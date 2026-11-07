@@ -75,6 +75,14 @@ def active_schema(session: Session, mode: str | None = None) -> Schema | None:
     return frozen or session.scalar(q.order_by(Schema.version.desc()).limit(1))
 
 
+def latest_schema(session: Session, mode: str | None = None) -> Schema | None:
+    """Highest schema version (of `mode` if given), frozen or draft."""
+    q = select(Schema).where(Schema.tenant_id == tenant())
+    if mode:
+        q = q.where(Schema.mode == mode)
+    return session.scalar(q.order_by(Schema.version.desc()).limit(1))
+
+
 # ---------------------------------------------------------------- versions and changes
 
 

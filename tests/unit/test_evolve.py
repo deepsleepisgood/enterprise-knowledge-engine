@@ -43,12 +43,16 @@ ONTO = Ontology(
 
 
 def fake_embed(texts: list[str]) -> list[list[float]]:
-    """Two-dimensional 'embedding': payment-term texts vs credit-note texts."""
+    """Three-dimensional 'embedding': payment terms, document versions, everything else."""
     out = []
     for t in texts:
         t = t.lower()
-        v = [1.0, 0.0] if ("term" in t or "payment" in t) else [0.0, 1.0]
-        out.append(v)
+        if "term" in t or "payment" in t:
+            out.append([1.0, 0.0, 0.0])
+        elif "version" in t:
+            out.append([0.0, 0.0, 1.0])
+        else:
+            out.append([0.0, 1.0, 0.0])
     return out
 
 
@@ -71,7 +75,7 @@ def test_group_merges_names_that_mean_the_same() -> None:
 def test_value_types_must_be_compatible_to_merge_or_map() -> None:
     assert ev._compatible("days", "number") and not ev._compatible("days", "list")
     g = ev.Group(["other:payment_text"], [row("other:payment_text", "payment", "list")], "list")
-    assert ev._candidates(g, ONTO, [1.0, 0.0], [[1.0, 0.0]]) == []
+    assert ev._candidates(g, ONTO, [1.0, 0.0, 0.0], [[1.0, 0.0, 0.0]]) == []
 
 
 def test_clean_key_refuses_time_scope_and_other() -> None:

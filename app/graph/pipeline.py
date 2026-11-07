@@ -301,9 +301,10 @@ def evolve_schema(
     if embed_fn == "default":
         from app.core.embed import embed as embed_fn
     with session_scope() as s:
+        newest = kb.latest_schema(s, mode=mode)
+        if newest is not None and newest.status == "draft":
+            return {"skipped": f"schema v{newest.version} is a draft waiting for review"}
         latest = kb.active_schema(s, mode=mode)
-        if latest is not None and latest.status == "draft":
-            return {"skipped": f"schema v{latest.version} is a draft waiting for review"}
         if latest is None:
             return {"skipped": "no frozen schema"}
         onto = Ontology.model_validate(latest.ontology)

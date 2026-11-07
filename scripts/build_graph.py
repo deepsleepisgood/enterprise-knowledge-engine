@@ -139,7 +139,7 @@ def main() -> None:
         )
     if not args.no_evolve and settings.schema_mode == "induced":
         ev = gp.evolve_schema(auto_freeze=args.auto_freeze)
-        if "skipped" in ev:
+        if isinstance(ev.get("skipped"), str):
             print("schema evolution:", ev["skipped"])
         else:
             if ev["to_version"] is None:
