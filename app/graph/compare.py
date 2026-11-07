@@ -7,6 +7,7 @@ cannot tell. `LLMComparator` asks MODEL_FAST only for those cases (cached on dis
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Callable
 from typing import Any, Literal
 
@@ -20,7 +21,9 @@ NUMERIC = {"percentage", "money", "days"}
 
 def _norm_text(s: str) -> str:
     s = s.lower().replace("per cent", "%").replace("percent", "%")
-    s = re.sub(r"[^\w%₹. ]+", " ", s)
+    s = "".join(
+        c if c.isalnum() or c in "%. _" or unicodedata.category(c) == "Sc" else " " for c in s
+    )
     s = re.sub(r"(?<!\d)\.|\.(?!\d)", " ", s)  # keep dots only inside numbers ("1.5")
     return re.sub(r"\s+", " ", s).strip()
 

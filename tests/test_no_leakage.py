@@ -25,7 +25,7 @@ TEXT_SUFFIXES = {
 
 def _files() -> list[Path]:
     out: list[Path] = []
-    for base in (ROOT / "app", ROOT / "web", ROOT / "packs"):
+    for base in (ROOT / "app", ROOT / "web", ROOT / "plugins"):
         if not base.exists():
             continue
         for p in base.rglob("*"):

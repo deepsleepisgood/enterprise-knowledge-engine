@@ -149,3 +149,17 @@ def test_rate_limiter_blocks_the_41st_request_in_a_minute() -> None:
     assert not slept
     rl.acquire()  # 41st waits until the first request is a minute old
     assert slept and now[0] >= 60
+
+
+def test_vision_sends_images_and_caches_by_image(setup) -> None:
+    fake = _use(FakeTransport(["# Page 1\n\n| a | b |", "# Page 2"]))
+    out = llm.vision("Transcribe this page.", [(b"\x89PNG-1", "image/png")], prompt_version="t-v")
+    assert out.text.startswith("# Page 1")
+    content = fake.bodies[0]["messages"][-1]["content"]
+    assert content[0]["type"] == "image_url"
+    assert content[0]["image_url"]["url"].startswith("data:image/png;base64,")
+    assert fake.bodies[0]["model"] == "vendor/smart-model"  # vision falls back to MODEL_SMART
+    again = llm.vision("Transcribe this page.", [(b"\x89PNG-1", "image/png")], prompt_version="t-v")
+    assert again.cached and len(fake.bodies) == 1
+    other = llm.vision("Transcribe this page.", [(b"\x89PNG-2", "image/png")], prompt_version="t-v")
+    assert other.text == "# Page 2" and len(fake.bodies) == 2

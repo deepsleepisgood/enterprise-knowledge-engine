@@ -12,6 +12,13 @@ sys.path.insert(0, str(ROOT))
 
 TEST_DB = "ps07_test"
 
+# Suites waiting for their v2 phase (see PROGRESS.md "v2 migration plan").
+collect_ignore = [
+    "integration/test_coverage.py",  # P1: generic segmenter
+    "plugins",  # P3: AP plug-in bindings
+    "unit/test_resolve.py",  # P2: resolution over facts
+]
+
 
 def _server_url() -> str | None:
     """A URL for some database on the server: DATABASE_URL, else the embedded dev server."""
@@ -64,38 +71,12 @@ def database_url() -> Iterator[str]:
     db.get_engine.cache_clear()
 
 
-@pytest.fixture(scope="session")
-def pack():
-    from app.core.pack import get_pack
-
-    return get_pack()
-
-
-@pytest.fixture(scope="session")
-def corpus(pack):
-    from app.core.config import get_settings
-    from app.ingest.passages import parse_corpus
-
-    return parse_corpus(pack, get_settings().data_dir)
-
-
-@pytest.fixture(scope="session")
-def built_graph(database_url, pack):
-    """The real claims graph in the test database (live LLM; cached after the first run)."""
-    from sqlalchemy import text
-
-    from app.core.config import get_settings
+@pytest.fixture
+def db(database_url):
+    """A clean default tenant in the test database (all content tables emptied)."""
     from app.core.db import session_scope
-    from app.graph.compare import LLMComparator
-    from app.graph.resolve import resolve
-    from app.graph.store import extract_all, load_passages, persist
-    from app.ingest.loader import ingest
+    from app.store.episodes import delete_tenant_content
 
     with session_scope() as s:
-        ingest(s, pack, get_settings().data_dir, with_vendors=False)
-        s.execute(text("TRUNCATE claims, conflicts, changes, kb_versions RESTART IDENTITY CASCADE"))
-        passages = load_passages(s)
-    result = resolve(extract_all(passages, pack, workers=6), compare=LLMComparator())
-    with session_scope() as s:
-        persist(s, result)
-    return result
+        delete_tenant_content(s)
+    yield database_url

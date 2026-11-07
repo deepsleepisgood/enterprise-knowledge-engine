@@ -112,7 +112,13 @@ def _log(record: dict[str, Any]) -> None:
 
 def _resolve_model(model: str | None) -> str:
     s = get_settings()
-    return {None: s.model_smart, "fast": s.model_fast, "smart": s.model_smart}.get(model, model)  # type: ignore[arg-type]
+    aliases = {
+        None: s.model_smart,
+        "fast": s.model_fast,
+        "smart": s.model_smart,
+        "vision": s.model_vision or s.model_smart,
+    }
+    return aliases.get(model, model)  # type: ignore[arg-type]
 
 
 def _usage(resp: Any) -> tuple[int, int]:
@@ -142,6 +148,7 @@ def _call(
     effort: str | None,
     schema: type[BaseModel] | None,
     invoke: Callable[[dict[str, Any]], tuple[Any, Any]],
+    key_extra: str | None = None,
 ) -> tuple[Any, LLMResult]:
     """Shared redact -> cache -> call -> log path. `invoke` returns (payload, raw_response)."""
     model_id = _resolve_model(model)
@@ -156,6 +163,7 @@ def _call(
         prompt=safe_prompt,
         schema=schema_sig,
         effort=effort,
+        **({"extra": key_extra} if key_extra else {}),
     )
     path = _cache_path(key)
     base_log = {
@@ -377,3 +385,79 @@ def structured(
         invoke=invoke,
     )
     return schema.model_validate(payload)
+
+
+def vision(
+    prompt: str,
+    images: list[tuple[bytes, str]],
+    *,
+    system: str | None = None,
+    model: str | None = "vision",
+    prompt_version: str = "v1",
+    max_tokens: int = 8192,
+) -> LLMResult:
+    """Read page images (bytes, media type) and return text, e.g. structured markdown.
+
+    Text parts are redacted as usual; images cannot be, so the returned text is redacted in the
+    log and by the caller before storage. Cache key includes a hash of every image.
+    """
+    import base64
+
+    digest = hashlib.sha256(b"".join(hashlib.sha256(b).digest() for b, _ in images)).hexdigest()
+
+    def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
+        text = req["messages"][0]["content"]
+        if _provider() == "nim":
+            from app.core import nim
+
+            parts: list[dict[str, Any]] = [
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mt};base64,{base64.b64encode(b).decode()}"},
+                }
+                for b, mt in images
+            ]
+            parts.append({"type": "text", "text": text})
+            body = nim.build_body(
+                model=req["model"],
+                system=req.get("system"),
+                messages=[{"role": "user", "content": parts}],  # type: ignore[list-item]
+                max_tokens=req["max_tokens"],
+                json_mode=False,
+            )
+            resp = nim.chat(body)
+            out, finish = nim.message_text(resp)
+            if finish == "length":
+                raise LLMError("response hit max_tokens; raise max_tokens for this call")
+            return out, _NimResp(*nim.usage(resp))
+        blocks: list[dict[str, Any]] = [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": mt,
+                    "data": base64.b64encode(b).decode(),
+                },
+            }
+            for b, mt in images
+        ]
+        blocks.append({"type": "text", "text": text})
+        resp = _get_client().messages.create(
+            **{**req, "messages": [{"role": "user", "content": blocks}]}
+        )
+        _check_stop(resp)
+        return "".join(getattr(b, "text", "") for b in resp.content if b.type == "text"), resp
+
+    _, result = _call(
+        style="vision",
+        prompt=prompt,
+        system=system,
+        model=model,
+        prompt_version=prompt_version,
+        max_tokens=max_tokens,
+        effort=None,
+        schema=None,
+        invoke=invoke,
+        key_extra=digest,
+    )
+    return result

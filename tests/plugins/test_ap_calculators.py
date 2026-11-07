@@ -10,7 +10,6 @@ from datetime import date
 from typing import Any
 
 import pytest
-
 from app.calc.registry import run
 from app.graph.rules import RuleNotFound, RuleValue
 

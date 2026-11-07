@@ -1,14 +1,20 @@
 """Redact personal and confidential identifiers before text leaves the process.
 
 Applied to every LLM prompt, every LLM log line and every ingested passage.
-GSTINs are not redacted: they are public business registrations, and the PAN
+Public business registration numbers that embed a tax id are not redacted: the tax-id
 pattern cannot match inside one because of the word boundaries.
 """
 
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass
+
+# Every currency symbol (Unicode category Sc), so "<symbol>9876543210" reads as money.
+_CURRENCY = "".join(
+    re.escape(chr(c)) for c in range(0x20, 0x10000) if unicodedata.category(chr(c)) == "Sc"
+)
 
 # Order matters: account numbers before phone numbers (a 10-digit account
 # number next to "a/c" should be labelled as an account).
@@ -22,7 +28,10 @@ _PATTERNS: list[tuple[str, re.Pattern[str]]] = [
             r"(\d[\d \-]{7,20}\d)"
         ),
     ),
-    ("PHONE", re.compile(r"(?<![\d₹,.])(?:\+91[\s\-]?|0)?[6-9]\d{4}[\s\-]?\d{5}(?![\d,])")),
+    (
+        "PHONE",
+        re.compile(rf"(?<![\d{_CURRENCY},.])(?:\+91[\s\-]?|0)?[6-9]\d{{4}}[\s\-]?\d{{5}}(?![\d,])"),
+    ),
     ("EMAIL", re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b")),
 ]
 

@@ -4,18 +4,20 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (7 Nov 2026):** Phases 0, 1 done. Phase 2 code done; first real graph build running on **NVIDIA NIM** (`LLM_PROVIDER=nim`, smart = `nvidia/nemotron-3-ultra-550b-a55b`, fast = `nvidia/nemotron-3.5-lightning-30b-a3b`). Phase 8 steps 1–2 (web shell + Ask page on fixtures) done.
+**Status (7 Nov 2026): migrating to BUILD_PLAN v2 (generic engine).** The spec changed: SCOPE.md, CLAUDE.md, BUILD_PLAN.md (v2), TEST_PLAN.md and DESIGN.md are now in the repo root (copied from the user's Downloads). v1 work (phases 0–3 on a hand-written pack, commit 7add2d0) is the checkpoint. The v2 plan below re-does phases 0–3 on the generic design; tick items as they land.
 
-**Next actions, in order**
-1. Check the graph build output (`python scripts/build_graph.py` prints claims per topic and unverified quotes; re-runs are free from cache).
-2. Run `pytest -q -m live_llm` → the Phase 2 acceptance tests in `tests/integration/test_graph_acceptance.py` must pass. If extraction is wrong, fix the prompt and bump `PROMPT_VERSION` in `app/graph/extract.py`.
-3. Then Phase 3 (calculators reading thresholds through `app/graph/rules.get_rule`).
+**v2 migration plan (phases 0–3 redone)**
+- [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
+- [ ] **P1** connectors (upload incl. folders/zip, api text, eml) → blob store + hash dedupe → type sniffing (signature, not extension) → tier-1 parsers to canonical blocks (docx, pdf text layer, xlsx/csv, pptx, html, md/txt, eml, vtt/srt/`[mm:ss] Speaker:`, json) → generic structure inference (`app/ingest/segment.py`) → metadata inference with provenance (`app/ingest/metadata.py`) → version matching/diff (`app/ingest/versions.py`). No hand-written pack at runtime.
+- [ ] **P2** schema induction (`app/graph/induce.py`, `SCHEMA_MODE=induced|baseline`), extraction to entities + facts, entity resolution (fastembed + LLM confirm), authority resolution on related facts only, `store.facts.get_facts(valid_on, known_at)`, `graph.rules.get_rule` via schema synonyms + plug-in bindings.
+- [ ] **P3** `plugins/ap/` (calculators moved from `app/calc`, params extraction, `bindings.yaml`, `roles.yaml`, baseline_schema from the v1 pack, ops loaders) + `app/plugins/` registry and bind step; scenario test under both schema modes.
+
+**Local deviations (documented):** embedded Postgres (pgserver) has `vector` but not `pg_trgm`/`btree_gist`; the migration enables them only when available (Neon has them). Without them: GiST index is on the time range alone, and trigram candidate search falls back to Python string similarity. No LibreOffice on this machine → tier-2 legacy files are stored and flagged `needs_attention`. LLM provider stays NVIDIA NIM until Anthropic keys arrive.
 
 **How to run on this machine (Windows, no Docker)**
 - Python: `.venv\Scripts\python.exe` (3.11). DB: `python scripts/dev_db.py start` (embedded Postgres + pgvector; writes `.pgdata/database_url.txt`), `... stop` when done. Then `alembic upgrade head`, `python scripts/ingest_all.py`.
-- Tests: `pytest -q` (creates and migrates its own `ps07_test` database). Lint: `ruff check app scripts tests`.
+- Tests: `pytest -q` (creates and migrates its own `ps07_test` database). Lint: `ruff check app scripts tests plugins`.
 - Web: `cd web && npm run dev` (port 3000); checks: `npx tsc --noEmit`, `npm run lint`, `npm run check:tokens`, `npm run build`. Stop the dev server afterwards (check port 3000: a child `node` process can outlive the task).
-- The spec documents (CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md, DESIGN.md) must be in the repo root; they were provided in chat and are **not yet in the folder**.
 
 ---
 
@@ -196,3 +198,23 @@ The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates
 - NIM free-tier cost is recorded as unknown (`cost_usd` = null) because there is no price table for these models; tokens are still logged.
 - The NVIDIA key was pasted in chat; it lives only in `.env` (git-ignored). Rotate it on build.nvidia.com after the hackathon.
 - Corpus passages sent to NIM are synthetic and redacted before sending, as with Anthropic.
+
+---
+
+## 2026-11-07 — v2 Phase 0: generic bitemporal store, job queue, worker
+
+### Built
+- `app/store/` is now the only code that touches tables: `models.py` (all BUILD_PLAN v2 tables, `tenant_id` on every one), `facts.py` (bitemporal `insert`, `retract`, `revise`, `get_facts(subject, attribute, scope, valid_on, known_at)` using `tstzrange @>` so the GiST indexes apply), `entities.py` (deterministic ids, aliases, candidates by trigram or Python similarity plus embedding, owner merge), `episodes.py` (episodes with hash dedupe and confirmation count, sources, passages with change detection and retirement), `kb.py` (schemas, kb versions, changes, conflicts, review items, plug-in bindings), `jobs.py` (enqueue, `FOR UPDATE SKIP LOCKED` claim, retry with backoff 5/30/120 s, failed after the last attempt, stale-job requeue), `base.py` (tenant context var, day/interval helpers).
+- **Bitemporal convention:** valid time `[valid_from, valid_to)` and transaction time `[recorded_at, retracted_at)` as timestamptz; a day `d` is stored as `d 00:00 UTC`, a "last day in force" `d` as `valid_to = d+1`. A row is never edited except to close `retracted_at`; a change of belief retracts the live row and inserts a new version with the same `origin_key` (partial unique index on live origin keys). This is what lets `known_at` return what the engine believed on a past date.
+- `app/worker.py`: handler registry, `drain()` for scripts/tests, `serve()` with N threads (`python -m app.worker`).
+- `app/core/llm.py`: new `vision()` call style (image parts on NIM and Anthropic; cache key includes image hashes; `model="vision"` → `MODEL_VISION` or `MODEL_SMART`).
+- Fresh Alembic baseline `0001_generic_bitemporal_schema` (v1 migrations removed; the dev database is disposable). Extensions `pg_trgm`/`btree_gist` and their indexes are created only when available. `alembic check` is clean (hand-made indexes excluded in `migrations/env.py`).
+- Settings: `TENANT_ID`, `SCHEMA_MODE`, `PLUGINS`, `BLOB_DIR`, `MODEL_VISION`, `WORKER_THREADS`; `PACK` removed.
+- Moved: `app/calc/` → `plugins/ap/calc/`; the v1 pack → `plugins/ap/` (`roles.yaml`, `calculators.yaml`) and `plugins/ap/baseline_schema/` (vocabulary, authority, risk, sources, extraction examples, and the old `v1_pack.yaml` for reference). Deleted the pack-bound v1 modules (ingest loader/segmenters, graph store/extract/rules, scripts); they are in git at 7add2d0.
+- Core made generic: redaction and the text comparer no longer name a currency (any Unicode currency symbol).
+
+### Tests
+- `pytest -q`: **49 passed**. New: `tests/test_core_is_generic.py` (no Meridian/Arvana/tax terms/rupee sign in `app/`, no `plugins` imports), `tests/integration/test_store_db.py` (every table has `tenant_id`; GiST indexes exist; hand-inserted fact: `known_at` before recording → nothing, `valid_on` 1 Mar 2026 → the old value closed on 31 Mar 2026, today → the new value, `known_at` before the change → the old value with an open interval; rows only grow; scope filter; dedupe; tenant isolation; aliases and merge; kb version; job through the worker; retry then fail; 4 threads never double-claim 20 jobs; stale job requeued), vision call with a fake transport.
+- Live: `llm.structured` on NIM returned a validated object; the log line shows `[REDACTED_PAN]` and `[REDACTED_PHONE]`.
+- Parked until their phase (`collect_ignore` in `tests/conftest.py`): locator coverage (P1), resolve unit tests (P2), AP plug-in tests (P3).
+- Note: `logs/llm_calls.jsonl` has one corrupt line from before the write lock (v1 run); readers should skip bad lines.

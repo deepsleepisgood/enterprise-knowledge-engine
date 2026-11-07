@@ -119,6 +119,7 @@ def scenario_results(built_graph, pack):
     from app.calc.base import DbRules
     from app.calc.params import calculator_inputs, extract_params
     from app.calc.registry import run
+
     from app.core.db import session_scope
 
     q = pd.read_excel(EVAL, sheet_name="questions")

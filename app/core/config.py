@@ -23,11 +23,16 @@ class Settings(BaseSettings):
     database_url: str = ""
     model_fast: str = "claude-haiku-5-5"
     model_smart: str = "claude-sonnet-5-5"
+    model_vision: str = ""  # empty: use model_smart
     api_base_url: str = "http://localhost:8000"
-    pack: str = "meridian_ap"
+    tenant_id: str = "default"
+    schema_mode: str = "induced"  # induced | baseline (a plug-in's hand-written schema)
+    plugins: str = "ap"  # comma-separated plug-in folders under plugins_dir to enable
+    worker_threads: int = 4
 
     data_dir: Path = ROOT / "data"
-    packs_dir: Path = ROOT / "packs"
+    blob_dir: Path = ROOT / "data" / "blobs"
+    plugins_dir: Path = ROOT / "plugins"
     log_dir: Path = ROOT / "logs"
     cache_dir: Path = ROOT / ".cache" / "llm"
 
@@ -39,8 +44,8 @@ class Settings(BaseSettings):
         return bool(self.anthropic_api_key)
 
     @property
-    def pack_dir(self) -> Path:
-        return self.packs_dir / self.pack
+    def enabled_plugins(self) -> list[str]:
+        return [p.strip() for p in self.plugins.split(",") if p.strip()]
 
     def resolved_database_url(self) -> str:
         """DATABASE_URL, or the URL written by `scripts/dev_db.py start`."""

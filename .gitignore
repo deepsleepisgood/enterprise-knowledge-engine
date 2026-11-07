@@ -13,3 +13,4 @@ web/test-results/
 web/playwright-report/
 ~$*
 web/tsconfig.tsbuildinfo
+data/blobs/
