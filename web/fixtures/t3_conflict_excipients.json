@@ -1,0 +1,73 @@
+{
+  "answer_id": "fx-t3",
+  "kb_version": 42,
+  "client": "pharma",
+  "route": "lookup",
+  "status": "answered",
+  "rule": {
+    "text": "Yes. For Arvana Pharma, invoices for active pharmaceutical ingredients, excipients and primary packaging must not be paid until the batch shows Released in the QMS [1]. The memo says this applies to excipients without exception [1].\n\nIf the batch is in Quarantine or Rejected, raise QA_RELEASE_PENDING. You may post the invoice, but the payment block stays until release [1][2].",
+    "citations": [
+      {
+        "n": 1,
+        "passage_id": "2013cac61683b02732c4",
+        "file": "PS-07_desk_instructions_and_client_memos.docx",
+        "short_label": "CM-PHA-01",
+        "locator": "Part D (CM-PHA-01)",
+        "section_title": "Client memo CM-PHA-01 (Arvana Pharma)",
+        "doc_type": "client_memo",
+        "status": "current",
+        "quote": "Invoices for active pharmaceutical ingredients, excipients and primary packaging material must not be paid until the batch shows status Released in the Quality Management System (QMS)."
+      },
+      {
+        "n": 2,
+        "passage_id": "4cfe51462880c6bb5969",
+        "file": "PS-07_training_and_expert_transcripts.docx",
+        "short_label": "Shadowing 11:30",
+        "locator": "Shadowing 11:30",
+        "section_title": "Shadowing notes — a day with a senior processor",
+        "doc_type": "shadowing",
+        "status": "observation",
+        "quote": "Pharma invoice for an excipient. L checks QMS: batch in Quarantine. Raises QA_RELEASE_PENDING."
+      }
+    ]
+  },
+  "working": null,
+  "decision": "Do not pay until the batch is Released in QMS",
+  "exception_code": "QA_RELEASE_PENDING",
+  "next_owner": "Client QA (batch release)",
+  "older_sources": [
+    {
+      "topic": "Excipient QA release (Pharma)",
+      "current_value": "Excipients need QA release before payment",
+      "older_value": "Only APIs need release; excipients paid on normal terms",
+      "file": "PS-07_desk_instructions_and_client_memos.docx",
+      "locator": "AP FAQ 2023 · Part F",
+      "superseded_by": "CM-PHA-01",
+      "superseded_on": "2026-01-01"
+    }
+  ],
+  "expert_tip": {
+    "text": "The 2023 FAQ still says excipients don't need release. Ignore it: the Pharma memo covers excipients too.",
+    "author": "Lakshmi Reddy, Senior Processor",
+    "date": "2026-06-17",
+    "citation": {
+      "n": 2,
+      "passage_id": "4cfe51462880c6bb5969",
+      "file": "PS-07_training_and_expert_transcripts.docx",
+      "short_label": "Shadowing 11:30",
+      "locator": "Shadowing 11:30",
+      "section_title": "Shadowing notes — a day with a senior processor",
+      "doc_type": "shadowing",
+      "status": "observation",
+      "quote": "L: 'The FAQ is from 2023. The Pharma memo says excipients too. Ignore the FAQ.'"
+    },
+    "approved_by": "AP Process Excellence"
+  },
+  "route_to": null,
+  "related": [
+    "Can I post the invoice while the batch is in quarantine?",
+    "Who releases a batch in QMS?",
+    "Does the rule cover primary packaging?"
+  ],
+  "latency_ms": 3380
+}

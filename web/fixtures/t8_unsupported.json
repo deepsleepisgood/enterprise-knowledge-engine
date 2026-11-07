@@ -1,0 +1,24 @@
+{
+  "answer_id": "fx-t8",
+  "kb_version": 42,
+  "client": null,
+  "route": "out_of_scope",
+  "status": "unsupported",
+  "rule": { "text": "", "citations": [] },
+  "working": null,
+  "decision": null,
+  "exception_code": null,
+  "next_owner": null,
+  "older_sources": [],
+  "expert_tip": null,
+  "route_to": {
+    "role": "HR / Admin team",
+    "reason": "Canteen subsidies are an employee policy. The AP SOP, desk instructions, client memos and transcripts do not cover them."
+  },
+  "related": [
+    "Who do I ask about a process gap in AP?",
+    "What does the Team Lead own?",
+    "How long do we keep invoices?"
+  ],
+  "latency_ms": 1940
+}

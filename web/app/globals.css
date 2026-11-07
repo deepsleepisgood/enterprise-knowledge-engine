@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-canvas text-ink antialiased;
+    color-scheme: light;
+  }
+  body {
+    @apply min-h-screen bg-canvas font-sans text-ink;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-rose;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .eyebrow {
+    @apply font-display text-xs font-semibold uppercase tracking-eyebrow text-muted;
+  }
+}

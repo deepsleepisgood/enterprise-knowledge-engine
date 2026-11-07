@@ -1,0 +1,13 @@
+[
+  {
+    "id": 7,
+    "kb_version": 42,
+    "summary": "Infra bulk-material tolerance",
+    "topic": "quantity_tolerance",
+    "old_value": "5%",
+    "new_value": "7%",
+    "effective_at": "2026-11-16",
+    "status": "provisional",
+    "source_label": "Email · Infra FC · 5 Nov"
+  }
+]

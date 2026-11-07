@@ -60,3 +60,33 @@ Running log of what was built, test results, assumptions and open issues. Newest
 - `embedding` column exists but is empty; filled in Phase 4 with fastembed.
 - Live LLM check (Phase 0 acceptance item "a sample llm.structured call … appears redacted in the log") is covered by the fake-client test; run `pytest -m live_llm` once a key is in `.env`.
 - The four spec documents (CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md, DESIGN.md) are not yet in this folder; copy them into the repo root.
+
+---
+
+## 2026-11-07 — Phase 8, steps 1–2 (web shell + Ask page on fixtures)
+
+Started early, as BUILD_PLAN allows ("run the UI in parallel … against fixture answer cards").
+
+### Built (`web/`)
+- Next.js 14.2.35 (App Router) + TypeScript (strict) + Tailwind 3.4 + lucide-react; versions pinned exactly.
+- Design tokens from DESIGN.md §2 in `tailwind.config.ts` only; fonts Hanken Grotesk, Inter, JetBrains Mono via `next/font/google`.
+- Shell: 64px left rail (brand glyph, nav, avatar with Processor / Process owner switch in localStorage) → fixed top bar with menu below `md`; main column `max-w-[760px]`; 320/360px sticky right rail → stacks below the answer below `lg`. Owner-only nav items (Conflicts, Review, Analytics) are hidden for processors.
+- Ask page: change banner with "Got it", eyebrow with client chip and `kb v42`, question heading, Answer / Sources / History tabs, source-chip strip with `+N` overflow, status pill, answer text with rose superscript citation chips, decision row, working card, current-vs-older card, expert tip card, not-covered route card, Related list, composer (auto-grow textarea, invoice picker, client chip, rose send button), loading skeleton with "Checking SOP v4.0, client memos and transcripts…".
+- Right rail: invoice context card (when an invoice is attached), sources with counts, active card in `rose-tint`/`rose-line` with a filled badge, older sources, "Show all N sources", and a source drawer (full quote, file, locator, status, passage id).
+- `lib/types.ts` mirrors the Phase 4 answer-card schema exactly; `lib/api.ts` calls the API when `NEXT_PUBLIC_API_BASE_URL` is set and otherwise runs in a labelled **demo mode** over `web/fixtures/`.
+- Fixtures: T1 (price tolerance, older sources), T5 (₹395 vs ₹400 × 500 → working card, PRICE_VAR), T8 (canteen subsidy → unsupported, route to HR / Admin), T3 (Pharma excipients → conflict with the 2023 FAQ, expert tip). Passage ids and quotes are taken from the real parsed corpus; invoice rows from the operations workbook. No eval content was used.
+- Placeholder pages for Changes, Conflicts, Review queue, Expert capture and Analytics in the same shell.
+- `npm run check:tokens`: fails on any hex colour outside `tailwind.config.ts` (checked with a planted value).
+
+### Verified
+- `tsc --noEmit` clean, `next lint` clean, token check passes, `next build` succeeds (Ask page 102 kB first load).
+- In the browser (Playwright MCP) at 1440px: T1, T5 and T8 render as specified. Hovering inline citation 2 activates source card 2 only; the rail scrolls, the page does not. The source drawer opens with focus on Close and closes on Escape. No console errors or warnings.
+- At 390px: top bar replaces the rail, no horizontal scroll (`scrollWidth` 375), the chip strip scrolls, the current-vs-older card stacks into Now / Before, sources stack below the answer.
+- Bugs found and fixed while checking: `scrollIntoView` scrolled the whole window (now scrolls only the rail); the screen-reader label inside document glyphs escaped the scrolling chip strip and widened the page to 571px at 390px; citation superscripts sat too high with a gap.
+- `pytest -q` still 49 passed / 1 skipped (the leakage test now also scans `web/`).
+
+### Not done yet / open
+- Playwright test files under `web/tests/` and a Lighthouse run are not in the repo yet; the checks above were done by hand through the browser tools.
+- The Changes, Conflicts, Review, Capture and Analytics pages are placeholders (Phase 8 step 4 and later phases).
+- The source drawer shows the citation's quote; it should load the full passage from `GET /passages/{id}` once the API exists.
+- T8 routes to "HR / Admin team" (added to `roles.yaml` as a non-AP role). Change it if the team prefers routing to the Team Lead.

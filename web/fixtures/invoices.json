@@ -1,0 +1,62 @@
+[
+  {
+    "invoice_id": "INV604578",
+    "client": "Arvana Infra",
+    "vendor_id": "V20042",
+    "vendor_name": "Apex Textiles",
+    "invoice_date": "2026-03-29",
+    "total_inr": 81502.4,
+    "po_backed": true,
+    "msme_category": "Not MSME",
+    "einvoice_required": false,
+    "qrmp_filer": false,
+    "due_date": "2026-06-01",
+    "payment_run": "Fri 29 May 2026",
+    "habits": ["Invoices before dispatch; GRN lags 2–3 days"]
+  },
+  {
+    "invoice_id": "INV602401",
+    "client": "Arvana Infra",
+    "vendor_id": "V20133",
+    "vendor_name": "Metro Distributors",
+    "invoice_date": "2026-04-02",
+    "total_inr": 54693,
+    "po_backed": true,
+    "msme_category": "Not MSME",
+    "einvoice_required": true,
+    "qrmp_filer": false,
+    "due_date": "2026-06-04",
+    "payment_run": "Tue 2 Jun 2026",
+    "habits": ["Sends paper and e-mail copies of the same invoice"]
+  },
+  {
+    "invoice_id": "INV602379",
+    "client": "Arvana Infra",
+    "vendor_id": "V20387",
+    "vendor_name": "Shree Exports Pvt Ltd",
+    "invoice_date": "2026-03-27",
+    "total_inr": 162736,
+    "po_backed": true,
+    "msme_category": "Micro",
+    "einvoice_required": false,
+    "qrmp_filer": false,
+    "due_date": "2026-04-16",
+    "payment_run": "Tue 14 Apr 2026",
+    "habits": []
+  },
+  {
+    "invoice_id": "INV608643",
+    "client": "Arvana Pharma",
+    "vendor_id": "V20073",
+    "vendor_name": "Lotus Retail",
+    "invoice_date": "2026-03-31",
+    "total_inr": 78753.2,
+    "po_backed": false,
+    "msme_category": "Not MSME",
+    "einvoice_required": false,
+    "qrmp_filer": false,
+    "due_date": "2026-05-31",
+    "payment_run": "Fri 29 May 2026",
+    "habits": []
+  }
+]

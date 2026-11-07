@@ -1,0 +1,91 @@
+{
+  "answer_id": "fx-t5",
+  "kb_version": 42,
+  "client": null,
+  "route": "calculator:price",
+  "status": "answered",
+  "rule": {
+    "text": "Hold the line as PRICE_VAR. The excess is ₹5 per unit on 500 units, ₹2,500 in total. The limit is the lower of 1% of the PO line value and ₹500 [1]: 1% of ₹1,97,500 is ₹1,975, so the cap of ₹500 applies. ₹2,500 is above ₹500.\n\nSend it to the buyer who raised the PO to amend the PO or obtain a credit note [1][2]. The PO buyer has 3 working days to resolve it [2].",
+    "citations": [
+      {
+        "n": 1,
+        "passage_id": "897f0744ac010f7858e2",
+        "file": "PS-07_AP_SOP_v4.0_2026.docx",
+        "short_label": "SOP v4.0 §4.2",
+        "locator": "4.2",
+        "section_title": "4.2 Price tolerance",
+        "doc_type": "sop",
+        "status": "current",
+        "quote": "The line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO."
+      },
+      {
+        "n": 2,
+        "passage_id": "cc8896c969321b246381",
+        "file": "PS-07_AP_SOP_v4.0_2026.docx",
+        "short_label": "SOP v4.0 §10",
+        "locator": "10",
+        "section_title": "10. Exceptions",
+        "doc_type": "sop",
+        "status": "current",
+        "quote": "PRICE_VAR · Unit price above tolerance (4.2) · PO buyer · 3 working days"
+      },
+      {
+        "n": 3,
+        "passage_id": "f57360ac0244cd35849f",
+        "file": "PS-07_training_and_expert_transcripts.docx",
+        "short_label": "Video 3 [03:10]",
+        "locator": "Video 3 [03:10]",
+        "section_title": "Video 3 — Working the exception queue",
+        "doc_type": "training_video",
+        "status": "current",
+        "quote": "A good note: 'Line 2 cement, invoice ₹412 per bag vs PO ₹395, excess ₹8,500 on 500 bags, above the ₹500 limit. Please amend PO or get a credit note.'"
+      }
+    ]
+  },
+  "working": [
+    { "label": "PO line value (₹395 × 500)", "value": "₹1,97,500" },
+    { "label": "Excess on line (₹5 × 500)", "value": "₹2,500" },
+    { "label": "1% of PO line value", "value": "₹1,975" },
+    { "label": "Cap", "value": "₹500" },
+    { "label": "Limit (lower of the two)", "value": "₹500" },
+    { "label": "Excess within limit?", "value": "No" }
+  ],
+  "decision": "Hold the line — price variance above tolerance",
+  "exception_code": "PRICE_VAR",
+  "next_owner": "PO buyer (amend PO or credit note)",
+  "older_sources": [
+    {
+      "topic": "Price tolerance",
+      "current_value": "Lower of 1% and ₹500 → limit ₹500",
+      "older_value": "Lower of 2% and ₹1,000 → limit ₹1,000",
+      "file": "PS-07_AP_SOP_v3.1_2023.docx",
+      "locator": "SOP v3.1 §3",
+      "superseded_by": "SOP v4.0 §4.2",
+      "superseded_on": "2026-03-31"
+    }
+  ],
+  "expert_tip": {
+    "text": "Write the exception note so the buyer can act without calling you: the line, both prices, the excess and the limit, and what you need from them.",
+    "author": "Sandeep Rao, Team Lead",
+    "date": "2026-04-01",
+    "citation": {
+      "n": 3,
+      "passage_id": "f57360ac0244cd35849f",
+      "file": "PS-07_training_and_expert_transcripts.docx",
+      "short_label": "Video 3 [03:10]",
+      "locator": "Video 3 [03:10]",
+      "section_title": "Video 3 — Working the exception queue",
+      "doc_type": "training_video",
+      "status": "current",
+      "quote": "A good note: 'Line 2 cement, invoice ₹412 per bag vs PO ₹395, excess ₹8,500 on 500 bags, above the ₹500 limit.'"
+    },
+    "approved_by": "AP Process Excellence"
+  },
+  "route_to": null,
+  "related": [
+    "Who approves this invoice?",
+    "What if the supplier sends a credit note for ₹2,000?",
+    "What is the price tolerance?"
+  ],
+  "latency_ms": 2870
+}
