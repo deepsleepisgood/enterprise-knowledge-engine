@@ -65,6 +65,9 @@ def main() -> None:
         help="drop schema, entities and facts first (keeps passages; dev only)",
     )
     ap.add_argument("--threads", type=int, default=2, help="episodes extracted in parallel")
+    ap.add_argument(
+        "--no-evolve", action="store_true", help="skip schema evolution (placing other:* facts)"
+    )
     args = ap.parse_args()
     settings = get_settings()
     started, since = time.perf_counter(), datetime.now(UTC).isoformat()
@@ -128,6 +131,36 @@ def main() -> None:
                 jobs.enqueue(s, "extract_episode", {"episode_id": eid})
     ran = worker.drain(kinds=["extract_episode", "reresolve_source"], threads=args.threads)
     print(f"ran {ran} jobs in {time.perf_counter() - started:.0f}s")
+    with session_scope() as s:
+        s.execute(
+            __import__("sqlalchemy").text(
+                "DELETE FROM jobs WHERE kind = 'evolve_schema' AND status = 'queued'"
+            )
+        )
+    if not args.no_evolve and settings.schema_mode == "induced":
+        ev = gp.evolve_schema(auto_freeze=args.auto_freeze)
+        if "skipped" in ev:
+            print("schema evolution:", ev["skipped"])
+        else:
+            if ev["to_version"] is None:
+                outcome = "schema unchanged"
+            elif ev["frozen"]:
+                outcome = f"schema v{ev['to_version']} frozen, {ev['rekeyed']} facts re-keyed"
+            else:
+                outcome = f"schema v{ev['to_version']} drafted (review on Setup)"
+            print(
+                f"schema evolution: {ev['groups']} groups of unplaced facts -> "
+                f"{ev['mapped']} mapped, {ev['proposed']} new attributes, "
+                f"{ev['skipped']} skipped; {outcome}"
+            )
+            for d in ev["decisions"]:
+                if d["action"] != "skip":
+                    print(
+                        f"  {d['action']:<4} {', '.join(d['keys'])[:70]} -> {d['attribute']} "
+                        f"({d['method']})"
+                    )
+        with session_scope() as s:
+            onto = gp.active_ontology(s)
 
     with session_scope() as s:
         for j in jobs.failed_jobs(s):

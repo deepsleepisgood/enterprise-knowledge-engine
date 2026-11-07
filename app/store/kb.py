@@ -179,3 +179,22 @@ def get_bindings(session: Session, plugin: str | None = None) -> list[PluginBind
     if plugin:
         q = q.where(PluginBinding.plugin == plugin)
     return list(session.scalars(q.order_by(PluginBinding.plugin, PluginBinding.param)))
+
+
+def get_schema(session: Session, version: int) -> Schema | None:
+    return session.scalar(
+        select(Schema).where(Schema.tenant_id == tenant(), Schema.version == version)
+    )
+
+
+def decide_review_item(session: Session, item_id: int, status: str, by: str) -> None:
+    session.execute(
+        update(ReviewItem)
+        .where(ReviewItem.id == item_id)
+        .values(
+            status=status,
+            decided_by=by,
+            decided_at=utcnow(),
+            row_version=ReviewItem.row_version + 1,
+        )
+    )

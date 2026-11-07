@@ -232,3 +232,18 @@ def summary(session: Session) -> dict[str, Any]:
 def set_supersedes(session: Session, fact_id: int, loser_id: int) -> None:
     """Link a fact version written in this transaction to the version it supersedes."""
     session.execute(update(Fact).where(Fact.id == fact_id).values(supersedes_id=loser_id))
+
+
+def live_with_attribute_prefix(session: Session, prefix: str) -> list[FactRow]:
+    """Live facts whose attribute starts with `prefix` (e.g. "other:" proposals)."""
+    q = (
+        select(Fact, Entity.name)
+        .join(Entity, Entity.id == Fact.subject_id)
+        .where(
+            Fact.tenant_id == tenant(),
+            Fact.retracted_at.is_(None),
+            Fact.attribute.startswith(prefix),
+        )
+        .order_by(Fact.attribute, Fact.id)
+    )
+    return [_row(f, n) for f, n in session.execute(q)]

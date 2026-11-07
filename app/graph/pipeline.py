@@ -22,7 +22,7 @@ from app.graph.ontology import Ontology
 from app.graph.write import PublishReport, publish
 from app.store import episodes as estore
 from app.store import facts as fstore
-from app.store import kb
+from app.store import jobs, kb
 from app.worker import handler
 
 log = logging.getLogger("graph")
@@ -214,6 +214,7 @@ def extract_and_publish(
         "passages": len(passages),
         "carried": len(carried),
         "drafts": len(drafts),
+        "unplaced": sum(1 for d in drafts if d.attribute.startswith("other:")),
         "failures": failures,
         "inserted": rep.inserted,
         "revised": rep.revised,
@@ -266,6 +267,107 @@ def reresolve_source_job(payload: dict[str, Any]) -> dict[str, Any]:
     return reresolve_source(payload["source_id"])
 
 
+def _evolve_report(rep: Any) -> dict[str, Any]:
+    return {
+        "from_version": rep.from_version,
+        "to_version": rep.to_version,
+        "frozen": rep.frozen,
+        "groups": rep.groups,
+        "mapped": rep.mapped,
+        "proposed": rep.proposed,
+        "skipped": rep.skipped,
+        "rekeyed": rep.rekeyed,
+        "kb_version": rep.kb_version,
+        "decisions": [d.__dict__ for d in rep.decisions],
+    }
+
+
+def evolve_schema(
+    auto_freeze: bool = False,
+    mode: str | None = None,
+    structured_fn: Any = "default",
+    embed_fn: Any = "default",
+) -> dict[str, Any]:
+    """Place `other:*` facts: map them to existing attributes or draft new ones (evolve.py).
+
+    With `auto_freeze` the new schema version is frozen and the facts re-keyed at once, in one
+    transaction. Otherwise the draft waits for the owner (a `schema` review item) and
+    `apply_schema` runs when it is frozen.
+    """
+    from app.graph import evolve as ev
+
+    mode = mode or get_settings().schema_mode
+    structured = _default_structured() if structured_fn == "default" else structured_fn
+    if embed_fn == "default":
+        from app.core.embed import embed as embed_fn
+    with session_scope() as s:
+        latest = kb.active_schema(s, mode=mode)
+        if latest is not None and latest.status == "draft":
+            return {"skipped": f"schema v{latest.version} is a draft waiting for review"}
+        if latest is None:
+            return {"skipped": "no frozen schema"}
+        onto = Ontology.model_validate(latest.ontology)
+        new, rep = ev.evolve(s, onto, latest.version, mode, structured, embed_fn)
+        if new is not None and auto_freeze:
+            kb.freeze_schema(s, rep.to_version, "auto")
+            compare = LLMComparator(structured) if structured else deterministic
+            resolver = Resolver(s, structured_fn=structured, embed_fn=embed_fn)
+            rep.rekeyed, rep.kb_version = ev.apply(
+                s,
+                new,
+                rep.remaps(),
+                compare,
+                resolver,
+                summary=f"schema v{rep.to_version}: unplaced facts re-keyed",
+            )
+            rep.frozen = True
+            for item in kb.list_review_items(s):
+                if item.kind == "schema" and (item.payload or {}).get("version") == rep.to_version:
+                    kb.decide_review_item(s, item.id, "approved", "auto")
+    return _evolve_report(rep)
+
+
+def apply_schema(version: int, by: str, structured_fn: Any = "default") -> dict[str, Any]:
+    """Freeze a drafted schema version and re-key the facts its review item maps (owner action)."""
+    from app.graph import evolve as ev
+
+    structured = _default_structured() if structured_fn == "default" else structured_fn
+    with session_scope() as s:
+        row = kb.get_schema(s, version)
+        if row is None:
+            raise LookupError(f"schema v{version} does not exist")
+        item = next(
+            (
+                i
+                for i in kb.list_review_items(s)
+                if i.kind == "schema" and (i.payload or {}).get("version") == version
+            ),
+            None,
+        )
+        remaps = dict((item.payload or {}).get("remaps", {})) if item else {}
+        kb.freeze_schema(s, version, by)
+        onto = Ontology.model_validate(row.ontology)
+        compare = LLMComparator(structured) if structured else deterministic
+        moved, kbv = ev.apply(
+            s,
+            onto,
+            remaps,
+            compare,
+            Resolver(s, structured_fn=structured),
+            summary=f"schema v{version} approved by {by}",
+        )
+        if item is not None:
+            kb.decide_review_item(s, item.id, "approved", by)
+    return {"version": version, "rekeyed": moved, "kb_version": kbv}
+
+
+@handler("evolve_schema")
+def evolve_schema_job(payload: dict[str, Any]) -> dict[str, Any]:
+    out = evolve_schema(auto_freeze=bool(payload.get("auto_freeze")))
+    out.pop("decisions", None)
+    return out
+
+
 @handler("extract_episode")
 def extract_episode(payload: dict[str, Any]) -> dict[str, Any]:
     with session_scope() as s:
@@ -273,4 +375,16 @@ def extract_episode(payload: dict[str, Any]) -> dict[str, Any]:
             return {"skipped": "no frozen schema yet; build_graph will re-queue"}
     out = extract_and_publish(payload["episode_id"])
     out.pop("entity_decisions", None)
+    if out.get("unplaced") and get_settings().schema_mode == "induced":
+        # New facts the schema has no attribute for: propose attributes for the owner.
+        from sqlalchemy import text
+
+        with session_scope() as s:
+            waiting = s.execute(
+                text(
+                    "SELECT 1 FROM jobs WHERE kind = 'evolve_schema' AND status = 'queued' LIMIT 1"
+                )
+            ).first()
+            if waiting is None:
+                jobs.enqueue(s, "evolve_schema", {"auto_freeze": False})
     return out

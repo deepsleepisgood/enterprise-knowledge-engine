@@ -7,10 +7,10 @@ Running log of what was built, test results, assumptions and open issues. Newest
 **Status (7 Nov 2026, evening): v2 P0 and P1 committed; P2 and P3 code written and unit/integration-tested offline (141 tests); first live induced-schema build running.** The spec changed to BUILD_PLAN v2 (generic engine); SCOPE.md, CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md and DESIGN.md are in the repo root. v1 (hand-written pack) is at commit 7add2d0.
 
 **Next actions, in order**
-1. Read the live build output (`python scripts/build_graph.py --auto-freeze`; re-runs are cached). Check: schema coverage of the baseline, facts per status, `other:*` count, failed passages, bindings (`UNBOUND` lines).
-2. Write `tests/integration/test_graph_acceptance.py` (live) for the BUILD_PLAN Phase 2 checks (SOP §14 rows, CM-INF-02 Infra-only until 31 Mar 2027, FAQ excipient superseded by CM-PHA-01, Video 2 per-fact staleness, known_at/valid_on), reading attributes through the plug-in bindings.
-3. Run `SCENARIO_MODES=induced pytest -m live_llm tests/plugins/test_ap_scenarios.py`, then `baseline`; document misses in `reports/scenario_misses_<mode>.md`.
-4. PROGRESS entry for P2/P3, commit, stop the dev DB.
+1. **Run the new tests (written, never run):** `pytest -q tests/unit/test_evolve.py tests/integration/test_evolve_db.py`, then the full `pytest -q`. Fix what fails.
+2. Rebuild with evolution: `python scripts/build_graph.py --auto-freeze --threads 1` (extraction is cached; evolution makes a few new LLM calls). Check the `schema evolution:` line, the `other:*` share and that `payments.default_term_days` is now bound.
+3. Live acceptance: `pytest -m live_llm tests/integration/test_graph_acceptance.py` (it was interrupted before producing results), then `SCENARIO_MODES=induced` and `baseline` for `tests/plugins/test_ap_scenarios.py`; document misses in `reports/scenario_misses_<mode>.md`.
+4. PROGRESS entry with live results, commit, stop the dev DB.
 
 **v2 migration plan (phases 0–3 redone)**
 - [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
@@ -252,3 +252,20 @@ The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates
 ### Open issues
 - Spreadsheet records are passages (cheap, no LLM). Phase 2 must not send 11,809 records through the LLM extractor: records get deterministic handling or triage. The operations workbook is also the AP plug-in's ERP data (P3 loads vendors and invoices from it).
 - No LibreOffice and no vision model on this machine: tiers 2 and 3 are wired but only exercised by tests that check they flag.
+
+---
+
+## 2026-11-07 — Schema evolution (fix for induced-schema gaps) — code written, tests NOT yet run
+
+**Why.** The first full induced build placed only part of the facts in the schema: 201 of 266 attribute names in use were improvised `other:*` keys. Three causes: topics induction never sampled (credit and debit notes, month-end, exception owners, match types, the default payment term, which left `payments.default_term_days` unbound), document metadata extracted as facts, and near-misses where a fitting attribute existed. Chosen fix (user decision, option 3 of 4): close the loop after extraction instead of narrowing the extraction prompt, because it fixes both missing topics and near-misses, it is how new topics in later documents get into the schema (SCOPE.md 3.5 / BUILD_PLAN 2a), and it needs no re-extraction.
+
+**Built** (`app/graph/evolve.py`, wired in `app/graph/pipeline.py` and `scripts/build_graph.py`):
+- Group live `other:*` facts by proposed name; merge names whose embeddings are ≥0.88 similar and whose value types are compatible.
+- Map each group to an existing attribute: score = 0.7·cosine + 0.3·word overlap (words only without embeddings), compatible value type required; ≥0.90 maps directly, otherwise MODEL_FAST picks among the top 5 or says none (`evolve-v1`, cached).
+- Propose: unmatched groups go to MODEL_SMART in batches of 40, which names an attribute under an existing or a new topic, or marks the group `keep=false` (document metadata, one-off statements). Keys naming versions/time, scope words ("general_") or `other` are refused in code.
+- Save schema v(n+1) as a draft plus a `schema` review item listing new topics, new attributes, remaps and skipped groups. `evolve_schema(auto_freeze=True)` (build script with `--auto-freeze`, tests) freezes it and re-keys at once; otherwise `apply_schema(version, by)` does that when the owner approves. A second evolution waits while a draft is open.
+- Re-keying (`evolve.apply`) retracts each fact and inserts a new version under the new attribute (topic-level facts move to the new topic's entity; facts about a named entity keep their subject), then runs authority resolution on the groups they joined, bumps `kb_version` and records a change, all in one transaction. History is kept: a `known_at` query before the evolution still returns the `other:*` row.
+- Continuous ingestion: an `extract_episode` job that produced unplaced facts queues one `evolve_schema` job (owner review, not auto-freeze) in induced mode. Baseline mode never evolves.
+- Store helpers: `facts.live_with_attribute_prefix`, `kb.get_schema`, `kb.decide_review_item`.
+
+**Tests written but not run (by request):** `tests/unit/test_evolve.py` (grouping, type compatibility, key cleaning, map/propose/skip with a fake LLM and embedding) and `tests/integration/test_evolve_db.py` (auto-freeze re-keys and keeps history; owner-review path; topic facts move to the new topic entity). Lint and import checks pass; all job handlers register.
