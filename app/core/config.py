@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     nim_base_url: str = "https://integrate.api.nvidia.com/v1"
     nim_timeout_s: float = 300
     nim_max_rpm: int = 35  # NIM free tier allows ~40 requests/minute; keep headroom
+    nim_max_concurrent: int = 4  # parallel bursts get 429s well below the per-minute limit
     database_url: str = ""
     model_fast: str = "claude-haiku-5-5"
     model_smart: str = "claude-sonnet-5-5"

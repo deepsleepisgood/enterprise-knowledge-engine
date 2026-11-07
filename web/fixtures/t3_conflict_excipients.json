@@ -14,7 +14,7 @@
         "short_label": "CM-PHA-01",
         "locator": "Part D (CM-PHA-01)",
         "section_title": "Client memo CM-PHA-01 (Arvana Pharma)",
-        "doc_type": "client_memo",
+        "doc_type": "memo",
         "status": "current",
         "quote": "Invoices for active pharmaceutical ingredients, excipients and primary packaging material must not be paid until the batch shows status Released in the Quality Management System (QMS)."
       },
@@ -25,8 +25,8 @@
         "short_label": "Shadowing 11:30",
         "locator": "Shadowing 11:30",
         "section_title": "Shadowing notes — a day with a senior processor",
-        "doc_type": "shadowing",
-        "status": "observation",
+        "doc_type": "observation",
+        "status": "record",
         "quote": "Pharma invoice for an excipient. L checks QMS: batch in Quarantine. Raises QA_RELEASE_PENDING."
       }
     ]
@@ -57,8 +57,8 @@
       "short_label": "Shadowing 11:30",
       "locator": "Shadowing 11:30",
       "section_title": "Shadowing notes — a day with a senior processor",
-      "doc_type": "shadowing",
-      "status": "observation",
+      "doc_type": "observation",
+      "status": "record",
       "quote": "L: 'The FAQ is from 2023. The Pharma memo says excipients too. Ignore the FAQ.'"
     },
     "approved_by": "AP Process Excellence"
@@ -69,5 +69,7 @@
     "Who releases a batch in QMS?",
     "Does the rule cover primary packaging?"
   ],
-  "latency_ms": 3380
+  "latency_ms": 3380,
+  "as_of": null,
+  "entities": []
 }

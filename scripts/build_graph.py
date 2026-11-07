@@ -59,6 +59,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--auto-freeze", action="store_true", help="freeze an induced schema at once")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--reset-graph",
+        action="store_true",
+        help="drop schema, entities and facts first (keeps passages; dev only)",
+    )
     ap.add_argument("--threads", type=int, default=2, help="episodes extracted in parallel")
     args = ap.parse_args()
     settings = get_settings()
@@ -76,6 +81,15 @@ def main() -> None:
     if not settings.llm_configured:
         sys.exit("No LLM key configured (LLM_PROVIDER / NVIDIA_API_KEY / ANTHROPIC_API_KEY).")
 
+    if args.reset_graph:
+        with session_scope() as s:
+            estore.delete_graph(s)
+            s.execute(
+                __import__("sqlalchemy").text(
+                    "DELETE FROM jobs WHERE kind IN ('extract_episode', 'reresolve_source')"
+                )
+            )
+        print("graph reset")
     version, status = gp.ensure_schema(auto_freeze=args.auto_freeze)
     print(
         f"schema v{version} ({settings.schema_mode}, {status}) "
@@ -122,8 +136,9 @@ def main() -> None:
             s.execute(
                 __import__("sqlalchemy").text(
                     "SELECT result FROM jobs WHERE kind='extract_episode' AND status='done' "
-                    "AND finished_at > now() - interval '6 hours'"
-                )
+                    "AND finished_at > :since"
+                ),
+                {"since": since},
             )
             .scalars()
             .all()

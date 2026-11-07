@@ -26,7 +26,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AP Knowledge Engine",
+  title: "Knowledge Engine",
   description: "Cited answers from SOPs, client memos, desk instructions and expert transcripts.",
 };
 

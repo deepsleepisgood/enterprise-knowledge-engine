@@ -1,10 +1,12 @@
 import changesFixture from "@/fixtures/changes.json";
 import invoicesFixture from "@/fixtures/invoices.json";
+import scopesFixture from "@/fixtures/scopes.json";
+import t1AsOf from "@/fixtures/t1_as_of.json";
 import t1 from "@/fixtures/t1_price_tolerance.json";
 import t3 from "@/fixtures/t3_conflict_excipients.json";
 import t5 from "@/fixtures/t5_price_calc.json";
 import t8 from "@/fixtures/t8_unsupported.json";
-import type { AnswerCard, ChangeItem, ClientKey, InvoiceContext } from "@/lib/types";
+import type { AnswerCard, ChangeItem, ClientKey, InvoiceContext, Scope } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -29,7 +31,7 @@ export const SAMPLES: SampleQuestion[] = [
     keywords: /395|₹\s?400|400\s*[x×]/i,
   },
   {
-    question: "Do Arvana Pharma excipient invoices need QA release before payment?",
+    question: "Do pharma excipient invoices need QA release before payment?",
     card: t3 as AnswerCard,
     keywords: /excipient|qa\s+release/i,
   },
@@ -53,12 +55,17 @@ export async function ask(params: {
   userId: string;
   client: ClientKey;
   invoiceId: string | null;
+  asOf: string | null;
 }): Promise<AnswerCard> {
   if (DEMO_MODE) {
     await delay(700);
     const hit = SAMPLES.find((s) => s.question === params.question || s.keywords.test(params.question));
     if (!hit) throw new DemoMissError();
-    return hit.card;
+    // The demo has one dated answer: the price-tolerance rule in force before 1 Apr 2026.
+    if (params.asOf && params.asOf < "2026-04-01" && hit.card.answer_id === "fx-t1") {
+      return { ...(t1AsOf as AnswerCard), as_of: params.asOf };
+    }
+    return { ...hit.card, as_of: params.asOf };
   }
   const res = await fetch(`${API_BASE}/ask`, {
     method: "POST",
@@ -68,6 +75,7 @@ export async function ask(params: {
       user_id: params.userId,
       client: params.client === "all" ? null : params.client,
       invoice_id: params.invoiceId,
+      as_of: params.asOf,
     }),
   });
   if (!res.ok) throw new Error(`The answer service returned ${res.status}.`);
@@ -100,4 +108,12 @@ export async function searchInvoices(q: string): Promise<InvoiceContext[]> {
   const res = await fetch(`${API_BASE}/invoices?q=${encodeURIComponent(q)}`);
   if (!res.ok) return [];
   return (await res.json()) as InvoiceContext[];
+}
+
+/** Client scopes known to the schema, for the composer's client chip. */
+export async function getScopes(): Promise<Scope[]> {
+  if (DEMO_MODE) return scopesFixture as Scope[];
+  const res = await fetch(`${API_BASE}/scopes`);
+  if (!res.ok) return [{ key: "all", label: "All clients" }];
+  return (await res.json()) as Scope[];
 }

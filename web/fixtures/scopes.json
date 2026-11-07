@@ -1,0 +1,18 @@
+[
+  {
+    "key": "all",
+    "label": "All clients"
+  },
+  {
+    "key": "Arvana Retail Pvt Ltd",
+    "label": "Arvana Retail"
+  },
+  {
+    "key": "Arvana Pharma Ltd",
+    "label": "Arvana Pharma"
+  },
+  {
+    "key": "Arvana Infra Projects Ltd",
+    "label": "Arvana Infra"
+  }
+]

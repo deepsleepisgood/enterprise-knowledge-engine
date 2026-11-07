@@ -204,6 +204,31 @@ def set_passage_embeddings(session: Session, vectors: dict[str, list[float]]) ->
         session.execute(update(Passage).where(Passage.id == pid).values(embedding=vec))
 
 
+def delete_graph(session: Session) -> None:
+    """Remove the tenant's derived graph (schema, entities, facts, conflicts, versions) while
+    keeping episodes, sources and passages. For rebuilds during development only."""
+    from app.store.models import (
+        Change,
+        Conflict,
+        Entity,
+        EntityAlias,
+        Fact,
+        KbVersion,
+        PluginBinding,
+        ReviewItem,
+        Schema,
+    )
+
+    t = tenant()
+    for model in (Change, Conflict, Fact, PluginBinding, EntityAlias, KbVersion, Schema):
+        session.execute(delete(model).where(model.tenant_id == t))
+    session.execute(
+        delete(ReviewItem).where(ReviewItem.tenant_id == t, ReviewItem.kind == "schema")
+    )
+    session.execute(update(Entity).where(Entity.tenant_id == t).values(merged_into=None))
+    session.execute(delete(Entity).where(Entity.tenant_id == t))
+
+
 def delete_tenant_content(session: Session) -> None:  # tests and fresh-tenant runs only
     from app.store.models import (
         Change,

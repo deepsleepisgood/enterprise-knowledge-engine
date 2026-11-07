@@ -12,6 +12,9 @@ import {
   Sparkles,
   X,
   type LucideIcon,
+  Network,
+  SlidersHorizontal,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,8 +35,11 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/", label: "Ask", icon: Search, roles: ["processor", "owner"] },
   { href: "/changes", label: "Changes", icon: Bell, roles: ["processor", "owner"], badge: true },
+  { href: "/sources", label: "Sources", icon: Upload, roles: ["owner"], badge: true },
   { href: "/conflicts", label: "Conflicts", icon: GitCompare, roles: ["owner"] },
   { href: "/review", label: "Review queue", icon: Inbox, roles: ["owner"] },
+  { href: "/setup", label: "Setup", icon: SlidersHorizontal, roles: ["owner"] },
+  { href: "/entities", label: "Entities", icon: Network, roles: ["owner"] },
   { href: "/capture", label: "Expert capture", icon: BookUser, roles: ["processor", "owner"] },
   { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["owner"] },
 ];
@@ -81,7 +87,7 @@ function RoleMenu({ placement }: { placement: "rail" | "bar" }) {
         aria-label={`Signed in as ${ROLE_LABEL[role]}. Switch role`}
         className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-fill font-display text-xs font-semibold text-ink hover:border-muted"
       >
-        {role === "owner" ? "PO" : "AP"}
+        {role === "owner" ? "PO" : "PR"}
       </button>
       {open && (
         <div

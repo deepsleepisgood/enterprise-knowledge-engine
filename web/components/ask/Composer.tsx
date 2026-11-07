@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowRight, Check, ChevronDown, Paperclip, X } from "lucide-react";
+import { ArrowRight, CalendarClock, Check, ChevronDown, Paperclip, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { searchInvoices } from "@/lib/api";
 import { cx, fmtInr } from "@/lib/format";
-import { CLIENTS, type ClientKey, type InvoiceContext } from "@/lib/types";
+import { fmtDate } from "@/lib/format";
+import { ALL_SCOPE, type ClientKey, type InvoiceContext, type Scope } from "@/lib/types";
 
 function usePopover() {
   const [open, setOpen] = useState(false);
@@ -82,9 +83,17 @@ function InvoicePicker({ onPick }: { onPick: (i: InvoiceContext) => void }) {
   );
 }
 
-function ClientChip({ value, onChange }: { value: ClientKey; onChange: (c: ClientKey) => void }) {
+function ClientChip({
+  value,
+  onChange,
+  scopes,
+}: {
+  value: ClientKey;
+  onChange: (c: ClientKey) => void;
+  scopes: Scope[];
+}) {
   const { open, setOpen, ref } = usePopover();
-  const label = CLIENTS.find((c) => c.key === value)?.label ?? "All clients";
+  const label = scopes.find((c) => c.key === value)?.label ?? ALL_SCOPE.label;
   return (
     <div ref={ref} className="relative">
       <button
@@ -101,7 +110,7 @@ function ClientChip({ value, onChange }: { value: ClientKey; onChange: (c: Clien
       </button>
       {open && (
         <ul role="listbox" className="absolute bottom-11 left-0 z-30 w-48 rounded-2xl border border-hairline bg-surface p-1.5 shadow-card">
-          {CLIENTS.map((c) => (
+          {scopes.map((c) => (
             <li key={c.key} role="option" aria-selected={c.key === value}>
               <button
                 type="button"
@@ -122,6 +131,48 @@ function ClientChip({ value, onChange }: { value: ClientKey; onChange: (c: Clien
   );
 }
 
+function AsOfPill({ value, onChange }: { value: string | null; onChange: (d: string | null) => void }) {
+  const { open, setOpen, ref } = usePopover();
+  const label = value ? fmtDate(value) : "Today";
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label={`Rules as of: ${label}`}
+        className="flex h-9 items-center gap-2 rounded-full border border-hairline px-3 text-[13px] font-medium text-ink hover:border-muted"
+      >
+        <CalendarClock className="h-3.5 w-3.5 text-muted" aria-hidden />
+        {label}
+      </button>
+      {open && (
+        <div className="absolute bottom-11 right-0 z-30 w-[min(15rem,calc(100vw-3rem))] rounded-2xl border border-hairline bg-surface p-3 shadow-card sm:left-0 sm:right-auto">
+          <label className="block">
+            <span className="eyebrow">Rules in force on</span>
+            <input
+              type="date"
+              value={value ?? ""}
+              onChange={(e) => onChange(e.target.value || null)}
+              className="mt-1.5 w-full rounded-xl border border-hairline bg-canvas px-3 py-2 font-mono text-sm text-ink focus:border-muted focus:outline-none"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              onChange(null);
+              setOpen(false);
+            }}
+            className="mt-2 text-[13px] font-medium text-rose hover:text-rose-hover"
+          >
+            Back to today
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Composer({
   onSubmit,
   client,
@@ -129,10 +180,16 @@ export function Composer({
   invoice,
   onInvoiceChange,
   busy,
+  scopes,
+  asOf,
+  onAsOfChange,
 }: {
   onSubmit: (q: string) => void;
   client: ClientKey;
   onClientChange: (c: ClientKey) => void;
+  scopes: Scope[];
+  asOf: string | null;
+  onAsOfChange: (d: string | null) => void;
   invoice: InvoiceContext | null;
   onInvoiceChange: (i: InvoiceContext | null) => void;
   busy: boolean;
@@ -192,12 +249,13 @@ export function Composer({
             submit();
           }
         }}
-        placeholder="Ask about a rule, an invoice or a supplier…"
+        placeholder="Ask about a rule, a document or an entity…"
         className="block w-full resize-none bg-transparent px-1.5 py-1 text-[15px] leading-relaxed text-ink placeholder:text-muted focus:outline-none"
       />
       <div className="mt-2 flex items-center gap-2">
         <InvoicePicker onPick={onInvoiceChange} />
-        <ClientChip value={client} onChange={onClientChange} />
+        <ClientChip value={client} onChange={onClientChange} scopes={scopes} />
+        <AsOfPill value={asOf} onChange={onAsOfChange} />
         <button
           type="submit"
           disabled={!text.trim() || busy}

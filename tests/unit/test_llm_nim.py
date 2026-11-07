@@ -163,3 +163,34 @@ def test_vision_sends_images_and_caches_by_image(setup) -> None:
     assert again.cached and len(fake.bodies) == 1
     other = llm.vision("Transcribe this page.", [(b"\x89PNG-2", "image/png")], prompt_version="t-v")
     assert other.text == "# Page 2" and len(fake.bodies) == 2
+
+
+def test_http_429_honours_retry_after_and_backs_off(monkeypatch) -> None:
+    import io
+    import urllib.error
+
+    calls, sleeps = [], []
+
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout):
+        calls.append(1)
+        if len(calls) <= 4:
+            raise urllib.error.HTTPError(
+                req.full_url, 429, "Too Many Requests", {"Retry-After": "7"}, io.BytesIO(b"{}")
+            )
+        return Resp(b'{"choices": []}')
+
+    s = get_settings()
+    monkeypatch.setattr(s, "nvidia_api_key", "test-key")
+    monkeypatch.setattr(nim.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(nim.time, "sleep", sleeps.append)
+    monkeypatch.setattr(nim, "_limiter", nim.RateLimiter(1000))
+    assert nim._http_post({"model": "m"}) == {"choices": []}
+    assert len(calls) == 5  # more attempts than the generic backoff allows
+    assert sleeps == [15, 30, 60, 120]  # at least Retry-After (7 s), growing

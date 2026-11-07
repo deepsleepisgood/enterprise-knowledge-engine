@@ -1,7 +1,10 @@
 """NVIDIA NIM transport (OpenAI-compatible /chat/completions), standard library only.
 
-Used by app/core/llm.py when LLM_PROVIDER=nim. Retries rate limits, server errors and
-timeouts with backoff. Tests replace the transport with `set_transport`.
+Used by app/core/llm.py when LLM_PROVIDER=nim. Two limits apply to every request: a sliding
+window of NIM_MAX_RPM per minute and at most NIM_MAX_CONCURRENT in flight (the free endpoints
+answer 429 to bursts of parallel requests well below the per-minute limit). Rate limits, server
+errors and timeouts are retried with backoff; a 429 honours Retry-After and backs off longer.
+Tests replace the transport with `set_transport`.
 """
 
 from __future__ import annotations
@@ -20,6 +23,7 @@ from app.core.config import get_settings
 
 RETRY_STATUS = {408, 429, 500, 502, 503, 504}
 BACKOFF_S = (3, 10, 30)
+BACKOFF_429_S = (15, 30, 60, 120, 240)
 
 
 class NimError(RuntimeError):
@@ -55,6 +59,15 @@ class RateLimiter:
 
 _limiter: RateLimiter | None = None
 _limiter_lock = threading.Lock()
+_inflight: threading.BoundedSemaphore | None = None
+
+
+def inflight() -> threading.BoundedSemaphore:
+    global _inflight
+    with _limiter_lock:
+        if _inflight is None:
+            _inflight = threading.BoundedSemaphore(max(1, get_settings().nim_max_concurrent))
+        return _inflight
 
 
 def limiter() -> RateLimiter:
@@ -89,20 +102,36 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
         method="POST",
     )
     last: Exception | None = None
-    for attempt in range(len(BACKOFF_S) + 1):
+    attempt = limited = 0
+    while True:
         limiter().acquire()  # every attempt counts against the per-minute limit
-        try:
-            with urllib.request.urlopen(req, timeout=s.nim_timeout_s) as r:
-                return json.loads(r.read())
-        except urllib.error.HTTPError as e:
-            detail = e.read().decode("utf-8", "replace")[:300]
-            if e.code not in RETRY_STATUS:
-                raise NimError(f"NIM HTTP {e.code}: {detail}") from e
-            last = NimError(f"NIM HTTP {e.code}: {detail}")
-        except (TimeoutError, urllib.error.URLError) as e:
-            last = e
-        if attempt < len(BACKOFF_S):
-            time.sleep(BACKOFF_S[attempt])
+        retry_after: float | None = None
+        with inflight():
+            try:
+                with urllib.request.urlopen(req, timeout=s.nim_timeout_s) as r:
+                    return json.loads(r.read())
+            except urllib.error.HTTPError as e:
+                detail = e.read().decode("utf-8", "replace")[:300]
+                if e.code not in RETRY_STATUS:
+                    raise NimError(f"NIM HTTP {e.code}: {detail}") from e
+                last = NimError(f"NIM HTTP {e.code}: {detail}")
+                if e.code == 429:
+                    try:
+                        retry_after = float(e.headers.get("Retry-After") or "")
+                    except ValueError:
+                        retry_after = None
+            except (TimeoutError, urllib.error.URLError) as e:
+                last = e
+        if retry_after is not None or "HTTP 429" in str(last):
+            if limited >= len(BACKOFF_429_S):
+                break
+            time.sleep(max(retry_after or 0, BACKOFF_429_S[limited]))
+            limited += 1
+            continue
+        if attempt >= len(BACKOFF_S):
+            break
+        time.sleep(BACKOFF_S[attempt])
+        attempt += 1
     raise NimError(f"NIM request failed after retries: {last}")
 
 

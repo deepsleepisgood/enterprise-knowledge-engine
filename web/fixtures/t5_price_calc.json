@@ -36,19 +36,37 @@
         "short_label": "Video 3 [03:10]",
         "locator": "Video 3 [03:10]",
         "section_title": "Video 3 — Working the exception queue",
-        "doc_type": "training_video",
+        "doc_type": "training",
         "status": "current",
         "quote": "A good note: 'Line 2 cement, invoice ₹412 per bag vs PO ₹395, excess ₹8,500 on 500 bags, above the ₹500 limit. Please amend PO or get a credit note.'"
       }
     ]
   },
   "working": [
-    { "label": "PO line value (₹395 × 500)", "value": "₹1,97,500" },
-    { "label": "Excess on line (₹5 × 500)", "value": "₹2,500" },
-    { "label": "1% of PO line value", "value": "₹1,975" },
-    { "label": "Cap", "value": "₹500" },
-    { "label": "Limit (lower of the two)", "value": "₹500" },
-    { "label": "Excess within limit?", "value": "No" }
+    {
+      "label": "PO line value (₹395 × 500)",
+      "value": "₹1,97,500"
+    },
+    {
+      "label": "Excess on line (₹5 × 500)",
+      "value": "₹2,500"
+    },
+    {
+      "label": "1% of PO line value",
+      "value": "₹1,975"
+    },
+    {
+      "label": "Cap",
+      "value": "₹500"
+    },
+    {
+      "label": "Limit (lower of the two)",
+      "value": "₹500"
+    },
+    {
+      "label": "Excess within limit?",
+      "value": "No"
+    }
   ],
   "decision": "Hold the line — price variance above tolerance",
   "exception_code": "PRICE_VAR",
@@ -75,7 +93,7 @@
       "short_label": "Video 3 [03:10]",
       "locator": "Video 3 [03:10]",
       "section_title": "Video 3 — Working the exception queue",
-      "doc_type": "training_video",
+      "doc_type": "training",
       "status": "current",
       "quote": "A good note: 'Line 2 cement, invoice ₹412 per bag vs PO ₹395, excess ₹8,500 on 500 bags, above the ₹500 limit.'"
     },
@@ -87,5 +105,7 @@
     "What if the supplier sends a credit note for ₹2,000?",
     "What is the price tolerance?"
   ],
-  "latency_ms": 2870
+  "latency_ms": 2870,
+  "as_of": null,
+  "entities": []
 }

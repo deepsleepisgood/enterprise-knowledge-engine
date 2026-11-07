@@ -12,6 +12,7 @@ With SCHEMA_MODE=baseline the first plug-in's hand-written schema is used instea
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -21,7 +22,7 @@ from pydantic import BaseModel, Field
 
 from app.graph.ontology import Attribute, EntityType, Ontology, SenderAuthority, SourceRank, Topic
 
-PROMPT_VERSION = "induce-v1"
+PROMPT_VERSION = "induce-v2"
 PER_SOURCE = 14
 PASSAGE_CHARS = 1400
 BATCH_CHARS = 16000
@@ -67,11 +68,20 @@ From the passages given, list:
 - units: words the text uses for multiples of a unit, with their multiplier;
 - base_currency: the currency code money amounts are in, if any.
 Use only what the passages support. Be specific: a calculator should be able to read each
-numeric attribute on its own."""
+numeric attribute on its own.
+The graph records time, scope and source for every fact, so the schema must not:
+- name versions or time in topics or attributes (no "old_", "new_", "previous", "v3", "current"):
+  an earlier and a later value of the same rule share one attribute;
+- make topics or attributes for one client, customer, site or department: a rule that a memo
+  changes for one client uses the general rule's attribute (the fact is scoped to that client);
+- make a topic per document (a memo, an FAQ): topics are subjects, not sources."""
 
 FINAL_SYSTEM = """You merge candidate schema fragments into one schema for a knowledge graph.
-- Merge topics and attributes that mean the same thing; keep the most specific keys; keep every
-  distinct numeric attribute; union the synonyms. Attribute keys must start with their topic key.
+- Merge topics and attributes that mean the same thing (one topic per subject, even if fragments
+  name it differently); keep the most specific keys; keep every distinct numeric attribute; union
+  the synonyms. Attribute keys must start with their topic key.
+- Remove any topic or attribute named after a version, a time ("old", "previous", "v3"), one
+  client, site or department, or one document: fold its values into the general attribute.
 - Always include an entity type "topic" and the entity types the fragments propose.
 - source_ranking: rank every document type listed (1 = most authoritative). Controlled,
   current, owner-approved documents rank above training material, which ranks above informal
@@ -187,9 +197,15 @@ def _dedupe(items: list[Any], key: str, must: Any | None = None) -> list[Any]:
     return list(seen.values())
 
 
+# Attribute names that encode time or version: the graph's validity intervals hold that.
+_TEMPORAL = re.compile(r"(^|_)(old|new|previous|prior|legacy|former|current|v\d+\w*)(_|$)")
+
+
 def _valid_attributes(attrs: list[Attribute], topics: set[str]) -> list[Attribute]:
     out: dict[str, Attribute] = {}
     for a in attrs:
+        if _TEMPORAL.search(a.key.split(".", 1)[-1]):
+            continue
         topic = a.topic if a.topic in topics else a.key.split(".", 1)[0]
         if topic not in topics:
             continue

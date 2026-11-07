@@ -23,6 +23,7 @@ import pandas as pd
 import pytest
 
 from app.core.config import get_settings
+from tests.live_graph import build_tenant
 
 ROOT = Path(__file__).resolve().parents[2]
 EVAL = ROOT / "eval" / "PS-07_qa_evaluation_set.xlsx"
@@ -117,44 +118,6 @@ def _same(exp: dict[str, Any], got: dict[str, Any]) -> bool:
         elif g != v:
             return False
     return True
-
-
-def build_tenant(mode: str) -> None:
-    """Ingest the corpus into tenant `mode`, freeze its schema, extract, publish and bind."""
-    from app import worker
-    from app.core.config import get_settings
-    from app.core.db import session_scope
-    from app.graph import pipeline as gp
-    from app.ingest.connectors import from_paths
-    from app.ingest.intake import submit
-    from app.plugins import registry
-    from app.plugins.bindings import bind
-    from app.store.base import use_tenant
-
-    settings = get_settings()
-    old = settings.schema_mode
-    settings.schema_mode = mode
-    try:
-        with use_tenant(mode), session_scope() as s:
-            for ep in from_paths([ROOT / "data" / "raw"]):
-                submit(s, ep)
-        worker.drain(kinds=["parse_episode", "reresolve_source"], threads=2)
-        with use_tenant(mode):
-            gp.ensure_schema(auto_freeze=True, mode=mode)
-            with session_scope() as s:
-                from app.store import episodes as estore
-                from app.store import jobs
-
-                for eid in estore.parsed_episode_ids(s):
-                    jobs.enqueue(s, "extract_episode", {"episode_id": eid})
-        worker.drain(kinds=["extract_episode", "reresolve_source"], threads=2)
-        with use_tenant(mode), session_scope() as s:
-            onto = gp.active_ontology(s, mode)
-            from app.core.llm import structured
-
-            bind(s, registry.get("ap"), onto, structured_fn=structured)
-    finally:
-        settings.schema_mode = old
 
 
 def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:

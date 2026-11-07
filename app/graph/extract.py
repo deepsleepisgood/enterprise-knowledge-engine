@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 
 from app.graph.ontology import Ontology, ValueType
 
-PROMPT_VERSION = "facts-v1"
+PROMPT_VERSION = "facts-v2"
 Kind = Literal["rule", "practice", "definition", "procedure", "attribute"]
 
 
@@ -85,6 +85,8 @@ named thing, or a working practice. Return every fact the passage states and not
   thing), practice (what a person does or advises from experience).
 - quote: copy the words exactly from the passage. Never invent a value.
 - The header says the document's status and date: still extract outdated documents faithfully.
+- A change log or comparison ("version 1 said X, version 2 says Y"): extract only the value this
+  document puts in force; earlier values are facts of the earlier document, not of this one.
 
 Example. Passage: "2.1 Annual leave — Staff get 24 days a year, or 18 days in the first year.
 Requests over 10 days need the director." Facts: annual_leave.days_per_year (days, 24);

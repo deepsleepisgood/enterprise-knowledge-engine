@@ -1,25 +1,27 @@
 // Answer card returned by POST /ask (BUILD_PLAN.md Phase 4). Keep field names stable.
 
+// Document types the engine infers (app/ingest/metadata.py DOC_TYPES); generic across companies.
 export type DocType =
+  | "policy"
   | "sop"
-  | "client_memo"
-  | "desk_instruction"
+  | "work_instruction"
+  | "memo"
   | "faq"
-  | "training_video"
+  | "training"
   | "interview"
-  | "shadowing"
+  | "observation"
   | "email"
   | "chat"
-  | "expert_entry";
+  | "spreadsheet"
+  | "slides"
+  | "report"
+  | "contract"
+  | "form"
+  | "image"
+  | "expert_answer"
+  | "other";
 
-export type SourceStatus =
-  | "current"
-  | "superseded"
-  | "stale"
-  | "partly_outdated"
-  | "observation"
-  | "knowledge_capture"
-  | "provisional";
+export type SourceStatus = "current" | "superseded" | "stale" | "draft" | "record" | "provisional";
 
 export type CardStatus = "answered" | "provisional" | "unverified" | "unsupported" | "needs_specialist";
 
@@ -63,9 +65,17 @@ export interface RouteTo {
   reason: string;
 }
 
+export interface EntityRef {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface AnswerCard {
   answer_id: string;
   kb_version: number;
+  as_of: string | null; // ISO date; null means "today"
+  superseded_since?: string | null; // for as_of answers: when the rule in force then was replaced
   client: string | null;
   route: string;
   status: CardStatus;
@@ -77,6 +87,7 @@ export interface AnswerCard {
   older_sources: OlderSource[];
   expert_tip: ExpertTip | null;
   route_to: RouteTo | null;
+  entities: EntityRef[];
   related: string[];
   latency_ms: number;
 }
@@ -109,11 +120,12 @@ export interface InvoiceContext {
   habits: string[];
 }
 
-export type ClientKey = "all" | "retail" | "pharma" | "infra";
+/** A scope the schema knows (a client entity), or "all". Labels come from the API. */
+export type ClientKey = string;
 
-export const CLIENTS: { key: ClientKey; label: string }[] = [
-  { key: "all", label: "All clients" },
-  { key: "retail", label: "Arvana Retail" },
-  { key: "pharma", label: "Arvana Pharma" },
-  { key: "infra", label: "Arvana Infra" },
-];
+export interface Scope {
+  key: ClientKey;
+  label: string;
+}
+
+export const ALL_SCOPE: Scope = { key: "all", label: "All clients" };

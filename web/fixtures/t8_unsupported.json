@@ -4,7 +4,10 @@
   "client": null,
   "route": "out_of_scope",
   "status": "unsupported",
-  "rule": { "text": "", "citations": [] },
+  "rule": {
+    "text": "",
+    "citations": []
+  },
   "working": null,
   "decision": null,
   "exception_code": null,
@@ -20,5 +23,7 @@
     "What does the Team Lead own?",
     "How long do we keep invoices?"
   ],
-  "latency_ms": 1940
+  "latency_ms": 1940,
+  "as_of": null,
+  "entities": []
 }

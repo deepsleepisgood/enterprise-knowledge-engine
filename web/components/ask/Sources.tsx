@@ -11,16 +11,15 @@ import { DocGlyph } from "./DocGlyph";
 const STATUS_LABEL: Record<SourceStatus, string> = {
   current: "current",
   superseded: "superseded",
-  stale: "not reviewed since 2023",
-  partly_outdated: "partly outdated",
-  observation: "observation",
-  knowledge_capture: "knowledge capture",
+  stale: "stale",
+  draft: "draft",
+  record: "record",
   provisional: "provisional",
 };
 
-const fileStem = (file: string) => file.replace(/\.docx$/i, "");
+const fileStem = (file: string) => file.replace(/\.[a-z0-9]{2,5}$/i, "");
 
-const TIMED: Citation["doc_type"][] = ["training_video", "interview", "shadowing"];
+const TIMED: Citation["doc_type"][] = ["training", "interview", "observation"];
 
 /** Transcripts are best named by their timestamp ("Interview 1 [00:42]"). */
 const cardTitle = (c: Citation) => (TIMED.includes(c.doc_type) ? c.short_label : c.section_title);

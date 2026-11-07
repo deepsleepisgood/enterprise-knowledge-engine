@@ -5,9 +5,17 @@ import { useCallback, useEffect, useState } from "react";
 
 import { PageColumns } from "@/components/shell/PageColumns";
 import { useRole } from "@/components/shell/RoleContext";
-import { DEMO_MODE, DemoMissError, SAMPLES, ackChange, ask, getChanges } from "@/lib/api";
-import { cx, safeStorageGet, safeStorageSet } from "@/lib/format";
-import { CLIENTS, type AnswerCard, type ChangeItem, type Citation, type ClientKey, type InvoiceContext } from "@/lib/types";
+import { DEMO_MODE, DemoMissError, SAMPLES, ackChange, ask, getChanges, getScopes } from "@/lib/api";
+import { cx, fmtDate, safeStorageGet, safeStorageSet } from "@/lib/format";
+import {
+  ALL_SCOPE,
+  type AnswerCard,
+  type ChangeItem,
+  type Citation,
+  type ClientKey,
+  type InvoiceContext,
+  type Scope,
+} from "@/lib/types";
 
 import {
   ChangeBanner,
@@ -48,8 +56,15 @@ function Skeleton() {
   );
 }
 
-function clientLabel(key: string | null): string {
-  return CLIENTS.find((c) => c.key === (key ?? "all"))?.label ?? "All clients";
+function clientLabel(scopes: Scope[], key: string | null): string {
+  return scopes.find((c) => c.key === (key ?? "all"))?.label ?? key ?? ALL_SCOPE.label;
+}
+
+/** "Rule in force on 1 Mar 2026 — superseded since 1 Apr 2026" for dated answers. */
+function asOfLine(card: AnswerCard): string | null {
+  if (!card.as_of) return null;
+  const base = `Rule in force on ${fmtDate(card.as_of)}`;
+  return card.superseded_since ? `${base} — superseded since ${fmtDate(card.superseded_since)}` : base;
 }
 
 export function AskView() {
@@ -64,6 +79,8 @@ export function AskView() {
   const [invoice, setInvoice] = useState<InvoiceContext | null>(null);
   const [drawer, setDrawer] = useState<Citation | null>(null);
   const [change, setChange] = useState<ChangeItem | null>(null);
+  const [scopes, setScopes] = useState<Scope[]>([ALL_SCOPE]);
+  const [asOf, setAsOf] = useState<string | null>(null);
 
   const run = useCallback(
     async (q: string) => {
@@ -72,7 +89,13 @@ export function AskView() {
       setFailure(null);
       setTab("answer");
       try {
-        const result = await ask({ question: q, userId, client, invoiceId: invoice?.invoice_id ?? null });
+        const result = await ask({
+          question: q,
+          userId,
+          client,
+          invoiceId: invoice?.invoice_id ?? null,
+          asOf,
+        });
         setCard(result);
         setActive(result.rule.citations[0]?.n ?? null);
       } catch (e) {
@@ -82,11 +105,12 @@ export function AskView() {
         setLoading(false);
       }
     },
-    [userId, client, invoice],
+    [userId, client, invoice, asOf],
   );
 
   useEffect(() => {
     void run(SAMPLES[0]?.question ?? "");
+    void getScopes().then((s) => setScopes(s.length ? s : [ALL_SCOPE]));
     const lastSeen = Number(safeStorageGet(LAST_SEEN_KEY) ?? "41");
     void getChanges(Number.isFinite(lastSeen) ? lastSeen : 41).then((items) => setChange(items[0] ?? null));
     // run once on mount; later questions come from the composer and Related
@@ -133,11 +157,16 @@ export function AskView() {
           <Sparkles className="h-4 w-4 text-rose" aria-hidden />
           <span className="eyebrow text-ink">Answer</span>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-muted">
-          <span className="rounded-full border border-hairline bg-surface px-2.5 py-1">
-            {clientLabel(card?.client ?? client)}
+        <div className="flex flex-wrap items-center justify-end gap-2 font-mono text-[11px] text-muted">
+          <span className="whitespace-nowrap rounded-full border border-hairline bg-surface px-2.5 py-1">
+            {clientLabel(scopes, card?.client ?? client)}
           </span>
-          {card && <span>kb v{card.kb_version}</span>}
+          {card?.as_of && (
+            <span className="whitespace-nowrap rounded-full border border-hairline bg-surface px-2.5 py-1">
+              as of {fmtDate(card.as_of)}
+            </span>
+          )}
+          {card && <span className="whitespace-nowrap">kb v{card.kb_version}</span>}
         </div>
       </div>
 
@@ -168,7 +197,7 @@ export function AskView() {
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="pt-5">
         {loading ? (
           <div aria-live="polite">
-            <p className="mb-4 text-sm text-muted">Checking SOP v4.0, client memos and transcripts…</p>
+            <p className="mb-4 text-sm text-muted">Checking the documents and the rules in force…</p>
             <Skeleton />
           </div>
         ) : failure?.kind === "demo" ? (
@@ -197,6 +226,11 @@ export function AskView() {
           <div className="space-y-6">
             <SourceChipStrip citations={citations} active={active} onActivate={activate} />
             {card.status !== "answered" && !unsupported && <StatusPill status={card.status} />}
+            {asOfLine(card) && (
+              <span className="inline-flex items-center rounded-full bg-fill px-3 py-1 text-[13px] font-medium text-muted">
+                {asOfLine(card)}
+              </span>
+            )}
             {unsupported ? (
               <NotCoveredCard route={card.route_to} />
             ) : (
@@ -257,6 +291,11 @@ export function AskView() {
         invoice={invoice}
         onInvoiceChange={setInvoice}
         busy={loading}
+        scopes={scopes}
+        asOf={asOf}
+        onAsOfChange={(d) => {
+          setAsOf(d);
+        }}
       />
       {DEMO_MODE && (
         <p className="mt-3 text-center font-mono text-[11px] text-muted">
