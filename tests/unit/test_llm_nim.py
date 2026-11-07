@@ -90,10 +90,26 @@ def test_still_invalid_after_retry_raises(setup) -> None:
         llm.structured("x", Tolerance, prompt_version="t-fail")
 
 
-def test_truncated_output_raises(setup) -> None:
-    _use(FakeTransport(['{"pct_of_line": 1'], finish="length"))
+def test_truncated_output_retries_with_double_budget(setup) -> None:
+    class Seq(FakeTransport):
+        def __call__(self, body):
+            self.bodies.append(body)
+            finish = "length" if len(self.bodies) == 1 else "stop"
+            return _resp(self.replies.pop(0), finish)
+
+    fake = _use(Seq(['{"pct_of_line": 1', '{"pct_of_line": 1, "cap_inr": 500}']))
+    out = llm.structured("x", Tolerance, prompt_version="t-len-ok", max_tokens=1000)
+    assert out.cap_inr == 500
+    assert [b["max_tokens"] for b in fake.bodies] == [1000, 2000]
+
+
+def test_truncated_output_raises_at_ceiling(setup) -> None:
+    fake = _use(FakeTransport(['{"pct_of_line": 1'] * 3, finish="length"))
     with pytest.raises(llm.LLMError, match="max_tokens"):
-        llm.structured("x", Tolerance, prompt_version="t-len")
+        llm.structured(
+            "x", Tolerance, prompt_version="t-len", max_tokens=llm.MAX_TOKENS_CEILING // 2
+        )
+    assert len(fake.bodies) == 2
 
 
 def test_complete_logs_tokens_and_caches(setup) -> None:
@@ -117,3 +133,19 @@ def test_extract_json_helper() -> None:
     assert nim.extract_json('noise {"a": 1} trailing') == {"a": 1}
     with pytest.raises(ValueError):
         nim.extract_json("no json here")
+
+
+def test_rate_limiter_blocks_the_41st_request_in_a_minute() -> None:
+    now = [0.0]
+    slept: list[float] = []
+
+    def sleep(s: float) -> None:
+        slept.append(s)
+        now[0] += s
+
+    rl = nim.RateLimiter(40, clock=lambda: now[0], sleep=sleep)
+    for _ in range(40):
+        rl.acquire()
+    assert not slept
+    rl.acquire()  # 41st waits until the first request is a minute old
+    assert slept and now[0] >= 60

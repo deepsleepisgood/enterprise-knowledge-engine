@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
+from collections import deque
 from collections.abc import Callable
 from typing import Any
 
@@ -22,6 +24,45 @@ BACKOFF_S = (3, 10, 30)
 
 class NimError(RuntimeError):
     pass
+
+
+class RateLimiter:
+    """Sliding-window limit on requests per minute, shared by all threads."""
+
+    def __init__(
+        self,
+        max_per_minute: int,
+        clock: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        self.max = max(1, max_per_minute)
+        self._clock, self._sleep = clock, sleep
+        self._sent: deque[float] = deque()
+        self._lock = threading.Lock()
+
+    def acquire(self) -> None:
+        while True:
+            with self._lock:
+                now = self._clock()
+                while self._sent and now - self._sent[0] >= 60:
+                    self._sent.popleft()
+                if len(self._sent) < self.max:
+                    self._sent.append(now)
+                    return
+                wait = 60 - (now - self._sent[0])
+            self._sleep(wait + 0.05)
+
+
+_limiter: RateLimiter | None = None
+_limiter_lock = threading.Lock()
+
+
+def limiter() -> RateLimiter:
+    global _limiter
+    with _limiter_lock:
+        if _limiter is None:
+            _limiter = RateLimiter(get_settings().nim_max_rpm)
+        return _limiter
 
 
 Transport = Callable[[dict[str, Any]], dict[str, Any]]
@@ -49,6 +90,7 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     )
     last: Exception | None = None
     for attempt in range(len(BACKOFF_S) + 1):
+        limiter().acquire()  # every attempt counts against the per-minute limit
         try:
             with urllib.request.urlopen(req, timeout=s.nim_timeout_s) as r:
                 return json.loads(r.read())

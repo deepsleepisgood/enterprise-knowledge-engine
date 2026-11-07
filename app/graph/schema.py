@@ -37,6 +37,9 @@ class ExtractedClaim(BaseModel):
     topic: str = Field(description="A topic from the vocabulary, or 'other'")
     parameter: str = Field(description="A parameter of that topic from the vocabulary, or 'other'")
     proposed_name: str | None = Field(None, description="Only when topic or parameter is 'other'")
+    subject: str | None = Field(
+        None, description="Only when one parameter repeats for several items: the item"
+    )
     client: str = Field(description="'all', or the client key the claim is limited to")
     materials: list[str] | None = Field(
         None, description="Materials or categories the claim is limited to"

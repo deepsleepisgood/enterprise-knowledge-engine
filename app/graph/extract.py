@@ -19,7 +19,7 @@ from typing import Any
 from app.core.pack import Pack
 from app.graph.schema import ClaimRec, ExtractedClaim, ExtractionResult
 
-PROMPT_VERSION = "extract-v1"
+PROMPT_VERSION = "extract-v2"
 PRACTICE_SOURCE_KINDS = {"interview", "shadowing"}
 SYSTEM = """You extract rule-claims from one passage of an organisation's process documentation.
 A claim is one checkable statement of a rule, threshold, procedure step, definition or working
@@ -32,6 +32,10 @@ Rules:
 - A statement that something does not exist ("there is no tolerance") is a claim with
   number 0 and text "none".
 - Percentages: 1% -> number 1, unit "%".
+- If the vocabulary gives a parameter a numeric type (percentage, money, days), always put the
+  number in value.number, even when the passage adds words around it.
+- subject: only when the passage states the same parameter for several items (one row per
+  item, e.g. a code or a category), set subject to the item; otherwise null.
 - If the passage records a change history (an old value and a new value), extract only the
   value this document states as current. Do not extract the old value.
 - client is "all" unless the passage limits the claim to one client; then use the client key.
@@ -158,7 +162,7 @@ def postprocess(raw: ExtractedClaim, p: PassageForExtraction, pack: Pack, index:
         source_valid_to=src.valid_to,
         passage_id=p.id,
         condition=raw.condition,
-        scope={"client": client, "materials": raw.materials},
+        scope={"client": client, "materials": raw.materials, "subject": raw.subject},
         meta=meta,
     )
 
@@ -178,6 +182,6 @@ def extract_passage(
         system=system_prompt(pack),
         model="smart",
         prompt_version=PROMPT_VERSION,
-        max_tokens=8192,
+        max_tokens=16384,
     )
     return [postprocess(c, p, pack, i) for i, c in enumerate(result.claims)]

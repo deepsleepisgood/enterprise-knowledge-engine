@@ -52,6 +52,8 @@ def fake(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "cache_dir", tmp_path / "cache")
     monkeypatch.setattr(settings, "log_dir", tmp_path / "logs")
     monkeypatch.setattr(settings, "llm_provider", "anthropic")
+    monkeypatch.setattr(settings, "model_fast", "claude-haiku-5-5")
+    monkeypatch.setattr(settings, "model_smart", "claude-sonnet-5-5")
     messages = FakeMessages()
     llm.set_client(SimpleNamespace(messages=messages))
     yield messages

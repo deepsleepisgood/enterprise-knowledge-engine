@@ -108,10 +108,20 @@ topics:
   tds:
     synonyms: [TDS, tax deducted at source, 194C, 194J, 194I, 194Q, PAN, lower deduction certificate, AMC]
     parameters:
-      section_rates: {type: text, description: Section and rate per nature of payment}
-      no_pan_rate: {type: percentage}
+      rate_contract_individual_huf: {type: percentage, description: "Work contracts, transport, repairs, manpower paid to an individual or HUF. Put the section code in value.text"}
+      rate_contract_other: {type: percentage, description: "Work contracts, transport, repairs, manpower paid to any other payee. Section code in value.text"}
+      rate_professional: {type: percentage, description: "Professional services (legal, audit, consulting, architects). Section code in value.text"}
+      rate_technical_service: {type: percentage, description: "Fees for technical services that are not professional, incl. software support. Section code in value.text"}
+      rate_rent_plant_machinery: {type: percentage, description: "Rent of plant, machinery or equipment. Section code in value.text"}
+      rate_rent_land_building: {type: percentage, description: "Rent of land, building or furniture. Section code in value.text"}
+      rate_goods_purchase: {type: percentage, description: "Purchase of goods above the yearly threshold, on the excess. Section code in value.text"}
+      goods_purchase_threshold_inr: {type: money, description: Yearly purchases from one supplier above which goods TDS applies}
+      no_pan_rate: {type: percentage, description: Rate when the supplier has no valid PAN (the higher of this and the normal rate)}
       base: {type: text, description: Whether GST is excluded from the base}
       amc_rule: {type: text}
+      amc_manpower_examples: {type: list, description: "AMC types that are mainly technicians and parts"}
+      amc_technical_examples: {type: list, description: "AMC types that are mainly technical or software support"}
+      amc_unclear_examples: {type: list, description: "AMC types that are mixed and decided case by case"}
       lower_deduction_certificate: {type: text}
 
   qa_release:

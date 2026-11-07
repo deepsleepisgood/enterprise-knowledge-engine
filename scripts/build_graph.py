@@ -35,7 +35,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int)
-    ap.add_argument("--workers", type=int, default=4, help="parallel extraction calls")
+    ap.add_argument("--workers", type=int, default=6, help="parallel extraction calls")
     args = ap.parse_args()
 
     pack = get_pack()
@@ -67,7 +67,10 @@ def main() -> None:
         print(f"  [{i:3d}/{n}] {p.source_id:12s} {p.locator}", flush=True)
 
     claims = extract_all(passages, pack, on_progress=progress, workers=args.workers)
-    result = resolve(claims, compare=LLMComparator())
+    comparator = LLMComparator()
+    result = resolve(claims, compare=comparator)
+    if comparator.failures:
+        print(f"comparison calls that failed (treated as unknown): {len(comparator.failures)}")
     with session_scope() as s:
         report = persist(s, result)
 

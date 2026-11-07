@@ -193,3 +193,24 @@ def test_compare_values() -> None:
         )
         == "same"
     )
+
+
+def test_subject_keeps_table_rows_apart(mk) -> None:
+    a = mk("sop_v4", "exceptions", "owner", vtype="text", text="PO buyer")
+    b = mk("sop_v4", "exceptions", "owner", vtype="text", text="Requester")
+    a.scope["subject"], b.scope["subject"] = "PRICE_VAR", "QTY_VAR"
+    resolve([a, b])
+    assert a.status == b.status == "current"
+
+
+def test_failed_llm_comparison_is_unknown_not_fatal(mk) -> None:
+    from app.graph.compare import LLMComparator
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("model unavailable")
+
+    cmp = LLMComparator(structured_fn=boom)
+    rule = mk("sop_v4", "missing_grn", "action", vtype="text", text="hold")
+    old = mk("faq_2023", "missing_grn", "action", vtype="text", text="email the requester")
+    resolve([rule, old], compare=cmp)
+    assert old.status == "superseded" and cmp.failures

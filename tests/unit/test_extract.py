@@ -134,7 +134,7 @@ def test_prompt_uses_pack_vocabulary_and_guidance(pack) -> None:
     fake = FakeLLM([])
     extract_passage(_passage("sop_v4", "body"), pack, fake)
     call = fake.calls[0]
-    assert call["model"] == "smart" and call["prompt_version"] == "extract-v1"
+    assert call["model"] == "smart" and call["prompt_version"] == "extract-v2"
     assert "price_tolerance.pct_of_line" in call["prompt"]
     assert "infra (Arvana Infra Projects Ltd)" in build_prompt(_passage("sop_v4", "b"), pack)
     assert "lakh" in system_prompt(pack)  # domain guidance comes from the pack

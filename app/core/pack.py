@@ -94,6 +94,11 @@ class Pack(BaseModel):
             return "all clients"
         return f"{self.clients[scope].short} only"
 
+    def pack_file(self, name: str) -> dict[str, Any]:
+        """Read another YAML file of this pack (empty dict if absent)."""
+        path = self.root / name
+        return _read(path) if path.exists() else {}
+
     def client_key_for_name(self, name: str | None) -> str | None:
         if not name:
             return None

@@ -1,0 +1,76 @@
+# Which graph rules each calculator reads, plus the domain labels it reports.
+# Values (thresholds, rates, day counts) are never here: they come from current claims.
+calculators:
+  price:
+    rules:
+      pct: price_tolerance.pct_of_line
+      cap: price_tolerance.cap_inr
+    exception: PRICE_VAR
+    next_owner: PO buyer (amend the PO or obtain a credit note)
+    citation_topic: price_tolerance
+
+  quantity:
+    rules:
+      pct: quantity_tolerance.pct
+      cap_value: quantity_tolerance.cap_value_inr
+      materials: quantity_tolerance.materials
+    exception: QTY_VAR
+    next_owner: Requester
+
+  approvals:
+    rules:
+      controller_above: approvals.controller_above_lakh
+      cfo_above: approvals.cfo_above_lakh
+    roles:
+      none: No approval beyond a clean match
+      controller: AP Controller
+      cfo: Client CFO
+      non_po_extra: Budget owner
+
+  msme:
+    rules:
+      max_term: msme.max_term_days
+      no_agreement: msme.no_agreement_days
+      default_term: payments.default_term_days
+      run_days: payments.run_days
+      cutoff: payments.cutoff
+    exception: MSME_DUE
+
+  einvoice:
+    rules:
+      threshold: einvoice.aato_threshold_crore
+    exception: IRN_MISSING
+
+  tds:
+    rules:
+      no_pan_rate: tds.no_pan_rate
+      goods_threshold: tds.goods_purchase_threshold_inr
+      contract_individual_huf: tds.rate_contract_individual_huf
+      contract_other: tds.rate_contract_other
+      professional: tds.rate_professional
+      technical_service: tds.rate_technical_service
+      rent_plant_machinery: tds.rate_rent_plant_machinery
+      rent_land_building: tds.rate_rent_land_building
+      goods_purchase: tds.rate_goods_purchase
+    unclear_exception: TDS_SECTION_UNCLEAR
+    rcm_exception: RCM_REVIEW
+    route: Tax Desk
+    # How AMC natures map onto rate rules (SOP §6 + Interview 2 [03:10]).
+    amc:
+      amc_manpower: contract      # 194C: rate depends on the payee type
+      amc_technical: technical_service
+      amc_unclear: unclear
+
+# Natures the parameter extractor may choose for a TDS question.
+tds_natures:
+  contract_individual_huf: Work contract, transport, repairs or manpower paid to an individual or HUF
+  contract_other: Work contract, transport, repairs or manpower paid to a company, firm or other payee
+  contract_unknown_payee: Work contract, transport, repairs or manpower where the payee type is not stated
+  professional: Professional services (legal, audit, consulting, architects)
+  technical_service: Fees for technical services that are not professional, including software support
+  rent_plant_machinery: Rent of plant, machinery or equipment
+  rent_land_building: Rent of land, building or furniture
+  goods_purchase: Purchase of goods
+  amc_manpower: Annual maintenance contract mainly of technicians and parts (lift, HVAC, DG set)
+  amc_technical: Annual maintenance contract mainly of technical or software support (software, ERP, network monitoring)
+  amc_unclear: Annual maintenance contract that is mixed or unclear (e.g. CCTV maintenance with remote monitoring)

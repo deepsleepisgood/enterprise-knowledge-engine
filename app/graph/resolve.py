@@ -2,6 +2,9 @@
 
 Pure function over ClaimRecs, so the precedence rules are unit-tested without a database.
 
+Claims are grouped by (topic, parameter, subject); subject is set only for tables that
+repeat one parameter per item (e.g. one row per exception code).
+
 Rules (BUILD_PLAN Phase 2):
 1. A client-scoped claim overrides the general rule for that client only (claims are
    bucketed by client; the "all" bucket is never touched by a client bucket).
@@ -83,11 +86,12 @@ def _settle_against(
 
 def resolve(claims: list[ClaimRec], compare: Comparator = deterministic) -> ResolveResult:
     conflicts: list[ConflictRec] = []
-    groups: dict[tuple[str, str], list[ClaimRec]] = defaultdict(list)
+    groups: dict[tuple[str, str, str], list[ClaimRec]] = defaultdict(list)
     for c in claims:
-        groups[(c.topic, c.parameter)].append(c)
+        subject = str(c.scope.get("subject") or "").strip().lower()
+        groups[(c.topic, c.parameter, subject)].append(c)
 
-    for (_topic, _param), group in groups.items():
+    for (_topic, _param, _subject), group in groups.items():
         rules = [c for c in group if c.kind != "practice"]
         practices = [c for c in group if c.kind == "practice"]
 

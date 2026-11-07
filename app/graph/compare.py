@@ -71,6 +71,7 @@ class LLMComparator:
 
             structured_fn = structured
         self._structured = structured_fn
+        self.failures: list[str] = []
 
     def __call__(self, a: ClaimRec, b: ClaimRec) -> Verdict:
         quick = deterministic(a, b)
@@ -85,11 +86,15 @@ class LLMComparator:
             f"Claim A: {a.statement}\nValue A: {a.value.get('text')}\n\n"
             f"Claim B: {b.statement}\nValue B: {b.value.get('text')}"
         )
-        result: CompareVerdict = self._structured(
-            prompt,
-            CompareVerdict,
-            model="fast",
-            prompt_version=self.PROMPT_VERSION,
-            max_tokens=1024,
-        )
+        try:
+            result: CompareVerdict = self._structured(
+                prompt,
+                CompareVerdict,
+                model="fast",
+                prompt_version=self.PROMPT_VERSION,
+                max_tokens=4096,
+            )
+        except Exception as exc:  # a failed judgement must not abort a graph build
+            self.failures.append(f"{a.key} vs {b.key}: {type(exc).__name__}: {exc}")
+            return "unknown"
         return result.verdict

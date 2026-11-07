@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -30,6 +31,8 @@ from app.core.config import get_settings
 from app.core.redaction import redact
 
 T = TypeVar("T", bound=BaseModel)
+
+MAX_TOKENS_CEILING = 32768  # NIM: a truncated reply is retried with double budget up to this
 
 # USD per million tokens (input, output). Source: Anthropic pricing, Oct 2026.
 PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
@@ -95,11 +98,16 @@ def _cache_path(key: str) -> Path:
     return d / f"{key}.json"
 
 
+_log_lock = threading.Lock()
+
+
 def _log(record: dict[str, Any]) -> None:
+    """Append one JSON line. Locked: extraction runs in parallel threads."""
     log_dir = get_settings().log_dir
     log_dir.mkdir(parents=True, exist_ok=True)
-    with (log_dir / "llm_calls.jsonl").open("a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    line = json.dumps(record, ensure_ascii=False) + "\n"
+    with _log_lock, (log_dir / "llm_calls.jsonl").open("a", encoding="utf-8") as f:
+        f.write(line)
 
 
 def _resolve_model(model: str | None) -> str:
@@ -258,12 +266,14 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
     system = "\n\n".join(p for p in parts if p)
     messages = list(req["messages"])
     in_tok = out_tok = 0
-    for attempt in range(2):
+    budget = req["max_tokens"]
+    attempt = 0
+    while True:
         body = nim.build_body(
             model=req["model"],
             system=system,
             messages=messages,
-            max_tokens=req["max_tokens"],
+            max_tokens=budget,
             json_mode=True,
         )
         resp = nim.chat(body)
@@ -271,12 +281,17 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
         in_tok, out_tok = in_tok + i, out_tok + o
         text, finish = nim.message_text(resp)
         if finish == "length":
-            raise LLMError("response hit max_tokens; raise max_tokens for this call")
+            # Reasoning models spend output tokens on thinking; one retry with double budget.
+            if budget >= MAX_TOKENS_CEILING:
+                raise LLMError("response hit max_tokens; raise max_tokens for this call")
+            budget = min(budget * 2, MAX_TOKENS_CEILING)
+            continue
         try:
             obj = schema.model_validate(nim.extract_json(text))
             return obj.model_dump(mode="json"), _NimResp(in_tok, out_tok)
         except (ValueError, ValidationError) as exc:
-            if attempt == 1:
+            attempt += 1
+            if attempt == 2:
                 raise LLMError(f"model output did not match {schema.__name__}: {exc}") from exc
             messages += [
                 {"role": "assistant", "content": text},
@@ -286,7 +301,6 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
                     "Return only the corrected JSON object.",
                 },
             ]
-    raise LLMError("unreachable")
 
 
 def _provider() -> str:

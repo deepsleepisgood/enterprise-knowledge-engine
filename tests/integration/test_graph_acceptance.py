@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import date
 
 import pytest
-from sqlalchemy import select, text
+from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.models import Claim
@@ -42,21 +42,8 @@ SECTION_14_TOPICS = {
 
 
 @pytest.fixture(scope="module")
-def built(database_url, pack):
-    from app.core.db import session_scope
-    from app.graph.compare import LLMComparator
-    from app.graph.resolve import resolve
-    from app.graph.store import extract_all, load_passages, persist
-    from app.ingest.loader import ingest
-
-    with session_scope() as s:
-        ingest(s, pack, get_settings().data_dir, with_vendors=False)
-        s.execute(text("TRUNCATE claims, conflicts, changes, kb_versions RESTART IDENTITY CASCADE"))
-        passages = load_passages(s)
-    result = resolve(extract_all(passages, pack), compare=LLMComparator())
-    with session_scope() as s:
-        persist(s, result)
-    return result
+def built(built_graph):
+    return built_graph
 
 
 def _claims(session, **where):

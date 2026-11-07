@@ -77,3 +77,25 @@ def corpus(pack):
     from app.ingest.passages import parse_corpus
 
     return parse_corpus(pack, get_settings().data_dir)
+
+
+@pytest.fixture(scope="session")
+def built_graph(database_url, pack):
+    """The real claims graph in the test database (live LLM; cached after the first run)."""
+    from sqlalchemy import text
+
+    from app.core.config import get_settings
+    from app.core.db import session_scope
+    from app.graph.compare import LLMComparator
+    from app.graph.resolve import resolve
+    from app.graph.store import extract_all, load_passages, persist
+    from app.ingest.loader import ingest
+
+    with session_scope() as s:
+        ingest(s, pack, get_settings().data_dir, with_vendors=False)
+        s.execute(text("TRUNCATE claims, conflicts, changes, kb_versions RESTART IDENTITY CASCADE"))
+        passages = load_passages(s)
+    result = resolve(extract_all(passages, pack, workers=6), compare=LLMComparator())
+    with session_scope() as s:
+        persist(s, result)
+    return result
