@@ -135,21 +135,32 @@ def upsert_passages(session: Session, rows: list[dict[str, Any]]) -> dict[str, i
         session.execute(select(Passage.id, Passage.content_hash).where(Passage.id.in_(ids))).all()
     )
     counts = {"inserted": 0, "updated": 0, "unchanged": 0}
+    new = [r for r in rows if r["id"] not in existing]
     # Parents first so parent_id foreign keys resolve.
-    for r in sorted(rows, key=lambda r: r.get("parent_id") is not None):
+    for wave in (
+        [r for r in new if r.get("parent_id") is None],
+        [r for r in new if r.get("parent_id") is not None],
+    ):
+        for i in range(0, len(wave), 1000):
+            session.execute(pg_insert(Passage), [{"tenant_id": t, **r} for r in wave[i : i + 1000]])
+    counts["inserted"] = len(new)
+    for r in rows:
         old = existing.get(r["id"])
         if old is None:
-            session.add(Passage(tenant_id=t, **r))
-            counts["inserted"] += 1
-        elif old != r["content_hash"]:
+            continue
+        if old != r["content_hash"]:
             session.execute(
                 update(Passage).where(Passage.id == r["id"]).values(retired_at=None, **r)
             )
             counts["updated"] += 1
         else:
             counts["unchanged"] += 1
-        session.flush()
+    session.flush()
     return counts
+
+
+def update_passage(session: Session, passage_id: str, **values: Any) -> None:
+    session.execute(update(Passage).where(Passage.id == passage_id).values(**values))
 
 
 def retire_passages(session: Session, passage_ids: list[str]) -> None:

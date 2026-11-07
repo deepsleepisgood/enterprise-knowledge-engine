@@ -14,7 +14,6 @@ TEST_DB = "ps07_test"
 
 # Suites waiting for their v2 phase (see PROGRESS.md "v2 migration plan").
 collect_ignore = [
-    "integration/test_coverage.py",  # P1: generic segmenter
     "plugins",  # P3: AP plug-in bindings
     "unit/test_resolve.py",  # P2: resolution over facts
 ]
