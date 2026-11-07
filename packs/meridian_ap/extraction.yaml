@@ -1,0 +1,34 @@
+# Pack-specific guidance for claim extraction (app/graph/extract.py adds this to its prompt).
+# Examples are written from SOP v4.0 text, never from the evaluation questions.
+
+currency: INR
+# Money units the documents use, as multipliers to the base currency.
+money_units:
+  inr: 1
+  "₹": 1
+  rupees: 1
+  rs: 1
+  lakh: 100000
+  lakhs: 100000
+  crore: 10000000
+  crores: 10000000
+
+guidance: |
+  - Money: give the number in the unit the passage uses (INR, lakh or crore) and name the unit.
+    "₹10 lakh" -> number 10, unit lakh. "₹500" -> number 500, unit INR.
+  - "Lower of 1% and ₹500" is two claims: pct_of_line = 1 (%) and cap_inr = 500 (INR).
+  - Exception codes (PRICE_VAR, QTY_VAR, ...) belong in the statement and condition, not in the value.
+
+examples: |
+  Example passage: "4.4 Rounding — Differences of up to ₹10 at invoice-total level caused by
+  line-level tax rounding are accepted automatically and posted to the rounding-difference account."
+  Example claim: topic rounding, parameter cap_inr, value {type money, number 10, unit INR,
+  text "up to ₹10"}, client all, kind rule, quote "Differences of up to ₹10 at invoice-total level
+  caused by line-level tax rounding are accepted automatically".
+
+  Example passage: "4.3 Quantity tolerance — Invoice quantity must not exceed the GRN quantity.
+  There is no quantity tolerance for any client, except the bulk-material tolerance agreed with
+  Arvana Infra Projects in Client Memo CM-INF-02."
+  Example claim: topic quantity_tolerance, parameter pct, value {type percentage, number 0,
+  unit %, text "none"}, client all, condition "except where a client memo sets a tolerance",
+  kind rule, quote "There is no quantity tolerance for any client".

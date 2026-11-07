@@ -18,6 +18,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
@@ -123,7 +124,10 @@ class Claim(Base):
     """A typed rule-claim extracted from a passage; never deleted, only retired."""
 
     __tablename__ = "claims"
-    __table_args__ = (Index("ix_claims_topic_param", "topic", "parameter"),)
+    __table_args__ = (
+        Index("ix_claims_topic_param", "topic", "parameter"),
+        UniqueConstraint("origin_key", name="uq_claims_origin_key"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     topic: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -142,10 +146,15 @@ class Claim(Base):
     expired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), nullable=False)
     supersedes_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id"))
+    # Stable key for claims extracted from the corpus (hash of passage, prompt version and
+    # claim content), so a rebuild updates rows in place. Null for claims from intake.
+    origin_key: Mapped[str | None] = mapped_column(String(40))
+    meta: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
 
 
 class Conflict(Base):
     __tablename__ = "conflicts"
+    __table_args__ = (UniqueConstraint("claim_a", "claim_b", "kind", name="uq_conflicts_pair"),)
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     topic: Mapped[str] = mapped_column(String(64), nullable=False)

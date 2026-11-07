@@ -16,6 +16,13 @@ def first_run(database_url, pack):
     from app.core.db import session_scope
     from app.ingest.loader import ingest
 
+    with session_scope() as s:  # start empty, whatever ran before in this test database
+        s.execute(
+            text(
+                "TRUNCATE claims, conflicts, changes, kb_versions, passages, sources, vendors "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
     with session_scope() as s:
         report = ingest(s, pack, get_settings().data_dir)
     return report

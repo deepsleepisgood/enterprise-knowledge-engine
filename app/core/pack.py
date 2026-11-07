@@ -87,6 +87,7 @@ class Pack(BaseModel):
     roles: dict[str, Any]
     authority: dict[str, Any]
     risk: dict[str, Any]
+    extraction: dict[str, Any] = Field(default_factory=dict)
 
     def client_label(self, scope: str) -> str:
         if scope == "all":
@@ -125,6 +126,9 @@ def load_pack(pack_dir: Path) -> Pack:
         roles=_read(pack_dir / "roles.yaml"),
         authority=_read(pack_dir / "authority.yaml"),
         risk=_read(pack_dir / "risk.yaml"),
+        extraction=_read(pack_dir / "extraction.yaml")
+        if (pack_dir / "extraction.yaml").exists()
+        else {},
     )
     for s in sources.values():
         if s.client_scope != "all" and s.client_scope not in pack.clients:

@@ -2,6 +2,21 @@
 
 Running log of what was built, test results, assumptions and open issues. Newest at the bottom.
 
+## Resume here (keep this block current)
+
+**Status (7 Nov 2026):** Phases 0, 1 done. Phase 2 code done and tested on hand-built claims; **the real graph has not been built yet: needs `ANTHROPIC_API_KEY` in `.env`**. Phase 8 steps 1–2 (web shell + Ask page on fixtures) done.
+
+**Next actions, in order**
+1. Put `ANTHROPIC_API_KEY` in `.env`. Run `python scripts/build_graph.py --dry-run` (expect ~121 passages, ~$1.25), then `python scripts/build_graph.py`.
+2. Run `pytest -q -m live_llm` → the Phase 2 acceptance tests in `tests/integration/test_graph_acceptance.py` must pass. Inspect the printed claims-per-topic summary and quotes that weren't found verbatim; fix the prompt (bump `PROMPT_VERSION` in `app/graph/extract.py`) if needed.
+3. Then Phase 3 (calculators reading thresholds through `app/graph/rules.get_rule`).
+
+**How to run on this machine (Windows, no Docker)**
+- Python: `.venv\Scripts\python.exe` (3.11). DB: `python scripts/dev_db.py start` (embedded Postgres + pgvector; writes `.pgdata/database_url.txt`), `... stop` when done. Then `alembic upgrade head`, `python scripts/ingest_all.py`.
+- Tests: `pytest -q` (creates and migrates its own `ps07_test` database). Lint: `ruff check app scripts tests`.
+- Web: `cd web && npm run dev` (port 3000); checks: `npx tsc --noEmit`, `npm run lint`, `npm run check:tokens`, `npm run build`. Stop the dev server afterwards (check port 3000: a child `node` process can outlive the task).
+- The spec documents (CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md, DESIGN.md) must be in the repo root; they were provided in chat and are **not yet in the folder**.
+
 ---
 
 ## 2026-11-07 — Phase 0 (scaffold) and Phase 1 (domain pack + ingestion)
@@ -90,3 +105,59 @@ Started early, as BUILD_PLAN allows ("run the UI in parallel … against fixture
 - The Changes, Conflicts, Review, Capture and Analytics pages are placeholders (Phase 8 step 4 and later phases).
 - The source drawer shows the citation's quote; it should load the full passage from `GET /passages/{id}` once the API exists.
 - T8 routes to "HR / Admin team" (added to `roles.yaml` as a non-AP role). Change it if the team prefers routing to the Team Lead.
+
+---
+
+## 2026-11-07 — Phase 2 (claims and the authority graph): code complete, graph build pending an API key
+
+### Built
+- Migration `0002` (additive): `claims.origin_key` (unique; a stable key so a rebuild updates rows in place) and `claims.meta`; unique `(claim_a, claim_b, kind)` on conflicts.
+- `app/graph/schema.py`: the `ExtractionResult` schema for structured outputs, plus `ClaimRec`, `ConflictRec` and `ResolveResult`.
+- `app/graph/extract.py`: one `MODEL_SMART` call per leaf passage (`prompt_version extract-v1`). The model proposes and code checks:
+  - topic and parameter must be in the vocabulary (otherwise kept as `other` / `other_<name>` with the proposal recorded);
+  - money is normalised to the pack currency using `extraction.yaml` units (lakh, crore);
+  - interview and shadowing passages always give `practice` claims;
+  - memo passages take the memo's client scope;
+  - each quote is checked as a verbatim substring of its passage (`meta.quote_verified`).
+  - Domain guidance and few-shot examples live in the new `packs/meridian_ap/extraction.yaml` (written from SOP text), so engine code has no rupee values.
+- `app/graph/compare.py`: deterministic comparison (numbers with the same unit, equal lists, normalised text); anything it can't decide goes to a cached `MODEL_FAST` judge (`compare-v1`).
+- `app/graph/resolve.py`: pure function implementing the six precedence rules:
+  - claims are bucketed by client, so a memo overrides only its own client;
+  - the lowest rank among `current` sources wins, and its invalid_at is the source's valid_to;
+  - agreeing claims become `corroborating`;
+  - disagreeing claims become `superseded`, with invalid_at the day before the winner took effect;
+  - two current sources that disagree open a `value` conflict;
+  - practice claims stay `current` as tips, and open `practice_vs_rule` only on a clear contradiction.
+- `app/graph/store.py`: loads leaf passages only (parents would double every claim), and persists in one transaction:
+  - upserts by origin_key and sets `expired_at` on superseded claims;
+  - **retires (never deletes)** corpus claims that a rebuild no longer extracts;
+  - links `supersedes_id`, inserts unique conflicts, and bumps `kb_versions` only when something changed.
+- `app/graph/rules.py`: `get_rule(session, topic, parameter, client, as_of, known_at)` → `RuleValue` (value, claim id, citation such as `SOP v4.0 §4.2`). Behaviour:
+  - client-specific first, then the general rule;
+  - expiry applied on read;
+  - an `as_of` (audit) query ranks by document kind from `authority.yaml` `kind_precedence`;
+  - **raises `RuleNotFound`, never defaults**.
+  - Also `older_claims()` (for `older_sources`) and `expert_tips()`.
+- `scripts/build_graph.py`: `--dry-run` (passage count and cost estimate, no LLM calls), `--limit N`, and a full build printing claims per topic, current/superseded counts and unverified quotes.
+
+### Tests: 81 passed, 15 skipped
+- `tests/unit/test_resolve.py` (10, hand-built claims mirroring the corpus):
+  - v4.0 beats v3.1 and the FAQ (invalid_at 31 Mar 2026), and Video 1 corroborates;
+  - the memo overrides for Infra only and carries its expiry;
+  - the FAQ excipient claim is superseded by CM-PHA-01 (invalid_at 1 Jan 2026);
+  - Video 2's staleness is per claim (no-PAN 20% corroborates; the ₹10 crore claim is superseded);
+  - practice never overrides; two current sources that disagree open a conflict; a stale-only claim is `pending`.
+- `tests/unit/test_extract.py` (10, fake LLM): money normalisation, quote verification, practice forcing, memo scope, unknown vocabulary, stable keys, prompt contents, the LLM judge called only when the deterministic check can't decide.
+- `tests/integration/test_graph_db.py` (11, Postgres): first persist bumps kb_version; current rule and citation; superseded rows kept with dates and `supersedes_id`; `as_of` 1 Mar 2026 returns v3.1; memo current for Infra only and gone on 1 Apr 2027 (no tolerance); `known_at` before ingestion returns nothing; missing rule raises; tips are not rules; rebuild idempotent; missing claims retired not deleted; conflicts unique.
+- **Skipped until a key is set:** `tests/integration/test_graph_acceptance.py`, the real Phase 2 acceptance:
+  - for each of the 11 rows of §14 (read from the parsed SOP), a current v4.0 claim exists and the v3.1 claims are superseded with invalid_at 31 Mar 2026;
+  - CM-INF-02 is current for Infra only and expired on 1 Apr 2027;
+  - the FAQ excipient claim is superseded by CM-PHA-01.
+
+### Assumptions and decisions
+1. Claims are bucketed by (topic, parameter, client). Materials and categories are stored in `scope` and `condition`, not in the grouping key, so the FAQ's "Infra 10% on cement and steel" competes with the memo's "5% on four materials".
+2. A bucket with no claim from a `current` source gets status `pending` (never shown as current). Example: an FAQ-only statement.
+3. When two current sources are worded differently and the check can't tell, the lower-ranked one is `corroborating`; the Phase 6 conflict scan judges these.
+4. invalid_at is the last valid day (inclusive): SOP v3.1 claims → 31 Mar 2026; the CM-INF-02 claim → 31 Mar 2027.
+5. `expired_at` (transaction time) is set when a claim is superseded or retired. `known_at` queries use `created_at` and `expired_at`; `as_of` queries use `valid_at` and `invalid_at`.
+6. A list that is a subset of another counts as unknown, not as agreement ("only APIs" vs "APIs and excipients" is a contradiction), so it is decided by the judge or by authority.

@@ -25,3 +25,7 @@ precedence:
   - A client memo overrides the SOP for its own client only.
   - Otherwise the lowest authority_rank among current sources wins.
   - Practice (interviews, shadowing) never overrides a rule; it attaches as an expert tip.
+
+# For "valid on <date>" (audit) queries the current ranks don't apply: SOP v3.1 was the
+# SOP while it was in force. Historical answers rank by document kind instead.
+kind_precedence: [client_memo, sop, desk_instruction, training_video, faq, email, chat]
