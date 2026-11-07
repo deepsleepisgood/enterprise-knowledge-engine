@@ -7,7 +7,6 @@ The topics to check are read from SOP §14 as parsed, not from the answer key.
 
 from __future__ import annotations
 
-import os
 from datetime import date
 
 import pytest
@@ -20,8 +19,8 @@ pytestmark = [
     pytest.mark.db,
     pytest.mark.live_llm,
     pytest.mark.skipif(
-        not (os.environ.get("ANTHROPIC_API_KEY") or get_settings().anthropic_api_key),
-        reason="needs ANTHROPIC_API_KEY to extract claims from the corpus",
+        not get_settings().llm_configured,
+        reason="needs an LLM API key (NVIDIA_API_KEY or ANTHROPIC_API_KEY) to extract claims",
     ),
 ]
 TODAY = date(2026, 11, 7)

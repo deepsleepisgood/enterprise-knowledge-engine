@@ -4,11 +4,11 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (7 Nov 2026):** Phases 0, 1 done. Phase 2 code done and tested on hand-built claims; **the real graph has not been built yet: needs `ANTHROPIC_API_KEY` in `.env`**. Phase 8 steps 1–2 (web shell + Ask page on fixtures) done.
+**Status (7 Nov 2026):** Phases 0, 1 done. Phase 2 code done; first real graph build running on **NVIDIA NIM** (`LLM_PROVIDER=nim`, smart = `nvidia/nemotron-3-ultra-550b-a55b`, fast = `nvidia/nemotron-3.5-lightning-30b-a3b`). Phase 8 steps 1–2 (web shell + Ask page on fixtures) done.
 
 **Next actions, in order**
-1. Put `ANTHROPIC_API_KEY` in `.env`. Run `python scripts/build_graph.py --dry-run` (expect ~121 passages, ~$1.25), then `python scripts/build_graph.py`.
-2. Run `pytest -q -m live_llm` → the Phase 2 acceptance tests in `tests/integration/test_graph_acceptance.py` must pass. Inspect the printed claims-per-topic summary and quotes that weren't found verbatim; fix the prompt (bump `PROMPT_VERSION` in `app/graph/extract.py`) if needed.
+1. Check the graph build output (`python scripts/build_graph.py` prints claims per topic and unverified quotes; re-runs are free from cache).
+2. Run `pytest -q -m live_llm` → the Phase 2 acceptance tests in `tests/integration/test_graph_acceptance.py` must pass. If extraction is wrong, fix the prompt and bump `PROMPT_VERSION` in `app/graph/extract.py`.
 3. Then Phase 3 (calculators reading thresholds through `app/graph/rules.get_rule`).
 
 **How to run on this machine (Windows, no Docker)**
@@ -161,3 +161,38 @@ Started early, as BUILD_PLAN allows ("run the UI in parallel … against fixture
 4. invalid_at is the last valid day (inclusive): SOP v3.1 claims → 31 Mar 2026; the CM-INF-02 claim → 31 Mar 2027.
 5. `expired_at` (transaction time) is set when a claim is superseded or retired. `known_at` queries use `created_at` and `expired_at`; `as_of` queries use `valid_at` and `invalid_at`.
 6. A list that is a subset of another counts as unknown, not as agreement ("only APIs" vs "APIs and excipients" is a contradiction), so it is decided by the judge or by authority.
+
+---
+
+## 2026-11-07 — LLM provider: NVIDIA NIM (user decision), models chosen by probe
+
+The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates from CLAUDE.md's stack line ("LLMs via the anthropic SDK"); everything else in rule 3 still holds.
+
+### Built
+- `app/core/nim.py`: OpenAI-compatible `/chat/completions` client, standard library only (`urllib`). Retries 408/429/5xx and timeouts with backoff 3 s / 10 s / 30 s; timeout `NIM_TIMEOUT_S` (default 300 s).
+- `app/core/llm.py` dispatches on `LLM_PROVIDER` (`nim` | `anthropic`). Redaction, cache, JSONL log and the `complete` / `structured` API are unchanged. On NIM:
+  - temperature 0 (so CLAUDE.md rule 3 now holds in full on this provider);
+  - JSON mode, with the Pydantic JSON Schema in the system prompt;
+  - `<think>` blocks and code fences stripped before parsing;
+  - Pydantic validation with one corrective retry;
+  - `finish_reason=length` raises; `effort` is ignored (Anthropic-only).
+- The cache key includes the model id, so switching provider never reuses the other provider's outputs.
+- Settings: `LLM_PROVIDER`, `NVIDIA_API_KEY`, `NIM_BASE_URL`, `NIM_TIMEOUT_S`, plus `settings.llm_configured`. `build_graph.py` checks the selected provider's key and takes `--workers N` (parallel extraction; results stay in passage order, so claim keys are stable).
+- Live tests are now opt-in: the default `pytest -q` excludes `live_llm`, because with a working key the acceptance test would rebuild the whole graph. Run them with `pytest -m live_llm`.
+- `tests/unit/test_llm_nim.py` (7 tests, fake transport): JSON mode, temperature 0, schema in the prompt, redaction before sending, reasoning and fences stripped, corrective retry, failure after the retry, truncation, token logging and the cache.
+
+### Model choice (probe on 7 Nov 2026, same prompt and schema as the real extraction of SOP §4.2)
+
+| Model | Result |
+| --- | --- |
+| `nvidia/nemotron-3-ultra-550b-a55b` | 47 s; pct_of_line = 1, cap_inr = 500; 6 claims, 6/6 quotes verified → **MODEL_SMART** |
+| `nvidia/nemotron-3.5-lightning-30b-a3b` | 7 s; correct "different" verdict → **MODEL_FAST** |
+| `nvidia/nemotron-3.5-bolt-e4b` | 1 s; correct, but a 4B model; kept as a faster fallback |
+| `deepseek-ai/deepseek-v4.1-flash` (user's suggestion) | listed for the key but timed out (> 150 s, no response) on 4 attempts, with and without JSON mode; kept commented out in `.env` |
+| `mistralai/mistral-large-4-1t-a52b` | once correct in 70 s, once timed out |
+| `moonshotai/kimi-k2.6`, `nvidia/nemotron-3-super-120b-a12b`, `nemotron-nano-3-30b-a3b`, `mistral-large-2-instruct`, `llama-3.1-nemotron-70b-instruct` | HTTP 404: listed but not served for this key |
+
+### Notes
+- NIM free-tier cost is recorded as unknown (`cost_usd` = null) because there is no price table for these models; tokens are still logged.
+- The NVIDIA key was pasted in chat; it lives only in `.env` (git-ignored). Rotate it on build.nvidia.com after the hackathon.
+- Corpus passages sent to NIM are synthetic and redacted before sending, as with Anthropic.

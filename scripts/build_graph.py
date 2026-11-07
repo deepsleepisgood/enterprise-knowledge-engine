@@ -35,6 +35,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--workers", type=int, default=4, help="parallel extraction calls")
     args = ap.parse_args()
 
     pack = get_pack()
@@ -54,18 +55,18 @@ def main() -> None:
         print(
             f"{len(passages)} leaf passages; ~{int(in_tok):,} input and ~{out_tok:,} output tokens"
         )
-        print(f"estimated cost on {settings.model_smart}: ${est:.2f} (cached re-runs: $0)")
+        price = f"${est:.2f}" if est is not None else "unknown (no price table for this model)"
+        print(f"estimated cost on {settings.model_smart}: {price} (cached re-runs: $0)")
         return
 
-    if not settings.anthropic_api_key:
-        raise SystemExit(
-            "ANTHROPIC_API_KEY is not set (put it in .env). Use --dry-run to estimate."
-        )
+    if not settings.llm_configured:
+        key = "NVIDIA_API_KEY" if settings.llm_provider == "nim" else "ANTHROPIC_API_KEY"
+        raise SystemExit(f"{key} is not set (put it in .env). Use --dry-run to estimate.")
 
     def progress(i: int, n: int, p) -> None:
         print(f"  [{i:3d}/{n}] {p.source_id:12s} {p.locator}", flush=True)
 
-    claims = extract_all(passages, pack, on_progress=progress)
+    claims = extract_all(passages, pack, on_progress=progress, workers=args.workers)
     result = resolve(claims, compare=LLMComparator())
     with session_scope() as s:
         report = persist(s, result)

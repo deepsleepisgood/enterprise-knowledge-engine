@@ -70,13 +70,22 @@ def extract_all(
     pack: Pack,
     structured_fn: Callable[..., Any] | None = None,
     on_progress: Callable[[int, int, PassageForExtraction], None] | None = None,
+    workers: int = 1,
 ) -> list[ClaimRec]:
-    claims: list[ClaimRec] = []
-    for i, p in enumerate(passages, 1):
-        claims.extend(extract_passage(p, pack, structured_fn))
-        if on_progress:
-            on_progress(i, len(passages), p)
-    return claims
+    """Extract in parallel (I/O bound); results keep passage order so keys stay stable."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    results: dict[int, list[ClaimRec]] = {}
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        futures = {
+            pool.submit(extract_passage, p, pack, structured_fn): i for i, p in enumerate(passages)
+        }
+        for done, fut in enumerate(as_completed(futures), 1):
+            i = futures[fut]
+            results[i] = fut.result()
+            if on_progress:
+                on_progress(done, len(passages), passages[i])
+    return [c for i in range(len(passages)) for c in results[i]]
 
 
 def _row_values(c: ClaimRec) -> dict[str, Any]:

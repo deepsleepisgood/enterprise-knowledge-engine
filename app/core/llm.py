@@ -6,10 +6,12 @@ and costed. Two call styles:
     complete(prompt, ...)            -> LLMResult (free text)
     structured(prompt, Schema, ...)  -> Schema instance (validated Pydantic object)
 
-Note on temperature: CLAUDE.md asks for temperature 0, but the configured models
-(claude-sonnet-5-5, claude-haiku-5-5) reject non-default sampling parameters with
-HTTP 400. We therefore send no temperature and get reproducibility from the
-on-disk cache keyed by (prompt_version, model, call style, schema, input).
+Providers (LLM_PROVIDER):
+- anthropic: the anthropic SDK; structured output via `messages.parse`. The 5.5 models
+  reject `temperature`, so none is sent; reproducibility comes from the disk cache.
+- nim: NVIDIA NIM (OpenAI-compatible), app/core/nim.py. Temperature 0, JSON mode, the
+  JSON Schema in the system prompt, Pydantic validation and one corrective retry.
+The cache key includes the model id, so switching provider never reuses another's output.
 """
 
 from __future__ import annotations
@@ -180,7 +182,7 @@ def _call(
     }
     if safe_system:
         request["system"] = safe_system
-    if effort:
+    if effort and _provider() != "nim":
         request["output_config"] = {"effort": effort}
 
     started = time.perf_counter()
@@ -220,6 +222,77 @@ def _call(
     return payload, result
 
 
+# --- NVIDIA NIM -----------------------------------------------------------------------
+
+
+class _NimResp:
+    """Adapts a NIM response to the usage shape `_call` reads."""
+
+    def __init__(self, input_tokens: int, output_tokens: int) -> None:
+        self.usage = type("U", (), {"input_tokens": input_tokens, "output_tokens": output_tokens})
+
+
+def _nim_complete(req: dict[str, Any]) -> tuple[Any, Any]:
+    from app.core import nim
+
+    body = nim.build_body(
+        model=req["model"],
+        system=req.get("system"),
+        messages=req["messages"],
+        max_tokens=req["max_tokens"],
+        json_mode=False,
+    )
+    resp = nim.chat(body)
+    text, finish = nim.message_text(resp)
+    if finish == "length":
+        raise LLMError("response hit max_tokens; raise max_tokens for this call")
+    return text, _NimResp(*nim.usage(resp))
+
+
+def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, Any]:
+    from pydantic import ValidationError
+
+    from app.core import nim
+
+    parts = (req.get("system"), nim.schema_instruction(schema.model_json_schema()))
+    system = "\n\n".join(p for p in parts if p)
+    messages = list(req["messages"])
+    in_tok = out_tok = 0
+    for attempt in range(2):
+        body = nim.build_body(
+            model=req["model"],
+            system=system,
+            messages=messages,
+            max_tokens=req["max_tokens"],
+            json_mode=True,
+        )
+        resp = nim.chat(body)
+        i, o = nim.usage(resp)
+        in_tok, out_tok = in_tok + i, out_tok + o
+        text, finish = nim.message_text(resp)
+        if finish == "length":
+            raise LLMError("response hit max_tokens; raise max_tokens for this call")
+        try:
+            obj = schema.model_validate(nim.extract_json(text))
+            return obj.model_dump(mode="json"), _NimResp(in_tok, out_tok)
+        except (ValueError, ValidationError) as exc:
+            if attempt == 1:
+                raise LLMError(f"model output did not match {schema.__name__}: {exc}") from exc
+            messages += [
+                {"role": "assistant", "content": text},
+                {
+                    "role": "user",
+                    "content": f"That did not validate: {str(exc)[:800]}\n"
+                    "Return only the corrected JSON object.",
+                },
+            ]
+    raise LLMError("unreachable")
+
+
+def _provider() -> str:
+    return get_settings().llm_provider.strip().lower()
+
+
 # --- public API ------------------------------------------------------------------------
 
 
@@ -235,6 +308,8 @@ def complete(
     """Free-text completion. `model` is "fast", "smart" (default) or a model id."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
+        if _provider() == "nim":
+            return _nim_complete(req)
         resp = _get_client().messages.create(**req)
         _check_stop(resp)
         text = "".join(getattr(b, "text", "") for b in resp.content if b.type == "text")
@@ -267,6 +342,8 @@ def structured(
     """Return a validated `schema` instance using the API's structured outputs."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
+        if _provider() == "nim":
+            return _nim_structured(req, schema)
         resp = _get_client().messages.parse(**req, output_format=schema)
         _check_stop(resp)
         parsed = resp.parsed_output

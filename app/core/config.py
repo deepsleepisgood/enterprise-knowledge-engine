@@ -14,7 +14,11 @@ DEV_DB_URL_FILE = ROOT / ".pgdata" / "database_url.txt"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
 
+    llm_provider: str = "anthropic"  # anthropic | nim
     anthropic_api_key: str = ""
+    nvidia_api_key: str = ""
+    nim_base_url: str = "https://integrate.api.nvidia.com/v1"
+    nim_timeout_s: float = 300
     database_url: str = ""
     model_fast: str = "claude-haiku-5-5"
     model_smart: str = "claude-sonnet-5-5"
@@ -25,6 +29,13 @@ class Settings(BaseSettings):
     packs_dir: Path = ROOT / "packs"
     log_dir: Path = ROOT / "logs"
     cache_dir: Path = ROOT / ".cache" / "llm"
+
+    @property
+    def llm_configured(self) -> bool:
+        """True when the selected provider has a key."""
+        if self.llm_provider == "nim":
+            return bool(self.nvidia_api_key)
+        return bool(self.anthropic_api_key)
 
     @property
     def pack_dir(self) -> Path:

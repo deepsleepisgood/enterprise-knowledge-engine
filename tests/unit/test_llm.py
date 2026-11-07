@@ -7,7 +7,6 @@ response shape. A live test runs only when ANTHROPIC_API_KEY is set.
 from __future__ import annotations
 
 import json
-import os
 from types import SimpleNamespace
 from typing import Any
 
@@ -52,6 +51,7 @@ def fake(tmp_path, monkeypatch):
     settings = get_settings()
     monkeypatch.setattr(settings, "cache_dir", tmp_path / "cache")
     monkeypatch.setattr(settings, "log_dir", tmp_path / "logs")
+    monkeypatch.setattr(settings, "llm_provider", "anthropic")
     messages = FakeMessages()
     llm.set_client(SimpleNamespace(messages=messages))
     yield messages
@@ -113,7 +113,7 @@ def test_refusal_raises(fake: FakeMessages) -> None:
 
 
 @pytest.mark.live_llm
-@pytest.mark.skipif(not os.environ.get("ANTHROPIC_API_KEY"), reason="ANTHROPIC_API_KEY not set")
+@pytest.mark.skipif(not get_settings().llm_configured, reason="no LLM API key configured")
 def test_live_structured_call(tmp_path, monkeypatch) -> None:
     settings = get_settings()
     monkeypatch.setattr(settings, "cache_dir", tmp_path / "cache")

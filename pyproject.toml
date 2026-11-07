@@ -33,8 +33,8 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -m 'not live_llm'"  # live tests: pytest -m live_llm
 markers = [
   "db: needs a Postgres database (DATABASE_URL or the embedded dev server)",
-  "live_llm: calls the real Anthropic API (needs ANTHROPIC_API_KEY)",
+  "live_llm: calls the configured LLM provider (needs its API key); run with -m live_llm",
 ]
