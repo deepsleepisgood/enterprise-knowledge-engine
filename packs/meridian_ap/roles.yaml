@@ -1,0 +1,53 @@
+# Roles and what they own (SOP v4.0 §2 plus roles named elsewhere in the SOP).
+# Used to route "who should I ask" and unsupported questions to a named role.
+roles:
+  ap_processor:
+    name: AP Processor
+    owns: Indexing invoices, matching and statutory checks, raising exceptions, posting clean invoices.
+  senior_processor:
+    name: Senior Processor
+    owns: Exceptions a Processor cannot resolve; DUP_SUSPECT clearance; sampling new joiners' postings.
+    topics: [duplicate_check, exceptions]
+  team_lead:
+    name: Team Lead
+    owns: Queue age and service levels for one client, write-offs up to the limit, MSME_DUE escalation, process and policy gaps.
+    topics: [msme, month_end, exceptions]
+    default_for: [process_gap, policy_gap, out_of_scope_ap]
+  ap_controller:
+    name: AP Controller
+    owns: Approvals in the controller band, payment proposals, vendor bank changes.
+    topics: [approvals, bank_change, payments]
+  tax_desk:
+    name: Tax Desk
+    owns: GST and TDS treatment where the SOP sends a case to them (TDS_SECTION_UNCLEAR, RCM_REVIEW, GSTIN_INACTIVE).
+    topics: [tds, reverse_charge, gstin, einvoice, itc]
+    default_for: [tax_question]
+  vendor_master_team:
+    name: Vendor Master team
+    owns: Creating and changing supplier records, including bank details.
+    topics: [bank_change]
+    default_for: [supplier_data]
+  treasury:
+    name: Treasury (client)
+    owns: Releasing payment files; approving early payment.
+    topics: [payments]
+  po_buyer:
+    name: PO buyer
+    owns: Amending a PO or obtaining a credit note after PRICE_VAR.
+    topics: [price_tolerance]
+  requester:
+    name: Requester
+    owns: GRNs, QTY_VAR and NO_GRN resolution, debit notes.
+    topics: [quantity_tolerance, missing_grn]
+  client_qa:
+    name: Client QA
+    owns: Batch release in the QMS (QA_RELEASE_PENDING).
+    topics: [qa_release]
+  hr_admin:
+    name: HR / Admin team
+    owns: Employee policies (leave, canteen, facilities). Not covered by AP documents.
+    default_for: [hr_policy]
+  process_owner:
+    name: AP Process Excellence
+    owns: The SOP and desk instructions; resolving conflicting guidance.
+    default_for: [conflict]

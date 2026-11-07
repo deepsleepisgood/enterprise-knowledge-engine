@@ -1,0 +1,4 @@
+# High-risk topics: changes always go to pending review, never auto-published.
+high_risk_topics: [bank_change, payments, approvals, tds, einvoice]
+medium_risk_topics: [msme, itc, gstin, reverse_charge, qa_release]
+# Everything else is low risk.

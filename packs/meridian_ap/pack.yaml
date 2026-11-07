@@ -1,0 +1,59 @@
+# Domain pack: everything specific to the Meridian AP case lives in packs/meridian_ap/.
+# The engine reads this file to know which documents to parse and how.
+name: meridian_ap
+title: Meridian Shared Services — Accounts payable
+
+clients:
+  retail: {name: Arvana Retail Pvt Ltd, short: Arvana Retail}
+  pharma: {name: Arvana Pharma Ltd, short: Arvana Pharma}
+  infra: {name: Arvana Infra Projects Ltd, short: Arvana Infra}
+
+# Paragraphs dropped wherever they appear (title blocks, disclaimers).
+skip_paragraphs:
+  - "^PS-07 · DATA PACK$"
+  - "^SYNTHETIC — "
+  - "^Statutory references \\(GST, TDS, MSME\\)"
+
+# A two-column table whose first-column values are all in this list is metadata
+# about the enclosing document or part, not content.
+metadata_keys:
+  [Document, Version, Effective, Replaces, Owner, Approved by, Applies to,
+   Reference, Updated, Subject, Issued, From, Valid until,
+   Recorded, Length, Presenter, Used in, Date, Observer, Shadowed, Interviewer, Context]
+
+documents:
+  - file: raw/PS-07_AP_SOP_v4.0_2026.docx
+    segmenter: numbered_sections
+    source: sop_v4
+    row_sections: ["14"]          # one passage per table row (the v3.1 -> v4.0 change table)
+
+  - file: raw/PS-07_AP_SOP_v3.1_2023.docx
+    segmenter: numbered_sections
+    source: sop_v3_1
+    row_sections: []
+
+  - file: raw/PS-07_desk_instructions_and_client_memos.docx
+    segmenter: lettered_parts
+    heading_pattern: "^Part (?P<part>[A-Z]) — (?P<title>.+)$"
+    parts:
+      A: {source: di_03, style: steps}
+      B: {source: di_07, style: steps}
+      C: {source: cm_inf_02, style: whole, locator: "Part C (CM-INF-02)"}
+      D: {source: cm_pha_01, style: whole, locator: "Part D (CM-PHA-01)"}
+      E: {source: cm_ret_03, style: whole, locator: "Part E (CM-RET-03)"}
+      F: {source: faq_2023, style: table_rows, locator: "Part F"}
+
+  - file: raw/PS-07_training_and_expert_transcripts.docx
+    segmenter: transcripts
+    question_speakers: [Interviewer]
+    sections:
+      - {heading: "^Video 1\\b", source: video_1, prefix: "Video 1", style: timestamped_turns}
+      - {heading: "^Video 2\\b", source: video_2, prefix: "Video 2", style: timestamped_turns}
+      - {heading: "^Video 3\\b", source: video_3, prefix: "Video 3", style: timestamped_turns}
+      - {heading: "^Shadowing notes\\b", source: shadowing, prefix: "Shadowing", style: timed_notes}
+      - {heading: "^Expert interview 1\\b", source: interview_1, prefix: "Interview 1", style: timestamped_turns}
+      - {heading: "^Expert interview 2\\b", source: interview_2, prefix: "Interview 2", style: timestamped_turns}
+
+operations:
+  file: ops/PS-07_ap_operations.xlsx
+  vendors_sheet: vendors

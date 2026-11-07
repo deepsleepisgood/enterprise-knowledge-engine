@@ -1,0 +1,151 @@
+# Canonical topics and parameters for claim extraction (Phase 2).
+# Each parameter has a value type: percentage | money | days | date | enum | text | list | boolean.
+topics:
+  price_tolerance:
+    synonyms: [price variance, unit price difference, PRICE_VAR, price tolerance]
+    parameters:
+      pct_of_line: {type: percentage, description: Share of the PO line value allowed as excess}
+      cap_inr: {type: money, description: Absolute cap on the excess per line}
+      lower_price_handling: {type: text, description: What to do when the invoice price is below the PO}
+
+  quantity_tolerance:
+    synonyms: [quantity variance, over-invoicing, QTY_VAR, weighbridge, bulk material tolerance]
+    parameters:
+      pct: {type: percentage, description: Excess over GRN quantity allowed}
+      cap_value_inr: {type: money, description: Maximum excess value on the invoice}
+      materials: {type: list, description: Materials the tolerance applies to}
+      short_invoicing: {type: text, description: Treatment when invoice quantity is below GRN}
+
+  rounding:
+    synonyms: [rounding difference, tax rounding]
+    parameters:
+      cap_inr: {type: money, description: Invoice-total rounding difference accepted automatically}
+
+  einvoice:
+    synonyms: [e-invoice, IRN, QR code, invoice reference number, IRN_MISSING, AATO]
+    parameters:
+      aato_threshold_crore: {type: money, description: Turnover above which e-invoicing is required (crore)}
+      missing_irn_action: {type: text, description: What to do when a required IRN is missing}
+
+  itc:
+    synonyms: [input tax credit, GSTR-2B, GSTR-2A, NOT_IN_2B, ITC check]
+    parameters:
+      return_name: {type: enum, values: [GSTR-2A, GSTR-2B]}
+      generation_day: {type: days, description: Day of the following month the return is available}
+      missing_action: {type: text}
+      qrmp_handling: {type: text}
+
+  gstin:
+    synonyms: [supplier GSTIN, buyer GSTIN, GSTIN_INACTIVE, GSTIN_MISMATCH, place of supply]
+    parameters:
+      inactive_action: {type: text}
+      mismatch_action: {type: text}
+      tax_type_rule: {type: text}
+
+  reverse_charge:
+    synonyms: [RCM, reverse charge, RCM_REVIEW, advocate, legal fees]
+    parameters:
+      services: {type: list}
+      action: {type: text}
+
+  approvals:
+    synonyms: [approval limit, AP Controller approval, CFO approval, who approves]
+    parameters:
+      controller_above_lakh: {type: money, description: Invoice total (incl. GST) above which the AP Controller approves}
+      cfo_above_lakh: {type: money, description: Invoice total above which the client CFO approves}
+      non_po_extra: {type: text, description: Extra approver for non-PO invoices}
+      basis: {type: text, description: Whether thresholds include GST}
+
+  non_po:
+    synonyms: [non-PO invoice, without PO, NON_PO_NOT_ALLOWED]
+    parameters:
+      allowed_categories: {type: list}
+      excluded_categories: {type: list}
+
+  missing_grn:
+    synonyms: [NO_GRN, no GRN, goods receipt]
+    parameters:
+      reminder_working_days: {type: days}
+      escalation_working_days: {type: days}
+      action: {type: text}
+
+  msme:
+    synonyms: [MSME, micro, small enterprise, Udyam, MSME_DUE, payment term]
+    parameters:
+      max_term_days: {type: days, description: Maximum agreed term for micro and small enterprises}
+      no_agreement_days: {type: days, description: Term when there is no written agreement}
+      medium_rule: {type: text}
+
+  payments:
+    synonyms: [payment run, cut-off, payment day]
+    parameters:
+      run_days: {type: list, description: Weekdays with a payment run}
+      cutoff: {type: text}
+      default_term_days: {type: days}
+      run_selection: {type: text, description: Which run to use for a due date}
+
+  bank_change:
+    synonyms: [bank account change, bank details, call-back, vendor bank]
+    parameters:
+      confirmation_method: {type: text}
+      approvals: {type: list}
+      cooling_off_hours: {type: days}
+      freeze_before_close_days: {type: days}
+
+  duplicate_check:
+    synonyms: [duplicate, DUP_SUSPECT, normalised invoice number]
+    parameters:
+      method: {type: text}
+      lookback_months: {type: days}
+      suffixes_dropped: {type: list}
+
+  month_end:
+    synonyms: [month-end close, accrual, cut-off for posting]
+    parameters:
+      posting_cutoff: {type: text}
+      bank_change_freeze_days: {type: days}
+
+  tds:
+    synonyms: [TDS, tax deducted at source, 194C, 194J, 194I, 194Q, PAN, lower deduction certificate, AMC]
+    parameters:
+      section_rates: {type: text, description: Section and rate per nature of payment}
+      no_pan_rate: {type: percentage}
+      base: {type: text, description: Whether GST is excluded from the base}
+      amc_rule: {type: text}
+      lower_deduction_certificate: {type: text}
+
+  qa_release:
+    synonyms: [QA release, QMS, quarantine, QA_RELEASE_PENDING, excipients, API]
+    parameters:
+      materials: {type: list}
+      action: {type: text}
+
+  rent_and_agency:
+    synonyms: [store rent, lease, marketing agency, campaign ID]
+    parameters:
+      rent_requirements: {type: text}
+      agency_requirements: {type: text}
+      landlord_tds: {type: text}
+
+  exceptions:
+    synonyms: [exception code, owner, target to resolve]
+    parameters:
+      owner: {type: text}
+      target: {type: text}
+
+  records:
+    synonyms: [retention, data protection, keep invoices]
+    parameters:
+      retention_years: {type: days}
+      confidential_data: {type: text}
+
+  credit_notes:
+    synonyms: [credit note, debit note]
+    parameters:
+      rule: {type: text}
+
+  intake:
+    synonyms: [channel, supplier portal, paper invoice, OCR, mandatory fields, INV_INCOMPLETE]
+    parameters:
+      channels: {type: list}
+      mandatory_fields: {type: list}

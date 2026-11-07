@@ -1,0 +1,27 @@
+# Who may publish rule changes for which scope (used by governance in Phase 9).
+# A sender not listed, or publishing outside their scope, goes to pending review.
+publishers:
+  - role: AP Process Excellence
+    scope: {client: all}
+    topics: all
+  - role: Arvana Infra Financial Controller
+    scope: {client: infra}
+    topics: all
+  - role: Arvana Pharma Head of Quality
+    scope: {client: pharma}
+    topics: [qa_release]
+  - role: Arvana Retail Finance Director
+    scope: {client: retail}
+    topics: all
+  - role: Vendor Master team
+    scope: {client: all}
+    topics: [bank_change]
+  - role: Tax Desk
+    scope: {client: all}
+    topics: [tds, reverse_charge, gstin, einvoice, itc]
+
+# Precedence used by resolution (Phase 2), restated for reviewers:
+precedence:
+  - A client memo overrides the SOP for its own client only.
+  - Otherwise the lowest authority_rank among current sources wins.
+  - Practice (interviews, shadowing) never overrides a rule; it attaches as an expert tip.

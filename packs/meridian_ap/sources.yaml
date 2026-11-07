@@ -1,0 +1,201 @@
+# One entry per document part, copied by hand from the source_index sheet (14 rows).
+# authority_rank: 1 = most authoritative. Client memos rank 1 for their own client only.
+# status: current | superseded | stale | partly_outdated | observation | knowledge_capture
+sources:
+  sop_v4:
+    file: PS-07_AP_SOP_v4.0_2026.docx
+    part: null
+    title: Accounts Payable SOP v4.0
+    label: SOP v4.0
+    kind: sop
+    version: "4.0"
+    dated: 2026-04-01
+    status: current
+    status_note: Current
+    owner: AP Process Excellence
+    authority_rank: 2
+    client_scope: all
+
+  sop_v3_1:
+    file: PS-07_AP_SOP_v3.1_2023.docx
+    part: null
+    title: Accounts Payable SOP v3.1
+    label: SOP v3.1
+    kind: sop
+    version: "3.1"
+    dated: 2023-07-01
+    valid_to: 2026-03-31
+    status: superseded
+    status_note: Superseded on 1 April 2026 (still on the shared drive)
+    owner: AP Operations
+    authority_rank: 8
+    client_scope: all
+
+  di_03:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part A
+    title: DI-03 Posting a goods invoice
+    label: DI-03
+    kind: desk_instruction
+    version: "2.2"
+    dated: 2026-04-12
+    status: current
+    status_note: Current
+    owner: AP Process Excellence
+    authority_rank: 3
+    client_scope: all
+
+  di_07:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part B
+    title: DI-07 Bank account changes
+    label: DI-07
+    kind: desk_instruction
+    version: "3.0"
+    dated: 2026-04-01
+    status: current
+    status_note: Current
+    owner: Vendor Master team
+    authority_rank: 3
+    client_scope: all
+
+  cm_inf_02:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part C
+    title: CM-INF-02 Infra quantity tolerance
+    label: CM-INF-02
+    kind: client_memo
+    version: "1.0"
+    dated: 2026-04-15
+    valid_to: 2027-03-31
+    status: current
+    status_note: Current until 31 March 2027
+    owner: Arvana Infra Financial Controller
+    authority_rank: 1
+    client_scope: infra
+
+  cm_pha_01:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part D
+    title: CM-PHA-01 Pharma QA release
+    label: CM-PHA-01
+    kind: client_memo
+    version: "1.0"
+    dated: 2026-01-02
+    status: current
+    status_note: Current
+    owner: Arvana Pharma Head of Quality
+    authority_rank: 1
+    client_scope: pharma
+
+  cm_ret_03:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part E
+    title: CM-RET-03 Retail rent and agencies
+    label: CM-RET-03
+    kind: client_memo
+    version: "1.0"
+    dated: 2026-05-20
+    status: current
+    status_note: Current
+    owner: Arvana Retail Finance Director
+    authority_rank: 1
+    client_scope: retail
+
+  faq_2023:
+    file: PS-07_desk_instructions_and_client_memos.docx
+    part: Part F
+    title: AP team FAQ (wiki export)
+    label: AP FAQ 2023
+    kind: faq
+    version: null
+    dated: 2023-10-09
+    status: stale
+    status_note: Not reviewed since 2023
+    owner: AP team
+    authority_rank: 7
+    client_scope: all
+
+  video_1:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Video 1
+    title: Video 1 — AP 101
+    label: Video 1
+    kind: training_video
+    version: null
+    dated: 2026-02-01
+    status: current
+    status_note: Current
+    owner: AP Training
+    authority_rank: 4
+    client_scope: all
+
+  video_2:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Video 2
+    title: Video 2 — GST and TDS
+    label: Video 2
+    kind: training_video
+    version: null
+    dated: 2022-11-01
+    status: partly_outdated
+    status_note: Partly outdated (see expert interview 2)
+    owner: Tax Desk
+    authority_rank: 6
+    client_scope: all
+
+  video_3:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Video 3
+    title: Video 3 — Exception queue
+    label: Video 3
+    kind: training_video
+    version: null
+    dated: 2026-04-01
+    status: current
+    status_note: Current
+    owner: AP Training
+    authority_rank: 4
+    client_scope: all
+
+  shadowing:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Shadowing notes
+    title: Shadowing notes
+    label: Shadowing
+    kind: shadowing
+    version: null
+    dated: 2026-06-17
+    status: observation
+    status_note: Observation record
+    owner: Knowledge Management
+    authority_rank: 5
+    client_scope: all
+
+  interview_1:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Expert interview 1
+    title: Expert interview 1 — Senior Processor
+    label: Interview 1
+    kind: interview
+    version: null
+    dated: 2026-09-08
+    status: knowledge_capture
+    status_note: Knowledge capture
+    owner: Knowledge Management
+    authority_rank: 5
+    client_scope: all
+
+  interview_2:
+    file: PS-07_training_and_expert_transcripts.docx
+    part: Expert interview 2
+    title: Expert interview 2 — Tax Desk Lead
+    label: Interview 2
+    kind: interview
+    version: null
+    dated: 2026-09-15
+    status: knowledge_capture
+    status_note: Knowledge capture
+    owner: Knowledge Management
+    authority_rank: 5
+    client_scope: all
