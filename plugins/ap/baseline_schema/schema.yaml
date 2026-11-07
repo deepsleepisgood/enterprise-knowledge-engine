@@ -1,0 +1,781 @@
+# Hand-written baseline schema for the AP plug-in, converted from the v1 pack
+# (vocabulary, authority, risk, money units). Used only for comparison tests and when
+# SCHEMA_MODE=baseline. Same format as an induced schema (app/graph/ontology.py).
+name: ap-baseline
+base_currency: INR
+units:
+  inr: 1.0
+  rupees: 1.0
+  rs: 1.0
+  lakh: 100000.0
+  lakhs: 100000.0
+  crore: 10000000.0
+  crores: 10000000.0
+entity_types:
+- name: topic
+  description: A rule topic
+- name: client
+  description: A client company served
+- name: supplier
+  description: A vendor
+- name: role
+  description: A role or team
+- name: exception_code
+  description: An exception code
+- name: system
+  description: A software system or screen
+- name: document
+  description: A form or document
+- name: person
+  description: A named person
+topics:
+- key: price_tolerance
+  label: Price tolerance
+  synonyms:
+  - price variance
+  - unit price difference
+  - PRICE_VAR
+  - price tolerance
+  risk: low
+- key: quantity_tolerance
+  label: Quantity tolerance
+  synonyms:
+  - quantity variance
+  - over-invoicing
+  - QTY_VAR
+  - weighbridge
+  - bulk material tolerance
+  risk: low
+- key: rounding
+  label: Rounding
+  synonyms:
+  - rounding difference
+  - tax rounding
+  risk: low
+- key: einvoice
+  label: Einvoice
+  synonyms:
+  - e-invoice
+  - IRN
+  - QR code
+  - invoice reference number
+  - IRN_MISSING
+  - AATO
+  risk: high
+- key: itc
+  label: Itc
+  synonyms:
+  - input tax credit
+  - GSTR-2B
+  - GSTR-2A
+  - NOT_IN_2B
+  - ITC check
+  risk: medium
+- key: gstin
+  label: Gstin
+  synonyms:
+  - supplier GSTIN
+  - buyer GSTIN
+  - GSTIN_INACTIVE
+  - GSTIN_MISMATCH
+  - place of supply
+  risk: medium
+- key: reverse_charge
+  label: Reverse charge
+  synonyms:
+  - RCM
+  - reverse charge
+  - RCM_REVIEW
+  - advocate
+  - legal fees
+  risk: medium
+- key: approvals
+  label: Approvals
+  synonyms:
+  - approval limit
+  - AP Controller approval
+  - CFO approval
+  - who approves
+  risk: high
+- key: non_po
+  label: Non po
+  synonyms:
+  - non-PO invoice
+  - without PO
+  - NON_PO_NOT_ALLOWED
+  risk: low
+- key: missing_grn
+  label: Missing grn
+  synonyms:
+  - NO_GRN
+  - no GRN
+  - goods receipt
+  risk: low
+- key: msme
+  label: Msme
+  synonyms:
+  - MSME
+  - micro
+  - small enterprise
+  - Udyam
+  - MSME_DUE
+  - payment term
+  risk: medium
+- key: payments
+  label: Payments
+  synonyms:
+  - payment run
+  - cut-off
+  - payment day
+  risk: high
+- key: bank_change
+  label: Bank change
+  synonyms:
+  - bank account change
+  - bank details
+  - call-back
+  - vendor bank
+  risk: high
+- key: duplicate_check
+  label: Duplicate check
+  synonyms:
+  - duplicate
+  - DUP_SUSPECT
+  - normalised invoice number
+  risk: low
+- key: month_end
+  label: Month end
+  synonyms:
+  - month-end close
+  - accrual
+  - cut-off for posting
+  risk: low
+- key: tds
+  label: Tds
+  synonyms:
+  - TDS
+  - tax deducted at source
+  - 194C
+  - 194J
+  - 194I
+  - 194Q
+  - PAN
+  - lower deduction certificate
+  - AMC
+  risk: high
+- key: qa_release
+  label: Qa release
+  synonyms:
+  - QA release
+  - QMS
+  - quarantine
+  - QA_RELEASE_PENDING
+  - excipients
+  - API
+  risk: medium
+- key: rent_and_agency
+  label: Rent and agency
+  synonyms:
+  - store rent
+  - lease
+  - marketing agency
+  - campaign ID
+  risk: low
+- key: exceptions
+  label: Exceptions
+  synonyms:
+  - exception code
+  - owner
+  - target to resolve
+  risk: low
+- key: records
+  label: Records
+  synonyms:
+  - retention
+  - data protection
+  - keep invoices
+  risk: low
+- key: credit_notes
+  label: Credit notes
+  synonyms:
+  - credit note
+  - debit note
+  risk: low
+- key: intake
+  label: Intake
+  synonyms:
+  - channel
+  - supplier portal
+  - paper invoice
+  - OCR
+  - mandatory fields
+  - INV_INCOMPLETE
+  risk: low
+attributes:
+- key: price_tolerance.pct_of_line
+  topic: price_tolerance
+  label: pct of line
+  description: Share of the PO line value allowed as excess
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: price_tolerance.cap_inr
+  topic: price_tolerance
+  label: cap inr
+  description: Absolute cap on the excess per line
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: price_tolerance.lower_price_handling
+  topic: price_tolerance
+  label: lower price handling
+  description: What to do when the invoice price is below the PO
+  value_type: text
+  unit: null
+  synonyms: []
+- key: quantity_tolerance.pct
+  topic: quantity_tolerance
+  label: pct
+  description: Excess over GRN quantity allowed
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: quantity_tolerance.cap_value_inr
+  topic: quantity_tolerance
+  label: cap value inr
+  description: Maximum excess value on the invoice
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: quantity_tolerance.materials
+  topic: quantity_tolerance
+  label: materials
+  description: Materials the tolerance applies to
+  value_type: list
+  unit: null
+  synonyms: []
+- key: quantity_tolerance.short_invoicing
+  topic: quantity_tolerance
+  label: short invoicing
+  description: Treatment when invoice quantity is below GRN
+  value_type: text
+  unit: null
+  synonyms: []
+- key: rounding.cap_inr
+  topic: rounding
+  label: cap inr
+  description: Invoice-total rounding difference accepted automatically
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: einvoice.aato_threshold_crore
+  topic: einvoice
+  label: aato threshold crore
+  description: Turnover above which e-invoicing is required (crore)
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: einvoice.missing_irn_action
+  topic: einvoice
+  label: missing irn action
+  description: What to do when a required IRN is missing
+  value_type: text
+  unit: null
+  synonyms: []
+- key: itc.return_name
+  topic: itc
+  label: return name
+  description: ''
+  value_type: enum
+  unit: null
+  synonyms: []
+- key: itc.generation_day
+  topic: itc
+  label: generation day
+  description: Day of the following month the return is available
+  value_type: days
+  unit: days
+  synonyms: []
+- key: itc.missing_action
+  topic: itc
+  label: missing action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: itc.qrmp_handling
+  topic: itc
+  label: qrmp handling
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: gstin.inactive_action
+  topic: gstin
+  label: inactive action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: gstin.mismatch_action
+  topic: gstin
+  label: mismatch action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: gstin.tax_type_rule
+  topic: gstin
+  label: tax type rule
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: reverse_charge.services
+  topic: reverse_charge
+  label: services
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: reverse_charge.action
+  topic: reverse_charge
+  label: action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: approvals.controller_above_lakh
+  topic: approvals
+  label: controller above lakh
+  description: Invoice total (incl. GST) above which the AP Controller approves
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: approvals.cfo_above_lakh
+  topic: approvals
+  label: cfo above lakh
+  description: Invoice total above which the client CFO approves
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: approvals.non_po_extra
+  topic: approvals
+  label: non po extra
+  description: Extra approver for non-PO invoices
+  value_type: text
+  unit: null
+  synonyms: []
+- key: approvals.basis
+  topic: approvals
+  label: basis
+  description: Whether thresholds include GST
+  value_type: text
+  unit: null
+  synonyms: []
+- key: non_po.allowed_categories
+  topic: non_po
+  label: allowed categories
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: non_po.excluded_categories
+  topic: non_po
+  label: excluded categories
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: missing_grn.reminder_working_days
+  topic: missing_grn
+  label: reminder working days
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: missing_grn.escalation_working_days
+  topic: missing_grn
+  label: escalation working days
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: missing_grn.action
+  topic: missing_grn
+  label: action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: msme.max_term_days
+  topic: msme
+  label: max term days
+  description: Maximum agreed term for micro and small enterprises
+  value_type: days
+  unit: days
+  synonyms: []
+- key: msme.no_agreement_days
+  topic: msme
+  label: no agreement days
+  description: Term when there is no written agreement
+  value_type: days
+  unit: days
+  synonyms: []
+- key: msme.medium_rule
+  topic: msme
+  label: medium rule
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: payments.run_days
+  topic: payments
+  label: run days
+  description: Weekdays with a payment run
+  value_type: list
+  unit: null
+  synonyms: []
+- key: payments.cutoff
+  topic: payments
+  label: cutoff
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: payments.default_term_days
+  topic: payments
+  label: default term days
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: payments.run_selection
+  topic: payments
+  label: run selection
+  description: Which run to use for a due date
+  value_type: text
+  unit: null
+  synonyms: []
+- key: bank_change.confirmation_method
+  topic: bank_change
+  label: confirmation method
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: bank_change.approvals
+  topic: bank_change
+  label: approvals
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: bank_change.cooling_off_hours
+  topic: bank_change
+  label: cooling off hours
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: bank_change.freeze_before_close_days
+  topic: bank_change
+  label: freeze before close days
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: duplicate_check.method
+  topic: duplicate_check
+  label: method
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: duplicate_check.lookback_months
+  topic: duplicate_check
+  label: lookback months
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: duplicate_check.suffixes_dropped
+  topic: duplicate_check
+  label: suffixes dropped
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: month_end.posting_cutoff
+  topic: month_end
+  label: posting cutoff
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: month_end.bank_change_freeze_days
+  topic: month_end
+  label: bank change freeze days
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: tds.rate_contract_individual_huf
+  topic: tds
+  label: rate contract individual huf
+  description: Work contracts, transport, repairs, manpower paid to an individual or HUF. Put the section
+    code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_contract_other
+  topic: tds
+  label: rate contract other
+  description: Work contracts, transport, repairs, manpower paid to any other payee. Section code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_professional
+  topic: tds
+  label: rate professional
+  description: Professional services (legal, audit, consulting, architects). Section code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_technical_service
+  topic: tds
+  label: rate technical service
+  description: Fees for technical services that are not professional, incl. software support. Section
+    code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_rent_plant_machinery
+  topic: tds
+  label: rate rent plant machinery
+  description: Rent of plant, machinery or equipment. Section code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_rent_land_building
+  topic: tds
+  label: rate rent land building
+  description: Rent of land, building or furniture. Section code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.rate_goods_purchase
+  topic: tds
+  label: rate goods purchase
+  description: Purchase of goods above the yearly threshold, on the excess. Section code in value.text
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.goods_purchase_threshold_inr
+  topic: tds
+  label: goods purchase threshold inr
+  description: Yearly purchases from one supplier above which goods TDS applies
+  value_type: money
+  unit: INR
+  synonyms: []
+- key: tds.no_pan_rate
+  topic: tds
+  label: no pan rate
+  description: Rate when the supplier has no valid PAN (the higher of this and the normal rate)
+  value_type: percentage
+  unit: '%'
+  synonyms: []
+- key: tds.base
+  topic: tds
+  label: base
+  description: Whether GST is excluded from the base
+  value_type: text
+  unit: null
+  synonyms: []
+- key: tds.amc_rule
+  topic: tds
+  label: amc rule
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: tds.amc_manpower_examples
+  topic: tds
+  label: amc manpower examples
+  description: AMC types that are mainly technicians and parts
+  value_type: list
+  unit: null
+  synonyms: []
+- key: tds.amc_technical_examples
+  topic: tds
+  label: amc technical examples
+  description: AMC types that are mainly technical or software support
+  value_type: list
+  unit: null
+  synonyms: []
+- key: tds.amc_unclear_examples
+  topic: tds
+  label: amc unclear examples
+  description: AMC types that are mixed and decided case by case
+  value_type: list
+  unit: null
+  synonyms: []
+- key: tds.lower_deduction_certificate
+  topic: tds
+  label: lower deduction certificate
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: qa_release.materials
+  topic: qa_release
+  label: materials
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: qa_release.action
+  topic: qa_release
+  label: action
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: rent_and_agency.rent_requirements
+  topic: rent_and_agency
+  label: rent requirements
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: rent_and_agency.agency_requirements
+  topic: rent_and_agency
+  label: agency requirements
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: rent_and_agency.landlord_tds
+  topic: rent_and_agency
+  label: landlord tds
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: exceptions.owner
+  topic: exceptions
+  label: owner
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: exceptions.target
+  topic: exceptions
+  label: target
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: records.retention_years
+  topic: records
+  label: retention years
+  description: ''
+  value_type: days
+  unit: days
+  synonyms: []
+- key: records.confidential_data
+  topic: records
+  label: confidential data
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: credit_notes.rule
+  topic: credit_notes
+  label: rule
+  description: ''
+  value_type: text
+  unit: null
+  synonyms: []
+- key: intake.channels
+  topic: intake
+  label: channels
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+- key: intake.mandatory_fields
+  topic: intake
+  label: mandatory fields
+  description: ''
+  value_type: list
+  unit: null
+  synonyms: []
+source_ranking:
+- doc_type: memo
+  rank: 1
+  reason: client memos override the SOP for their own client
+- doc_type: sop
+  rank: 2
+  reason: the controlling procedure
+- doc_type: policy
+  rank: 2
+  reason: controlling policy
+- doc_type: work_instruction
+  rank: 3
+  reason: desk instructions implement the SOP
+- doc_type: training
+  rank: 4
+  reason: training material restates rules
+- doc_type: observation
+  rank: 4
+  practice: true
+  reason: observed practice
+- doc_type: interview
+  rank: 5
+  practice: true
+  reason: expert practice
+- doc_type: faq
+  rank: 6
+  reason: wiki export, not controlled
+- doc_type: email
+  rank: 7
+  reason: messages
+- doc_type: chat
+  rank: 8
+  reason: messages
+- doc_type: spreadsheet
+  rank: 9
+  reason: operational data
+scope_keys:
+- client
+- materials
+sender_authority:
+- who: AP Process Excellence
+  client: all
+  topics:
+  - all
+- who: Arvana Infra Financial Controller
+  client: Arvana Infra Projects Ltd
+  topics:
+  - all
+- who: Arvana Pharma Head of Quality
+  client: Arvana Pharma Ltd
+  topics:
+  - qa_release
+- who: Arvana Retail Finance Director
+  client: Arvana Retail Pvt Ltd
+  topics:
+  - all
+- who: Vendor Master team
+  client: all
+  topics:
+  - bank_change
+- who: Tax Desk
+  client: all
+  topics:
+  - tds
+  - reverse_charge
+  - gstin
+  - einvoice
+  - itc

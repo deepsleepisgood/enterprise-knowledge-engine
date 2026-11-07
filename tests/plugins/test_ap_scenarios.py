@@ -1,14 +1,17 @@
-"""Phase 3 acceptance: the 92 scenario questions through parameter extraction + calculators.
+"""Phase 3 acceptance: the 92 scenario questions through the real application path.
 
-Test code, so it may read the evaluation workbook. The app path is the real one:
-question -> MODEL_FAST parameter extraction -> calculator -> rules from the claims graph.
+Test code, so it may read the evaluation workbook. Path: corpus -> generic ingestion -> schema
+(induced, or the plug-in baseline) -> extraction -> authority resolution -> plug-in bindings ->
+question -> MODEL_FAST parameter extraction -> plug-in calculator over bound facts.
 Grading (TEST_PLAN level 1): a question passes only if the decision and every number match.
-Writes reports/scenario_results.csv and reports/scenario_misses.md.
+Each schema mode runs in its own tenant: SCENARIO_MODES=induced,baseline (default: induced).
+Writes reports/scenario_results_<mode>.csv and reports/scenario_misses_<mode>.md.
 """
 
 from __future__ import annotations
 
 import csv
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -32,6 +35,8 @@ pytestmark = [
     pytest.mark.skipif(not EVAL.exists(), reason="eval workbook not present"),
     pytest.mark.skipif(not get_settings().llm_configured, reason="needs an LLM API key"),
 ]
+
+MODES = [m.strip() for m in os.environ.get("SCENARIO_MODES", "induced").split(",") if m.strip()]
 
 FAMILY_BY_SECTION = {"4.2": "price", "6": "tds", "7": "approvals", "9": "msme", "5.4": "einvoice"}
 
@@ -114,20 +119,61 @@ def _same(exp: dict[str, Any], got: dict[str, Any]) -> bool:
     return True
 
 
-@pytest.fixture(scope="module")
-def scenario_results(built_graph, pack):
-    from app.calc.base import DbRules
-    from app.calc.params import calculator_inputs, extract_params
-    from app.calc.registry import run
-
+def build_tenant(mode: str) -> None:
+    """Ingest the corpus into tenant `mode`, freeze its schema, extract, publish and bind."""
+    from app import worker
+    from app.core.config import get_settings
     from app.core.db import session_scope
+    from app.graph import pipeline as gp
+    from app.ingest.connectors import from_paths
+    from app.ingest.intake import submit
+    from app.plugins import registry
+    from app.plugins.bindings import bind
+    from app.store.base import use_tenant
+
+    settings = get_settings()
+    old = settings.schema_mode
+    settings.schema_mode = mode
+    try:
+        with use_tenant(mode), session_scope() as s:
+            for ep in from_paths([ROOT / "data" / "raw"]):
+                submit(s, ep)
+        worker.drain(kinds=["parse_episode", "reresolve_source"], threads=2)
+        with use_tenant(mode):
+            gp.ensure_schema(auto_freeze=True, mode=mode)
+            with session_scope() as s:
+                from app.store import episodes as estore
+                from app.store import jobs
+
+                for eid in estore.parsed_episode_ids(s):
+                    jobs.enqueue(s, "extract_episode", {"episode_id": eid})
+        worker.drain(kinds=["extract_episode", "reresolve_source"], threads=2)
+        with use_tenant(mode), session_scope() as s:
+            onto = gp.active_ontology(s, mode)
+            from app.core.llm import structured
+
+            bind(s, registry.get("ap"), onto, structured_fn=structured)
+    finally:
+        settings.schema_mode = old
+
+
+def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:
+    from app.core.db import session_scope
+    from app.graph import pipeline as gp
+    from app.plugins.calculate import calculate
+    from app.store import entities
+    from app.store.base import use_tenant
+    from plugins.ap.calc.params import calculator_inputs, extract_params
 
     q = pd.read_excel(EVAL, sheet_name="questions")
     rows = q[q.question_type == "scenario"].to_dict(orient="records")
+    with use_tenant(mode), session_scope() as s:
+        clients = [e.name for e in entities.list_entities(s, "client")]
+        onto = gp.active_ontology(s, mode)
 
     def extract(row):
         try:
-            return extract_params(row["question"]), None
+            return extract_params(row["question"], clients), None
         except Exception as exc:
             return None, f"extraction: {type(exc).__name__}: {exc}"
 
@@ -135,8 +181,7 @@ def scenario_results(built_graph, pack):
         extracted = list(pool.map(extract, rows))
 
     out = []
-    with session_scope() as s:
-        rules = DbRules(s, today=TODAY)
+    with use_tenant(mode), session_scope() as s:
         for row, (params, err) in zip(rows, extracted, strict=True):
             exp = expected_from_gold(str(row["gold_source_section"]), row["gold_answer"])
             rec = {
@@ -154,11 +199,11 @@ def scenario_results(built_graph, pack):
             if params is not None:
                 rec["family"] = params.family
                 try:
-                    inputs = calculator_inputs(params, pack)
+                    inputs = calculator_inputs(params, onto.units, clients, onto.base_currency)
                     if params.family != exp.family or inputs is None:
                         rec["cause"] = f"routing: extracted family {params.family!r}"
                     else:
-                        res = run(params.family, inputs, rules)
+                        res = calculate(s, onto, "ap", params.family, inputs, today=TODAY)
                         rec["got"] = actual_fields(params.family, res)
                         rec["decision"] = res.decision
                         rec["ok"] = _same(exp.fields, rec["got"])
@@ -167,13 +212,22 @@ def scenario_results(built_graph, pack):
                 except Exception as exc:
                     rec["cause"] = f"calculator: {type(exc).__name__}: {exc}"
             out.append(rec)
-    _write_reports(out)
+    _write_reports(out, mode)
     return {r["id"]: r for r in out}
 
 
-def _write_reports(out: list[dict[str, Any]]) -> None:
+@pytest.fixture(scope="module")
+def scenario_results(database_url) -> dict[str, dict[str, dict[str, Any]]]:
+    out = {}
+    for mode in MODES:
+        build_tenant(mode)
+        out[mode] = run_scenarios(mode)
+    return out
+
+
+def _write_reports(out: list[dict[str, Any]], mode: str) -> None:
     REPORTS.mkdir(exist_ok=True)
-    with (REPORTS / "scenario_results.csv").open("w", newline="", encoding="utf-8") as f:
+    with (REPORTS / f"scenario_results_{mode}.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
             fieldnames=[
@@ -192,7 +246,10 @@ def _write_reports(out: list[dict[str, Any]]) -> None:
         for r in out:
             w.writerow({k: r[k] for k in w.fieldnames})
     misses = [r for r in out if not r["ok"]]
-    lines = [f"# Scenario misses — {len(out) - len(misses)} of {len(out)} correct", ""]
+    lines = [
+        f"# Scenario misses ({mode} schema) — {len(out) - len(misses)} of {len(out)} correct",
+        "",
+    ]
     for r in misses:
         lines += [
             f"## {r['id']} ({r['expected_family']})",
@@ -204,7 +261,7 @@ def _write_reports(out: list[dict[str, Any]]) -> None:
             f"- Cause: {r['cause']}",
             "",
         ]
-    (REPORTS / "scenario_misses.md").write_text("\n".join(lines), encoding="utf-8")
+    (REPORTS / f"scenario_misses_{mode}.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def _ids() -> list[str]:
@@ -214,7 +271,8 @@ def _ids() -> list[str]:
     return list(q[q.question_type == "scenario"].question_id)
 
 
+@pytest.mark.parametrize("mode", MODES)
 @pytest.mark.parametrize("qid", _ids())
-def test_scenario(scenario_results, qid) -> None:
-    r = scenario_results[qid]
-    assert r["ok"], f"{qid}: {r['cause']} | expected {r['expected']} got {r['got']}"
+def test_scenario(scenario_results, mode, qid) -> None:
+    r = scenario_results[mode][qid]
+    assert r["ok"], f"{mode} {qid}: {r['cause']} | expected {r['expected']} got {r['got']}"

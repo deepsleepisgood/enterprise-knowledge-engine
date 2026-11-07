@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -28,9 +29,9 @@ def _files() -> list[Path]:
     for base in (ROOT / "app", ROOT / "web", ROOT / "plugins"):
         if not base.exists():
             continue
-        for p in base.rglob("*"):
-            if p.is_file() and p.suffix in TEXT_SUFFIXES and not SKIP_DIRS & set(p.parts):
-                out.append(p)
+        for root, dirs, files in os.walk(base):
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+            out += [Path(root) / f for f in files if Path(f).suffix in TEXT_SUFFIXES]
     out.extend((ROOT / "scripts").glob("ingest_*.py"))
     return out
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from app.calc.base import CalcResult, Rules, Step, config, inr, rule
+from .base import CalcResult, Rules, Step, config, inr, rule
 
 
 class EinvoiceInput(BaseModel):

@@ -47,7 +47,7 @@ def _assign_columns(lines: list[dict[str, Any]]) -> None:
 
 
 def parse_pdf(data: bytes) -> tuple[list[Block], dict[str, Any]]:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz
 
     doc = fitz.open(stream=data, filetype="pdf")
     lines: list[dict[str, Any]] = []
@@ -182,7 +182,7 @@ def parse_pdf(data: bytes) -> tuple[list[Block], dict[str, Any]]:
 
 def render_pages(data: bytes, dpi: int = 150, limit: int = 40) -> list[bytes]:
     """PNG images of each page, for the vision tier."""
-    import fitz
+    import pymupdf as fitz
 
     doc = fitz.open(stream=data, filetype="pdf")
     return [page.get_pixmap(dpi=dpi).tobytes("png") for page in list(doc)[:limit]]

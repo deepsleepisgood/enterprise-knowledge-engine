@@ -238,3 +238,35 @@ def delete_tenant_content(session: Session) -> None:  # tests and fresh-tenant r
     session.execute(update(Source).where(Source.tenant_id == t).values(supersedes_source_id=None))
     session.execute(delete(Source).where(Source.tenant_id == t))
     session.execute(delete(Episode).where(Episode.tenant_id == t))
+
+
+def sources_by_ids(session: Session, ids: list[str]) -> dict[str, Source]:
+    if not ids:
+        return {}
+    return {s.id: s for s in session.scalars(select(Source).where(Source.id.in_(ids)))}
+
+
+def passages_by_ids(session: Session, ids: list[str]) -> dict[str, Passage]:
+    if not ids:
+        return {}
+    return {p.id: p for p in session.scalars(select(Passage).where(Passage.id.in_(ids)))}
+
+
+def extractable_passages(session: Session, episode_id: str | None = None) -> list[Passage]:
+    """Live leaf passages that carry statements (records and parents are not sent to the LLM)."""
+    q = select(Passage).where(
+        Passage.tenant_id == tenant(),
+        Passage.retired_at.is_(None),
+        Passage.segment_kind.not_in(["record", "table"]),
+        Passage.meta["leaf"].astext == "true",
+    )
+    if episode_id:
+        q = q.where(Passage.episode_id == episode_id)
+    return list(session.scalars(q.order_by(Passage.episode_id, Passage.source_id, Passage.ordinal)))
+
+
+def parsed_episode_ids(session: Session) -> list[str]:
+    q = select(Episode.id).where(
+        Episode.tenant_id == tenant(), Episode.status.in_(["parsed", "extracted", "published"])
+    )
+    return list(session.scalars(q.order_by(Episode.received_at, Episode.id)))

@@ -7,8 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from app.calc import approvals, einvoice, msme, price, quantity, tds
-from app.calc.base import CalcResult, Rules
+from . import approvals, einvoice, msme, price, quantity, tds
+from .base import CalcResult, Rules
 
 CALCULATORS: dict[str, tuple[type[BaseModel], Callable[[Any, Rules], CalcResult]]] = {
     "price": (price.PriceInput, price.calculate),

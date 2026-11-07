@@ -44,6 +44,8 @@ def main() -> None:
             created += new
     print(f"{len(eps)} files, {created} new episodes, {len(eps) - created} duplicates")
     ran = worker.drain(kinds=["parse_episode"], threads=args.threads)
+    hooks = worker.drain(kinds=["plugin_hooks"])
+    print(f"plug-in hooks: {hooks} jobs")
     print(f"parsed {ran} episodes in {time.perf_counter() - started:.1f}s")
     with session_scope() as s:
         print("episodes:", store.episode_counts(s))

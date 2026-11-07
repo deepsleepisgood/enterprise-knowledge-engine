@@ -89,7 +89,7 @@ def test_docx_without_heading_styles_infers_structure_from_numbering() -> None:
 
 
 def _pdf(pages: list[list[tuple[str, float, tuple[float, float]]]]) -> bytes:
-    import fitz
+    import pymupdf as fitz
 
     doc = fitz.open()
     for items in pages:
@@ -132,7 +132,7 @@ def test_pdf_with_almost_no_text_is_low_quality_and_held() -> None:
 
 
 def test_pdf_table_becomes_table_block() -> None:
-    import fitz
+    import pymupdf as fitz
 
     doc = fitz.open()
     page = doc.new_page()

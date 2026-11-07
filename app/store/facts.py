@@ -227,3 +227,8 @@ def summary(session: Session) -> dict[str, Any]:
         ).all()
     )
     return {"by_status": by_status, "by_attribute": by_attr, "rows_total": total_rows(session)}
+
+
+def set_supersedes(session: Session, fact_id: int, loser_id: int) -> None:
+    """Link a fact version written in this transaction to the version it supersedes."""
+    session.execute(update(Fact).where(Fact.id == fact_id).values(supersedes_id=loser_id))

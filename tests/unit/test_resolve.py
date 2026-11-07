@@ -1,216 +1,154 @@
-"""Authority resolution on hand-built claims that mirror the corpus (TEST_PLAN level 3)."""
+"""Authority resolution on hand-built assertions that mirror the corpus (TEST_PLAN level 3)."""
 
 from __future__ import annotations
 
 from datetime import date
 from itertools import count
-from typing import Any
 
-import pytest
-
-from app.graph.compare import compare_values
-from app.graph.resolve import resolve
-from app.graph.schema import ClaimRec
+from app.graph.compare import LLMComparator, compare_values, deterministic
+from app.graph.resolve import Assertion, resolve, resolve_group
 
 _ids = count()
 
+# label, status, rank, dated, valid_until
+SOURCES = {
+    "sop4": ("SOP v4.0", "current", 2, date(2026, 4, 1), None),
+    "sop31": ("SOP v3.1", "superseded", 2, date(2023, 7, 1), date(2026, 3, 31)),
+    "faq": ("FAQ", "stale", 6, date(2023, 10, 9), None),
+    "video1": ("Video 1", "current", 4, date(2026, 2, 1), None),
+    "memo": ("CM-X-02", "current", 1, date(2026, 4, 15), date(2027, 3, 31)),
+    "interview": ("Interview 1", "record", 5, date(2026, 9, 8), None),
+    "faq_new": ("FAQ 2027", "current", 6, date(2027, 1, 1), None),
+}
 
-@pytest.fixture
-def mk(pack):
-    def _mk(
-        source_id: str,
-        topic: str,
-        parameter: str,
-        *,
-        number: float | None = None,
-        text: str = "",
-        vtype: str = "percentage",
-        unit: str | None = None,
-        client: str | None = None,
-        kind: str = "rule",
-        items: list[str] | None = None,
-    ) -> ClaimRec:
-        src = pack.sources[source_id]
-        if unit is None:
-            unit = {"percentage": "%", "money": "INR"}.get(vtype)
-        value: dict[str, Any] = {
+
+def mk(
+    src: str,
+    number=None,
+    text="",
+    vtype="percentage",
+    client="all",
+    kind="rule",
+    attribute="price_tolerance.pct_of_line",
+    items=None,
+) -> Assertion:
+    label, status, rank, dated, until = SOURCES[src]
+    return Assertion(
+        key=f"k{next(_ids)}",
+        subject_id="topic-1",
+        attribute=attribute,
+        client=client,
+        value={
             "type": vtype,
             "number": number,
-            "unit": unit,
+            "unit": "%" if vtype == "percentage" else None,
             "text": text or str(number),
             "items": items,
-        }
-        return ClaimRec(
-            key=f"k{next(_ids)}",
-            topic=topic,
-            parameter=parameter,
-            client=client or src.client_scope,
-            value=value,
-            kind="practice" if src.kind in ("interview", "shadowing") else kind,
-            statement=f"{topic}.{parameter} = {text or number}",
-            source_id=source_id,
-            source_kind=src.kind,
-            source_status=src.status,
-            authority_rank=src.authority_rank,
-            valid_at=src.dated,
-            source_valid_to=src.valid_to,
-            meta={"origin": "test"},
-        )
-
-    return _mk
+        },
+        kind=kind,
+        statement=f"{attribute} = {text or number}",
+        source_id=src,
+        source_label=label,
+        source_status=status,
+        authority_rank=rank,
+        asserted_from=dated,
+        asserted_to=until,
+    )
 
 
-def test_sop_v4_beats_v3_1_and_faq_video_corroborates(mk) -> None:
-    v4 = mk("sop_v4", "price_tolerance", "pct_of_line", number=1)
-    v3 = mk("sop_v3_1", "price_tolerance", "pct_of_line", number=2)
-    faq = mk("faq_2023", "price_tolerance", "pct_of_line", number=2)
-    video = mk("video_1", "price_tolerance", "pct_of_line", number=1)
-    resolve([v3, faq, v4, video])
-    assert v4.status == "current"
-    assert v3.status == "superseded" and v3.invalid_at == date(2026, 3, 31)
-    assert faq.status == "superseded" and faq.invalid_at == date(2026, 3, 31)
+def test_current_sop_beats_old_sop_and_faq_and_video_corroborates() -> None:
+    v4, v31, faq, video = mk("sop4", 1), mk("sop31", 2), mk("faq", 2), mk("video1", 1)
+    conflicts = resolve_group([v31, faq, v4, video], deterministic)
+    assert v4.status == "current" and v4.valid_from == date(2026, 4, 1) and v4.valid_to is None
+    assert v31.status == "superseded" and v31.valid_to == date(2026, 4, 1)  # last day 31 Mar
+    assert faq.status == "superseded" and faq.valid_to == date(2026, 4, 1)
     assert video.status == "corroborating"
-    assert v4.supersedes_key in {faq.key, v3.key}
+    assert v4.supersedes_key in (v31.key, faq.key)
+    assert conflicts == []  # the losers' sources are not current
 
 
-def test_client_memo_overrides_for_its_client_only(mk) -> None:
-    sop = mk("sop_v4", "quantity_tolerance", "pct", number=0, text="none")
-    v3 = mk("sop_v3_1", "quantity_tolerance", "pct", number=2)
-    memo = mk("cm_inf_02", "quantity_tolerance", "pct", number=5)
-    faq = mk("faq_2023", "quantity_tolerance", "pct", number=10, client="infra")
-    res = resolve([sop, v3, memo, faq])
-    assert sop.status == "current" and sop.client == "all"
-    assert memo.status == "current" and memo.client == "infra"
-    assert memo.invalid_at == date(2027, 3, 31)  # memo expiry carried as invalid_at
-    assert v3.status == "superseded"
-    assert faq.status == "superseded" and faq.invalid_at == date(2026, 4, 14)
-    assert not res.conflicts
-
-
-def test_faq_excipients_superseded_by_pharma_memo(mk) -> None:
-    memo = mk(
-        "cm_pha_01",
-        "qa_release",
-        "materials",
-        vtype="list",
-        items=["active pharmaceutical ingredients", "excipients", "primary packaging"],
+def test_client_memo_overrides_for_its_client_only_and_expires() -> None:
+    general, memo = (
+        mk("sop4", 0, attribute="qty.pct"),
+        mk("memo", 5, client="Northwind", attribute="qty.pct"),
     )
-    faq = mk(
-        "faq_2023",
-        "qa_release",
-        "materials",
-        vtype="list",
-        client="pharma",
-        items=["active pharmaceutical ingredients"],
-    )
-    resolve([memo, faq])
-    assert memo.status == "current"
-    assert faq.status == "superseded" and faq.invalid_at == date(2026, 1, 1)
+    resolve_group([general, memo], deterministic)
+    assert general.status == "current" and general.client == "all"
+    assert memo.status == "current" and memo.valid_to == date(2027, 4, 1)
 
 
-def test_video_2_staleness_is_per_claim(mk) -> None:
-    sop_pan = mk("sop_v4", "tds", "no_pan_rate", number=20)
-    vid_pan = mk("video_2", "tds", "no_pan_rate", number=20)
-    sop_irn = mk("sop_v4", "einvoice", "aato_threshold_crore", vtype="money", number=5e7)
-    vid_irn = mk("video_2", "einvoice", "aato_threshold_crore", vtype="money", number=1e8)
-    resolve([sop_pan, vid_pan, sop_irn, vid_irn])
-    assert vid_pan.status == "corroborating"
-    assert vid_irn.status == "superseded"
+def test_authority_beats_recency() -> None:
+    sop, newer = mk("sop4", 1), mk("faq_new", 2)  # newer but lower-ranked
+    conflicts = resolve_group([sop, newer], deterministic)
+    assert sop.status == "current"
+    assert newer.status == "overridden" and newer.valid_from == newer.valid_to  # never in force
+    assert [c.kind for c in conflicts] == ["value"]  # both current: the owner should know
 
 
-def test_practice_attaches_as_tip_and_never_overrides(mk) -> None:
-    rule = mk(
-        "sop_v4",
-        "missing_grn",
-        "action",
-        vtype="text",
-        text="hold as NO_GRN; reminder after two working days",
-    )
-    tip = mk(
-        "interview_1",
-        "missing_grn",
-        "action",
-        vtype="text",
-        text="for Infra, wait until Tuesday noon before chasing",
-    )
-    res = resolve([rule, tip])
-    assert rule.status == "current"
-    assert tip.kind == "practice" and tip.status == "current"
-    assert not res.conflicts  # wording differs; only a clear contradiction opens a conflict
-
-
-def test_practice_contradicting_a_rule_opens_conflict(mk) -> None:
-    rule = mk("sop_v4", "price_tolerance", "cap_inr", vtype="money", number=500)
-    tip = mk("shadowing", "price_tolerance", "cap_inr", vtype="money", number=1000)
-    res = resolve([rule, tip])
+def test_practice_never_overrides_and_flags_contradiction() -> None:
+    rule, tip = mk("sop4", 1), mk("interview", 2, kind="practice")
+    conflicts = resolve_group([rule, tip], deterministic)
     assert rule.status == "current" and tip.status == "current"
-    (conflict,) = res.conflicts
-    assert conflict.kind == "practice_vs_rule" and conflict.authoritative_key == rule.key
+    assert [c.kind for c in conflicts] == ["practice_vs_rule"]
+    same_tip = mk("interview", 1, kind="practice")
+    assert resolve_group([mk("sop4", 1), same_tip], deterministic) == []
 
 
-def test_two_current_sources_disagreeing_open_value_conflict(mk) -> None:
-    sop = mk("sop_v4", "price_tolerance", "pct_of_line", number=1)
-    di = mk("di_03", "price_tolerance", "pct_of_line", number=2)
-    res = resolve([sop, di])
-    assert sop.status == "current" and di.status == "superseded"
-    (conflict,) = res.conflicts
-    assert conflict.kind == "value"
-    assert di.invalid_at == di.valid_at  # started after the SOP: never valid
+def test_no_current_source_is_pending_and_superseded_only_expires() -> None:
+    stale = mk("faq", 3, attribute="other:faq_only")
+    resolve_group([stale], deterministic)
+    assert stale.status == "pending"
+    old = mk("sop31", 2, attribute="other:old_only")
+    resolve_group([old], deterministic)
+    assert old.status == "superseded" and old.valid_to == date(2026, 4, 1)
 
 
-def test_stale_only_claim_is_pending_not_current(mk) -> None:
-    faq = mk("faq_2023", "records", "retention_years", vtype="days", number=8, unit="years")
-    resolve([faq])
-    assert faq.status == "pending"
+def test_unknown_wording_from_current_source_corroborates() -> None:
+    a = mk("sop4", text="Raise QA_RELEASE_PENDING and hold", vtype="text", attribute="qa.action")
+    b = mk("video1", text="Hold until QA releases the batch", vtype="text", attribute="qa.action")
+    resolve_group([a, b], deterministic)
+    assert a.status == "current" and b.status == "corroborating"
 
 
-def test_stale_client_claim_settled_by_general_rule(mk) -> None:
-    sop = mk("sop_v4", "rounding", "cap_inr", vtype="money", number=10)
-    faq = mk("faq_2023", "rounding", "cap_inr", vtype="money", number=50, client="retail")
-    resolve([sop, faq])
-    assert faq.status == "superseded"
+def test_groups_are_independent() -> None:
+    a = mk("sop4", 1)
+    b = mk("sop31", 2, attribute="price_tolerance.cap")
+    resolve([a, b], deterministic)
+    assert a.status == "current" and b.status == "superseded"
 
 
 def test_compare_values() -> None:
-    pct = {"type": "percentage", "unit": "%"}
-    assert compare_values({**pct, "number": 1}, {**pct, "number": 1.0}) == "same"
-    assert compare_values({**pct, "number": 1}, {**pct, "number": 2}) == "different"
-    days = {"type": "days", "number": 2}
-    assert compare_values({**days, "unit": "days"}, {**days, "unit": "working_days"}) == "unknown"
-    lst = {"type": "list"}
+    p = {"type": "percentage", "unit": "%"}
+    assert compare_values({**p, "number": 1}, {**p, "number": 1.0}) == "same"
+    assert compare_values({**p, "number": 1}, {**p, "number": 2}) == "different"
     assert (
-        compare_values({**lst, "items": ["Cement", "sand"]}, {**lst, "items": ["sand", "cement"]})
-        == "same"
-    )
-    assert (
-        compare_values({**lst, "items": ["api"]}, {**lst, "items": ["api", "excipient"]})
+        compare_values(
+            {"type": "days", "number": 2, "unit": "days"},
+            {"type": "days", "number": 2, "unit": "working_days"},
+        )
         == "unknown"
     )
     assert (
         compare_values(
-            {"type": "text", "text": "Tuesday and Friday"},
-            {"type": "text", "text": "tuesday  and friday."},
+            {"type": "list", "items": ["Cement", "sand"]},
+            {"type": "list", "items": ["cement", "Sands"]},
+        )
+        == "same"
+    )
+    assert (
+        compare_values(
+            {"type": "text", "text": "Lower of 1% and 500."},
+            {"type": "text", "text": "lower of 1 % and 500"},
         )
         == "same"
     )
 
 
-def test_subject_keeps_table_rows_apart(mk) -> None:
-    a = mk("sop_v4", "exceptions", "owner", vtype="text", text="PO buyer")
-    b = mk("sop_v4", "exceptions", "owner", vtype="text", text="Requester")
-    a.scope["subject"], b.scope["subject"] = "PRICE_VAR", "QTY_VAR"
-    resolve([a, b])
-    assert a.status == b.status == "current"
+def test_failed_llm_comparison_is_unknown_not_fatal() -> None:
+    def boom(*a, **k):
+        raise RuntimeError("timeout")
 
-
-def test_failed_llm_comparison_is_unknown_not_fatal(mk) -> None:
-    from app.graph.compare import LLMComparator
-
-    def boom(*args, **kwargs):
-        raise RuntimeError("model unavailable")
-
-    cmp = LLMComparator(structured_fn=boom)
-    rule = mk("sop_v4", "missing_grn", "action", vtype="text", text="hold")
-    old = mk("faq_2023", "missing_grn", "action", vtype="text", text="email the requester")
-    resolve([rule, old], compare=cmp)
-    assert old.status == "superseded" and cmp.failures
+    cmp = LLMComparator(boom)
+    a = mk("sop4", text="x", vtype="text")
+    b = mk("faq", text="y", vtype="text")
+    assert cmp(a, b) == "unknown" and cmp.failures

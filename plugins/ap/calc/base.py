@@ -1,42 +1,30 @@
 """Shared pieces for calculators.
 
 A calculator is a pure function: typed inputs + a `Rules` lookup -> CalcResult.
-It never holds a threshold itself (CLAUDE.md rule 2): every number comes from a
-current claim, found through the pack's calculators.yaml mapping. A missing rule
-raises RuleNotFound; there is no fallback.
+It never holds a threshold itself (CLAUDE.md rule 2): every number comes from a current
+fact in the graph, read through the plug-in's bindings (calculators.yaml names the bound
+parameters). A missing rule or binding raises RuleNotFound; there is no fallback.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Protocol
 
-from app.core.pack import Pack, get_pack
+import yaml
+
 from app.graph.rules import RuleNotFound, RuleValue
+
+PLUGIN_DIR = Path(__file__).resolve().parents[1]
 
 
 class Rules(Protocol):
     def get(
         self, topic: str, parameter: str, client: str | None = None, as_of: date | None = None
     ) -> RuleValue: ...
-
-
-class DbRules:
-    """Rules read from the claims graph."""
-
-    def __init__(self, session: Any, today: date | None = None) -> None:
-        self.session = session
-        self.today = today
-
-    def get(
-        self, topic: str, parameter: str, client: str | None = None, as_of: date | None = None
-    ) -> RuleValue:
-        from app.graph.rules import get_rule
-
-        return get_rule(
-            self.session, topic, parameter, client=client, as_of=as_of, today=self.today
-        )
 
 
 @dataclass
@@ -58,13 +46,18 @@ class CalcResult:
     notes: list[str] = field(default_factory=list)
 
     def cite(self, rule: RuleValue) -> RuleValue:
-        if all(c.claim_id != rule.claim_id for c in self.citations):
+        if all(c.fact_id != rule.fact_id for c in self.citations):
             self.citations.append(rule)
         return rule
 
 
-def config(family: str, pack: Pack | None = None) -> dict[str, Any]:
-    cfg = (pack or get_pack()).pack_file("calculators.yaml").get("calculators", {}).get(family)
+@lru_cache
+def calculators_yaml() -> dict[str, Any]:
+    return yaml.safe_load((PLUGIN_DIR / "calculators.yaml").read_text(encoding="utf-8"))
+
+
+def config(family: str) -> dict[str, Any]:
+    cfg = calculators_yaml().get("calculators", {}).get(family)
     if cfg is None:
         raise KeyError(f"calculators.yaml has no entry for {family!r}")
     return cfg

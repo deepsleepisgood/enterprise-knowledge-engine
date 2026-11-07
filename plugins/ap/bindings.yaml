@@ -1,0 +1,72 @@
+# Parameters the AP calculators read from the graph, in plain language.
+# The bind step (app/plugins/bindings.py) maps each one to an attribute of the tenant's active
+# schema: an exact key match first, otherwise embedding candidates confirmed by MODEL_FAST.
+# Unresolved bindings are listed for the owner on the Setup page; a calculator that needs an
+# unbound parameter raises an error (never a default value).
+params:
+  price_tolerance.pct_of_line:
+    value_type: percentage
+    description: Price tolerance as a percentage of the PO line value that an invoice unit price may exceed
+  price_tolerance.cap_inr:
+    value_type: money
+    description: Absolute cap in rupees on the price excess allowed per invoice line
+  quantity_tolerance.pct:
+    value_type: percentage
+    description: Percentage by which invoice quantity may exceed the goods receipt (GRN) quantity
+  quantity_tolerance.cap_value_inr:
+    value_type: money
+    description: Maximum value of the quantity excess allowed under the quantity tolerance
+  quantity_tolerance.materials:
+    value_type: list
+    description: Materials (for example bulk construction materials) the quantity tolerance applies to
+  approvals.controller_above_lakh:
+    value_type: money
+    description: Invoice total including GST above which the AP Controller must approve
+  approvals.cfo_above_lakh:
+    value_type: money
+    description: Invoice total including GST above which the client CFO must approve
+  einvoice.aato_threshold_crore:
+    value_type: money
+    description: Supplier aggregate annual turnover above which an e-invoice with an IRN is required
+  msme.max_term_days:
+    value_type: days
+    description: Maximum payment term in days for micro and small enterprises with a written agreement
+  msme.no_agreement_days:
+    value_type: days
+    description: Payment term in days for micro and small enterprises without a written agreement
+  payments.default_term_days:
+    value_type: days
+    description: Default payment term in days when nothing else applies (medium or non-MSME suppliers)
+  payments.run_days:
+    value_type: list
+    description: Weekdays on which the payment run happens
+  payments.cutoff:
+    value_type: text
+    description: Cut-off time for an invoice to make a payment run
+  tds.no_pan_rate:
+    value_type: percentage
+    description: TDS rate when the supplier has no valid PAN
+  tds.goods_purchase_threshold_inr:
+    value_type: money
+    description: Yearly purchases from one supplier above which TDS on purchase of goods applies
+  tds.rate_contract_individual_huf:
+    value_type: percentage
+    description: TDS rate for work contracts, transport, repairs or manpower paid to an individual or HUF
+  tds.rate_contract_other:
+    value_type: percentage
+    description: TDS rate for work contracts, transport, repairs or manpower paid to a company or other payee
+  tds.rate_professional:
+    value_type: percentage
+    description: TDS rate for professional services such as legal, audit, consulting or architects
+  tds.rate_technical_service:
+    value_type: percentage
+    description: TDS rate for fees for technical services that are not professional, including software support
+  tds.rate_rent_plant_machinery:
+    value_type: percentage
+    description: TDS rate for rent of plant, machinery or equipment
+  tds.rate_rent_land_building:
+    value_type: percentage
+    description: TDS rate for rent of land, building or furniture
+  tds.rate_goods_purchase:
+    value_type: percentage
+    description: TDS rate on purchase of goods above the yearly threshold, on the excess

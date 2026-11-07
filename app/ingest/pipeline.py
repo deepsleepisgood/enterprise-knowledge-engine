@@ -166,6 +166,21 @@ def refresh_context_headers(session: Any, source_id: str) -> None:
         store.update_passage(session, p.id, context_header=redact(context_header(info, d)))
 
 
+@handler("plugin_hooks")
+def plugin_hooks(payload: dict[str, Any]) -> dict[str, Any]:
+    """Let enabled plug-ins load their own data from an episode (e.g. ERP exports)."""
+    from app.plugins import registry
+    from app.store.base import tenant
+
+    with session_scope() as s:
+        ep = store.get_episode(s, payload["episode_id"])
+        data = Path(ep.blob_path).read_bytes()
+        out = {}
+        for plugin, fn in registry.hooks(payload["event"]):
+            out[plugin.name] = fn(s, data, tenant())
+    return out
+
+
 @handler("parse_episode")
 def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
     eid = payload["episode_id"]
@@ -241,6 +256,8 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
             for link in versions.link_versions(s, src["id"]):
                 links.append(link.__dict__)
                 refresh_context_headers(s, link.older_id)
+                # Facts already published from the older version must be re-resolved.
+                jobs.enqueue(s, "reresolve_source", {"source_id": link.older_id})
         old_meta = store.get_episode(s, eid).meta or {}
         store.set_status(
             s,
@@ -258,5 +275,7 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
             },
         )
         jobs.enqueue(s, "extract_episode", {"episode_id": eid})
+        if kind in ("xlsx", "csv"):
+            jobs.enqueue(s, "plugin_hooks", {"episode_id": eid, "event": "on_spreadsheet"})
     summary.update(sources=len(sources), passages=counts, versions=links)
     return summary

@@ -8,8 +8,9 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.calc.base import CalcResult, Rules, Step, config, fmt_day, rule
 from app.graph.rules import RuleNotFound
+
+from .base import CalcResult, Rules, Step, config, fmt_day, rule
 
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 

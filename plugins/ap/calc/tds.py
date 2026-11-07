@@ -6,8 +6,9 @@ import re
 
 from pydantic import BaseModel, Field
 
-from app.calc.base import CalcResult, Rules, Step, config, inr, pct, rule
 from app.graph.rules import RuleValue
+
+from .base import CalcResult, Rules, Step, config, inr, pct, rule
 
 
 class TdsInput(BaseModel):
@@ -22,7 +23,11 @@ class TdsInput(BaseModel):
 
 
 def section_of(r: RuleValue) -> str:
-    text = " ".join(str(r.value.get(k) or "") for k in ("text", "items")) + " " + r.statement
+    parts = [str(r.value.get(k) or "") for k in ("text", "items")] + [
+        r.statement,
+        r.condition or "",
+    ]
+    text = " ".join(parts)
     m = re.search(r"\b(19\d[A-Z]?)\b", text)
     return m.group(1) if m else "?"
 

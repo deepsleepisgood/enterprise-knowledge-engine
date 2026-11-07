@@ -4,13 +4,19 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (7 Nov 2026): migrating to BUILD_PLAN v2 (generic engine).** The spec changed: SCOPE.md, CLAUDE.md, BUILD_PLAN.md (v2), TEST_PLAN.md and DESIGN.md are now in the repo root (copied from the user's Downloads). v1 work (phases 0–3 on a hand-written pack, commit 7add2d0) is the checkpoint. The v2 plan below re-does phases 0–3 on the generic design; tick items as they land.
+**Status (7 Nov 2026, evening): v2 P0 and P1 committed; P2 and P3 code written and unit/integration-tested offline (141 tests); first live induced-schema build running.** The spec changed to BUILD_PLAN v2 (generic engine); SCOPE.md, CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md and DESIGN.md are in the repo root. v1 (hand-written pack) is at commit 7add2d0.
+
+**Next actions, in order**
+1. Read the live build output (`python scripts/build_graph.py --auto-freeze`; re-runs are cached). Check: schema coverage of the baseline, facts per status, `other:*` count, failed passages, bindings (`UNBOUND` lines).
+2. Write `tests/integration/test_graph_acceptance.py` (live) for the BUILD_PLAN Phase 2 checks (SOP §14 rows, CM-INF-02 Infra-only until 31 Mar 2027, FAQ excipient superseded by CM-PHA-01, Video 2 per-fact staleness, known_at/valid_on), reading attributes through the plug-in bindings.
+3. Run `SCENARIO_MODES=induced pytest -m live_llm tests/plugins/test_ap_scenarios.py`, then `baseline`; document misses in `reports/scenario_misses_<mode>.md`.
+4. PROGRESS entry for P2/P3, commit, stop the dev DB.
 
 **v2 migration plan (phases 0–3 redone)**
 - [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
 - [x] **P1** connectors (upload incl. folders/zip, api text, eml) → blob store + hash dedupe → type sniffing (signature, not extension) → tier-1 parsers to canonical blocks (docx, pdf text layer, xlsx/csv, pptx, html, md/txt, eml, vtt/srt/`[mm:ss] Speaker:`, json) → generic structure inference (`app/ingest/segment.py`) → metadata inference with provenance (`app/ingest/metadata.py`) → version matching/diff (`app/ingest/versions.py`). No hand-written pack at runtime.
-- [ ] **P2** schema induction (`app/graph/induce.py`, `SCHEMA_MODE=induced|baseline`), extraction to entities + facts, entity resolution (fastembed + LLM confirm), authority resolution on related facts only, `store.facts.get_facts(valid_on, known_at)`, `graph.rules.get_rule` via schema synonyms + plug-in bindings.
-- [ ] **P3** `plugins/ap/` (calculators moved from `app/calc`, params extraction, `bindings.yaml`, `roles.yaml`, baseline_schema from the v1 pack, ops loaders) + `app/plugins/` registry and bind step; scenario test under both schema modes.
+- [~] **P2** schema induction (code + offline tests done; live acceptance pending) (`app/graph/induce.py`, `SCHEMA_MODE=induced|baseline`), extraction to entities + facts, entity resolution (fastembed + LLM confirm), authority resolution on related facts only, `store.facts.get_facts(valid_on, known_at)`, `graph.rules.get_rule` via schema synonyms + plug-in bindings.
+- [~] **P3** `plugins/ap/` (code + offline tests done; live scenarios pending) (calculators moved from `app/calc`, params extraction, `bindings.yaml`, `roles.yaml`, baseline_schema from the v1 pack, ops loaders) + `app/plugins/` registry and bind step; scenario test under both schema modes.
 
 **Local deviations (documented):** embedded Postgres (pgserver) has `vector` but not `pg_trgm`/`btree_gist`; the migration enables them only when available (Neon has them). Without them: GiST index is on the time range alone, and trigram candidate search falls back to Python string similarity. No LibreOffice on this machine → tier-2 legacy files are stored and flagged `needs_attention`. LLM provider stays NVIDIA NIM until Anthropic keys arrive.
 

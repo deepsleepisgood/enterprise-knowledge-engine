@@ -10,8 +10,9 @@ from datetime import date
 from typing import Any
 
 import pytest
-from app.calc.registry import run
+
 from app.graph.rules import RuleNotFound, RuleValue
+from plugins.ap.calc.registry import run
 
 LAKH, CRORE = 100_000, 10_000_000
 MEMO_TO = date(2027, 3, 31)
@@ -23,15 +24,14 @@ def _rv(
     number=None,
     text="",
     items=None,
-    client="all",
+    client=None,
     vtype="number",
     src="sop_v4",
     invalid_at=None,
 ) -> RuleValue:
     return RuleValue(
-        claim_id=hash((topic, parameter, client)) & 0xFFFF,
-        topic=topic,
-        parameter=parameter,
+        fact_id=hash((topic, parameter, client)) & 0xFFFF,
+        attribute=f"{topic}.{parameter}",
         client=client,
         value={"type": vtype, "number": number, "text": text, "items": items},
         statement=text or str(number),
@@ -40,8 +40,8 @@ def _rv(
         source_label="CM-INF-02" if src == "cm_inf_02" else "SOP v4.0",
         locator="4.3",
         passage_id=None,
-        valid_at=None,
-        invalid_at=invalid_at,
+        valid_from=None,
+        valid_until=invalid_at,
     )
 
 
@@ -99,7 +99,7 @@ class FakeRules:
     def get(self, topic, parameter, client=None, as_of=None) -> RuleValue:
         if client == "infra":
             r = INFRA.get((topic, parameter))
-            if r and not (as_of and r.invalid_at and as_of > r.invalid_at):
+            if r and not (as_of and r.valid_until and as_of > r.valid_until):
                 return r
         if (topic, parameter) in GENERAL:
             return GENERAL[(topic, parameter)]
@@ -142,7 +142,10 @@ def test_price_invoice_below_po_passes_at_invoice_price() -> None:
 
 def test_price_cites_rules() -> None:
     r = calc("price", po_unit_price=395, invoice_unit_price=400, quantity=500)
-    assert {c.parameter for c in r.citations} == {"pct_of_line", "cap_inr"}
+    assert {c.attribute for c in r.citations} == {
+        "price_tolerance.pct_of_line",
+        "price_tolerance.cap_inr",
+    }
 
 
 # --- approvals --------------------------------------------------------------------------

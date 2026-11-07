@@ -37,6 +37,11 @@ extend-exclude = ["web", ".pgdata", "migrations/versions"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# Prompt text is part of the LLM cache key: do not reflow it for line length.
+"app/graph/extract.py" = ["E501"]
+"app/graph/induce.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra -m 'not live_llm'"  # live tests: pytest -m live_llm

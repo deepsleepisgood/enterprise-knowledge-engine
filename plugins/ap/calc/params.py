@@ -1,20 +1,22 @@
 """Read calculator inputs from a free-text question with MODEL_FAST (structured output).
 
 Never regex the question wording (TEST_PLAN §3): the model extracts typed values, and
-code converts money units with the pack's table. Few-shot examples are invented, not
-taken from any evaluation question.
+code converts money units with the active schema's unit words. Client names come from the
+graph's client entities. Few-shot examples are invented, not taken from any evaluation
+question.
 """
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from app.core.pack import Pack, get_pack
+from .base import calculators_yaml
 
-PROMPT_VERSION = "params-v1"
+PROMPT_VERSION = "params-v2"
 
 Family = Literal["price", "quantity", "approvals", "einvoice", "msme", "tds", "none"]
 
@@ -69,7 +71,9 @@ class TdsArgs(BaseModel):
 
 class ScenarioParams(BaseModel):
     family: Family
-    client: str | None = Field(None, description="Client key if the question names a client")
+    client: str | None = Field(
+        None, description="The client named in the question, as one of the listed client names"
+    )
     price: PriceArgs | None = None
     quantity: QuantityArgs | None = None
     approvals: ApprovalsArgs | None = None
@@ -96,52 +100,66 @@ Example: "Supplier billed ₹12.5 per kg against a PO price of ₹12 for 800 kg.
 """
 
 
-def build_prompt(question: str, pack: Pack) -> str:
-    natures = pack.pack_file("calculators.yaml").get("tds_natures", {})
+def build_prompt(question: str, clients: list[str]) -> str:
+    natures = calculators_yaml().get("tds_natures", {})
     nature_lines = "\n".join(f"- {k}: {v}" for k, v in natures.items())
-    clients = ", ".join(f"{k} ({c.name})" for k, c in pack.clients.items())
-    return (
-        f"Client keys: {clients}\n\nTDS nature keys:\n{nature_lines}\n\nQuestion:\n{question}"
-    )
+    names = ", ".join(clients) or "none known"
+    return f"Clients: {names}\n\nTDS nature keys:\n{nature_lines}\n\nQuestion:\n{question}"
 
 
-def to_base(money: Money | None, pack: Pack) -> float | None:
+def to_base(money: Money | None, units: dict[str, float], base: str | None = None) -> float | None:
     if money is None:
         return None
-    units = {str(k).lower(): float(v) for k, v in pack.extraction.get("money_units", {}).items()}
-    mult = units.get(money.unit.strip().lower())
+    unit = money.unit.strip().lower().rstrip(".")
+    if base and unit == base.lower():
+        return money.amount
+    mult = {str(k).lower(): float(v) for k, v in units.items()}.get(unit)
     if mult is None:
         raise ValueError(f"unknown money unit {money.unit!r}")
     return money.amount * mult
 
 
-def calculator_inputs(p: ScenarioParams, pack: Pack | None = None) -> dict[str, Any] | None:
+def match_client(name: str | None, clients: list[str]) -> str | None:
+    """The known client this name refers to (exact, or every word of one inside the other)."""
+    if not name:
+        return None
+    words = set(re.findall(r"[a-z0-9]+", name.lower())) - {"ltd", "pvt", "limited", "the"}
+    for c in clients:
+        cw = set(re.findall(r"[a-z0-9]+", c.lower())) - {"ltd", "pvt", "limited", "the"}
+        if name.lower() == c.lower() or (words and (words <= cw or cw <= words)):
+            return c
+    return None
+
+
+def calculator_inputs(
+    p: ScenarioParams,
+    units: dict[str, float],
+    clients: list[str],
+    base: str | None = None,
+) -> dict[str, Any] | None:
     """Turn extracted params into the calculator's input dict (money in base currency)."""
-    pack = pack or get_pack()
     block = getattr(p, p.family, None) if p.family != "none" else None
     if block is None:
         return None
     d = block.model_dump()
     if p.family == "approvals":
-        d["total_incl_gst"] = to_base(block.total_incl_gst, pack)
+        d["total_incl_gst"] = to_base(block.total_incl_gst, units, base)
     elif p.family == "einvoice":
-        d["aato"] = to_base(block.aato, pack)
+        d["aato"] = to_base(block.aato, units, base)
     elif p.family == "tds":
-        d["taxable_value"] = to_base(block.taxable_value, pack)
-        d["purchases_before_inr"] = to_base(block.purchases_before, pack)
+        d["taxable_value"] = to_base(block.taxable_value, units, base)
+        d["purchases_before_inr"] = to_base(block.purchases_before, units, base)
         d.pop("purchases_before", None)
-    client = p.client if p.client in pack.clients else None
-    return {**d, "client": client}
+    return {**d, "client": match_client(p.client, clients)}
 
 
-def extract_params(question: str, structured_fn=None, pack: Pack | None = None) -> ScenarioParams:
+def extract_params(question: str, clients: list[str], structured_fn=None) -> ScenarioParams:
     if structured_fn is None:
         from app.core.llm import structured
 
         structured_fn = structured
-    pack = pack or get_pack()
     return structured_fn(
-        build_prompt(question, pack),
+        build_prompt(question, clients),
         ScenarioParams,
         system=SYSTEM,
         model="fast",

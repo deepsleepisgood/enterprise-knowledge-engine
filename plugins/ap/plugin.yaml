@@ -1,0 +1,8 @@
+# AP plug-in: everything specific to the first tenant's accounts-payable work.
+name: ap
+title: Accounts payable
+description: Deterministic AP calculators, role routing, invoice picker and ERP data loaders.
+calculators: [price, quantity, approvals, einvoice, msme, tds]
+entry: calc.registry
+hooks:
+  on_spreadsheet: loaders.ops.on_spreadsheet

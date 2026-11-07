@@ -7,8 +7,9 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
-from app.calc.base import CalcResult, Rules, Step, config, inr, pct, rule
 from app.graph.rules import RuleNotFound
+
+from .base import CalcResult, Rules, Step, config, inr, pct, rule
 
 EPS = 1e-9
 
@@ -51,7 +52,7 @@ def calculate(inp: QuantityInput, rules: Rules) -> CalcResult:
 
     r_pct = res.cite(rule(rules, cfg, "pct", inp.client, inp.invoice_date))
     allowed = False
-    if r_pct.number > 0 and r_pct.client != "all":
+    if r_pct.number > 0 and r_pct.client not in (None, "all"):
         try:
             r_mat = res.cite(rule(rules, cfg, "materials", inp.client, inp.invoice_date))
             r_cap = res.cite(rule(rules, cfg, "cap_value", inp.client, inp.invoice_date))

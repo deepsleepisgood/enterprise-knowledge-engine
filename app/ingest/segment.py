@@ -273,6 +273,31 @@ def split_documents(blocks: list[Block]) -> list[DocPart]:
                 )
             )
         return parts
+    # A lone top-level heading that opens the file (a Markdown or HTML H1) is the title when a
+    # header table or deeper headings follow it; its sections become the top level.
+    lone = len(starts) == 1 and starts[0] == first_head
+    if lone and not _NUMBERED.match(blocks[first_head].text):
+        title_block = blocks[first_head]
+        after = blocks[first_head + 1 : first_head + 3]
+        deeper = any(b in heads and (b.level or 1) > top for b in blocks[first_head + 1 :])
+        meta_after = next((b for b in after if is_metadata_table(b)), None)
+        if pre_meta is None and (meta_after is not None or deeper):
+            title_para = Block(
+                "paragraph", title_block.text, meta={**title_block.meta, "title": True}
+            )
+            pre = [b for b in preamble if b is not pre_meta] + [title_para]
+            body = [b for b in blocks[first_head + 1 :] if b is not meta_after]
+            return [
+                DocPart(
+                    ordinal=0,
+                    heading=None,
+                    label=None,
+                    title=title_block.text,
+                    meta_kv=table_kv(meta_after) if meta_after else {},
+                    preamble=pre,
+                    blocks=body,
+                )
+            ]
     pre = [b for b in preamble if b is not pre_meta]
     return [
         DocPart(

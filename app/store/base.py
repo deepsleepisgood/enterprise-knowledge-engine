@@ -78,3 +78,8 @@ def _extensions(url: str) -> frozenset[str]:  # cached per database
 
 def has_extension(session: Session, name: str) -> bool:
     return name in _extensions(str(session.get_bind().url))
+
+
+def advisory_lock(session: Session, key: str) -> None:
+    """Transaction-scoped lock (released at commit or rollback)."""
+    session.execute(text("SELECT pg_advisory_xact_lock(hashtext(:k))"), {"k": key})

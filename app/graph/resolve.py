@@ -1,149 +1,185 @@
-"""Authority resolution: decide which claim is current for each (topic, parameter, client).
+"""Authority resolution (BUILD_PLAN Phase 2d): which assertion holds in each (subject, attribute).
 
-Pure function over ClaimRecs, so the precedence rules are unit-tested without a database.
+Pure function over `Assertion`s, so precedence is unit-tested without a database. It is run on
+one (subject, attribute) group at a time, with only that group's facts (CLAUDE.md rule 12).
 
-Claims are grouped by (topic, parameter, subject); subject is set only for tables that
-repeat one parameter per item (e.g. one row per exception code).
-
-Rules (BUILD_PLAN Phase 2):
-1. A client-scoped claim overrides the general rule for that client only (claims are
-   bucketed by client; the "all" bucket is never touched by a client bucket).
-2. Within a bucket, the lowest authority_rank among sources with status `current` wins
-   (ties: the later valid_at). Its invalid_at is the source's valid_to (memo expiry).
-3. A claim from another source that states the same value is `corroborating`.
-4. A claim that states a different value is `superseded`: invalid_at is the day before the
-   winner took effect (or its own start, if it started later), and the winner records
-   `supersedes_key`. Two *current* sources that disagree also open a `value` conflict.
-5. `practice` claims never compete with rules. They stay `current` as expert tips; if one
-   contradicts the current rule it opens a `practice_vs_rule` conflict for the owner.
-6. Expiry (valid_to in the past) is applied on read by rules.py, not here.
-A bucket with no claim from a current source gets status `pending` (nothing
-authoritative says it), unless a general current rule settles it.
+1. Scope: assertions are bucketed by client. A client-scoped fact overrides the general rule
+   for that client only; the general bucket is never touched by a client bucket.
+2. Within a bucket, the lowest authority_rank among sources with status `current` wins (ties:
+   the later start). Authority beats recency: a newer fact from a lower-ranked source loses.
+3. Same value (or narrower scope) from another source: `corroborating`.
+4. Different value: `superseded`, valid until the day before the winner starts; if it did not
+   start earlier than the winner, `overridden` with an empty interval (kept for audit). Two
+   current sources that disagree also open a `value` conflict.
+5. Practice never overrides a rule: it stays `current` as a tip; a contradiction opens a
+   `practice_vs_rule` conflict.
+6. No current source in a bucket: facts from superseded sources are `superseded` (their source's
+   validity ends them); others are `pending` for the owner, unless a general rule settles them.
+Validity is a closed-open day interval [valid_from, valid_to); `None` is unbounded.
 """
 
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import timedelta
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import date, timedelta
+from typing import Any, Literal
 
-from app.graph.compare import Comparator, deterministic
-from app.graph.schema import ClaimRec, ConflictRec, ResolveResult
-
-AUTHORITATIVE_STATUSES = {"current"}
-
-
-def _winner_key(c: ClaimRec) -> tuple[int, int]:
-    return (c.authority_rank, -(c.valid_at.toordinal() if c.valid_at else 0))
+Verdict = Literal["same", "different", "narrower", "unknown"]
+AUTHORITATIVE = {"current"}
 
 
-def _retire(loser: ClaimRec, winner: ClaimRec, why: str) -> None:
-    loser.status = "superseded"
-    if winner.valid_at and loser.valid_at and loser.valid_at < winner.valid_at:
-        loser.invalid_at = winner.valid_at - timedelta(days=1)
-    else:
-        loser.invalid_at = loser.valid_at
+@dataclass
+class Assertion:
+    key: str
+    subject_id: str
+    attribute: str
+    client: str  # canonical client name or "all"
+    value: dict[str, Any]
+    kind: str
+    statement: str
+    source_id: str
+    source_label: str
+    source_status: str
+    authority_rank: int
+    asserted_from: date | None
+    asserted_to: date | None  # last day in force (inclusive), from the fact or its source
+    scope: dict[str, Any] = field(default_factory=dict)
+    # set by resolution
+    status: str = "pending"
+    valid_from: date | None = None
+    valid_to: date | None = None  # exclusive
+    supersedes_key: str | None = None
+    reason: str = ""
+
+
+@dataclass
+class ConflictRec:
+    subject_id: str
+    attribute: str
+    client: str
+    a_key: str
+    b_key: str
+    kind: str
+    authoritative_key: str | None
+    reason: str
+
+
+Comparator = Callable[[Assertion, Assertion], Verdict]
+
+
+def _end(a: Assertion) -> date | None:
+    return a.asserted_to + timedelta(days=1) if a.asserted_to else None
+
+
+def _winner_key(a: Assertion) -> tuple[int, int]:
+    return (a.authority_rank, -(a.asserted_from.toordinal() if a.asserted_from else 0))
+
+
+def _keep(a: Assertion, status: str, reason: str) -> None:
+    a.status, a.reason = status, reason
+    a.valid_from, a.valid_to = a.asserted_from, _end(a)
+
+
+def _retire(loser: Assertion, winner: Assertion, why: str) -> None:
     loser.reason = why
+    loser.valid_from = loser.asserted_from
+    if winner.asserted_from and (
+        loser.asserted_from is None or loser.asserted_from < winner.asserted_from
+    ):
+        loser.status = "superseded"
+        end = _end(loser)
+        loser.valid_to = min(winner.asserted_from, end) if end else winner.asserted_from
+    elif winner.asserted_from is None:
+        loser.status, loser.valid_to = "superseded", loser.asserted_from
+    else:
+        loser.status = "overridden"  # never in force: the winner started first
+        loser.valid_to = loser.asserted_from
     if winner.supersedes_key is None:
         winner.supersedes_key = loser.key
 
 
-def _settle_against(
-    others: list[ClaimRec],
-    winner: ClaimRec,
-    compare: Comparator,
-    conflicts: list[ConflictRec],
+def _settle(
+    others: list[Assertion], winner: Assertion, compare: Comparator, conflicts: list[ConflictRec]
 ) -> None:
-    for other in sorted(others, key=_winner_key):
-        verdict = compare(other, winner)
+    for o in sorted(others, key=_winner_key):
+        verdict = compare(o, winner)
         if verdict in ("same", "narrower"):
-            other.status = "corroborating"
-            other.reason = f"agrees with {winner.source_id}"
+            _keep(o, "corroborating", f"agrees with {winner.source_label}")
             continue
-        other_is_current = other.source_status in AUTHORITATIVE_STATUSES
-        if verdict == "unknown" and other_is_current:
-            # Two current documents worded differently: assume consistent; the conflict
-            # scan (Phase 6) judges these with the LLM.
-            other.status = "corroborating"
-            other.reason = f"current source; wording differs from {winner.source_id}"
+        current = o.source_status in AUTHORITATIVE
+        if verdict == "unknown" and current:
+            _keep(o, "corroborating", f"current source; wording differs from {winner.source_label}")
             continue
-        _retire(
-            other, winner, f"{winner.source_id} (rank {winner.authority_rank}) takes precedence"
-        )
-        if other_is_current and verdict == "different":
+        _retire(o, winner, f"{winner.source_label} (rank {winner.authority_rank}) takes precedence")
+        if current and verdict == "different":
             conflicts.append(
                 ConflictRec(
-                    topic=winner.topic,
-                    parameter=winner.parameter,
-                    client=winner.client,
-                    a_key=winner.key,
-                    b_key=other.key,
-                    kind="value",
-                    authoritative_key=winner.key,
-                    reason=f"Both sources are current; {winner.source_id} has higher authority.",
+                    winner.subject_id,
+                    winner.attribute,
+                    winner.client,
+                    winner.key,
+                    o.key,
+                    "value",
+                    winner.key,
+                    f"Both sources are current; {winner.source_label} has higher authority.",
                 )
             )
 
 
-def resolve(claims: list[ClaimRec], compare: Comparator = deterministic) -> ResolveResult:
+def resolve_group(group: list[Assertion], compare: Comparator) -> list[ConflictRec]:
     conflicts: list[ConflictRec] = []
-    groups: dict[tuple[str, str, str], list[ClaimRec]] = defaultdict(list)
-    for c in claims:
-        subject = str(c.scope.get("subject") or "").strip().lower()
-        groups[(c.topic, c.parameter, subject)].append(c)
-
-    for (_topic, _param, _subject), group in groups.items():
-        rules = [c for c in group if c.kind != "practice"]
-        practices = [c for c in group if c.kind == "practice"]
-
-        buckets: dict[str, list[ClaimRec]] = defaultdict(list)
-        for c in rules:
-            buckets[c.client].append(c)
-
-        winners: dict[str, ClaimRec] = {}
-        # General bucket first so client buckets can fall back to it.
-        for client in sorted(buckets, key=lambda k: (k != "all", k)):
-            bucket = buckets[client]
-            eligible = [c for c in bucket if c.source_status in AUTHORITATIVE_STATUSES]
-            if eligible:
-                winner = min(eligible, key=_winner_key)
-                winner.status = "current"
-                winner.invalid_at = winner.source_valid_to
-                winner.reason = "highest-authority current source" + (
-                    f" for {client}" if client != "all" else ""
+    rules = [a for a in group if a.kind != "practice"]
+    practices = [a for a in group if a.kind == "practice"]
+    buckets: dict[str, list[Assertion]] = defaultdict(list)
+    for a in rules:
+        buckets[a.client].append(a)
+    winners: dict[str, Assertion] = {}
+    for client in sorted(buckets, key=lambda k: (k != "all", k)):
+        bucket = buckets[client]
+        eligible = [a for a in bucket if a.source_status in AUTHORITATIVE]
+        if eligible:
+            w = min(eligible, key=_winner_key)
+            _keep(
+                w,
+                "current",
+                "highest-authority current source" + (f" for {client}" if client != "all" else ""),
+            )
+            winners[client] = w
+            _settle([a for a in bucket if a is not w], w, compare, conflicts)
+        elif client != "all" and "all" in winners:
+            _settle(bucket, winners["all"], compare, conflicts)
+        else:
+            for a in bucket:
+                if a.source_status == "superseded":
+                    _keep(a, "superseded", f"{a.source_label} is superseded")
+                else:
+                    _keep(a, "pending", "no current source states this; needs owner review")
+    for p in practices:
+        _keep(p, "current", "expert practice (a tip; never overrides a rule)")
+        rule = winners.get(p.client) or winners.get("all")
+        if rule is not None and compare(p, rule) == "different":
+            conflicts.append(
+                ConflictRec(
+                    p.subject_id,
+                    p.attribute,
+                    p.client,
+                    rule.key,
+                    p.key,
+                    "practice_vs_rule",
+                    rule.key,
+                    f"Practice in {p.source_label} differs from {rule.source_label}.",
                 )
-                winners[client] = winner
-                _settle_against([c for c in bucket if c is not winner], winner, compare, conflicts)
-            elif client != "all" and "all" in winners:
-                # e.g. an outdated client-specific claim when only the general rule is current
-                _settle_against(bucket, winners["all"], compare, conflicts)
-            else:
-                for c in bucket:
-                    c.status = "pending"
-                    c.reason = "no current source states this; needs owner review"
-
-        for p in practices:
-            p.status = "current"
-            p.reason = "expert practice (attached as a tip, never overrides a rule)"
-            rule = winners.get(p.client) or winners.get("all")
-            if rule is not None and compare(p, rule) == "different":
-                conflicts.append(
-                    ConflictRec(
-                        topic=p.topic,
-                        parameter=p.parameter,
-                        client=p.client,
-                        a_key=rule.key,
-                        b_key=p.key,
-                        kind="practice_vs_rule",
-                        authoritative_key=rule.key,
-                        reason=f"Practice in {p.source_id} differs from {rule.source_id}.",
-                    )
-                )
-    return ResolveResult(claims=claims, conflicts=conflicts)
+            )
+    return conflicts
 
 
-def summarise(result: ResolveResult) -> dict[str, int]:
-    out: dict[str, int] = defaultdict(int)
-    for c in result.claims:
-        out[c.status] += 1
-    out["conflicts"] = len(result.conflicts)
-    return dict(out)
+def resolve(assertions: list[Assertion], compare: Comparator) -> list[ConflictRec]:
+    groups: dict[tuple[str, str], list[Assertion]] = defaultdict(list)
+    for a in assertions:
+        groups[(a.subject_id, a.attribute)].append(a)
+    out: list[ConflictRec] = []
+    for g in groups.values():
+        out += resolve_group(g, compare)
+    return out
