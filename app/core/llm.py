@@ -20,7 +20,9 @@ import hashlib
 import json
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, TypeVar
@@ -101,8 +103,24 @@ def _cache_path(key: str) -> Path:
 _log_lock = threading.Lock()
 
 
+_trace: ContextVar[str | None] = ContextVar("llm_trace", default=None)
+
+
+@contextmanager
+def trace(tag: str) -> Iterator[None]:
+    """Tag every LLM call made inside this block (per thread / task) in the call log, so a
+    caller can add up tokens, cost and calls for one unit of work (e.g. one eval question)."""
+    token = _trace.set(tag)
+    try:
+        yield
+    finally:
+        _trace.reset(token)
+
+
 def _log(record: dict[str, Any]) -> None:
     """Append one JSON line. Locked: extraction runs in parallel threads."""
+    if _trace.get() is not None:
+        record = {**record, "trace": _trace.get()}
     log_dir = get_settings().log_dir
     log_dir.mkdir(parents=True, exist_ok=True)
     line = json.dumps(record, ensure_ascii=False) + "\n"

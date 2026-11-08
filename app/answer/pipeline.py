@@ -193,6 +193,14 @@ def ask(
                     )
                     calc = _calc_view(f"calculator:{plugin}.{family}", res)
                     base["route"] = calc.route
+                    diag["calculator"] = {
+                        "family": family,
+                        "inputs": inputs,
+                        "passed": res.passed,
+                        "decision": res.decision,
+                        "exception_code": res.exception_code,
+                        "result": res.result,
+                    }
             except (RuleNotFound, ValueError) as exc:
                 diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
             if calc is None:

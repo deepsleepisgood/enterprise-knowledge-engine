@@ -12,10 +12,8 @@ from __future__ import annotations
 
 import csv
 import os
-import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -39,85 +37,7 @@ pytestmark = [
 
 MODES = [m.strip() for m in os.environ.get("SCENARIO_MODES", "induced").split(",") if m.strip()]
 
-FAMILY_BY_SECTION = {"4.2": "price", "6": "tds", "7": "approvals", "9": "msme", "5.4": "einvoice"}
-
-
-def _num(s: str) -> float:
-    return float(s.replace(",", ""))
-
-
-def _money_all(text: str) -> list[float]:
-    return [_num(m) for m in re.findall(r"₹\s?([\d,]+(?:\.\d+)?)", text)]
-
-
-def _date(text: str) -> list[date]:
-    return [
-        datetime.strptime(m, "%d %B %Y").date()
-        for m in re.findall(r"(\d{1,2} [A-Z][a-z]+ \d{4})", text)
-    ]
-
-
-@dataclass
-class Expected:
-    family: str
-    fields: dict[str, Any]
-
-
-def expected_from_gold(section: str, gold: str) -> Expected:
-    fam = FAMILY_BY_SECTION[section]
-    g = gold.strip()
-    if fam == "price":
-        excess = _num(re.search(r"Excess ₹([\d,]+(?:\.\d+)?)", g).group(1))
-        limit = _num(re.findall(r"=\s*₹([\d,]+(?:\.\d+)?)", g)[-1])
-        return Expected(fam, {"passed": g.startswith("Yes"), "excess": excess, "limit": limit})
-    if fam == "tds":
-        if "TDS_SECTION_UNCLEAR" in g:
-            return Expected(fam, {"exception": "TDS_SECTION_UNCLEAR"})
-        sec = re.search(r"\b(19\d[A-Z])\b", g).group(1)
-        rate = _num(re.search(r"at ([\d.]+)%", g).group(1))
-        amount = _num(re.search(r":\s*₹([\d,]+(?:\.\d+)?)", g).group(1))
-        return Expected(fam, {"section": sec, "rate": rate, "amount": amount})
-    if fam == "approvals":
-        return Expected(fam, {"decision": g.split(" (")[0].rstrip(".")})
-    if fam == "msme":
-        due, run = _date(g)[:2]
-        return Expected(fam, {"due_date": due.isoformat(), "run_date": run.isoformat()})
-    return Expected(
-        fam,
-        {"passed": g.startswith("Yes"), "exception": "IRN_MISSING" if "IRN_MISSING" in g else None},
-    )
-
-
-def actual_fields(family: str, res) -> dict[str, Any]:
-    r = res.result
-    if family == "price":
-        return {
-            "passed": res.passed,
-            "excess": round(r["excess"], 2),
-            "limit": round(r["limit"], 2),
-        }
-    if family == "tds":
-        if res.exception_code == "TDS_SECTION_UNCLEAR":
-            return {"exception": "TDS_SECTION_UNCLEAR"}
-        if "options" in r:
-            return {"options": r["options"]}
-        return {"section": r["section"], "rate": r["rate"], "amount": round(r["amount"], 2)}
-    if family == "approvals":
-        return {"decision": res.decision}
-    if family == "msme":
-        return {"due_date": r["due_date"], "run_date": r["run_date"]}
-    return {"passed": res.passed, "exception": res.exception_code}
-
-
-def _same(exp: dict[str, Any], got: dict[str, Any]) -> bool:
-    for k, v in exp.items():
-        g = got.get(k)
-        if isinstance(v, float):
-            if g is None or abs(float(g) - v) > 0.01:
-                return False
-        elif g != v:
-            return False
-    return True
+from evaluation.scenario import expected_from_gold, from_calc, same  # noqa: E402
 
 
 def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:
@@ -167,9 +87,9 @@ def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:
                         rec["cause"] = f"routing: extracted family {params.family!r}"
                     else:
                         res = calculate(s, onto, "ap", params.family, inputs, today=TODAY)
-                        rec["got"] = actual_fields(params.family, res)
+                        rec["got"] = from_calc(params.family, res)
                         rec["decision"] = res.decision
-                        rec["ok"] = _same(exp.fields, rec["got"])
+                        rec["ok"] = same(exp.fields, rec["got"])
                         if not rec["ok"]:
                             rec["cause"] = f"mismatch; inputs={inputs}"
                 except Exception as exc:
