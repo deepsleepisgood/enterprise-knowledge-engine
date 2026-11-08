@@ -37,7 +37,7 @@ pytestmark = [
 
 MODES = [m.strip() for m in os.environ.get("SCENARIO_MODES", "induced").split(",") if m.strip()]
 
-from evaluation.scenario import expected_from_gold, from_calc, same  # noqa: E402
+from evaluation.scenario import expected_from_gold, from_calc, same, tolerances  # noqa: E402
 
 
 def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:
@@ -89,7 +89,7 @@ def run_scenarios(mode: str) -> dict[str, dict[str, Any]]:
                         res = calculate(s, onto, "ap", params.family, inputs, today=TODAY)
                         rec["got"] = from_calc(params.family, res)
                         rec["decision"] = res.decision
-                        rec["ok"] = same(exp.fields, rec["got"])
+                        rec["ok"] = same(exp.fields, rec["got"], tolerances(row["question"]))
                         if not rec["ok"]:
                             rec["cause"] = f"mismatch; inputs={inputs}"
                 except Exception as exc:

@@ -166,3 +166,22 @@ def test_complementary_values_from_one_source_are_one_list() -> None:
     assert both.status == "current"
     assert tue.status == fri.status == "corroborating"
     assert old.status == "superseded" and conflicts == []
+
+
+def test_tie_goes_to_where_the_document_first_states_the_rule() -> None:
+    summary = mk("sop4", 1)
+    summary.position = 90  # the change table at the end
+    section = mk("sop4", 1)
+    section.position = 12  # the rule's own section
+    resolve_group([summary, section], deterministic)
+    assert section.status == "current" and summary.status == "corroborating"
+
+
+def test_reference_to_another_source_does_not_beat_it() -> None:
+    sop = mk(
+        "sop4", text="bulk-material tolerance per Client Memo CM-X-02", vtype="text", client="Infra"
+    )
+    memo = mk("memo", 5, client="Infra")
+    sop.authority_rank, memo.authority_rank = 1, 2  # the SOP outranks the memo
+    resolve_group([sop, memo], deterministic)
+    assert memo.status == "current"

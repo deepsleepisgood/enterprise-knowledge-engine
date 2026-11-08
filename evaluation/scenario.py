@@ -92,13 +92,27 @@ def from_card(card: dict[str, Any]) -> tuple[str | None, dict[str, Any] | None]:
         return c.get("family"), None
 
 
-def same(exp: dict[str, Any], got: dict[str, Any] | None) -> bool:
+def tolerances(question: str) -> dict[str, float]:
+    """How precisely the question lets a figure be known. The gold excess of some price
+    scenarios was computed from an invoice price the question rounds to whole rupees, so the
+    excess is only known to +/- half a unit of the stated price times the quantity."""
+    qty = re.search(r"for ([\d,]+) units", question)
+    price = re.search(r"charges ₹([\d,]+(?:\.(\d+))?) per unit", question)
+    if not qty or not price:
+        return {}
+    step = 10 ** -len(price.group(2) or "")
+    return {"excess": 0.5 * step * _num(qty.group(1)) + 0.01}
+
+
+def same(
+    exp: dict[str, Any], got: dict[str, Any] | None, tol: dict[str, float] | None = None
+) -> bool:
     if got is None:
         return False
     for k, v in exp.items():
         g = got.get(k)
         if isinstance(v, float):
-            if g is None or abs(float(g) - v) > 0.01:
+            if g is None or abs(float(g) - v) > (tol or {}).get(k, 0.01):
                 return False
         elif g != v:
             return False

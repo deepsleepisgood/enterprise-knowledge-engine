@@ -253,3 +253,72 @@ def test_uncited_number_gets_the_evidence_that_states_it() -> None:
     assert cards.attach_number_sources(gen, evidence, ["notice in November?"]) == 1
     assert gen.sentences[0].sources == ["P1"]
     assert gen.sentences[1].sources == ["P1", "P2"]
+
+
+def test_rule_number_from_its_one_percentage() -> None:
+    from app.graph.rules import RuleNotFound, RuleValue
+
+    def rv(text: str) -> RuleValue:
+        return RuleValue(
+            1,
+            "tds.no_pan_rate",
+            None,
+            {"text": text},
+            "",
+            "current",
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+
+    assert rv("20% or the applicable rate, whichever is higher").number == 20.0
+    try:
+        _ = rv("1% for individuals, 2% for others").number
+        raise AssertionError("two percentages must not pick one")
+    except RuleNotFound:
+        pass
+
+
+def test_params_guards_need_the_question_to_say_so() -> None:
+    from plugins.ap.calc.params import ScenarioParams, extract_params
+
+    def fake(out: dict):
+        return lambda *a, **k: ScenarioParams.model_validate(out)
+
+    tds = {
+        "family": "tds",
+        "tds": {
+            "nature": "professional",
+            "reverse_charge_service": False,
+            "taxable_value": {"amount": 100, "unit": "INR"},
+            "pan_available": False,
+        },
+    }
+    assert extract_params("Legal advice, ₹100. What TDS?", [], fake(tds)).tds.pan_available
+    p = extract_params("Legal advice; the supplier has no PAN.", [], fake(tds))
+    assert not p.tds.pan_available
+
+
+def test_stated_agreed_term_counts_as_written_unless_said_otherwise() -> None:
+    from plugins.ap.calc.params import ScenarioParams, extract_params
+
+    out = {
+        "family": "msme",
+        "msme": {
+            "category": "small",
+            "acceptance_date": "2026-04-01",
+            "agreed_term_days": 60,
+            "written_agreement": False,
+        },
+    }
+
+    def fake(*a, **k):
+        return ScenarioParams.model_validate(out)
+
+    p = extract_params("Small enterprise; agreed payment term 60 days.", [], fake)
+    assert p.msme.written_agreement
+    p = extract_params("Small enterprise; term of 60 days, no written agreement.", [], fake)
+    assert not p.msme.written_agreement

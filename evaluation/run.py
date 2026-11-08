@@ -153,7 +153,7 @@ def run_question(q: Question, opt: Options, run_id: str) -> dict[str, Any]:
             exp = sc.expected_from_gold(q.gold_section, q.gold)
             fam, got = sc.from_card(card)
             if fam == exp.family and got:
-                ok = sc.same(exp.fields, got)
+                ok = sc.same(exp.fields, got, sc.tolerances(q.question))
                 reason = f"expected {exp.fields}; calculator {fam}: {got}"
             else:
                 # No calculator: every figure must be in the text AND the judge, who sees the

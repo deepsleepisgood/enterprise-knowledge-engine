@@ -64,7 +64,9 @@ def topic_entity(resolver: Resolver, onto: Ontology, topic_key: str) -> str:
     return eid
 
 
-def _assertion_from_row(r: fstore.FactRow, src: Any, onto: Ontology) -> Assertion:
+def _assertion_from_row(
+    r: fstore.FactRow, src: Any, onto: Ontology, order: dict[str, int] | None = None
+) -> Assertion:
     m = r.meta or {}
     return Assertion(
         key=r.origin_key,
@@ -81,6 +83,7 @@ def _assertion_from_row(r: fstore.FactRow, src: Any, onto: Ontology) -> Assertio
         asserted_from=_d(m.get("asserted_from")),
         asserted_to=_d(m.get("asserted_to")),
         scope=r.scope or {},
+        position=(order or {}).get(r.passage_id or "", 0),
     )
 
 
@@ -149,8 +152,11 @@ def publish(
             [r.source_id for r in rows.values() if r.source_id and r.source_id not in sources],
         )
         sources.update(extra_src)
+        pids = [r.passage_id for r in rows.values() if r.passage_id]
+        pids += [d.passage_id for d, _, _ in by_group.get((subject_id, attribute), [])]
+        order = {pid: p.ordinal for pid, p in estore.passages_by_ids(session, pids).items()}
         assertions: dict[str, Assertion] = {
-            k: _assertion_from_row(r, sources[r.source_id], onto)
+            k: _assertion_from_row(r, sources[r.source_id], onto, order)
             for k, r in rows.items()
             if r.source_id in sources
         }
@@ -176,6 +182,7 @@ def publish(
                 asserted_from=d.asserted_from,
                 asserted_to=d.asserted_to,
                 scope=sc,
+                position=order.get(d.passage_id, 0),
             )
         conflicts = resolve_group(list(assertions.values()), compare)
         for k, a in assertions.items():

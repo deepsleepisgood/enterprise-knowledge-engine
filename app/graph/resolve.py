@@ -49,6 +49,7 @@ class Assertion:
     asserted_from: date | None
     asserted_to: date | None  # last day in force (inclusive), from the fact or its source
     scope: dict[str, Any] = field(default_factory=dict)
+    position: int = 0  # passage order in its source: ties go to where the rule is first stated
     # set by resolution
     status: str = "pending"
     valid_from: date | None = None
@@ -93,10 +94,25 @@ def _part_of(small: Assertion, big: Assertion) -> bool:
 
 
 def _pick(eligible: list[Assertion]) -> Assertion:
-    """Highest authority (then latest start); among those, the widest list."""
-    best = min(_winner_key(a) for a in eligible)
-    top = [a for a in eligible if _winner_key(a) == best]
-    return max(top, key=lambda a: len(_items(a)))
+    """Highest authority (then latest start); among those, the widest list, then the
+    statement that comes first in its document (a rule section before its summary table).
+    A statement that defers to another eligible source ("per Client Memo CM-X-01") does not
+    win over that source."""
+    own = [a for a in eligible if _defers_to(a, eligible) is None] or eligible
+    best = min(_winner_key(a) for a in own)
+    top = [a for a in own if _winner_key(a) == best]
+    return max(top, key=lambda a: (len(_items(a)), -a.position))
+
+
+def _defers_to(a: Assertion, others: list[Assertion]) -> Assertion | None:
+    """The other source that `a` names as where the rule is stated, if one is in the group."""
+    v = a.value or {}
+    text = " ".join(str(x) for x in [v.get("text") or "", *(v.get("items") or [])]).lower()
+    for b in others:
+        label = (b.source_label or "").lower()
+        if b.source_id != a.source_id and len(label) >= 4 and label in text:
+            return b
+    return None
 
 
 def _keep(a: Assertion, status: str, reason: str) -> None:

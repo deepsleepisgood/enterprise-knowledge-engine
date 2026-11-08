@@ -11,6 +11,7 @@ A missing rule raises `RuleNotFound`; there is never a default.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
@@ -50,6 +51,11 @@ class RuleValue:
     def number(self) -> float:
         n = self.value.get("number")
         if n is None:
+            # "20% or the applicable rate, whichever is higher": the rule's own figure is its
+            # one percentage (how it combines with other rules is the caller's logic).
+            pcts = re.findall(r"(\d+(?:\.\d+)?)\s*(?:%|per ?cent)", self.text, re.I)
+            if len(set(pcts)) == 1:
+                return float(pcts[0])
             raise RuleNotFound(f"{self.attribute} has no numeric value ({self.value.get('text')})")
         return float(n)
 

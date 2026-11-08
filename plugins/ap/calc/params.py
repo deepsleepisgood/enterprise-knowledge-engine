@@ -158,7 +158,7 @@ def extract_params(question: str, clients: list[str], structured_fn=None) -> Sce
         from app.core.llm import structured
 
         structured_fn = structured
-    return structured_fn(
+    out: ScenarioParams = structured_fn(
         build_prompt(question, clients),
         ScenarioParams,
         system=SYSTEM,
@@ -166,3 +166,13 @@ def extract_params(question: str, clients: list[str], structured_fn=None) -> Sce
         prompt_version=PROMPT_VERSION,
         max_tokens=4096,
     )
+    # A missing PAN is a fact the question must state; silence means the normal rate.
+    if out.tds is not None and not re.search(r"\bPAN\b", question, re.I):
+        out.tds.pan_available = True
+    # An agreed payment term is the contract term unless the question says it is not written.
+    m = out.msme
+    if m is not None and m.agreed_term_days and not m.written_agreement:
+        unwritten = r"\b(no|not|without|verbal|oral|unwritten)\b[^.;]{0,30}\b(written|agreement)"
+        if not re.search(unwritten, question, re.I):
+            m.written_agreement = True
+    return out
