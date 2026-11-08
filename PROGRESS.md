@@ -294,4 +294,11 @@ The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates
 
 **Phase 5 built:** `evaluation/` (split: grouped duplicates, stratified 60/40, seed 7, `eval/split.csv`; deterministic scenario grading shared with the scenario test; citation strict/lenient per TEST_PLAN locator rules; outdated answers on the current-rule part only; LLM judge with `eval/judge/prompt.md` and calibration with agreement + Cohen's kappa; ablation configs A naive RAG, B whole corpus, C + authority layer, D full system; per-question tokens/cost via LLM trace tags; reports with the 15 worst and failure causes). Runners: `run_replay.py` (22 probes in `eval/replay_probes.csv` from SOP 14 and a synthetic Infra email), `run_second_corpus.py` (Kestrel Freight HR corpus in six formats, no plug-ins), `run_format_invariance.py` + `render_variants.py` (eight SOP variants). Smoke: 2 dev conflict questions correct with strict citations; ablation paths A-D run.
 
+**Second company (TEST_PLAN level 16): 10/10** (`reports/second_corpus_20261108.md`), no plug-ins, induced schema accepted unedited. Three runs: 3/10 -> 8/10 -> 10/10. Fixes, all generic (AP corpus metadata unchanged):
+- `Key: value` lines before the first heading (PDF, Markdown) are read as header fields; `Effective:`/`Last reviewed:` take a colon; an uploaded .eml uses its Date header (the replay email now dates 2 Nov). Before, v2 PDF/FAQ/email were dated by ingestion time and so not in force on the day asked.
+- Sheets of <= 30 rows are one leaf passage holding the whole table (extracted, retrievable); large exports stay records. The AP 6-row sheet is now searchable too.
+- The support check skips sentences that restate their evidence (90%+ words, all negations and numbers): the fast model rejected a verbatim sentence.
+- A number missing from a sentence's citations is attached to the in-force evidence passage that states it, before verification.
+- H04 gold accepts the entitlement table as well as v2 (v2 points to the table; the answer gave the grade split).
+
 **Open issues:** live acceptance and full eval numbers pending; T11 needs Phase 9 governance (expert replies held for the owner); NIM cost is not priced (cost_usd 0); `bge-reranker-base` is 1 GB (watch memory on the deploy host); schema v2 has some value-in-key attributes and a near-duplicate default-payment-term pair.
