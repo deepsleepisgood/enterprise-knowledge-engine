@@ -98,6 +98,17 @@ def _calc_text(c: CalcView | None) -> str | None:
     return f"decision: {c.decision}\nexception: {c.exception_code}\n{rows}"
 
 
+def _merge_older(older: list[dict], conflicting: list[dict], limit: int = 4) -> list[dict]:
+    """Older versions first, then sources the conflict scan found disagreeing (no repeats)."""
+    out, seen = [], set()
+    for o in [*older, *conflicting]:
+        key = (o.get("file"), str(o.get("older_value", "")).lower())
+        if key not in seen:
+            seen.add(key)
+            out.append(o)
+    return out[:limit]
+
+
 def ask(
     question: str,
     client: str | None = None,
@@ -297,14 +308,18 @@ def ask(
             decision=(calc.decision if calc else gen.decision),
             exception_code=calc.exception_code if calc else None,
             next_owner=calc.next_owner if calc else None,
-            older_sources=cards.older_sources(
-                s, onto, in_force, not_in_force, as_of, today, cited_keys=cited_keys
+            older_sources=_merge_older(
+                cards.older_sources(
+                    s, onto, in_force, not_in_force, as_of, today, cited_keys=cited_keys
+                ),
+                [] if as_of else cards.conflicting_sources(s, sorted(set(cited_facts))),
             ),
             expert_tip=cards.expert_tip(
                 s,
                 got.tips,
                 as_of or today,
                 {r.doc_type for r in onto.source_ranking if r.practice},
+                [(p.id, p.score) for p in got.passages],
             ),
             related=[q for q in gen.related if q.strip()][:4],
         )

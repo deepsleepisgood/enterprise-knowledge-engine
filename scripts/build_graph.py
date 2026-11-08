@@ -79,6 +79,7 @@ def main() -> None:
         action="store_true",
         help="no extraction or evolution: re-run authority resolution on every group, bind, index",
     )
+    ap.add_argument("--no-conflicts", action="store_true", help="skip the conflict scan")
     args = ap.parse_args()
     settings = get_settings()
     started, since = time.perf_counter(), datetime.now(UTC).isoformat()
@@ -230,6 +231,11 @@ def main() -> None:
 
     t0 = time.perf_counter()
     print("embedding index:", index_all(), f"in {time.perf_counter() - t0:.0f}s")
+    if not args.no_conflicts:
+        from app.graph.conflicts import scan_tenant
+
+        t0 = time.perf_counter()
+        print("conflict scan:", scan_tenant(), f"in {time.perf_counter() - t0:.0f}s")
     print("LLM:", llm_usage(since))
 
 

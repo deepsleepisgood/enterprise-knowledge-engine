@@ -108,7 +108,7 @@ def test_t4_infra_saturday_no_grn(asker) -> None:
     practice = f"{tip.get('text', '')} {card['rule']['text']}".lower()
     assert "tuesday" in practice, _why(card)
     cited = labels + " " + str((tip.get("citation") or {}).get("short_label", ""))
-    assert "Interview 1" in cited, _why(card)
+    assert "interview 1" in cited.lower(), _why(card)  # label wording varies by build
 
 
 def test_t5_price_calculation(asker) -> None:

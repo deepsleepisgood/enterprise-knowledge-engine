@@ -11,7 +11,7 @@ from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app.store.base import day_start, tenant, utcnow
@@ -309,6 +309,43 @@ def nearest(
     )
     q = _narrow(q, statuses, kinds).order_by(dist).limit(k)
     return [(_row(f, n, lbl, loc), float(s)) for f, n, lbl, loc, s in session.execute(q)]
+
+
+def nearest_current(
+    session: Session, fact_ids: list[int], k: int = 3, min_sim: float = 0.8
+) -> list[tuple[int, int, float]]:
+    """(fact id, in-force rule id, similarity): for each of `fact_ids`, the `k` live rules (not
+    practice) in force (current or corroborating) nearest by embedding, outside the fact's own
+    group. A general fact (no client) is compared with every client's rules: an FAQ that says
+    "10% on cement" for everyone contradicts a client memo for that client."""
+    if not fact_ids:
+        return []
+    rows = session.execute(
+        text(
+            """
+            SELECT f.id, c.id, c.sim FROM facts f
+            CROSS JOIN LATERAL (
+                SELECT g.id, 1 - (g.embedding <=> f.embedding) AS sim FROM facts g
+                WHERE g.tenant_id = f.tenant_id AND g.retracted_at IS NULL
+                  AND g.status IN ('current', 'corroborating') AND g.kind <> 'practice'
+                  AND g.embedding IS NOT NULL AND g.id <> f.id
+                  AND left(g.attribute, 6) <> 'other:'
+                  AND (COALESCE(f.scope->>'client', 'all') = 'all'
+                       OR COALESCE(g.scope->>'client', 'all')
+                          = COALESCE(f.scope->>'client', 'all'))
+                  AND NOT (g.attribute = f.attribute
+                           AND COALESCE(g.scope->>'client', 'all')
+                               = COALESCE(f.scope->>'client', 'all'))
+                ORDER BY g.embedding <=> f.embedding
+                LIMIT :k
+            ) c
+            WHERE f.id = ANY(:ids) AND f.tenant_id = :t AND f.embedding IS NOT NULL
+              AND c.sim >= :min_sim
+            """
+        ),
+        {"ids": list(fact_ids), "t": tenant(), "k": k, "min_sim": min_sim},
+    )
+    return [(a, b, float(s)) for a, b, s in rows]
 
 
 def similarity(session: Session, fact_ids: list[int], vec: list[float]) -> dict[int, float]:

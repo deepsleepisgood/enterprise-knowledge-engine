@@ -122,7 +122,8 @@ def force_split(
 
     "Not in force" is anchored: only versions of something that is in force now (same subject
     and attribute), so list-like attributes (one fact per code) never look like replacements.
-    Pending facts are neither: they wait for the owner.
+    Pending facts are listed as not in force (an unconfirmed older statement, such as a stale
+    FAQ answer, is shown as outdated; it never answers).
     """
     if not attributes:
         return [], []
@@ -138,7 +139,7 @@ def force_split(
         for f in fstore.get_facts(
             session,
             attribute=attributes,
-            statuses=["current", "superseded", "overridden", "provisional"],
+            statuses=["current", "superseded", "overridden", "provisional", "pending"],
         )
         if f.kind != "practice"
     ]
@@ -184,7 +185,7 @@ def older_sources(
         (
             f
             for f in not_in_force
-            if f.status in ("superseded", "overridden")
+            if f.status in ("superseded", "overridden", "pending")
             and (f.valid_from is None or f.valid_from.date() <= day)
             and (f.subject_id, f.attribute) in keys
         ),
@@ -200,6 +201,12 @@ def older_sources(
         cur = min(now, key=lambda f: f.authority_rank)
         if old.source_id and old.source_id == cur.source_id:
             continue  # a document does not supersede itself
+        if old.status == "pending" and not (
+            old.valid_from and cur.valid_from and old.valid_from < cur.valid_from
+        ):
+            continue  # an unconfirmed statement is shown only when it predates the rule
+        if _value_text(old).strip().lower() == _value_text(cur).strip().lower():
+            continue
         if len(old.value.get("items") or []) > 2 or _value_text(old).count(",") >= 2:
             continue  # a list of items (e.g. codes) is not one older value
         if old.value.get("number") is not None and old.value.get("number") == cur.value.get(
@@ -235,6 +242,61 @@ def older_sources(
     return out
 
 
+def conflicting_sources(
+    session: Session, cited_fact_ids: list[int], limit: int = 4
+) -> list[dict[str, Any]]:
+    """Sources the conflict scan found disagreeing with a fact the answer cites, where the cited
+    fact holds: an outdated FAQ that states another rule under another name, which the
+    same-attribute 'older sources' line cannot see. Same shape as `older_sources`."""
+    from sqlalchemy import or_, select
+
+    from app.store.base import tenant
+    from app.store.models import Conflict
+
+    if not cited_fact_ids:
+        return []
+    rows = session.scalars(
+        select(Conflict).where(
+            Conflict.tenant_id == tenant(),
+            Conflict.status == "open",
+            Conflict.kind == "value",
+            Conflict.authoritative_fact.in_(cited_fact_ids),
+            or_(Conflict.fact_a.in_(cited_fact_ids), Conflict.fact_b.in_(cited_fact_ids)),
+        )
+    ).all()
+    pairs = [
+        (c.authoritative_fact, c.fact_b if c.fact_a == c.authoritative_fact else c.fact_a, c)
+        for c in rows
+    ]
+    facts = fstore.by_ids(session, sorted({i for a, b, _ in pairs for i in (a, b)}))
+    hits = search.hydrate(session, [f.passage_id for f in facts.values() if f.passage_id])
+    out, seen = [], set()
+    for a, b, c in pairs:
+        cur, old = facts.get(a), facts.get(b)
+        if cur is None or old is None:
+            continue
+        p, q = hits.get(old.passage_id or ""), hits.get(cur.passage_id or "")
+        key = (p.file if p else old.source_label, _value_text(old).lower())
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {
+                "topic": cur.attribute,
+                "current_value": _value_text(cur),
+                "older_value": _value_text(old),
+                "file": p.file if p else (old.source_label or ""),
+                "locator": p.label if p else (old.locator or ""),
+                "superseded_by": q.label if q else (cur.source_label or ""),
+                "superseded_on": cur.valid_from.date().isoformat() if cur.valid_from else "",
+                "reason": c.reason or "",
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out
+
+
 def superseded_since(in_force: list[FactRow], cited_fact_ids: set[int], today: date) -> str | None:
     """For an as_of answer: when the rule in force then was replaced (if it was)."""
     ends = [
@@ -259,10 +321,20 @@ def expert_tip(
     tips: list[tuple[FactRow, float]],
     day: date,
     practice_types: set[str] | None = None,
+    ranked_passages: list[tuple[str, float]] | None = None,
 ) -> dict[str, Any] | None:
     """The most relevant practice fact that says something the rule does not, from a source
-    type the schema marks as practice (interviews, observations...)."""
-    useful = [t[0] for t in tips if not _restates_rule(session, t[0], day)]
+    type the schema marks as practice (interviews, observations...). Candidates are the tips
+    found by fact similarity plus the practice facts of the retrieved passages; the one whose
+    passage the reranker scored highest wins (fact similarity breaks ties)."""
+    rank = dict(ranked_passages or [])
+    cands = [t[0] for t in tips]
+    have = {f.id for f in cands}
+    for f in fstore.live_for_passages(session, list(rank)):
+        if f.kind == "practice" and f.id not in have:
+            cands.append(f)
+            have.add(f.id)
+    useful = [f for f in cands if not _restates_rule(session, f, day)]
     hits = search.hydrate(session, [f.passage_id for f in useful if f.passage_id])
     pick = [
         (f, hits[f.passage_id])
@@ -270,6 +342,8 @@ def expert_tip(
         if f.passage_id in hits
         and (not practice_types or hits[f.passage_id].doc_type in practice_types)
     ]
+    order = {f.id: i for i, f in enumerate(cands)}
+    pick.sort(key=lambda fp: (-rank.get(fp[0].passage_id or "", float("-inf")), order[fp[0].id]))
     if not pick:
         return None
     f, p = pick[0]

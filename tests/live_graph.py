@@ -55,6 +55,9 @@ def build_tenant(mode: str) -> None:
 
         with use_tenant(mode):
             index_all()
+            from app.graph.conflicts import scan_tenant
+
+            scan_tenant()  # conflicts recorded up front, as after any build
     finally:
         settings.schema_mode = old
     _built.add(mode)

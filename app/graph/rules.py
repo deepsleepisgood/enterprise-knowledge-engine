@@ -56,6 +56,8 @@ class RuleValue:
             pcts = re.findall(r"(\d+(?:\.\d+)?)\s*(?:%|per ?cent)", self.text, re.I)
             if len(set(pcts)) == 1:
                 return float(pcts[0])
+            if not pcts and re.match(r"\s*(none|nil|zero)\b", self.text, re.I):
+                return 0.0  # "None, except client memo CM-X-02": no tolerance in general
             raise RuleNotFound(f"{self.attribute} has no numeric value ({self.value.get('text')})")
         return float(n)
 
@@ -150,10 +152,51 @@ def get_rule(
                     -(r.valid_from.timestamp() if r.valid_from else 0),
                 ),
             )
+            if scope_client is None and name and (best.value or {}).get("number") is None:
+                ref = _referenced_rule(session, best, attr, name, day, known_at, statuses)
+                if ref is not None:
+                    return _to_value(ref)
             return _to_value(best)
     where = f" for {client}" if client else ""
     when = f" on {day}" if as_of else ""
     raise RuleNotFound(f"no rule in force for {attr}{where}{when}")
+
+
+def _tokens(s: str) -> set[str]:
+    return {w for w in re.split(r"[^a-z]+", s.lower()) if len(w) > 2}
+
+
+def _referenced_rule(
+    session: Session,
+    general: fstore.FactRow,
+    attr: str,
+    client: str,
+    day: date,
+    known_at: datetime | None,
+    statuses: list[str],
+) -> fstore.FactRow | None:
+    """A general rule with no figure that defers to a named source for some clients ("None,
+    except client memo CM-INF-02"): that source's numeric rule for this client, filed under the
+    attribute closest in name to the one asked for."""
+    v = general.value or {}
+    text = " ".join([str(v.get("text") or ""), general.condition or "", general.statement])
+    rows = fstore.get_facts(session, valid_on=day, known_at=known_at, statuses=statuses)
+    want = _tokens(attr)
+    best: tuple[int, fstore.FactRow] | None = None
+    for r in rows:
+        label = r.source_label or ""
+        if (
+            r.kind == "practice"
+            or (r.value or {}).get("number") is None
+            or ((r.scope or {}).get("client") or None) != client
+            or len(label) < 4
+            or label.lower() not in text.lower()
+        ):
+            continue
+        score = len(want & _tokens(r.attribute))
+        if score and (best is None or score > best[0]):
+            best = (score, r)
+    return best[1] if best else None
 
 
 def older_values(session: Session, attribute: str, client: str | None = None) -> list[RuleValue]:

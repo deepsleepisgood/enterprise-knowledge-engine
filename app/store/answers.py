@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
@@ -13,6 +14,11 @@ from app.store.base import tenant, utcnow
 from app.store.models import AnswerLog, Escalation, Notification
 
 # ---------------------------------------------------------------- answers
+
+
+def _jsonable(card: dict[str, Any]) -> dict[str, Any]:
+    """Cards carry calculator results with dates; the JSON column stores them as ISO text."""
+    return json.loads(json.dumps(card, default=str))
 
 
 def log_answer(
@@ -37,7 +43,7 @@ def log_answer(
         as_of=as_of,
         kb_version=kb_version,
         route=route,
-        card=card,
+        card=_jsonable(card),
         cited_fact_ids=cited_fact_ids,
         cited_passage_ids=cited_passage_ids,
         latency_ms=latency_ms,
@@ -51,7 +57,7 @@ def update_card(session: Session, answer_id: int, card: dict[str, Any]) -> None:
     session.execute(
         update(AnswerLog)
         .where(AnswerLog.tenant_id == tenant(), AnswerLog.id == answer_id)
-        .values(card=card)
+        .values(card=_jsonable(card))
     )
 
 
