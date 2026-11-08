@@ -4,19 +4,21 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (7 Nov 2026, evening): v2 P0 and P1 committed; P2 and P3 code written and unit/integration-tested offline (141 tests); first live induced-schema build running.** The spec changed to BUILD_PLAN v2 (generic engine); SCOPE.md, CLAUDE.md, BUILD_PLAN.md, TEST_PLAN.md and DESIGN.md are in the repo root. v1 (hand-written pack) is at commit 7add2d0.
+**Status (8 Nov 2026): P0-P1 done; P2-P3 built and offline-tested (live acceptance re-running); P4 answer pipeline built (live smoke T1-T8 mostly correct, p50 ~10 s); P5 evaluation harness and runners built (not yet run in full).** 170 offline + DB tests pass. The spec is BUILD_PLAN v2; v1 is at commit 7add2d0.
 
 **Next actions, in order**
-1. **Run the new tests (written, never run):** `pytest -q tests/unit/test_evolve.py tests/integration/test_evolve_db.py`, then the full `pytest -q`. Fix what fails.
-2. Rebuild with evolution: `python scripts/build_graph.py --auto-freeze --threads 1` (extraction is cached; evolution makes a few new LLM calls). Check the `schema evolution:` line, the `other:*` share and that `payments.default_term_days` is now bound.
-3. Live acceptance: `pytest -m live_llm tests/integration/test_graph_acceptance.py` (it was interrupted before producing results), then `SCENARIO_MODES=induced` and `baseline` for `tests/plugins/test_ap_scenarios.py`; document misses in `reports/scenario_misses_<mode>.md`.
-4. PROGRESS entry with live results, commit, stop the dev DB.
+1. Read the live run (`reports/live_p2_p4.log`): P2 graph acceptance, P3 92 scenarios (induced), P4 T1-T8. Fix what fails.
+2. `python scripts/run_replay.py` (re-extracts under the current schema: ~45 min on NIM), `python scripts/run_second_corpus.py` (report in `reports/second_corpus_<date>.md`), `python scripts/run_eval.py --split dev`, then `--config ablation`. Format invariance and the baseline-schema scenarios are slow on NIM: run them after switching to Anthropic.
+3. Hand-grade `eval/judge/hand_graded.csv` (written by the first full run of `run_eval.py`) for judge calibration.
+4. Phase 6 (fix loop on dev failures, conflict scan), Phase 7 (API).
 
 **v2 migration plan (phases 0–3 redone)**
 - [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
 - [x] **P1** connectors (upload incl. folders/zip, api text, eml) → blob store + hash dedupe → type sniffing (signature, not extension) → tier-1 parsers to canonical blocks (docx, pdf text layer, xlsx/csv, pptx, html, md/txt, eml, vtt/srt/`[mm:ss] Speaker:`, json) → generic structure inference (`app/ingest/segment.py`) → metadata inference with provenance (`app/ingest/metadata.py`) → version matching/diff (`app/ingest/versions.py`). No hand-written pack at runtime.
 - [~] **P2** schema induction (code + offline tests done; live acceptance pending) (`app/graph/induce.py`, `SCHEMA_MODE=induced|baseline`), extraction to entities + facts, entity resolution (fastembed + LLM confirm), authority resolution on related facts only, `store.facts.get_facts(valid_on, known_at)`, `graph.rules.get_rule` via schema synonyms + plug-in bindings.
 - [~] **P3** `plugins/ap/` (code + offline tests done; live scenarios pending) (calculators moved from `app/calc`, params extraction, `bindings.yaml`, `roles.yaml`, baseline_schema from the v1 pack, ops loaders) + `app/plugins/` registry and bind step; scenario test under both schema modes.
+- [~] **P4** answer pipeline (`app/answer/`): index, retrieve, router, generate, verify, card, escalate; answers_log. Offline + DB tests pass; live acceptance `tests/acceptance/test_answers_live.py` pending; T11 needs P9 governance.
+- [~] **P5** evaluation harness (`evaluation/`, `scripts/run_eval.py`), ablation A-D, runners for replay, second company and format invariance with their data. Built and smoke-tested; full runs pending.
 
 **Local deviations (documented):** embedded Postgres (pgserver) has `vector` but not `pg_trgm`/`btree_gist`; the migration enables them only when available (Neon has them). Without them: GiST index is on the time range alone, and trigram candidate search falls back to Python string similarity. No LibreOffice on this machine → tier-2 legacy files are stored and flagged `needs_attention`. LLM provider stays NVIDIA NIM until Anthropic keys arrive.
 
@@ -269,3 +271,27 @@ The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates
 - Store helpers: `facts.live_with_attribute_prefix`, `kb.get_schema`, `kb.decide_review_item`.
 
 **Tests written but not run (by request):** `tests/unit/test_evolve.py` (grouping, type compatibility, key cleaning, map/propose/skip with a fake LLM and embedding) and `tests/integration/test_evolve_db.py` (auto-freeze re-keys and keeps history; owner-review path; topic facts move to the new topic entity). Lint and import checks pass; all job handlers register.
+
+
+---
+
+## 2026-11-08 — Testing P2-P4 fixes, Phase 4 (answer pipeline), Phase 5 (evaluation harness)
+
+**Evolution verified.** Unit + DB tests (7) pass after one real fix: evolution now waits while a newer draft schema is open (`kb.latest_schema`). Rebuild: schema v2 frozen (15 new topics, 145 remaps), improvised `other:*` facts 201 -> 46 (the rest is document metadata, correctly skipped), 22/22 plug-in parameters bound.
+
+**Phase 4 built** (`app/answer/`): embedding index (passages, facts, entities; `index_embeddings` job); hybrid retrieval (full-text OR-query + pgvector, RRF, `BAAI/bge-reranker-base` cross-encoder, keep 6) filtered to sources in force on the day asked; graph context from linked entities (alias + embedding) one hop out plus facts of the kept passages; router over plug-in calculators; closed-book generation with per-sentence passage ids; verifier (quote occurs, numbers grounded, no value not in force, support check) with one retry, unverified drafts hidden from processors; answer card per web/lib/types.ts with older sources, expert tip (practice sources only), routing to plug-in roles; answers_log; escalation, report-wrong, expert reply as an `expert_answer` episode, re-ask after publish.
+
+**Fixes found by the live smoke tests** (each covered by a test):
+- Reasoning models on NIM made answers take 45-260 s. Gateway now takes `thinking=False` (NIM `chat_template_kwargs.enable_thinking`), used on the answer path: p50 ~10 s. `ROUTER_MODEL=smart` in the local .env (the fast model routes badly without reasoning).
+- Calculator inputs hallucinated from the prompt's worked example, and a crore read as a lakh: calculators now run only when the question has figures and every numeric input comes from the question with the unit written next to it.
+- Complementary list values ("Tuesday", "Friday", "Tuesday and Friday" from one SOP) were resolved as a conflict: the widest list now wins and parts corroborate (T7 now Friday 14 Aug).
+- A binding pointed at an attribute with nothing in force (e-invoice threshold): binding now prefers attributes with a rule in force and shows their values to the LLM.
+- Induced ranking had ties (latest-wins fallback picked DI-03 over SOP v4.0) and a client-named topic (`client_specific_rules.arvana_infra_*`): ranks are now strict by listed order; topics and attributes named after a client scope are dropped.
+- Older sources were noisy (exception-code lists): only versions of what the answer cites, no self-supersession, no item lists.
+- `build_graph.py` silently re-extracted everything after a schema change (the vocabulary is in the extraction prompt): it now extracts only new episodes unless `--reextract`; `--resolve-only` re-runs authority resolution without extraction.
+
+**Live smoke on the dev graph (before the last fixes):** T1, as-of 1 Mar 2026 (v3.1 values), T2 (after unit fix), T5, T6, T7 (after list fix), T8 correct and verified; T3 cites CM-PHA-01 (FAQ flag to check); T4 cites SOP 4.6 and Interview 1 [02:30]. p50 9.9 s.
+
+**Phase 5 built:** `evaluation/` (split: grouped duplicates, stratified 60/40, seed 7, `eval/split.csv`; deterministic scenario grading shared with the scenario test; citation strict/lenient per TEST_PLAN locator rules; outdated answers on the current-rule part only; LLM judge with `eval/judge/prompt.md` and calibration with agreement + Cohen's kappa; ablation configs A naive RAG, B whole corpus, C + authority layer, D full system; per-question tokens/cost via LLM trace tags; reports with the 15 worst and failure causes). Runners: `run_replay.py` (22 probes in `eval/replay_probes.csv` from SOP 14 and a synthetic Infra email), `run_second_corpus.py` (Kestrel Freight HR corpus in six formats, no plug-ins), `run_format_invariance.py` + `render_variants.py` (eight SOP variants). Smoke: 2 dev conflict questions correct with strict citations; ablation paths A-D run.
+
+**Open issues:** live acceptance and full eval numbers pending; T11 needs Phase 9 governance (expert replies held for the owner); NIM cost is not priced (cost_usd 0); `bge-reranker-base` is 1 GB (watch memory on the deploy host); schema v2 has some value-in-key attributes and a near-duplicate default-payment-term pair.
