@@ -6,13 +6,14 @@ names stable.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from app.answer.generate import GenOut
-from app.answer.verify import best_sentence, find_quote
+from app.answer.verify import best_sentence, find_quote, numbers
 from app.graph.ontology import Ontology
 from app.graph.rules import CURRENT, IN_FORCE_THEN
 from app.store import facts as fstore
@@ -69,6 +70,36 @@ def assemble(
             found = best_sentence(p.text, claim)
         cites.append(citation(n, p, found))
     return " ".join(parts).strip(), cites, [evidence[s].id for s in number], problems
+
+
+def attach_number_sources(gen: GenOut, evidence: dict[str, PassageHit], given: list[str]) -> int:
+    """Cite the evidence a sentence's number comes from when the model left it out.
+
+    For each number in a sentence that is not in its cited passages or in `given` (the question,
+    calculator output), add the evidence passage that contains it and shares the most words
+    with the sentence. Evidence is already limited to sources in force on the day asked, and
+    the not-in-force check still runs afterwards. Returns the number of sources added."""
+
+    def words(t: str) -> set[str]:
+        return set(re.findall(r"[a-z]{3,}", t.lower()))
+
+    added = 0
+    base = numbers(" ".join(given))
+    for s in gen.sentences:
+        mine = [evidence[x] for x in s.sources if x in evidence]
+        have = base | numbers(
+            " ".join(f"{h.text} {h.label} {h.locator} {h.section_title or ''}" for h in mine)
+        )
+        for n in sorted(numbers(s.text) - have):
+            pool = [
+                (len(words(h.text) & words(s.text)), key)
+                for key, h in evidence.items()
+                if key not in s.sources and n in numbers(h.text)
+            ]
+            if pool:
+                s.sources.append(max(pool)[1])
+                added += 1
+    return added
 
 
 def _scoped(facts: list[FactRow], client: str | None) -> list[FactRow]:

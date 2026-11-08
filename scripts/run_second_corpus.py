@@ -103,7 +103,7 @@ def grade(q: dict[str, str], card: dict) -> tuple[bool, str]:
     ):
         return False, f"says the superseded value {q['must_not_say']!r}"
     files = {c.get("file") for c in (card.get("rule") or {}).get("citations") or []}
-    if q["file"] and q["file"] not in files:
+    if q["file"] and not files & set(q["file"].split("|")):
         return False, f"cites {sorted(f for f in files if f)}, expected {q['file']}"
     return True, "ok"
 

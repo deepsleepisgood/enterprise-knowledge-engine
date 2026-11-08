@@ -230,3 +230,26 @@ def test_restatement_needs_no_model_check() -> None:
     )
     assert len(calls) == 1 and "Sentence 1: Sick leave" in calls[0]
     assert problems and problems[0].startswith("sentence 2 ")
+
+
+def test_uncited_number_gets_the_evidence_that_states_it() -> None:
+    from app.answer.generate import GenOut
+
+    evidence = {
+        "P1": hit("a", "Warehouse staff must request leave at least 30 days before leave."),
+        "P2": hit("b", "Annual leave must be requested at least 10 days before leave."),
+        "P3": hit("c", "Grade L3 carry forward limit is 10 days."),
+    }
+    gen = GenOut(
+        status="answered",
+        sentences=[
+            {"text": "You need 30 days' notice.", "sources": ["P1"]},
+            {
+                "text": "This replaces the general 10-day notice for leave requests.",
+                "sources": ["P1"],
+            },
+        ],
+    )
+    assert cards.attach_number_sources(gen, evidence, ["notice in November?"]) == 1
+    assert gen.sentences[0].sources == ["P1"]
+    assert gen.sentences[1].sources == ["P1", "P2"]

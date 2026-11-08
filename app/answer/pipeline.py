@@ -233,6 +233,10 @@ def ask(
             )
             if gen.status == "unsupported":
                 break
+            given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+            given.append(str(res.result) if res is not None else "")
+            if added := cards.attach_number_sources(gen, evidence, given):
+                diag["citations_added"] = diag.get("citations_added", 0) + added
             rule_text, cites, cited, problems = cards.assemble(gen, evidence)
             cited_hits = [h for h in evidence.values() if h.id in cited]
             allowed = [h.text for h in cited_hits]

@@ -2,7 +2,7 @@ id,question,as_of,expected,must_not_say,status,file
 H01,How many days of paid sick leave do employees get per year?,,12,10,answered,leave_policy_v2.pdf
 H02,How much notice is needed for annual leave?,,10 days,14 days,answered,leave_policy_v2.pdf
 H03,How do I apply for leave?,,HR portal,,answered,leave_faq.md
-H04,How many unused annual leave days can be carried forward?,,8,,answered,leave_policy_v2.pdf
+H04,How many unused annual leave days can be carried forward?,,8,,answered,leave_policy_v2.pdf|leave_entitlements.xlsx
 H05,How many days of annual leave did employees get?,2025-06-01,20,24,answered,leave_policy_v1.docx
 H06,How many days of annual leave does a grade L1 employee get per year?,,24,20 days,answered,leave_policy_v2.pdf
 H07,I work in Warehouse Operations. How much notice do I need for leave in November?,,30 days,,answered,warehouse_memo_wo12.html

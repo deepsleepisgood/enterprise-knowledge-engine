@@ -149,7 +149,7 @@ QUESTIONS = [
         "8",
         "",
         "answered",
-        "leave_policy_v2.pdf",
+        "leave_policy_v2.pdf|leave_entitlements.xlsx",  # v2 points to the table for grades
     ),
     (
         "H05",
