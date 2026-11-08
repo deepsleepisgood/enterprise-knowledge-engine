@@ -102,3 +102,21 @@ def test_split_is_deterministic_grouped_and_stratified() -> None:
     types = Counter((q.type, a[q.id]) for q in qs)
     for t in {q.type for q in qs}:
         assert types[(t, "dev")] >= 1 and types[(t, "holdout")] >= 1
+
+
+def test_format_invariance_scoring_helpers() -> None:
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[2] / "scripts" / "run_format_invariance.py"
+    spec = importlib.util.spec_from_file_location("fi", path)
+    fi = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fi)
+    assert fi.norm_text("Lower of 1% and ₹500") == fi.norm_text("lower of 1% and Rs 500")
+    assert fi.f1({1, 2, 3, 4}, {1, 2, 3, 9}) == (0.75, 0.75, 0.75)
+    base = ["The line passes only if the excess is small. Then post the invoice."]
+    assert (
+        fi.recovery(base, ["the line passes only if the excess is small. then post the invoice."])
+        == 1
+    )
+    assert fi.recovery(base, ["Something else entirely, nothing in common here."]) == 0
