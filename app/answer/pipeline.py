@@ -71,6 +71,15 @@ def grounded_inputs(
     return [f"{v:g}" for v in leaves(inputs) if not ok(v)]
 
 
+def _with_model(structured: Any, model: str) -> Any:
+    """The same structured call, pinned to `model` (the plug-in asks for its own model)."""
+
+    def call(prompt: str, schema: Any, **kw: Any) -> Any:
+        return structured(prompt, schema, **{**kw, "model": model})
+
+    return call
+
+
 def _calc_view(route_key: str, res: Any) -> CalcView:
     return CalcView(
         route=route_key,
@@ -167,7 +176,9 @@ def ask(
         if r.route.startswith("calculator:"):
             plugin = r.route.split(":", 1)[1].split(".", 1)[0]
             try:
-                prep = calc_mod.inputs_for(plugin, question, clients, onto, structured)
+                prep = calc_mod.inputs_for(
+                    plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                )
                 if prep is not None:
                     family, inputs = prep
                     stray = grounded_inputs(

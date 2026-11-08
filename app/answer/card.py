@@ -167,6 +167,10 @@ def older_sources(
         if not now or len({_value_text(x).lower() for x in now}) > 1:
             continue
         cur = min(now, key=lambda f: f.authority_rank)
+        if old.source_id and old.source_id == cur.source_id:
+            continue  # a document does not supersede itself
+        if len(old.value.get("items") or []) > 2 or _value_text(old).count(",") >= 2:
+            continue  # a list of items (e.g. codes) is not one older value
         if old.value.get("number") is not None and old.value.get("number") == cur.value.get(
             "number"
         ):
