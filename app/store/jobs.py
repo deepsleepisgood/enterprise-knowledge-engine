@@ -32,6 +32,14 @@ def enqueue(session: Session, kind: str, payload: dict[str, Any], max_attempts: 
     return job.id
 
 
+def enqueue_once(session: Session, kind: str, payload: dict[str, Any]) -> int | None:
+    """Queue a job unless one of the same kind is already waiting (for idempotent work)."""
+    waiting = session.scalar(
+        select(Job.id).where(Job.tenant_id == tenant(), Job.kind == kind, Job.status == "queued")
+    )
+    return None if waiting else enqueue(session, kind, payload)
+
+
 _CLAIM = text(
     """
     UPDATE jobs SET status = 'running', locked_by = :worker, locked_at = now(),

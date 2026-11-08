@@ -68,6 +68,17 @@ def main() -> None:
     ap.add_argument(
         "--no-evolve", action="store_true", help="skip schema evolution (placing other:* facts)"
     )
+    ap.add_argument(
+        "--reextract",
+        action="store_true",
+        help="extract every parsed episode again (default: only episodes not yet extracted; "
+        "a schema change alters the extraction prompt, so this re-pays every LLM call)",
+    )
+    ap.add_argument(
+        "--resolve-only",
+        action="store_true",
+        help="no extraction or evolution: re-run authority resolution on every group, bind, index",
+    )
     args = ap.parse_args()
     settings = get_settings()
     started, since = time.perf_counter(), datetime.now(UTC).isoformat()
@@ -126,9 +137,19 @@ def main() -> None:
                 )
             ).scalars()
         }
-        for eid in eps:
+        todo = (
+            []
+            if args.resolve_only
+            else eps
+            if args.reextract or args.reset_graph
+            else estore.parsed_episode_ids(s, unextracted_only=True)
+        )
+        for eid in todo:
             if eid not in queued:
                 jobs.enqueue(s, "extract_episode", {"episode_id": eid})
+    print(f"{len(todo)} episodes to extract")
+    if args.resolve_only:
+        print("re-resolution:", gp.reresolve_all())
     ran = worker.drain(kinds=["extract_episode", "reresolve_source"], threads=args.threads)
     print(f"ran {ran} jobs in {time.perf_counter() - started:.0f}s")
     with session_scope() as s:
@@ -137,7 +158,7 @@ def main() -> None:
                 "DELETE FROM jobs WHERE kind = 'evolve_schema' AND status = 'queued'"
             )
         )
-    if not args.no_evolve and settings.schema_mode == "induced":
+    if not args.no_evolve and not args.resolve_only and settings.schema_mode == "induced":
         ev = gp.evolve_schema(auto_freeze=args.auto_freeze)
         if isinstance(ev.get("skipped"), str):
             print("schema evolution:", ev["skipped"])
@@ -205,6 +226,10 @@ def main() -> None:
                     print(f"  UNBOUND {r.param}")
                 elif r.method != "exact key":
                     print(f"  {r.param} -> {r.attribute} ({r.method})")
+    from app.answer.index import index_all
+
+    t0 = time.perf_counter()
+    print("embedding index:", index_all(), f"in {time.perf_counter() - t0:.0f}s")
     print("LLM:", llm_usage(since))
 
 

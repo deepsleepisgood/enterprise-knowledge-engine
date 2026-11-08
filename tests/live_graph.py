@@ -42,8 +42,19 @@ def build_tenant(mode: str) -> None:
                 for eid in estore.parsed_episode_ids(s):
                     jobs.enqueue(s, "extract_episode", {"episode_id": eid})
         worker.drain(kinds=["extract_episode", "reresolve_source"], threads=2)
+        if mode == "induced":  # same as scripts/build_graph.py: place unplaced facts
+            with use_tenant(mode), session_scope() as s:
+                from sqlalchemy import text
+
+                s.execute(text("DELETE FROM jobs WHERE kind = 'evolve_schema'"))
+            with use_tenant(mode):
+                gp.evolve_schema(auto_freeze=True, mode=mode)
         with use_tenant(mode), session_scope() as s:
             bind(s, registry.get("ap"), gp.active_ontology(s, mode), structured_fn=structured)
+        from app.answer.index import index_all
+
+        with use_tenant(mode):
+            index_all()
     finally:
         settings.schema_mode = old
     _built.add(mode)

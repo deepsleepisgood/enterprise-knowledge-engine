@@ -262,6 +262,28 @@ def reresolve_source(source_id: str, compare=None) -> dict[str, Any]:
     return {"groups": len(groups), "revised": rep.revised, "kb_version": rep.kb_version}
 
 
+def reresolve_all(compare=None) -> dict[str, Any]:
+    """Re-run authority resolution on every group, without extraction (after the resolution
+    rules change). One transaction; changed statuses become new fact versions."""
+    with session_scope() as s:
+        onto = active_ontology(s)
+        if onto is None:
+            return {"skipped": "no frozen schema"}
+        groups = fstore.live_groups(s)
+        structured = _default_structured()
+        rep = publish(
+            s,
+            [],
+            [],
+            onto,
+            compare or (LLMComparator(structured) if structured else deterministic),
+            Resolver(s, structured_fn=structured),
+            summary="re-resolution of every group",
+            extra_groups=groups,
+        )
+    return {"groups": len(groups), "revised": rep.revised, "kb_version": rep.kb_version}
+
+
 @handler("reresolve_source")
 def reresolve_source_job(payload: dict[str, Any]) -> dict[str, Any]:
     return reresolve_source(payload["source_id"])
@@ -376,6 +398,11 @@ def extract_episode(payload: dict[str, Any]) -> dict[str, Any]:
             return {"skipped": "no frozen schema yet; build_graph will re-queue"}
     out = extract_and_publish(payload["episode_id"])
     out.pop("entity_decisions", None)
+    with session_scope() as s:
+        jobs.enqueue_once(s, "index_embeddings", {})
+        ep = estore.get_episode(s, payload["episode_id"])
+        if ep is not None and ep.channel == "expert_answer":
+            jobs.enqueue(s, "reask_escalations", {"episode_id": ep.id})
     if out.get("unplaced") and get_settings().schema_mode == "induced":
         # New facts the schema has no attribute for: propose attributes for the owner.
         from sqlalchemy import text

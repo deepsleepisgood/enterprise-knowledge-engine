@@ -149,6 +149,7 @@ def _call(
     schema: type[BaseModel] | None,
     invoke: Callable[[dict[str, Any]], tuple[Any, Any]],
     key_extra: str | None = None,
+    thinking: bool | None = None,
 ) -> tuple[Any, LLMResult]:
     """Shared redact -> cache -> call -> log path. `invoke` returns (payload, raw_response)."""
     model_id = _resolve_model(model)
@@ -164,6 +165,7 @@ def _call(
         schema=schema_sig,
         effort=effort,
         **({"extra": key_extra} if key_extra else {}),
+        **({"thinking": False} if thinking is False else {}),
     )
     path = _cache_path(key)
     base_log = {
@@ -200,6 +202,8 @@ def _call(
         request["system"] = safe_system
     if effort and _provider() != "nim":
         request["output_config"] = {"effort": effort}
+    if thinking is False and _provider() == "nim":
+        request["thinking_off"] = True  # read by the NIM adapters, never sent to Anthropic
 
     started = time.perf_counter()
     try:
@@ -258,6 +262,8 @@ def _nim_complete(req: dict[str, Any]) -> tuple[Any, Any]:
         max_tokens=req["max_tokens"],
         json_mode=False,
     )
+    if req.get("thinking_off"):
+        body["chat_template_kwargs"] = {"enable_thinking": False}
     resp = nim.chat(body)
     text, finish = nim.message_text(resp)
     if finish == "length":
@@ -284,6 +290,8 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             max_tokens=budget,
             json_mode=True,
         )
+        if req.get("thinking_off"):
+            body["chat_template_kwargs"] = {"enable_thinking": False}
         resp = nim.chat(body)
         i, o = nim.usage(resp)
         in_tok, out_tok = in_tok + i, out_tok + o
@@ -326,8 +334,12 @@ def complete(
     prompt_version: str = "v1",
     max_tokens: int = 4096,
     effort: str | None = None,
+    thinking: bool | None = None,
 ) -> LLMResult:
-    """Free-text completion. `model` is "fast", "smart" (default) or a model id."""
+    """Free-text completion. `model` is "fast", "smart" (default) or a model id.
+
+    `thinking=False` asks a reasoning model to answer directly (NIM chat-template switch);
+    None leaves the provider's default."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         if _provider() == "nim":
@@ -347,6 +359,7 @@ def complete(
         effort=effort,
         schema=None,
         invoke=invoke,
+        thinking=thinking,
     )
     return result
 
@@ -360,6 +373,7 @@ def structured(
     prompt_version: str = "v1",
     max_tokens: int = 8192,
     effort: str | None = None,
+    thinking: bool | None = None,
 ) -> T:
     """Return a validated `schema` instance using the API's structured outputs."""
 
@@ -383,6 +397,7 @@ def structured(
         effort=effort,
         schema=schema,
         invoke=invoke,
+        thinking=thinking,
     )
     return schema.model_validate(payload)
 

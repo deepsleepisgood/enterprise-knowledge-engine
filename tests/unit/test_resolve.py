@@ -152,3 +152,17 @@ def test_failed_llm_comparison_is_unknown_not_fatal() -> None:
     a = mk("sop4", text="x", vtype="text")
     b = mk("faq", text="y", vtype="text")
     assert cmp(a, b) == "unknown" and cmp.failures
+
+
+def test_complementary_values_from_one_source_are_one_list() -> None:
+    attr = "payments.run_days"
+    tue = mk("sop4", text="Tuesday", vtype="enum", attribute=attr)
+    fri = mk("sop4", text="Friday", vtype="enum", attribute=attr)
+    both = mk(
+        "sop4", text="Tuesday and Friday", vtype="enum", attribute=attr, items=["Tuesday", "Friday"]
+    )
+    old = mk("sop31", text="Thursday", vtype="enum", attribute=attr)
+    conflicts = resolve_group([tue, fri, both, old], deterministic)
+    assert both.status == "current"
+    assert tue.status == fri.status == "corroborating"
+    assert old.status == "superseded" and conflicts == []

@@ -194,3 +194,11 @@ def test_http_429_honours_retry_after_and_backs_off(monkeypatch) -> None:
     assert nim._http_post({"model": "m"}) == {"choices": []}
     assert len(calls) == 5  # more attempts than the generic backoff allows
     assert sleeps == [15, 30, 60, 120]  # at least Retry-After (7 s), growing
+
+
+def test_thinking_off_reaches_the_body_and_has_its_own_cache_entry(setup) -> None:
+    fake = _use(FakeTransport(['{"pct_of_line": 1, "cap_inr": 500}'] * 2))
+    llm.structured("Extract.", Tolerance, model="fast", thinking=False)
+    assert fake.bodies[0]["chat_template_kwargs"] == {"enable_thinking": False}
+    llm.structured("Extract.", Tolerance, model="fast")  # default: separate cache entry
+    assert len(fake.bodies) == 2 and "chat_template_kwargs" not in fake.bodies[1]

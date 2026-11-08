@@ -176,13 +176,19 @@ def induce(
         prompt_version=PROMPT_VERSION,
         max_tokens=32768,
     )
+    scoped = scope_words({s.client_scope for s in sources})
+    topics = [t for t in _dedupe(final.topics, "key") if not _names_scope(t.key, scoped)]
     onto = Ontology(
         name="induced",
         base_currency=currency,
         units=units,
         entity_types=_dedupe(final.entity_types, "name", EntityType(name="topic")),
-        topics=_dedupe(final.topics, "key"),
-        attributes=_valid_attributes(final.attributes, {t.key for t in final.topics}),
+        topics=topics,
+        attributes=[
+            a
+            for a in _valid_attributes(final.attributes, {t.key for t in topics})
+            if not _names_scope(a.key, scoped)
+        ],
         source_ranking=_complete_ranking(final.source_ranking, {s.doc_type for s in sources}),
         scope_keys=sorted({"client", *final.scope_keys}),
         sender_authority=final.sender_authority,
@@ -214,14 +220,38 @@ def _valid_attributes(attrs: list[Attribute], topics: set[str]) -> list[Attribut
     return list(out.values())
 
 
+_CORPORATE = {"ltd", "pvt", "limited", "private", "inc", "llc", "llp", "co", "company", "the"}
+_SCOPE_BUCKET = re.compile(
+    r"(^|[._])(client_specific|client_rules|client_overrides?|memos?)([._]|$)"
+)
+
+
+def scope_words(scopes: set[str]) -> set[str]:
+    """Distinctive words of the client scopes the documents name ('all' excluded)."""
+    words: set[str] = set()
+    for sc in scopes:
+        if sc and sc != "all":
+            words |= {w for w in re.findall(r"[a-z0-9]+", sc.lower()) if len(w) > 2}
+    return words - _CORPORATE
+
+
+def _names_scope(key: str, scoped: set[str]) -> bool:
+    """A topic or attribute named after a client (or a 'client-specific' bucket). Scope belongs
+    in the fact's scope, so the general attribute holds every client's value."""
+    if _SCOPE_BUCKET.search(key):
+        return True
+    return bool(set(re.split(r"[._]", key.lower())) & scoped)
+
+
 def _complete_ranking(ranking: list[SourceRank], present: set[str]) -> list[SourceRank]:
-    have = {r.doc_type for r in ranking}
-    worst = max((r.rank for r in ranking), default=1)
-    extra = [
-        SourceRank(doc_type=t, rank=worst + 1, reason="not ranked by induction")
-        for t in sorted(present - have)
-    ]
-    return sorted([*ranking, *extra], key=lambda r: r.rank)
+    """Every present type ranked, strictly: ties are broken by the order the model listed them,
+    so equal-authority sources never fall back to 'latest wins'."""
+    ordered: dict[str, SourceRank] = {}
+    for r in sorted(ranking, key=lambda r: r.rank):  # stable: keeps listing order within ties
+        ordered.setdefault(r.doc_type, r)
+    for t in sorted(present - set(ordered)):
+        ordered[t] = SourceRank(doc_type=t, rank=0, reason="not ranked by induction")
+    return [r.model_copy(update={"rank": i}) for i, r in enumerate(ordered.values(), start=1)]
 
 
 def coverage(induced: Ontology, baseline: Ontology) -> dict[str, Any]:

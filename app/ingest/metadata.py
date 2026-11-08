@@ -397,8 +397,8 @@ _TYPE_WORDS = [
 
 
 def _type_by_keywords(text: str, channel: str) -> str | None:
-    if channel == "email":
-        return "email"
+    if channel in ("email", "expert_answer"):
+        return channel
     t = text.lower()
     for rx, kind in _TYPE_WORDS:
         if re.search(rx, t):

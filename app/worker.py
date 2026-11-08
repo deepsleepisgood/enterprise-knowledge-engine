@@ -30,7 +30,12 @@ Handler = Callable[[dict[str, Any]], dict[str, Any] | None]
 HANDLERS: dict[str, Handler] = {}
 
 # Modules whose import registers handlers. Plain module names, no plug-in imports.
-HANDLER_MODULES = ("app.ingest.pipeline", "app.graph.pipeline")
+HANDLER_MODULES = (
+    "app.ingest.pipeline",
+    "app.graph.pipeline",
+    "app.answer.index",
+    "app.answer.escalate",
+)
 
 
 def handler(kind: str) -> Callable[[Handler], Handler]:

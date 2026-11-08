@@ -7,7 +7,10 @@ one (subject, attribute) group at a time, with only that group's facts (CLAUDE.m
    for that client only; the general bucket is never touched by a client bucket.
 2. Within a bucket, the lowest authority_rank among sources with status `current` wins (ties:
    the later start). Authority beats recency: a newer fact from a lower-ranked source loses.
-3. Same value (or narrower scope) from another source: `corroborating`.
+3. Same value (or narrower scope) from another source: `corroborating`. Complementary values
+   are one list, not a conflict: among equally ranked assertions the one whose items cover the
+   others wins, and an assertion whose items are part of the winner's list corroborates it
+   (a source stating "Tuesday" and "Friday" separately and "Tuesday and Friday" in a summary).
 4. Different value: `superseded`, valid until the day before the winner starts; if it did not
    start earlier than the winner, `overridden` with an empty interval (kept for audit). Two
    current sources that disagree also open a `value` conflict.
@@ -77,6 +80,25 @@ def _winner_key(a: Assertion) -> tuple[int, int]:
     return (a.authority_rank, -(a.asserted_from.toordinal() if a.asserted_from else 0))
 
 
+def _items(a: Assertion) -> set[str]:
+    v = a.value or {}
+    raw = v.get("items") or ([v["text"]] if v.get("text") else [])
+    return {" ".join(str(x).lower().split()) for x in raw if str(x).strip()}
+
+
+def _part_of(small: Assertion, big: Assertion) -> bool:
+    """`small`'s items are all in `big`'s list (and `big` is a list of more than one)."""
+    s, b = _items(small), _items(big)
+    return bool(s) and len(b) > 1 and s <= b
+
+
+def _pick(eligible: list[Assertion]) -> Assertion:
+    """Highest authority (then latest start); among those, the widest list."""
+    best = min(_winner_key(a) for a in eligible)
+    top = [a for a in eligible if _winner_key(a) == best]
+    return max(top, key=lambda a: len(_items(a)))
+
+
 def _keep(a: Assertion, status: str, reason: str) -> None:
     a.status, a.reason = status, reason
     a.valid_from, a.valid_to = a.asserted_from, _end(a)
@@ -104,6 +126,9 @@ def _settle(
     others: list[Assertion], winner: Assertion, compare: Comparator, conflicts: list[ConflictRec]
 ) -> None:
     for o in sorted(others, key=_winner_key):
+        if _part_of(o, winner):
+            _keep(o, "corroborating", f"part of the list in {winner.source_label}")
+            continue
         verdict = compare(o, winner)
         if verdict in ("same", "narrower"):
             _keep(o, "corroborating", f"agrees with {winner.source_label}")
@@ -140,7 +165,7 @@ def resolve_group(group: list[Assertion], compare: Comparator) -> list[ConflictR
         bucket = buckets[client]
         eligible = [a for a in bucket if a.source_status in AUTHORITATIVE]
         if eligible:
-            w = min(eligible, key=_winner_key)
+            w = _pick(eligible)
             _keep(
                 w,
                 "current",

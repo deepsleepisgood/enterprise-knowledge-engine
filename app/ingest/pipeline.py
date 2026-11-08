@@ -275,6 +275,7 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
             },
         )
         jobs.enqueue(s, "extract_episode", {"episode_id": eid})
+        jobs.enqueue_once(s, "index_embeddings", {})
         if kind in ("xlsx", "csv"):
             jobs.enqueue(s, "plugin_hooks", {"episode_id": eid, "event": "on_spreadsheet"})
     summary.update(sources=len(sources), passages=counts, versions=links)

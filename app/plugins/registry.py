@@ -110,6 +110,15 @@ def get(name: str) -> Plugin | None:
     return next((p for p in plugins() if p.name == name), None)
 
 
+def roles() -> dict[str, dict[str, Any]]:
+    """Roles plug-ins declare (roles.yaml): key -> {name, owns, topics, default_for}."""
+    out: dict[str, dict[str, Any]] = {}
+    for p in plugins():
+        for key, r in (p.file(p.manifest.get("roles", "roles.yaml")).get("roles") or {}).items():
+            out.setdefault(key, {"key": key, **(r or {})})
+    return out
+
+
 def baseline_schema() -> dict[str, Any] | None:
     """The first enabled plug-in's hand-written schema, for SCHEMA_MODE=baseline."""
     for p in plugins():

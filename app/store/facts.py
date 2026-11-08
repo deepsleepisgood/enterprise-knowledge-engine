@@ -247,3 +247,122 @@ def live_with_attribute_prefix(session: Session, prefix: str) -> list[FactRow]:
         .order_by(Fact.attribute, Fact.id)
     )
     return [_row(f, n) for f, n in session.execute(q)]
+
+
+def _joined():  # type: ignore[no-untyped-def]
+    return (
+        select(Fact, Entity.name, Source.short_label, Passage.locator)
+        .join(Entity, Entity.id == Fact.subject_id)
+        .outerjoin(Source, Source.id == Fact.source_id)
+        .outerjoin(Passage, Passage.id == Fact.passage_id)
+    )
+
+
+def _narrow(q, statuses: list[str] | None, kinds: list[str] | None):  # type: ignore[no-untyped-def]
+    if statuses:
+        q = q.where(Fact.status.in_(statuses))
+    if kinds:
+        q = q.where(Fact.kind.in_(kinds))
+    return q
+
+
+def facts_touching(
+    session: Session,
+    entity_ids: list[str],
+    valid_on: date | datetime | None = None,
+    known_at: datetime | None = None,
+    statuses: list[str] | None = None,
+    kinds: list[str] | None = None,
+    limit: int = 300,
+) -> list[FactRow]:
+    """Facts whose subject or object is one of `entity_ids` (one hop in the graph)."""
+    if not entity_ids:
+        return []
+    q = _joined().where(
+        Fact.tenant_id == tenant(),
+        *_time_filters(valid_on, known_at),
+        or_(Fact.subject_id.in_(entity_ids), Fact.object_id.in_(entity_ids)),
+    )
+    q = _narrow(q, statuses, kinds).order_by(Fact.authority_rank, Fact.id).limit(limit)
+    return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
+
+
+def nearest(
+    session: Session,
+    vec: list[float],
+    k: int,
+    valid_on: date | datetime | None = None,
+    known_at: datetime | None = None,
+    statuses: list[str] | None = None,
+    kinds: list[str] | None = None,
+) -> list[tuple[FactRow, float]]:
+    """Facts nearest to `vec` by embedding (cosine similarity), filtered by time and status."""
+    dist = Fact.embedding.cosine_distance(vec)
+    q = (
+        _joined()
+        .add_columns(1 - dist)
+        .where(
+            Fact.tenant_id == tenant(),
+            Fact.embedding.is_not(None),
+            *_time_filters(valid_on, known_at),
+        )
+    )
+    q = _narrow(q, statuses, kinds).order_by(dist).limit(k)
+    return [(_row(f, n, lbl, loc), float(s)) for f, n, lbl, loc, s in session.execute(q)]
+
+
+def similarity(session: Session, fact_ids: list[int], vec: list[float]) -> dict[int, float]:
+    """Cosine similarity of each fact's embedding to `vec` (facts without one are left out)."""
+    if not fact_ids:
+        return {}
+    q = select(Fact.id, 1 - Fact.embedding.cosine_distance(vec)).where(
+        Fact.tenant_id == tenant(), Fact.id.in_(fact_ids), Fact.embedding.is_not(None)
+    )
+    return {i: float(s) for i, s in session.execute(q)}
+
+
+def by_ids(session: Session, fact_ids: list[int]) -> dict[int, FactRow]:
+    if not fact_ids:
+        return {}
+    q = _joined().where(Fact.tenant_id == tenant(), Fact.id.in_(fact_ids))
+    return {f.id: _row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)}
+
+
+def live_for_episode(
+    session: Session, episode_id: str, statuses: list[str] | None = None
+) -> list[FactRow]:
+    q = select(Fact).where(
+        Fact.tenant_id == tenant(), Fact.retracted_at.is_(None), Fact.episode_id == episode_id
+    )
+    if statuses:
+        q = q.where(Fact.status.in_(statuses))
+    return [_row(f) for f in session.scalars(q.order_by(Fact.id))]
+
+
+def in_force_values(session: Session, limit_per_attribute: int = 3) -> dict[str, list[str]]:
+    """Attribute -> value texts of its live rules in force now (current or provisional)."""
+    q = (
+        select(Fact.attribute, Fact.value)
+        .where(
+            Fact.tenant_id == tenant(),
+            Fact.retracted_at.is_(None),
+            Fact.status.in_(["current", "provisional"]),
+            Fact.kind != "practice",
+        )
+        .order_by(Fact.attribute, Fact.authority_rank, Fact.id)
+    )
+    out: dict[str, list[str]] = {}
+    for attr, value in session.execute(q):
+        texts = out.setdefault(attr, [])
+        t = str((value or {}).get("text") or "")
+        if t and t not in texts and len(texts) < limit_per_attribute:
+            texts.append(t)
+    return out
+
+
+def live_groups(session: Session) -> set[tuple[str, str]]:
+    """Every (subject, attribute) group that has a live fact (for a full re-resolution)."""
+    q = select(Fact.subject_id, Fact.attribute).where(
+        Fact.tenant_id == tenant(), Fact.retracted_at.is_(None)
+    )
+    return {(sid, attr) for sid, attr in session.execute(q.distinct())}

@@ -208,18 +208,24 @@ def delete_graph(session: Session) -> None:
     """Remove the tenant's derived graph (schema, entities, facts, conflicts, versions) while
     keeping episodes, sources and passages. For rebuilds during development only."""
     from app.store.models import (
+        Ack,
         Change,
         Conflict,
         Entity,
         EntityAlias,
         Fact,
         KbVersion,
+        Notification,
         PluginBinding,
         ReviewItem,
         Schema,
     )
 
     t = tenant()
+    session.execute(delete(Ack).where(Ack.tenant_id == t))
+    session.execute(
+        delete(Notification).where(Notification.tenant_id == t, Notification.change_id.is_not(None))
+    )
     for model in (Change, Conflict, Fact, PluginBinding, EntityAlias, KbVersion, Schema):
         session.execute(delete(model).where(model.tenant_id == t))
     session.execute(
@@ -231,13 +237,17 @@ def delete_graph(session: Session) -> None:
 
 def delete_tenant_content(session: Session) -> None:  # tests and fresh-tenant runs only
     from app.store.models import (
+        Ack,
+        AnswerLog,
         Change,
         Conflict,
         Entity,
         EntityAlias,
+        Escalation,
         Fact,
         Job,
         KbVersion,
+        Notification,
         PluginBinding,
         ReviewItem,
         Schema,
@@ -245,6 +255,10 @@ def delete_tenant_content(session: Session) -> None:  # tests and fresh-tenant r
 
     t = tenant()
     for model in (
+        Escalation,
+        Notification,
+        Ack,
+        AnswerLog,
         Change,
         Conflict,
         ReviewItem,
@@ -290,8 +304,8 @@ def extractable_passages(session: Session, episode_id: str | None = None) -> lis
     return list(session.scalars(q.order_by(Passage.episode_id, Passage.source_id, Passage.ordinal)))
 
 
-def parsed_episode_ids(session: Session) -> list[str]:
-    q = select(Episode.id).where(
-        Episode.tenant_id == tenant(), Episode.status.in_(["parsed", "extracted", "published"])
-    )
+def parsed_episode_ids(session: Session, unextracted_only: bool = False) -> list[str]:
+    """Episodes ready for extraction (all parsed ones, or only those not extracted yet)."""
+    statuses = ["parsed"] if unextracted_only else ["parsed", "extracted", "published"]
+    q = select(Episode.id).where(Episode.tenant_id == tenant(), Episode.status.in_(statuses))
     return list(session.scalars(q.order_by(Episode.received_at, Episode.id)))

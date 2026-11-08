@@ -31,6 +31,17 @@ class Settings(BaseSettings):
     plugins: str = "ap"  # comma-separated plug-in folders under plugins_dir to enable
     worker_threads: int = 4
 
+    # Answer pipeline (BUILD_PLAN Phase 4)
+    rerank_model: str = "BAAI/bge-reranker-base"  # fastembed cross-encoder; "none" disables
+    retrieve_k: int = 20  # full-text and vector candidates each
+    answer_passages: int = 6  # kept after reranking
+    graph_facts: int = 10  # graph-context facts, ranked by similarity
+    abstain_rerank_score: float = -4.0  # top reranker logit below this: unsupported
+    abstain_vector_score: float = 0.55  # used when the reranker is off
+    router_min_confidence: float = 0.6  # below this a calculator route falls back to lookup
+    router_model: str = "fast"  # fast | smart | a model id
+    answer_thinking: bool = False  # let reasoning models think on the answer path (slower)
+
     data_dir: Path = ROOT / "data"
     blob_dir: Path = ROOT / "data" / "blobs"
     plugins_dir: Path = ROOT / "plugins"

@@ -24,7 +24,7 @@ from app.plugins.registry import Plugin
 from app.store import facts as fstore
 from app.store import kb
 
-PROMPT_VERSION = "bind-v1"
+PROMPT_VERSION = "bind-v2"
 NUMERIC = {"percentage", "money", "days", "number"}
 COMPATIBLE = {
     "percentage": {"percentage", "number"},
@@ -76,7 +76,7 @@ def bind(
 ) -> list[BindResult]:
     params = plugin.file("bindings.yaml").get("params", {})
     existing = {b.param: b for b in kb.get_bindings(session, plugin.name)}
-    counts = fstore.summary(session)["by_attribute"]
+    live = fstore.in_force_values(session)  # attribute -> values of rules in force now
     attrs = onto.attributes
     vecs = None
     if embed_fn is not None and attrs:
@@ -94,19 +94,23 @@ def bind(
             desc = f"{param.replace('_', ' ').replace('.', ' ')}: {spec.get('description', '')}"
             pv = embed_fn([desc])[0] if embed_fn is not None else None
             scored = []
-            for i, a in enumerate(attrs):
-                if a.value_type not in COMPATIBLE.get(want, {want}):
-                    continue
+            # A calculator reads rules in force: prefer attributes that have one.
+            pool = [
+                (i, a) for i, a in enumerate(attrs) if a.value_type in COMPATIBLE.get(want, {want})
+            ]
+            if any(a.key in live for _, a in pool):
+                pool = [(i, a) for i, a in pool if a.key in live]
+            for i, a in pool:
                 words = len(_words(desc) & _words(_attr_text(a, onto))) / max(len(_words(desc)), 1)
                 cos = sum(x * y for x, y in zip(pv, vecs[i], strict=True)) if pv and vecs else 0.0
-                scored.append((0.6 * cos + 0.4 * words + 0.05 * (counts.get(a.key, 0) > 0), a))
+                scored.append((0.6 * cos + 0.4 * words, a))
             scored.sort(key=lambda t: -t[0])
             top = [a for _, a in scored[:6]]
             res = BindResult(param, None, 0.0, "unresolved")
             if top and structured_fn is not None:
                 lines = "\n".join(
                     f"{n}. {a.key} [{a.value_type}] {a.label}: {a.description} "
-                    f"({counts.get(a.key, 0)} facts)"
+                    f"(in force now: {', '.join(live.get(a.key, [])) or 'nothing'})"
                     for n, a in enumerate(top, 1)
                 )
                 pick: _Pick = structured_fn(
@@ -139,9 +143,16 @@ class BoundRules:
     """`Rules` for a plug-in's calculators: parameter -> bound attribute -> current fact."""
 
     def __init__(
-        self, session: Session, onto: Ontology, plugin: str, today: date | None = None
+        self,
+        session: Session,
+        onto: Ontology,
+        plugin: str,
+        today: date | None = None,
+        as_of: date | None = None,
     ) -> None:
         self.session, self.onto, self.plugin, self.today = session, onto, plugin, today
+        self.as_of = as_of
+        self.used: list[RuleValue] = []
         self.bindings = {b.param: b.attribute_key for b in kb.get_bindings(session, plugin)}
 
     def get(
@@ -154,13 +165,15 @@ class BoundRules:
                 f"plug-in {self.plugin}: parameter {param} is not bound to the "
                 "schema (see Setup → Plug-in bindings)"
             )
-        return get_rule(
+        rv = get_rule(
             self.session,
             self.onto,
             topic,
             parameter,
             client=client,
-            as_of=as_of,
+            as_of=as_of or self.as_of,
             today=self.today,
             attribute=attr,
         )
+        self.used.append(rv)
+        return rv
