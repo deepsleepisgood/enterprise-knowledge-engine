@@ -6,12 +6,22 @@ import t1 from "@/fixtures/t1_price_tolerance.json";
 import t3 from "@/fixtures/t3_conflict_excipients.json";
 import t5 from "@/fixtures/t5_price_calc.json";
 import t8 from "@/fixtures/t8_unsupported.json";
-import type { AnswerCard, ChangeItem, ClientKey, InvoiceContext, Scope } from "@/lib/types";
+import type {
+  AnswerCard,
+  ChangeFeedItem,
+  ChangeItem,
+  ClientKey,
+  InvoiceContext,
+  PassageDetail,
+  Scope,
+} from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
 
-/** True when no API is configured and the UI answers from web/fixtures. */
+/** True when no API is configured and the UI reads from web/fixtures. */
 export const DEMO_MODE = API_BASE === "";
+
+export const API_URL = API_BASE;
 
 export interface SampleQuestion {
   question: string;
@@ -48,7 +58,96 @@ export class DemoMissError extends Error {
   }
 }
 
+/** A write attempted without an API: the demo is read-only. */
+export class DemoReadOnlyError extends Error {
+  constructor() {
+    super("Demo mode is read-only. Connect the API to make changes.");
+  }
+}
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Read-only fixtures for demo mode, by path (loaded on demand: never shipped to API users).
+const FIXTURES: [RegExp, () => Promise<{ default: unknown }>][] = [
+  [/^\/episodes(\?|$)/, () => import("@/fixtures/episodes.json")],
+  [/^\/stats$/, () => import("@/fixtures/stats.json")],
+  [/^\/schema$/, () => import("@/fixtures/schema.json")],
+  [/^\/bindings/, () => import("@/fixtures/bindings.json")],
+  [/^\/entities\/[^/]+\/timeline/, () => import("@/fixtures/timeline.json")],
+  [/^\/entities(\?|$)/, () => import("@/fixtures/entities.json")],
+  [/^\/conflicts(\?|$)/, () => import("@/fixtures/conflicts.json")],
+  [/^\/conflict-scan$/, () => import("@/fixtures/conflict_scan.json")],
+  [/^\/review-queue/, () => import("@/fixtures/review_queue.json")],
+  [/^\/escalations/, () => import("@/fixtures/escalations.json")],
+  [/^\/analytics$/, () => import("@/fixtures/analytics.json")],
+  [/^\/notifications/, async () => ({ default: [] })],
+  [/^\/changes/, () => import("@/fixtures/changes.json")],
+];
+
+async function errorFrom(res: Response): Promise<ApiError> {
+  let detail: unknown = null;
+  try {
+    detail = (await res.json())?.detail;
+  } catch {
+    /* not JSON */
+  }
+  const text = typeof detail === "string" ? detail : `The service returned ${res.status}.`;
+  return new ApiError(res.status, text);
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  if (DEMO_MODE) {
+    const hit = FIXTURES.find(([re]) => re.test(path));
+    if (!hit) throw new ApiError(404, "Not available in demo mode.");
+    const mod = await hit[1]();
+    return structuredClone(mod.default) as T;
+  }
+  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+  if (!res.ok) throw await errorFrom(res);
+  return (await res.json()) as T;
+}
+
+export async function apiSend<T>(
+  method: "POST" | "PUT" | "PATCH",
+  path: string,
+  body?: unknown,
+): Promise<T> {
+  if (DEMO_MODE) throw new DemoReadOnlyError();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) throw await errorFrom(res);
+  return (await res.json()) as T;
+}
+
+/** Files (or a folder's files) to the intake; zips expand on the server. */
+export async function uploadFiles(
+  files: File[],
+  sender: string,
+): Promise<{ episodes: { episode_id: string; file: string; created: boolean }[] }> {
+  if (DEMO_MODE) throw new DemoReadOnlyError();
+  const form = new FormData();
+  for (const f of files) form.append("files", f, f.webkitRelativePath || f.name);
+  const res = await fetch(`${API_BASE}/episodes/upload?sender=${encodeURIComponent(sender)}`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw await errorFrom(res);
+  return res.json();
+}
+
+export const originalUrl = (episodeId: string) => `${API_BASE}/episodes/${episodeId}/original`;
 
 export async function ask(params: {
   question: string;
@@ -56,6 +155,7 @@ export async function ask(params: {
   client: ClientKey;
   invoiceId: string | null;
   asOf: string | null;
+  viewer: "processor" | "owner";
 }): Promise<AnswerCard> {
   if (DEMO_MODE) {
     await delay(700);
@@ -67,35 +167,32 @@ export async function ask(params: {
     }
     return { ...hit.card, as_of: params.asOf };
   }
-  const res = await fetch(`${API_BASE}/ask`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      question: params.question,
-      user_id: params.userId,
-      client: params.client === "all" ? null : params.client,
-      invoice_id: params.invoiceId,
-      as_of: params.asOf,
-    }),
+  return apiSend<AnswerCard>("POST", "/ask", {
+    question: params.question,
+    user_id: params.userId,
+    client: params.client === "all" ? null : params.client,
+    invoice_id: params.invoiceId,
+    as_of: params.asOf,
+    viewer: params.viewer,
   });
-  if (!res.ok) throw new Error(`The answer service returned ${res.status}.`);
-  return (await res.json()) as AnswerCard;
 }
 
-export async function getChanges(sinceVersion: number): Promise<ChangeItem[]> {
-  if (DEMO_MODE) return (changesFixture as ChangeItem[]).filter((c) => c.kb_version > sinceVersion);
-  const res = await fetch(`${API_BASE}/changes?since=${sinceVersion}`);
-  if (!res.ok) return [];
-  return (await res.json()) as ChangeItem[];
+export async function getChanges(sinceVersion: number): Promise<ChangeFeedItem[]> {
+  if (DEMO_MODE) {
+    return (changesFixture as ChangeItem[])
+      .filter((c) => c.kb_version > sinceVersion)
+      .map((c) => ({ ...c, attribute: c.topic, acknowledged: 0 }));
+  }
+  try {
+    return await apiGet<ChangeFeedItem[]>(`/changes?since=${sinceVersion}`);
+  } catch {
+    return [];
+  }
 }
 
 export async function ackChange(id: number, userId: string): Promise<void> {
   if (DEMO_MODE) return;
-  await fetch(`${API_BASE}/changes/${id}/ack`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userId }),
-  });
+  await apiSend("POST", `/changes/${id}/ack`, { user_id: userId });
 }
 
 export async function searchInvoices(q: string): Promise<InvoiceContext[]> {
@@ -105,15 +202,62 @@ export async function searchInvoices(q: string): Promise<InvoiceContext[]> {
       (i) => !needle || `${i.invoice_id} ${i.vendor_name} ${i.client}`.toLowerCase().includes(needle),
     );
   }
-  const res = await fetch(`${API_BASE}/invoices?q=${encodeURIComponent(q)}`);
-  if (!res.ok) return [];
-  return (await res.json()) as InvoiceContext[];
+  try {
+    return await apiGet<InvoiceContext[]>(`/invoices?q=${encodeURIComponent(q)}`);
+  } catch {
+    return [];
+  }
 }
 
-/** Client scopes known to the schema, for the composer's client chip. */
+/** Client scopes known to the graph, for the composer's client chip. */
 export async function getScopes(): Promise<Scope[]> {
   if (DEMO_MODE) return scopesFixture as Scope[];
-  const res = await fetch(`${API_BASE}/scopes`);
-  if (!res.ok) return [{ key: "all", label: "All clients" }];
-  return (await res.json()) as Scope[];
+  try {
+    return await apiGet<Scope[]>("/scopes");
+  } catch {
+    return [{ key: "all", label: "All clients" }];
+  }
+}
+
+export interface InvoiceExtras {
+  tips: string[];
+  vendor: Record<string, unknown> | null;
+}
+
+/** Vendor tips and details for an attached invoice (plug-in context hook). */
+export async function getContext(invoiceId: string): Promise<InvoiceExtras | null> {
+  if (DEMO_MODE) {
+    const inv = (invoicesFixture as InvoiceContext[]).find((i) => i.invoice_id === invoiceId);
+    return inv ? { tips: inv.habits, vendor: null } : null;
+  }
+  try {
+    return await apiGet<InvoiceExtras>(`/context?invoice_id=${encodeURIComponent(invoiceId)}`);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPassage(id: string): Promise<PassageDetail | null> {
+  if (DEMO_MODE) return null;
+  try {
+    return await apiGet<PassageDetail>(`/passages/${encodeURIComponent(id)}`);
+  } catch {
+    return null;
+  }
+}
+
+export async function escalate(answerId: string, userId: string): Promise<{ routed_to: string }> {
+  if (DEMO_MODE) {
+    await delay(400);
+    return { routed_to: "" };
+  }
+  return apiSend("POST", "/escalations", { answer_id: Number(answerId), asked_by: userId });
+}
+
+export async function reportWrong(answerId: string, userId: string, note: string): Promise<void> {
+  if (DEMO_MODE) {
+    await delay(300);
+    return;
+  }
+  await apiSend("POST", `/answers/${answerId}/report`, { user_id: userId, note });
 }

@@ -327,3 +327,103 @@ def test_rescan_keeps_owner_decisions_and_clears_what_is_gone(api: TestClient) -
         assert kb.get_conflict(s, b).status == "cleared"  # kept, not deleted
     assert b not in {c["id"] for c in api.get("/conflicts").json()}
     assert b in {c["id"] for c in api.get("/conflicts", params={"status": "cleared"}).json()}
+
+
+def test_episode_counts_retry_and_metadata_correction(api: TestClient) -> None:
+    eps = api.get("/episodes").json()
+    built = [e for e in eps if e["passages"]]
+    assert built and any(e["facts"] for e in built)
+    src = next(s for e in built for s in e["sources"])
+    assert {"id", "short_label", "doc_type", "dated", "status", "unsure"} <= set(src)
+    assert api.post(f"/episodes/{built[0]['id']}/retry").status_code == 409  # not failed
+    r = api.patch(f"/sources/{src['id']}", json={"by": "owner", "dated": "2026-01-15"})
+    assert r.status_code == 200 and r.json()["updated"] == ["dated"] and r.json()["reresolve_job"]
+    again = next(
+        s for e in api.get("/episodes").json() for s in e["sources"] if s["id"] == src["id"]
+    )
+    assert again["dated"] == "2026-01-15" and again["confirmed_by"] == "owner"
+    assert again["unsure"] == []
+    assert api.patch("/sources/nope", json={"by": "o"}).status_code == 404
+
+
+def test_stats_analytics_and_notifications(api: TestClient) -> None:
+    st = api.get("/stats").json()
+    assert st["documents"] >= 4 and st["passages"] > 0 and st["facts"] > 0 and st["entities"] > 0
+    assert st["kb_version"] >= 1 and set(st["queue"]) == {"queued", "running", "failed"}
+    api.post("/ask", json={"question": QUESTION, "user_id": "u9"})
+    card = api.post("/ask", json={"question": "Is there a canteen subsidy?", "user_id": "u9"})
+    an = api.get("/analytics").json()
+    assert an["answers"] >= 2 and an["users"] >= 1 and an["latency_ms"]["p50"] is not None
+    assert any("canteen" in u["question"] for u in an["unanswered"])
+    assert an["top_sources"] and an["top_sources"][0]["label"]
+    aid = int(card.json()["answer_id"])
+    eid = api.post("/escalations", json={"answer_id": aid, "asked_by": "u9"}).json()[
+        "escalation_id"
+    ]
+    api.post(f"/escalations/{eid}/reply", json={"expert_id": "x1", "text": "No subsidy."})
+    notes = api.get("/notifications", params={"user_id": "u9"}).json()
+    assert notes and "No subsidy" in notes[0]["body"] and notes[0]["answer_id"] == aid
+    assert (
+        api.post(f"/notifications/{notes[0]['id']}/read", json={"user_id": "u9"}).status_code == 200
+    )
+    assert api.get("/notifications", params={"user_id": "u9"}).json() == []
+    assert (
+        api.post(f"/notifications/{notes[0]['id']}/read", json={"user_id": "x"}).status_code == 404
+    )
+
+
+def test_schema_draft_edit_and_freeze(api: TestClient) -> None:
+    before = api.get("/schema").json()["active"]
+    d = api.post("/schema/draft", json={"by": "owner"})
+    assert d.status_code == 201 and d.json()["created"]
+    v = d.json()["version"]
+    assert api.post("/schema/draft", json={"by": "owner"}).json() == {
+        "version": v,
+        "status": "draft",
+        "created": False,
+    }
+    onto = dict(before["ontology"])
+    onto["attributes"] = [
+        {**a, "label": a["label"] + " (edited)"} if i == 0 else a
+        for i, a in enumerate(onto["attributes"])
+    ]
+    assert api.put("/schema", json={"version": v, "ontology": onto}).status_code == 200
+    assert (
+        api.put("/schema", json={"version": before["version"], "ontology": onto}).status_code == 409
+    )
+    assert (
+        api.put("/schema", json={"version": v, "ontology": {"attributes": "x"}}).status_code == 422
+    )
+    sc = api.get("/schema").json()
+    assert sc["draft"]["version"] == v and sc["draft"]["ontology"]["attributes"][0][
+        "label"
+    ].endswith("(edited)")
+    fr = api.post("/schema/freeze", json={"version": v, "by": "owner"})
+    assert fr.status_code == 200, fr.text
+    after = api.get("/schema").json()
+    assert after["active"]["version"] == v and after["draft"] is None
+
+
+def test_conflict_scan_status_and_open_in_review(api: TestClient) -> None:
+    assert api.get("/conflict-scan").json() == {"status": "never"}
+    api.post("/conflict-scan", json={})
+    assert api.get("/conflict-scan").json()["status"] == "queued"
+    with session_scope() as s:
+        facts = fstore.get_facts(s)
+        cur = next(f for f in facts if "24 days" in f.statement)
+        old = next(f for f in facts if "20 days" in f.statement)
+        cid = kb.add_conflict(
+            s,
+            subject_id=cur.subject_id,
+            attribute=cur.attribute,
+            fact_a=cur.id,
+            fact_b=old.id,
+            kind="value",
+            authoritative_fact=cur.id,
+            reason="v2 replaced v1",
+        )
+    r = api.post(f"/conflicts/{cid}/review", json={"by": "owner"})
+    assert r.status_code == 201
+    item = next(i for i in api.get("/review-queue").json() if i["id"] == r.json()["review_item"])
+    assert item["kind"] == "conflict" and "24" in item["payload"]["authoritative"]["value"]
+    assert api.post("/conflicts/999999/review", json={"by": "o"}).status_code == 404

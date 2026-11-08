@@ -311,3 +311,29 @@ def parsed_episode_ids(session: Session, unextracted_only: bool = False) -> list
     statuses = ["parsed"] if unextracted_only else ["parsed", "extracted", "published"]
     q = select(Episode.id).where(Episode.tenant_id == tenant(), Episode.status.in_(statuses))
     return list(session.scalars(q.order_by(Episode.received_at, Episode.id)))
+
+
+def passage_counts(session: Session) -> dict[str, int]:
+    """Episode id -> live passages."""
+    rows = session.execute(
+        select(Passage.episode_id, func.count())
+        .where(Passage.tenant_id == tenant(), Passage.retired_at.is_(None))
+        .group_by(Passage.episode_id)
+    )
+    return dict(rows.all())
+
+
+def totals(session: Session) -> dict[str, int]:
+    def n(model: Any, *where: Any) -> int:
+        return (
+            session.scalar(
+                select(func.count()).select_from(model).where(model.tenant_id == tenant(), *where)
+            )
+            or 0
+        )
+
+    return {
+        "episodes": n(Episode),
+        "documents": n(Source),
+        "passages": n(Passage, Passage.retired_at.is_(None)),
+    }

@@ -90,6 +90,8 @@ export interface AnswerCard {
   entities: EntityRef[];
   related: string[];
   latency_ms: number;
+  /** Owner view only: the text the verifier could not confirm, and why. */
+  draft?: { rule: { text: string; citations: Citation[] }; problems: string[] } | null;
 }
 
 export interface ChangeItem {
@@ -129,3 +131,304 @@ export interface Scope {
 }
 
 export const ALL_SCOPE: Scope = { key: "all", label: "All clients" };
+
+// ---------------------------------------------------------------- engine pages (API Phase 7)
+
+export interface ChangeFeedItem extends ChangeItem {
+  attribute: string | null;
+  acknowledged: number;
+}
+
+export interface UnsureField {
+  field: string;
+  origin: string;
+  confidence: number | null;
+}
+
+export interface SourceBrief {
+  id: string;
+  short_label: string;
+  title: string;
+  doc_type: DocType;
+  version: string | null;
+  dated: string | null;
+  status: SourceStatus | "outdated" | "unknown";
+  client_scope: string;
+  confirmed_by: string | null;
+  unsure: UnsureField[];
+}
+
+export type EpisodeStatus =
+  | "queued"
+  | "parsed"
+  | "extracted"
+  | "published"
+  | "pending_review"
+  | "needs_attention"
+  | "failed";
+
+export interface Episode {
+  id: string;
+  channel: string;
+  source_uri: string | null;
+  mime: string | null;
+  sender: string | null;
+  sender_role: string | null;
+  received_at: string;
+  parse_tier: number | null;
+  parse_quality: number | null;
+  status: EpisodeStatus;
+  error: string | null;
+  confirmations: number;
+  meta: Record<string, unknown>;
+  created_at: string;
+  passages: number;
+  facts: number;
+  sources: SourceBrief[];
+}
+
+export interface Stats {
+  episodes: number;
+  documents: number;
+  passages: number;
+  facts: number;
+  entities: number;
+  kb_version: number;
+  queue: { queued: number; running: number; failed: number };
+  users: number;
+  open_conflicts: number;
+  open_reviews: number;
+  episodes_by_status: Record<string, number>;
+  facts_by_status: Record<string, number>;
+  entities_by_type: Record<string, number>;
+}
+
+export type Risk = "high" | "medium" | "low";
+
+export interface OntologyAttribute {
+  key: string;
+  topic: string;
+  label: string;
+  description: string;
+  value_type: string;
+  unit: string | null;
+  synonyms: string[];
+}
+
+export interface OntologyTopic {
+  key: string;
+  label: string;
+  description: string;
+  synonyms: string[];
+  risk: Risk;
+}
+
+export interface SourceRank {
+  doc_type: string;
+  rank: number;
+  practice: boolean;
+  reason: string;
+}
+
+export interface SenderAuthority {
+  who: string;
+  client: string;
+  topics: string[];
+}
+
+export interface Ontology {
+  name: string;
+  base_currency: string | null;
+  units: Record<string, number>;
+  entity_types: { name: string; description: string }[];
+  topics: OntologyTopic[];
+  attributes: OntologyAttribute[];
+  source_ranking: SourceRank[];
+  scope_keys: string[];
+  sender_authority: SenderAuthority[];
+}
+
+export interface SchemaVersion {
+  id: number;
+  version: number;
+  status: "draft" | "frozen";
+  mode: string;
+  ontology: Ontology;
+  sample: string[];
+  created_at: string;
+  frozen_at: string | null;
+  frozen_by: string | null;
+}
+
+export interface SchemaState {
+  active: SchemaVersion | null;
+  draft: SchemaVersion | null;
+  kb_version: number;
+}
+
+export interface Binding {
+  id: number;
+  plugin: string;
+  param: string;
+  attribute_key: string | null;
+  subject_entity_id: string | null;
+  confidence: number | null;
+  confirmed_by: string | null;
+  meta: Record<string, unknown>;
+  updated_at: string;
+}
+
+export interface EntitySummary {
+  id: string;
+  type: string;
+  name: string;
+  aliases: string[];
+  facts: number;
+}
+
+export interface FactValue {
+  type?: string;
+  number?: number | null;
+  unit?: string | null;
+  text?: string | null;
+  items?: string[] | null;
+}
+
+export interface FactVersion {
+  id: number;
+  subject_id: string;
+  attribute: string;
+  value: FactValue;
+  scope: Record<string, string>;
+  statement: string;
+  kind: string;
+  status: string;
+  valid_from: string | null;
+  valid_to: string | null;
+  recorded_at: string;
+  retracted_at: string | null;
+  authority_rank: number;
+  quote: string | null;
+  passage_id: string | null;
+  source_label: string | null;
+  locator: string | null;
+  subject_name: string | null;
+}
+
+export interface Timeline {
+  entity: { id: string; type: string; name: string; aliases: string[] };
+  attributes: { attribute: string; versions: FactVersion[] }[];
+}
+
+export interface ConflictSide {
+  fact_id: number;
+  passage_id: string | null;
+  source: string | null;
+  locator: string | null;
+  value: string;
+  statement: string;
+  quote: string | null;
+  status: string;
+  valid_from: string | null;
+}
+
+export interface Conflict {
+  id: number;
+  kind: "value" | "self_contradiction" | "practice_vs_rule" | "scope";
+  status: string;
+  attribute: string | null;
+  scope: Record<string, string>;
+  topic: string | null;
+  authoritative: ConflictSide | null;
+  conflicting: ConflictSide | null;
+  reason: string | null;
+  detected_at: string;
+}
+
+export interface ScanStatus {
+  status: "never" | "queued" | "running" | "done" | "failed";
+  job_id?: number;
+  queued_at?: string;
+  finished_at?: string | null;
+  result?: { conflicts?: number; cleared?: number; judged?: number };
+  error?: string | null;
+}
+
+export interface ReviewItem {
+  id: number;
+  kind: string;
+  payload: Record<string, unknown>;
+  risk_tier: string;
+  status: string;
+  row_version: number;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+}
+
+export interface Escalation {
+  id: number;
+  answer_id: number | null;
+  question: string;
+  client: string | null;
+  asked_by: string;
+  routed_to_role: string;
+  kind: string;
+  status: string;
+  found: Record<string, unknown>;
+  expert_reply: string | null;
+  expert_id: string | null;
+  episode_id: string | null;
+  created_at: string;
+  answered_at: string | null;
+}
+
+export interface Notification {
+  id: number;
+  kind: string;
+  body: string;
+  answer_id: number | null;
+  change_id: number | null;
+  at: string;
+  read: boolean;
+}
+
+export interface PassageDetail {
+  id: string;
+  locator: string;
+  section_title: string | null;
+  speaker: string | null;
+  text: string;
+  context_header: string;
+  segment_kind: string;
+  position: Record<string, unknown>;
+  episode_id: string;
+  source: {
+    id: string;
+    short_label: string;
+    title: string;
+    doc_type: DocType;
+    version: string | null;
+    dated: string | null;
+    status: string;
+    client_scope: string;
+  } | null;
+  position_in_source: {
+    index: number | null;
+    of: number;
+    previous: { id: string; locator: string; section_title: string | null } | null;
+    next: { id: string; locator: string; section_title: string | null } | null;
+  };
+}
+
+export interface Analytics {
+  answers: number;
+  users: number;
+  by_status: Record<string, number>;
+  by_route: Record<string, number>;
+  top_topics: { topic: string; count: number }[];
+  unanswered: { id: number; question: string; client: string | null; status: string; created_at: string }[];
+  top_sources: { passage_id: string; count: number; label: string; locator: string; section_title: string | null }[];
+  latency_ms: { p50: number | null; p90: number | null };
+  acknowledgements: { changes: number; acks: number; rate: number | null };
+}

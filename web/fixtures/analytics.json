@@ -1,0 +1,154 @@
+{
+ "answers": 24,
+ "users": 2,
+ "by_status": {
+  "answered": 18,
+  "unverified": 3,
+  "unsupported": 3
+ },
+ "by_route": {
+  "lookup": 13,
+  "calculator:ap.einvoice": 2,
+  "calculator:ap.msme": 2,
+  "calculator:ap.tds": 1,
+  "calculator:ap.price": 5,
+  "out_of_scope": 1
+ },
+ "top_topics": [
+  {
+   "topic": "Price tolerance",
+   "count": 9
+  },
+  {
+   "topic": "Payment terms",
+   "count": 2
+  },
+  {
+   "topic": "GST",
+   "count": 1
+  },
+  {
+   "topic": "TDS",
+   "count": 1
+  },
+  {
+   "topic": "Infra",
+   "count": 1
+  },
+  {
+   "topic": "Pharma",
+   "count": 1
+  }
+ ],
+ "unanswered": [
+  {
+   "id": 19,
+   "question": "A supplier whose highest aggregate annual turnover since 2017-18 is ₹8.9 crore sends an invoice without an IRN. Can we accept it?",
+   "client": null,
+   "status": "unverified",
+   "created_at": "2026-11-07T20:24:26.008573Z"
+  },
+  {
+   "id": 18,
+   "question": "What is the canteen subsidy for staff working the night shift?",
+   "client": null,
+   "status": "unsupported",
+   "created_at": "2026-11-07T20:11:34.267373Z"
+  },
+  {
+   "id": 12,
+   "question": "A supplier whose highest aggregate annual turnover since 2017-18 is ₹8.9 crore sends an invoice without an IRN. Can we accept it?",
+   "client": null,
+   "status": "unverified",
+   "created_at": "2026-11-07T20:09:05.999533Z"
+  },
+  {
+   "id": 9,
+   "question": "What is the canteen subsidy for staff working the night shift?",
+   "client": null,
+   "status": "unsupported",
+   "created_at": "2026-11-07T20:06:26.562413Z"
+  },
+  {
+   "id": 5,
+   "question": "What is the canteen subsidy for staff working the night shift?",
+   "client": null,
+   "status": "unsupported",
+   "created_at": "2026-11-07T20:02:49.114235Z"
+  },
+  {
+   "id": 1,
+   "question": "What is the price tolerance for an invoice line where the unit price is higher than the PO price?",
+   "client": null,
+   "status": "unverified",
+   "created_at": "2026-11-07T19:51:35.229218Z"
+  }
+ ],
+ "top_sources": [
+  {
+   "passage_id": "6a3d60030fef8254dc43",
+   "count": 9,
+   "label": "AP SOP v4.0",
+   "locator": "4.2",
+   "section_title": "Price tolerance"
+  },
+  {
+   "passage_id": "e039adb5db2abe2347ba",
+   "count": 6,
+   "label": "AP SOP v4.0",
+   "locator": "14",
+   "section_title": "What changed from version 3.1"
+  },
+  {
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "count": 4,
+   "label": "AP SOP v4.0",
+   "locator": "5.4",
+   "section_title": "E-invoices"
+  },
+  {
+   "passage_id": "74dbc50fc92df4fdefd9",
+   "count": 4,
+   "label": "AP SOP v4.0",
+   "locator": "10",
+   "section_title": "Exceptions"
+  },
+  {
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "count": 3,
+   "label": "AP SOP v3.1",
+   "locator": "3",
+   "section_title": "Matching"
+  },
+  {
+   "passage_id": "24ff09af33216f26bf19",
+   "count": 2,
+   "label": "AP SOP v4.0",
+   "locator": "9",
+   "section_title": "Payments"
+  },
+  {
+   "passage_id": "2e835f7c493a3ebfcf98",
+   "count": 2,
+   "label": "Part F",
+   "locator": "Part F",
+   "section_title": "AP team FAQ (internal wiki export, last updated 9 October 2023)"
+  },
+  {
+   "passage_id": "81eaace0c2177a591571",
+   "count": 1,
+   "label": "AP SOP v4.0",
+   "locator": "10",
+   "section_title": "Exceptions"
+  }
+ ],
+ "latency_ms": {
+  "p50": 15353,
+  "p90": 69569
+ },
+ "acknowledgements": {
+  "changes": 11,
+  "acks": 0,
+  "rate": 0
+ }
+}

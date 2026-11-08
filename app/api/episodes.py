@@ -19,6 +19,7 @@ from app.ingest.connectors import EpisodeIn, from_eml, from_text, from_upload
 from app.ingest.intake import submit
 from app.store import episodes as estore
 from app.store import facts as fstore
+from app.store import jobs
 
 router = APIRouter(tags=["episodes"])
 
@@ -95,11 +96,94 @@ async def upload(
     return {"episodes": _submit_all(s, eps)}
 
 
+METADATA_FIELDS = ("doc_type", "dated", "status", "version", "scope")
+LOW_CONFIDENCE = 0.6
+
+
+def source_brief(src: Any) -> dict[str, Any]:
+    """A document with the metadata the engine was unsure of (for the owner to correct)."""
+    prov = src.meta_provenance or {}
+    unsure = [
+        {
+            "field": f,
+            "origin": (prov.get(f) or {}).get("origin", ""),
+            "confidence": (prov.get(f) or {}).get("confidence"),
+        }
+        for f in METADATA_FIELDS
+        if (prov.get(f) or {}).get("confidence") is not None
+        and prov[f]["confidence"] < LOW_CONFIDENCE
+        and not src.confirmed_by
+    ]
+    return {
+        "id": src.id,
+        "short_label": src.short_label,
+        "title": src.title,
+        "doc_type": src.doc_type,
+        "version": src.version,
+        "dated": src.dated,
+        "status": src.status,
+        "client_scope": src.client_scope,
+        "confirmed_by": src.confirmed_by,
+        "unsure": unsure,
+    }
+
+
 @router.get("/episodes")
 def list_episodes(limit: int = 200, s: Session = Depends(read_session)) -> list[dict[str, Any]]:
+    """Newest first, with each episode's documents, passage and fact counts."""
+    eps = estore.list_episodes(s, limit=min(max(limit, 1), 1000))
+    passages, facts = estore.passage_counts(s), fstore.counts_by_episode(s)
+    docs: dict[str, list[dict[str, Any]]] = {}
+    for src in estore.list_sources(s):
+        docs.setdefault(src.episode_id, []).append(source_brief(src))
     return [
-        row(e, drop={"blob_path"}) for e in estore.list_episodes(s, limit=min(max(limit, 1), 1000))
+        {
+            **row(e, drop={"blob_path"}),
+            "passages": passages.get(e.id, 0),
+            "facts": facts.get(e.id, 0),
+            "sources": docs.get(e.id, []),
+        }
+        for e in eps
     ]
+
+
+@router.post("/episodes/{episode_id}/retry", status_code=202)
+def retry(episode_id: str, s: Session = Depends(write_session)) -> dict[str, Any]:
+    """Parse a failed or held episode again (the failed attempt stays in the job log)."""
+    e = estore.get_episode(s, episode_id)
+    if e is None:
+        raise not_found("episode")
+    if e.status not in ("failed", "needs_attention"):
+        raise HTTPException(409, f"episode is {e.status}; only failed or held episodes retry")
+    estore.set_status(s, episode_id, "queued", error=None)
+    job = jobs.retry(s, "parse_episode", {"episode_id": episode_id})
+    return {"episode_id": episode_id, "status": "queued", "job_id": job}
+
+
+class SourceEdit(BaseModel):
+    by: str
+    doc_type: str | None = None
+    version: str | None = None
+    dated: date | None = None
+    status: str | None = None
+    client_scope: str | None = None
+
+
+@router.patch("/sources/{source_id}")
+def edit_source(source_id: str, body: SourceEdit, s: Session = Depends(write_session)) -> dict:
+    """The owner corrects inferred metadata once; the document's facts are re-resolved (a new
+    date or status can change which rule is in force)."""
+    src = estore.get_source(s, source_id)
+    if src is None:
+        raise not_found("document")
+    values = body.model_dump(exclude_none=True, exclude={"by"})
+    prov = dict(src.meta_provenance or {})
+    for f in values:
+        key = "scope" if f == "client_scope" else f
+        prov[key] = {"origin": f"confirmed by {body.by}", "confidence": 1.0}
+    estore.update_source(s, source_id, **values, meta_provenance=prov, confirmed_by=body.by)
+    job = jobs.enqueue(s, "reresolve_source", {"source_id": source_id})
+    return {"source_id": source_id, "updated": sorted(values), "reresolve_job": job}
 
 
 @router.get("/episodes/{episode_id}")

@@ -16,7 +16,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import ask, changes, conflicts, episodes, knowledge, plugins, review
+from app.api import ask, changes, conflicts, episodes, insights, knowledge, plugins, review
 from app.api.deps import TenantMiddleware
 from app.core.config import get_settings
 
@@ -43,6 +43,7 @@ def create_app() -> FastAPI:
         changes.router,
         review.router,
         conflicts.router,
+        insights.router,
     ):
         app.include_router(r)
 

@@ -1,0 +1,2484 @@
+[
+ {
+  "id": 21,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "supplier_habits.resend_suffixes",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Supplier behavioural patterns",
+  "authoritative": {
+   "fact_id": 125,
+   "passage_id": "72f14a5f302dcc6a4970",
+   "source": "Video 1",
+   "locator": "Video 1 [02:10]",
+   "value": "-REV",
+   "statement": "Suppliers add the suffix '-REV' to invoice numbers when sending revised copies.",
+   "quote": "Suppliers resend invoices all the time: a reminder, a revised copy, the same PDF from a different person. The system normalises the invoice number, so 'INV/0042' and 'INV42-REV' look the same to it.",
+   "status": "current",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 317,
+   "passage_id": "f67b136daa068ef58540",
+   "source": "Expert interview 1",
+   "locator": "Expert interview 1 [02:30]",
+   "value": "/A, -REV",
+   "statement": "Transporters add '/A' or '-REV' suffixes when resending the same invoice.",
+   "quote": "Three or four transporters add '/A' or '-REV' when they resend the same invoice.",
+   "status": "current",
+   "valid_from": "2026-09-08T00:00:00Z"
+  },
+  "reason": "Practice in Expert interview 1 Expert interview 1 [02:30] differs from the rule in Video 1 Video 1 [02:10], dated 01 Feb 2026; practice never overrides.",
+  "detected_at": "2026-11-07T13:29:34.957200Z"
+ },
+ {
+  "id": 34,
+  "kind": "value",
+  "status": "open",
+  "attribute": "tds_deduction.unclear_section_action",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "TDS deduction rules",
+  "authoritative": {
+   "fact_id": 381,
+   "passage_id": "cfaeffaf9617184012be",
+   "source": "AP SOP v4.0",
+   "locator": "6",
+   "value": "raise TDS_SECTION_UNCLEAR to Tax Desk",
+   "statement": "If an AMC contract is mixed or unclear, the TDS_SECTION_UNCLEAR exception must be raised to the Tax Desk; do not guess the section.",
+   "quote": "When a contract is mixed or unclear, raise TDS_SECTION_UNCLEAR to the Tax Desk. Do not guess.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 379,
+   "passage_id": "9cb3b36f18e0a048bb62",
+   "source": "DI-03",
+   "locator": "Part A, step 6",
+   "value": "raise TDS_SECTION_UNCLEAR",
+   "statement": "If the vendor master's suggested TDS section and the invoice's service nature disagree, the user must raise a TDS_SECTION_UNCLEAR exception.",
+   "quote": "If the suggestion and the invoice disagree, raise TDS_SECTION_UNCLEAR.",
+   "status": "overridden",
+   "valid_from": "2026-04-12T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 6 (authority rank 1, dated 01 Apr 2026) outranks DI-03 Part A, step 6 (rank 3, dated 12 Apr 2026).",
+  "detected_at": "2026-11-07T13:47:06.675489Z"
+ },
+ {
+  "id": 37,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "gst_compliance.itc_available_date",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 433,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "14 day",
+   "statement": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "quote": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 309,
+   "passage_id": "44e2578450fb16e3635f",
+   "source": "Video 2",
+   "locator": "Video 2 [06:20]",
+   "value": "20 day",
+   "statement": "The team checks GSTR-2A around the 20th of the following month.",
+   "quote": "We look at GSTR-2A around the twentieth of the next month.",
+   "status": "current",
+   "valid_from": "2022-11-01T00:00:00Z"
+  },
+  "reason": "Practice in Video 2 Video 2 [06:20] differs from the rule in AP SOP v4.0 5.5, dated 01 Apr 2026; practice never overrides.",
+  "detected_at": "2026-11-07T13:47:06.675489Z"
+ },
+ {
+  "id": 38,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "gst_compliance.missing_itc_action",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 434,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "Pay the base value on the due date and hold the GST amount until the invoice appears in GSTR-2B.",
+   "statement": "If an invoice does not appear in GSTR-2B by the 14th, pay the base value on the due date and hold the GST amount until the invoice appears.",
+   "quote": "If an invoice does not appear in GSTR-2B by then, pay the base value on the due date and hold the GST amount until the invoice appears.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 311,
+   "passage_id": "44e2578450fb16e3635f",
+   "source": "Video 2",
+   "locator": "Video 2 [06:20]",
+   "value": "hold GST portion and pay base",
+   "statement": "If the invoice is not reflected in GSTR-2A, the GST portion is held and only the base amount is paid.",
+   "quote": "If the invoice isn't there, hold the GST portion and pay the base.",
+   "status": "current",
+   "valid_from": "2022-11-01T00:00:00Z"
+  },
+  "reason": "Practice in Video 2 Video 2 [06:20] differs from the rule in AP SOP v4.0 5.5, dated 01 Apr 2026; practice never overrides.",
+  "detected_at": "2026-11-07T13:47:06.675489Z"
+ },
+ {
+  "id": 164,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_matching.services_matching_type",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice matching rules",
+  "authoritative": {
+   "fact_id": 594,
+   "passage_id": "902f4a9571065fa68440",
+   "source": "AP SOP v4.0",
+   "locator": "4.1",
+   "value": "purchase order, approved service entry sheet",
+   "statement": "Service invoices must be matched two ways: purchase order and approved service entry sheet.",
+   "quote": "Service invoices are matched two ways against the PO and the approved service entry sheet.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 671,
+   "passage_id": "732c3af92baad708588f",
+   "source": "Video 1",
+   "locator": "Video 1 [04:30]",
+   "value": "two-way matching with service entry sheet",
+   "statement": "Services invoice matching uses two-way matching with the service entry sheet.",
+   "quote": "Services: two-way with the service entry sheet.",
+   "status": "superseded",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "reason": "Video 1 Video 1 [04:30], dated 01 Feb 2026 is superseded; AP SOP v4.0 4.1, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-07T19:22:23.675631Z"
+ },
+ {
+  "id": 206,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 418,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "5e+07 INR",
+   "statement": "A supplier whose aggregate annual turnover exceeds ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "quote": "A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 33,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "1e+08 INR",
+   "statement": "Suppliers with annual turnover above ₹10 crore must issue e-invoices with an IRN.",
+   "quote": "Suppliers with aggregate turnover above ₹10 crore must send e-invoices with an IRN",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.4, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 207,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 418,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "5e+07 INR",
+   "statement": "A supplier whose aggregate annual turnover exceeds ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "quote": "A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 416,
+   "passage_id": "a27522c03d65afebe0cb",
+   "source": "Video 2",
+   "locator": "Video 2 [03:40]",
+   "value": "1e+08 INR",
+   "statement": "Suppliers with annual turnover above ten crore INR must send e-invoices with IRN.",
+   "quote": "any supplier with turnover above ten crore must send an e-invoice with an IRN",
+   "status": "superseded",
+   "valid_from": "2022-10-01T00:00:00Z"
+  },
+  "reason": "Video 2 Video 2 [03:40], dated 01 Nov 2022 is superseded; AP SOP v4.0 5.4, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 208,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 418,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "5e+07 INR",
+   "statement": "A supplier whose aggregate annual turnover exceeds ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "quote": "A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 417,
+   "passage_id": "927907de7b048581c92d",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "1e+08 INR",
+   "statement": "IRN is required only if the supplier's annual turnover exceeds ₹10 crore.",
+   "quote": "Only if the supplier's turnover is above ₹10 crore. Below that, a normal tax invoice is fine.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 5.4, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 209,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.itc_available_date",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 433,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "14 day",
+   "statement": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "quote": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 36,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "20 day",
+   "statement": "GSTR-2A must be checked by the 20th of the following month for input tax credit.",
+   "quote": "check by the 20th of the following month",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.5, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 210,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.itc_available_date",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 433,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "14 day",
+   "statement": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "quote": "GSTR-2B for a month is generated on the 14th of the following month.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 432,
+   "passage_id": "b047ede51ea833a7b51a",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "20 day",
+   "statement": "GSTR-2A becomes available on the 20th day of the month.",
+   "quote": "Look at GSTR-2A on the 20th.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 5.5, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 211,
+  "kind": "value",
+  "status": "open",
+  "attribute": "quantity_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Quantity tolerance",
+  "authoritative": {
+   "fact_id": 447,
+   "passage_id": "650ec83794239ad8d60e",
+   "source": "AP SOP v4.0",
+   "locator": "4.3",
+   "value": "0 %",
+   "statement": "The general quantity tolerance for invoice quantity over GRN quantity is 0%.",
+   "quote": "There is no quantity tolerance for any client",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 444,
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "source": "AP SOP v3.1",
+   "locator": "3",
+   "value": "2 %",
+   "statement": "Invoice quantity may exceed GRN quantity by up to 2% for any goods.",
+   "quote": "Invoice quantity may exceed the GRN by up to 2% for any goods, to allow for weighing and counting differences.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.3, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 216,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.variance_absolute_threshold",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 330,
+   "passage_id": "a1c5bb42d73893644924",
+   "source": "Video 3",
+   "locator": "Video 3 [03:10]",
+   "value": "500 INR",
+   "statement": "The absolute monetary threshold for raising a PRICE_VAR exception is ₹500 per invoice line.",
+   "quote": "above the ₹500 limit",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 42,
+   "passage_id": "bdfb3c5e45b57226c186",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 1",
+   "value": "1000 INR",
+   "statement": "The absolute price variance threshold is ₹1,000.",
+   "quote": "PO price ₹1,200 per unit for 100 units; invoice price ₹1,218. Difference ₹1,800 on a line value of ₹1,20,000 is 1.5%, but above ₹1,000 — raise PRICE_VAR.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 12, step 1, dated 01 Jul 2023 is superseded; Video 3 Video 3 [03:10], dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 217,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_approval_authority.cfo_threshold_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 504,
+   "passage_id": "270bdf97dc3851dc80a3",
+   "source": "AP SOP v4.0",
+   "locator": "7",
+   "value": "5e+06 INR",
+   "statement": "Invoices with total above ₹50 lakh require Client CFO approval through the approval workflow before posting.",
+   "quote": "Above ₹50 lakh | Client CFO, through the approval workflow",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 502,
+   "passage_id": "c726de9cffd5e5368bf3",
+   "source": "AP SOP v3.1",
+   "locator": "6",
+   "value": "1e+07 INR",
+   "statement": "Invoices above ₹1 crore require client CFO approval.",
+   "quote": "Above ₹1 crore: client CFO.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 7, dated 01 Apr 2026 replaced AP SOP v3.1 6, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 218,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_approval_authority.threshold_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 508,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "1e+06 INR",
+   "statement": "The threshold amount for AP Controller invoice approval is ₹10 lakh.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 56,
+   "passage_id": "c726de9cffd5e5368bf3",
+   "source": "AP SOP v3.1",
+   "locator": "6",
+   "value": "2.5e+06 INR",
+   "statement": "Invoices above ₹25 lakh and up to ₹1 crore require AP Controller approval.",
+   "quote": "Above ₹25 lakh and up to ₹1 crore: AP Controller.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 2, dated 01 Apr 2026 replaced AP SOP v3.1 6, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 219,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_approval_authority.threshold_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 508,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "1e+06 INR",
+   "statement": "The threshold amount for AP Controller invoice approval is ₹10 lakh.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 507,
+   "passage_id": "29aa8c6032c925b2b6fd",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "2.5e+06 INR",
+   "statement": "Invoices above ₹25 lakh require AP Controller approval.",
+   "quote": "AP Controller (above ₹25 lakh).",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 2, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:07.519162Z"
+ },
+ {
+  "id": 235,
+  "kind": "value",
+  "status": "open",
+  "attribute": "tds_deduction.unclear_section_action",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "TDS deduction rules",
+  "authoritative": {
+   "fact_id": 381,
+   "passage_id": "cfaeffaf9617184012be",
+   "source": "AP SOP v4.0",
+   "locator": "6",
+   "value": "raise TDS_SECTION_UNCLEAR to Tax Desk",
+   "statement": "If an AMC contract is mixed or unclear, the TDS_SECTION_UNCLEAR exception must be raised to the Tax Desk; do not guess the section.",
+   "quote": "When a contract is mixed or unclear, raise TDS_SECTION_UNCLEAR to the Tax Desk. Do not guess.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 10,
+   "passage_id": "6ae2f5b6475f4c539ac4",
+   "source": "AP SOP v3.1",
+   "locator": "5",
+   "value": "ask the Team Lead",
+   "statement": "If the TDS section cannot be determined, ask the Team Lead.",
+   "quote": "If unsure, ask the Team Lead.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 6, dated 01 Apr 2026 replaced AP SOP v3.1 5, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 254,
+  "kind": "value",
+  "status": "open",
+  "attribute": "month_end_procedures.exception_review_required",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Month-end procedures",
+  "authoritative": {
+   "fact_id": 452,
+   "passage_id": "6427f0045c64651cb553",
+   "source": "AP SOP v4.0",
+   "locator": "11",
+   "value": "true",
+   "statement": "The Team Lead signs off the open-exception report on the last working day.",
+   "quote": "The Team Lead signs off the open-exception report on the last working day.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 243,
+   "passage_id": "f548441877bbf01d7d78",
+   "source": "AP SOP v3.1",
+   "locator": "10",
+   "value": "The Team Lead reviews open exceptions before close.",
+   "statement": "The Team Lead reviews open exceptions before month-end close.",
+   "quote": "The Team Lead reviews open exceptions before close.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 11, dated 01 Apr 2026 replaced AP SOP v3.1 10, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 255,
+  "kind": "value",
+  "status": "open",
+  "attribute": "month_end_procedures.posting_cutoff_rule",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Month-end procedures",
+  "authoritative": {
+   "fact_id": 454,
+   "passage_id": "6427f0045c64651cb553",
+   "source": "AP SOP v4.0",
+   "locator": "11",
+   "value": "Invoices received after the third-last working day of the month are not posted in that month",
+   "statement": "Invoices received after the third-last working day of the month are not posted in that month.",
+   "quote": "Invoices received after the third-last working day of the month are not posted in that month",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 244,
+   "passage_id": "f548441877bbf01d7d78",
+   "source": "AP SOP v3.1",
+   "locator": "10",
+   "value": "Invoices received up to the second-last working day of the month are posted in that month.",
+   "statement": "Invoices received up to the second-last working day of the month are posted in that month.",
+   "quote": "Invoices received up to the second-last working day of the month are posted in that month.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 11, dated 01 Apr 2026 replaced AP SOP v3.1 10, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 257,
+  "kind": "value",
+  "status": "open",
+  "attribute": "non_po_categories.categories",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Non-PO invoice categories",
+  "authoritative": {
+   "fact_id": 197,
+   "passage_id": "3ff366c795f4edba60e9",
+   "source": "AP SOP v4.0",
+   "locator": "4.5",
+   "value": "electricity, water and telecom utilities, store and office rent under a registered lease, statutory payments and government fees, insurance premiums",
+   "statement": "The categories that may be processed without a PO are electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums.",
+   "quote": "Only these categories may be processed without a PO: electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 44,
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "source": "AP SOP v3.1",
+   "locator": "3",
+   "value": "utilities, rent, statutory payments, insurance, courier services, travel agency invoices",
+   "statement": "Invoices for utilities, rent, statutory payments, insurance, courier services, and travel agency may be processed without a PO.",
+   "quote": "The following may be processed without a PO: utilities, rent, statutory payments, insurance, courier services and travel agency invoices.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.5, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 258,
+  "kind": "value",
+  "status": "open",
+  "attribute": "non_po_categories.categories",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Non-PO invoice categories",
+  "authoritative": {
+   "fact_id": 197,
+   "passage_id": "3ff366c795f4edba60e9",
+   "source": "AP SOP v4.0",
+   "locator": "4.5",
+   "value": "electricity, water and telecom utilities, store and office rent under a registered lease, statutory payments and government fees, insurance premiums",
+   "statement": "The categories that may be processed without a PO are electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums.",
+   "quote": "Only these categories may be processed without a PO: electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 196,
+   "passage_id": "df1ee31effc8e33e68ad",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "courier",
+   "statement": "Courier is a non-PO category.",
+   "quote": "Fine — courier is a non-PO category.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 4.5, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 259,
+  "kind": "value",
+  "status": "open",
+  "attribute": "duplicate_check.flag_action",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Duplicate invoice check",
+  "authoritative": {
+   "fact_id": 461,
+   "passage_id": "40c2997053914de6e47c",
+   "source": "AP SOP v4.0",
+   "locator": "3.3",
+   "value": "Suspected duplicates go to the exception queue as DUP_SUSPECT and are never posted until a Senior Processor clears them.",
+   "statement": "Suspected duplicate invoices are routed to the exception queue with code DUP_SUSPECT and blocked from posting until cleared by a Senior Processor.",
+   "quote": "Suspected duplicates go to the exception queue as DUP_SUSPECT and are never posted until a Senior Processor clears them.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 45,
+   "passage_id": "0aa451221657cd8cc952",
+   "source": "AP SOP v3.1",
+   "locator": "2",
+   "value": "reject the new invoice as a duplicate",
+   "statement": "If an invoice with the exact same number for the same supplier already exists, the new invoice is rejected as a duplicate.",
+   "quote": "Check for duplicates by searching the invoice number for the same supplier; if the exact number exists, reject the new invoice as a duplicate.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 3.3, dated 01 Apr 2026 replaced AP SOP v3.1 2, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 263,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_retention.supplier_bank_details_sharing_restricted",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice retention period",
+  "authoritative": {
+   "fact_id": 215,
+   "passage_id": "684d5a8612f398b87278",
+   "source": "AP SOP v4.0",
+   "locator": "13",
+   "value": "true",
+   "statement": "Supplier bank details, PAN, and contact numbers are confidential and must not be shared outside the Vendor Master team and AP Controllers.",
+   "quote": "Supplier bank details, PAN and contact numbers are personal or confidential data: they are visible only to the Vendor Master team and AP Controllers, and are never pasted into e-mail, chat or any external tool.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 46,
+   "passage_id": "d3ab296c1f0596064c44",
+   "source": "AP SOP v3.1",
+   "locator": "11",
+   "value": "Do not share supplier bank details outside the AP team.",
+   "statement": "Supplier bank details must not be shared outside the AP team.",
+   "quote": "Do not share supplier bank details outside the AP team.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 13, dated 01 Apr 2026 replaced AP SOP v3.1 11, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 264,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.cutoff_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 337,
+   "passage_id": "cbd8707434198f2a9f13",
+   "source": "Video 1",
+   "locator": "Video 1 [11:40]",
+   "value": "working day before payment run",
+   "statement": "The cut-off for invoice submission is the working day before the payment run.",
+   "quote": "Cut-off is one o'clock the working day before.",
+   "status": "current",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 335,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "Tuesday",
+   "statement": "The cut-off for payment run is Tuesday at 5 pm.",
+   "quote": "The cut-off is Tuesday at 5 pm.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 8, dated 01 Jul 2023 is superseded; Video 1 Video 1 [11:40], dated 01 Feb 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 265,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.cutoff_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 337,
+   "passage_id": "cbd8707434198f2a9f13",
+   "source": "Video 1",
+   "locator": "Video 1 [11:40]",
+   "value": "working day before payment run",
+   "statement": "The cut-off for invoice submission is the working day before the payment run.",
+   "quote": "Cut-off is one o'clock the working day before.",
+   "status": "current",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 336,
+   "passage_id": "26235f036f8ce6970008",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "Tuesday",
+   "statement": "Invoices must be submitted by Tuesday for the payment run.",
+   "quote": "Get it in by Tuesday 5 pm.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; Video 1 Video 1 [11:40], dated 01 Feb 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 266,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.cutoff_time",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 220,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "1 pm",
+   "statement": "The cut-off for invoice inclusion is 1 pm on the previous working day.",
+   "quote": "The cut-off for an invoice to be included is 1 pm on the previous working day.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 49,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "5 pm",
+   "statement": "The cut-off time for payment run is 5 pm on Tuesday.",
+   "quote": "The cut-off is Tuesday at 5 pm.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 9, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 267,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.cutoff_time",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 220,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "1 pm",
+   "statement": "The cut-off for invoice inclusion is 1 pm on the previous working day.",
+   "quote": "The cut-off for an invoice to be included is 1 pm on the previous working day.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 219,
+   "passage_id": "26235f036f8ce6970008",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "5 pm",
+   "statement": "The cutoff time for invoice submission is 5 pm on Tuesday.",
+   "quote": "Get it in by Tuesday 5 pm.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 9, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 268,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.run_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 678,
+   "passage_id": "3c8091a7d04ffacf1e7b",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "Tuesday, Friday",
+   "statement": "Payment runs occur on Tuesday and Friday.",
+   "quote": "Tuesday and Friday",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 50,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "Thursday",
+   "statement": "Payments are made in one weekly run on Thursday.",
+   "quote": "Payments are made in one weekly run on Thursday.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 269,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.run_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 678,
+   "passage_id": "3c8091a7d04ffacf1e7b",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "Tuesday, Friday",
+   "statement": "Payment runs occur on Tuesday and Friday.",
+   "quote": "Tuesday and Friday",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 223,
+   "passage_id": "26235f036f8ce6970008",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "Thursday",
+   "statement": "The payment run occurs on Thursday.",
+   "quote": "Thursday.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 14, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 271,
+  "kind": "self_contradiction",
+  "status": "open",
+  "attribute": "grn_posting_timeline.missing_grn_escalation_days",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GRN posting timeline",
+  "authoritative": {
+   "fact_id": 601,
+   "passage_id": "26bda74a5f1666174528",
+   "source": "AP SOP v4.0",
+   "locator": "4.6",
+   "value": "5 working_days",
+   "statement": "The system escalates to the requester's manager after five working days for a goods invoice with no GRN.",
+   "quote": "escalates to the requester's manager after five working days",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 675,
+   "passage_id": "26bda74a5f1666174528",
+   "source": "AP SOP v4.0",
+   "locator": "4.6",
+   "value": "2 working_days",
+   "statement": "The system sends a reminder after two working days for a goods invoice with no GRN.",
+   "quote": "The system sends a reminder after two working days",
+   "status": "overridden",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.6 states two different values (5 working_days; 2 working_days); the one resolved as in force is 5 working_days.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 276,
+  "kind": "self_contradiction",
+  "status": "open",
+  "attribute": "payment_run_schedule.run_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 676,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "Tuesday",
+   "statement": "Payment runs occur on Tuesday.",
+   "quote": "Payment runs are on Tuesday and Friday.",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 677,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "Friday",
+   "statement": "Payment runs occur on Friday.",
+   "quote": "Payment runs are on Tuesday and Friday.",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 9 states two different values (Tuesday; Friday); the one resolved as in force is Tuesday.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 277,
+  "kind": "self_contradiction",
+  "status": "open",
+  "attribute": "payment_run_schedule.run_day",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 676,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "Tuesday",
+   "statement": "Payment runs occur on Tuesday.",
+   "quote": "Payment runs are on Tuesday and Friday.",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 678,
+   "passage_id": "3c8091a7d04ffacf1e7b",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "Tuesday, Friday",
+   "statement": "Payment runs occur on Tuesday and Friday.",
+   "quote": "Tuesday and Friday",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 9 states two different values (Tuesday; Tuesday, Friday); the one resolved as in force is Tuesday.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 278,
+  "kind": "self_contradiction",
+  "status": "open",
+  "attribute": "vendor_bank_account_change.approval_chain",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Vendor bank account change process",
+  "authoritative": {
+   "fact_id": 680,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "AP Controller",
+   "statement": "AP Controller is an approver for vendor bank account changes.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 681,
+   "passage_id": "c55fb8b5fb8fb16df990",
+   "source": "AP SOP v4.0",
+   "locator": "8.2, step 3",
+   "value": "Vendor Master lead, AP Controller",
+   "statement": "The change must be approved by the Vendor Master lead and the AP Controller.",
+   "quote": "The change is approved by the Vendor Master lead and the AP Controller.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 2 states two different values (AP Controller; Vendor Master lead, AP Controller); the one resolved as in force is AP Controller.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 279,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.itc_claim_rule",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 590,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "statement": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "quote": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 37,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "GSTR-2A",
+   "statement": "Input tax credit is claimed when the invoice appears in GSTR-2A.",
+   "quote": "Input tax credit is taken when the invoice is reflected in GSTR-2A",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.5, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 281,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_with_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 221,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "45 day",
+   "statement": "MSME suppliers with a written agreement must be paid within 45 days from acceptance.",
+   "quote": "Micro and small enterprises registered on Udyam must be paid within the agreed term, which can never exceed 45 days from the day of acceptance.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 9, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 282,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "exception_handling.exception_code_meaning",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "QA_RELEASE_PENDING",
+  "authoritative": {
+   "fact_id": 545,
+   "passage_id": "01bcf98aef926d28d4df",
+   "source": "AP SOP v4.0",
+   "locator": "10",
+   "value": "Pharma batch not released (CM-PHA-01)",
+   "statement": "The meaning of exception code QA_RELEASE_PENDING is 'Pharma batch not released (CM-PHA-01)'.",
+   "quote": "Pharma batch not released (CM-PHA-01)",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 131,
+   "passage_id": "44ce3ca42ad9a206f260",
+   "source": "Shadowing notes",
+   "locator": "Shadowing notes 11:30",
+   "value": "Released",
+   "statement": "Batch status must be Released for payment; Quarantine triggers QA_RELEASE_PENDING exception.",
+   "quote": "batch in Quarantine. Raises QA_RELEASE_PENDING.",
+   "status": "current",
+   "valid_from": "2026-06-17T00:00:00Z"
+  },
+  "reason": "Practice in Shadowing notes Shadowing notes 11:30 differs from the rule in AP SOP v4.0 10, dated 01 Apr 2026; practice never overrides.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 283,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.gst_tab_confirmations",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 576,
+   "passage_id": "022418586d5ee1f57041",
+   "source": "DI-03",
+   "locator": "Part A, step 5",
+   "value": "buyer GSTIN",
+   "statement": "Buyer GSTIN must be confirmed on the GST tab.",
+   "quote": "buyer GSTIN",
+   "status": "current",
+   "valid_from": "2026-04-12T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 522,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "correct for state of delivery",
+   "statement": "Buyer GSTIN must be correct for the state of delivery.",
+   "quote": "that the buyer GSTIN is correct for the state of delivery",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 4, dated 01 Jul 2023 is superseded; DI-03 Part A, step 5, dated 12 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 284,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.do_not_pay_base_value_for_missing_irn",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "invoice",
+  "authoritative": {
+   "fact_id": 538,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "do not pay base value",
+   "statement": "The base value of an invoice missing IRN must not be paid; a valid invoice will follow.",
+   "quote": "Do not pay the base value either; a valid invoice will follow.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 588,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "return their invoices",
+   "statement": "Invoices from suppliers above the turnover threshold must be returned if the IRN is missing.",
+   "quote": "return their invoices if the IRN is missing",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.4, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 285,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_intake.paper_invoice_scanning_sla_days",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice intake channels",
+  "authoritative": {
+   "fact_id": 622,
+   "passage_id": "1ad458bfeb9cc6dfb974",
+   "source": "AP SOP v4.0",
+   "locator": "3.1",
+   "value": "1 working day",
+   "statement": "Paper invoices must be scanned within one working day of receipt.",
+   "quote": "within one working day of receipt",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 620,
+   "passage_id": "0aa451221657cd8cc952",
+   "source": "AP SOP v3.1",
+   "locator": "2",
+   "value": "day of receipt",
+   "statement": "Paper invoices are scanned on the day of receipt.",
+   "quote": "All paper invoices are scanned on the day of receipt.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 3.1, dated 01 Apr 2026 replaced AP SOP v3.1 2, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T07:40:41.201996Z"
+ },
+ {
+  "id": 317,
+  "kind": "value",
+  "status": "open",
+  "attribute": "rounding_tolerance.max_accepted_difference",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Rounding difference tolerance",
+  "authoritative": {
+   "fact_id": 820,
+   "passage_id": "66d167d7f1807dac8991",
+   "source": "AP SOP v4.0",
+   "locator": "4.4",
+   "value": "10 INR",
+   "statement": "Rounding differences up to ₹10 at invoice-total level caused by line-level tax rounding are accepted automatically and posted to the rounding-difference account; amounts above ₹10 are treated as mismatches.",
+   "quote": "Differences of up to ₹10 at invoice-total level caused by line-level tax rounding are accepted automatically and posted to the rounding-difference account. Anything above ₹10 is a mismatch.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 11,
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "source": "AP SOP v3.1",
+   "locator": "3",
+   "value": "50 INR",
+   "statement": "Rounding differences up to ₹50 are accepted automatically.",
+   "quote": "Rounding differences up to ₹50 are accepted.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.4, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:08.202875Z"
+ },
+ {
+  "id": 324,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_cap_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 824,
+   "passage_id": "6a3d60030fef8254dc43",
+   "source": "AP SOP v4.0",
+   "locator": "4.2",
+   "value": "500 INR",
+   "statement": "The general price tolerance cap amount is ₹500 per line.",
+   "quote": "the lower of 1% of the PO line value and ₹500",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 40,
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "source": "AP SOP v3.1",
+   "locator": "3",
+   "value": "1000 INR",
+   "statement": "Price difference tolerance cap is ₹1,000 per line.",
+   "quote": "A price difference is acceptable if it is within the lower of 2% of the line value and ₹1,000.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.2, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:08.202875Z"
+ },
+ {
+  "id": 325,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_cap_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 824,
+   "passage_id": "6a3d60030fef8254dc43",
+   "source": "AP SOP v4.0",
+   "locator": "4.2",
+   "value": "500 INR",
+   "statement": "The general price tolerance cap amount is ₹500 per line.",
+   "quote": "the lower of 1% of the PO line value and ₹500",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 191,
+   "passage_id": "2e835f7c493a3ebfcf98",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "1000 INR",
+   "statement": "The general price tolerance cap amount is ₹1,000 per line.",
+   "quote": "2% or ₹1,000, whichever is lower, per line.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 4.2, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T08:21:08.202875Z"
+ },
+ {
+  "id": 326,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 826,
+   "passage_id": "6a3d60030fef8254dc43",
+   "source": "AP SOP v4.0",
+   "locator": "4.2",
+   "value": "1 %",
+   "statement": "The general price tolerance percentage is 1% of the PO line value.",
+   "quote": "the lower of 1% of the PO line value and ₹500",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 41,
+   "passage_id": "b115ddb6b85f07fe8b19",
+   "source": "AP SOP v3.1",
+   "locator": "3",
+   "value": "2 %",
+   "statement": "Price difference tolerance is 2% of the line value.",
+   "quote": "A price difference is acceptable if it is within the lower of 2% of the line value and ₹1,000.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.2, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:08.202875Z"
+ },
+ {
+  "id": 327,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 826,
+   "passage_id": "6a3d60030fef8254dc43",
+   "source": "AP SOP v4.0",
+   "locator": "4.2",
+   "value": "1 %",
+   "statement": "The general price tolerance percentage is 1% of the PO line value.",
+   "quote": "the lower of 1% of the PO line value and ₹500",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 194,
+   "passage_id": "2e835f7c493a3ebfcf98",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "2 %",
+   "statement": "The general price tolerance percentage is 2% per line.",
+   "quote": "2% or ₹1,000, whichever is lower, per line.",
+   "status": "superseded",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 4.2, dated 01 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T08:21:08.202875Z"
+ },
+ {
+  "id": 373,
+  "kind": "value",
+  "status": "open",
+  "attribute": "pharma_qa_release.required_materials",
+  "scope": {
+   "client": "Arvana Pharma"
+  },
+  "topic": "Arvana Pharma",
+  "authoritative": {
+   "fact_id": 253,
+   "passage_id": "4645612b02e984863ba2",
+   "source": "CM-PHA-01",
+   "locator": "Part D",
+   "value": "active pharmaceutical ingredients, excipients, primary packaging material",
+   "statement": "For Arvana Pharma, invoices for active pharmaceutical ingredients, excipients and primary packaging material require batch release in QMS before payment.",
+   "quote": "Invoices for active pharmaceutical ingredients, excipients and primary packaging material must not be paid until the batch shows status Released in the Quality Management System (QMS).",
+   "status": "current",
+   "valid_from": "2026-01-02T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 74,
+   "passage_id": "804e13d4c6b0b1508055",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "APIs",
+   "statement": "Pharma QA release is required only for APIs, not for excipients or packaging.",
+   "quote": "No, only APIs need release. Excipients and packaging can be paid on normal terms.",
+   "status": "pending",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is stale; CM-PHA-01 Part D, dated 02 Jan 2026 is current (for Arvana Pharma).",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 377,
+  "kind": "self_contradiction",
+  "status": "open",
+  "attribute": "invoice_approval_authority.threshold_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 246,
+   "passage_id": "f24577edd45b0e43363c",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 5",
+   "value": "2.5e+06 INR",
+   "statement": "Invoices above ₹25 lakh require AP Controller approval.",
+   "quote": "threshold ₹25 lakh is for processing; above ₹25 lakh needs Controller",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 266,
+   "passage_id": "f24577edd45b0e43363c",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 5",
+   "value": "AP Controller",
+   "statement": "AP Controller must approve invoices above the threshold.",
+   "quote": "Controller approval",
+   "status": "corroborating",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 12, step 5 contradicts itself: The passage first states that an invoice total of ₹40 lakh does not need Controller approval because the threshold is ₹25 lakh for processing and above ₹25 lakh needs Controller, which is internally inconsistent; it then explicitly corrects itself by saying this requires Controller approval, directly contradicting the initial claim.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 379,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 419,
+   "passage_id": "22ec30d359d7fa951957",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "5e+07 INR",
+   "statement": "The e-invoice threshold (IRN requirement) is mandatory for suppliers with annual turnover above ₹5 crore.",
+   "quote": "AATO above ₹5 crore",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 34,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "1e+08 INR",
+   "statement": "E-invoicing with IRN is mandatory for suppliers with turnover above ₹10 crore.",
+   "quote": "Suppliers with aggregate turnover above ₹10 crore must send e-invoices with an IRN",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 380,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 329,
+   "passage_id": "732c3af92baad708588f",
+   "source": "Video 1",
+   "locator": "Video 1 [04:30]",
+   "value": "1 %",
+   "statement": "Price tolerance per line is 1% of the line amount.",
+   "quote": "The tolerance on price is the lower of one per cent of the line and five hundred rupees.",
+   "status": "corroborating",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 43,
+   "passage_id": "bdfb3c5e45b57226c186",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 1",
+   "value": "1.5 %",
+   "statement": "The price variance percentage threshold is 1.5%.",
+   "quote": "PO price ₹1,200 per unit for 100 units; invoice price ₹1,218. Difference ₹1,800 on a line value of ₹1,20,000 is 1.5%, but above ₹1,000 — raise PRICE_VAR.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 12, step 1, dated 01 Jul 2023 is superseded; Video 1 Video 1 [04:30], dated 01 Feb 2026 is in force.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 381,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 826,
+   "passage_id": "6a3d60030fef8254dc43",
+   "source": "AP SOP v4.0",
+   "locator": "4.2",
+   "value": "1 %",
+   "statement": "The general price tolerance percentage is 1% of the PO line value.",
+   "quote": "the lower of 1% of the PO line value and ₹500",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 43,
+   "passage_id": "bdfb3c5e45b57226c186",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 1",
+   "value": "1.5 %",
+   "statement": "The price variance percentage threshold is 1.5%.",
+   "quote": "PO price ₹1,200 per unit for 100 units; invoice price ₹1,218. Difference ₹1,800 on a line value of ₹1,20,000 is 1.5%, but above ₹1,000 — raise PRICE_VAR.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 4.2, dated 01 Apr 2026 replaced AP SOP v3.1 12, step 1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 382,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 825,
+   "passage_id": "e039adb5db2abe2347ba",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "1 %",
+   "statement": "The general price tolerance percentage under SOP v4.0 is 1% of line value.",
+   "quote": "Lower of 1% of line value and ₹500",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 43,
+   "passage_id": "bdfb3c5e45b57226c186",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 1",
+   "value": "1.5 %",
+   "statement": "The price variance percentage threshold is 1.5%.",
+   "quote": "PO price ₹1,200 per unit for 100 units; invoice price ₹1,218. Difference ₹1,800 on a line value of ₹1,20,000 is 1.5%, but above ₹1,000 — raise PRICE_VAR.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 12, step 1, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 383,
+  "kind": "value",
+  "status": "open",
+  "attribute": "price_tolerance.general_percentage",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Price tolerance",
+  "authoritative": {
+   "fact_id": 193,
+   "passage_id": "be14f644503dd76f141c",
+   "source": "DI-03",
+   "locator": "Part A, step 4",
+   "value": "1 %",
+   "statement": "The SOP v4.0 price tolerance percentage is 1% per line.",
+   "quote": "The tolerance shown is the SOP v4.0 rule (lower of 1% and ₹500 per line)",
+   "status": "corroborating",
+   "valid_from": "2026-04-12T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 43,
+   "passage_id": "bdfb3c5e45b57226c186",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 1",
+   "value": "1.5 %",
+   "statement": "The price variance percentage threshold is 1.5%.",
+   "quote": "PO price ₹1,200 per unit for 100 units; invoice price ₹1,218. Difference ₹1,800 on a line value of ₹1,20,000 is 1.5%, but above ₹1,000 — raise PRICE_VAR.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 12, step 1, dated 01 Jul 2023 is superseded; DI-03 Part A, step 4, dated 12 Apr 2026 is in force.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 384,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.itc_claim_rule",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 590,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "statement": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "quote": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 77,
+   "passage_id": "b047ede51ea833a7b51a",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "GSTR-2A",
+   "statement": "The form used to verify Input Tax Credit is GSTR-2A.",
+   "quote": "Look at GSTR-2A on the 20th.",
+   "status": "pending",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is stale; AP SOP v4.0 5.5, dated 01 Apr 2026 is current.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 385,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_with_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 470,
+   "passage_id": "bc8d3da2210cf6e83c05",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "45 day",
+   "statement": "MSME suppliers with a written agreement must be paid within 45 days.",
+   "quote": "Agreed term up to 45 days; 15 days without agreement",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 386,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_with_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 339,
+   "passage_id": "cbd8707434198f2a9f13",
+   "source": "Video 1",
+   "locator": "Video 1 [11:40]",
+   "value": "45 day",
+   "statement": "MSME suppliers with a written agreement must be paid within 45 days maximum.",
+   "quote": "Forty-five days maximum, or fifteen if there's no written agreement.",
+   "status": "corroborating",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 8, dated 01 Jul 2023 is superseded; Video 1 Video 1 [11:40], dated 01 Feb 2026 is in force.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 388,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_without_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 471,
+   "passage_id": "bc8d3da2210cf6e83c05",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "15 day",
+   "statement": "MSME suppliers without a written agreement must be paid within 15 days.",
+   "quote": "Agreed term up to 45 days; 15 days without agreement",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 393,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 418,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "5e+07 INR",
+   "statement": "A supplier whose aggregate annual turnover exceeds ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "quote": "A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 298,
+   "passage_id": "a27522c03d65afebe0cb",
+   "source": "Video 2",
+   "locator": "Video 2 [03:40]",
+   "value": "1 October 2022",
+   "statement": "The e-invoicing mandate requiring IRN for suppliers above ten crore turnover becomes effective from 1 October 2022.",
+   "quote": "From the first of October this year, any supplier with turnover above ten crore must send an e-invoice with an IRN",
+   "status": "pending",
+   "valid_from": "2022-10-01T00:00:00Z"
+  },
+  "reason": "Video 2 Video 2 [03:40], dated 01 Nov 2022 is stale; AP SOP v4.0 5.4, dated 01 Apr 2026 is current.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 394,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 419,
+   "passage_id": "22ec30d359d7fa951957",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "5e+07 INR",
+   "statement": "The e-invoice threshold (IRN requirement) is mandatory for suppliers with annual turnover above ₹5 crore.",
+   "quote": "AATO above ₹5 crore",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 306,
+   "passage_id": "a27522c03d65afebe0cb",
+   "source": "Video 2",
+   "locator": "Video 2 [03:40]",
+   "value": "1e+08 INR",
+   "statement": "The GST e-invoicing turnover threshold is ten crore INR.",
+   "quote": "any supplier with turnover above ten crore must send an e-invoice with an IRN",
+   "status": "pending",
+   "valid_from": "2022-10-01T00:00:00Z"
+  },
+  "reason": "Video 2 Video 2 [03:40], dated 01 Nov 2022 is stale; AP SOP v4.0 14, dated 01 Apr 2026 is current.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 395,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "invoice_approval_authority.approver_role",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 266,
+   "passage_id": "f24577edd45b0e43363c",
+   "source": "AP SOP v3.1",
+   "locator": "12, step 5",
+   "value": "AP Controller",
+   "statement": "AP Controller must approve invoices above the threshold.",
+   "quote": "Controller approval",
+   "status": "corroborating",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 515,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "true",
+   "statement": "AP Controller approves payment proposals.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "Practice in AP SOP v4.0 2 differs from the rule in AP SOP v3.1 12, step 5, dated 01 Jul 2023; practice never overrides.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 396,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "invoice_approval_authority.approver_role",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 267,
+   "passage_id": "29aa8c6032c925b2b6fd",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "AP Controller",
+   "statement": "The approver for invoices above ₹25 lakh is AP Controller.",
+   "quote": "AP Controller (above ₹25 lakh).",
+   "status": "corroborating",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 515,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "true",
+   "statement": "AP Controller approves payment proposals.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "Practice in AP SOP v4.0 2 differs from the rule in Part F, dated 09 Oct 2023; practice never overrides.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 397,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "invoice_approval_authority.approver_role",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 265,
+   "passage_id": "c726de9cffd5e5368bf3",
+   "source": "AP SOP v3.1",
+   "locator": "6",
+   "value": "AP Controller",
+   "statement": "The approver for invoices above ₹25 lakh and up to ₹1 crore is AP Controller.",
+   "quote": "Above ₹25 lakh and up to ₹1 crore: AP Controller.",
+   "status": "corroborating",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 515,
+   "passage_id": "b47eb4ada9e552b995c0",
+   "source": "AP SOP v4.0",
+   "locator": "2",
+   "value": "true",
+   "statement": "AP Controller approves payment proposals.",
+   "quote": "Approves invoices between ₹10 lakh and ₹50 lakh, payment proposals and vendor bank changes.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "reason": "Practice in AP SOP v4.0 2 differs from the rule in AP SOP v3.1 6, dated 01 Jul 2023; practice never overrides.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 399,
+  "kind": "value",
+  "status": "open",
+  "attribute": "vendor_bank_account_change.verification_call_required",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Vendor bank account change process",
+  "authoritative": {
+   "fact_id": 231,
+   "passage_id": "c2fd3192fce835d85c42",
+   "source": "AP SOP v4.0",
+   "locator": "1",
+   "value": "true",
+   "statement": "Supplier bank account changes require a verification call-back control instead of e-mail confirmation.",
+   "quote": "replaces e-mail confirmation of supplier bank changes with a call-back control after two attempted frauds in 2025.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 543,
+   "passage_id": "b96bb266e7087ca9d7a1",
+   "source": "AP SOP v3.1",
+   "locator": "7",
+   "value": "true",
+   "statement": "Bank account changes are accepted only when the supplier confirms the change by email from the email address registered in the vendor master.",
+   "quote": "Bank account changes are accepted when the supplier confirms the change by e-mail from the e-mail address registered in the vendor master.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 1, dated 01 Apr 2026 replaced AP SOP v3.1 7, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 402,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.irn_missing_invalid_for_itc",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "invoice",
+  "authoritative": {
+   "fact_id": 585,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "not valid for input tax credit",
+   "statement": "An invoice from a supplier required to issue e-invoices that lacks an IRN is not valid for input tax credit.",
+   "quote": "the invoice is not valid for input tax credit",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 588,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "return their invoices",
+   "statement": "Invoices from suppliers above the turnover threshold must be returned if the IRN is missing.",
+   "quote": "return their invoices if the IRN is missing",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.4, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 404,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_approval_authority.threshold_amount",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice approval authority",
+  "authoritative": {
+   "fact_id": 510,
+   "passage_id": "364c4266ac157297b38b",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "1e+06 INR",
+   "statement": "Invoices above ₹10 lakh require AP Controller approval.",
+   "quote": "AP Controller above ₹10 lakh; CFO above ₹50 lakh",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 611,
+   "passage_id": "c726de9cffd5e5368bf3",
+   "source": "AP SOP v3.1",
+   "locator": "6",
+   "value": "2.5e+06 INR",
+   "statement": "Invoices up to ₹25 lakh require no additional approval.",
+   "quote": "Up to ₹25 lakh: no additional approval.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 14, dated 01 Apr 2026 replaced AP SOP v3.1 6, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 407,
+  "kind": "value",
+  "status": "open",
+  "attribute": "irn_requirement.threshold_turnover",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "IRN requirement",
+  "authoritative": {
+   "fact_id": 419,
+   "passage_id": "22ec30d359d7fa951957",
+   "source": "AP SOP v4.0",
+   "locator": "14",
+   "value": "5e+07 INR",
+   "statement": "The e-invoice threshold (IRN requirement) is mandatory for suppliers with annual turnover above ₹5 crore.",
+   "quote": "AATO above ₹5 crore",
+   "status": "corroborating",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 644,
+   "passage_id": "a27522c03d65afebe0cb",
+   "source": "Video 2",
+   "locator": "Video 2 [03:40]",
+   "value": "send it back",
+   "statement": "If a supplier with turnover above ten crore sends a plain invoice without IRN, the AP processor must send it back.",
+   "quote": "So if a supplier above ten crore sends a plain invoice, send it back.",
+   "status": "pending",
+   "valid_from": "2022-10-01T00:00:00Z"
+  },
+  "reason": "Video 2 Video 2 [03:40], dated 01 Nov 2022 is stale; AP SOP v4.0 14, dated 01 Apr 2026 is current.",
+  "detected_at": "2026-11-08T08:21:14.912507Z"
+ },
+ {
+  "id": 419,
+  "kind": "value",
+  "status": "open",
+  "attribute": "gst_compliance.missing_itc_action",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "GST compliance checks",
+  "authoritative": {
+   "fact_id": 434,
+   "passage_id": "b69c0060ab5a623c596a",
+   "source": "AP SOP v4.0",
+   "locator": "5.5",
+   "value": "Pay the base value on the due date and hold the GST amount until the invoice appears in GSTR-2B.",
+   "statement": "If an invoice does not appear in GSTR-2B by the 14th, pay the base value on the due date and hold the GST amount until the invoice appears.",
+   "quote": "If an invoice does not appear in GSTR-2B by then, pay the base value on the due date and hold the GST amount until the invoice appears.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 38,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "hold GST portion",
+   "statement": "If the invoice is not reflected in GSTR-2A, the GST portion must be held.",
+   "quote": "hold the GST portion if it is not reflected",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.5, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 428,
+  "kind": "value",
+  "status": "open",
+  "attribute": "month_end_procedures.accrue_uninvoiced_grns",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Month-end procedures",
+  "authoritative": {
+   "fact_id": 451,
+   "passage_id": "6427f0045c64651cb553",
+   "source": "AP SOP v4.0",
+   "locator": "11",
+   "value": "true",
+   "statement": "Goods received but not invoiced are accrued from open GRNs at month-end.",
+   "quote": "goods received but not invoiced are accrued from open GRNs instead",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 242,
+   "passage_id": "f548441877bbf01d7d78",
+   "source": "AP SOP v3.1",
+   "locator": "10",
+   "value": "GRNs not invoiced are accrued.",
+   "statement": "GRNs not invoiced are accrued at month-end.",
+   "quote": "GRNs not invoiced are accrued.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 11, dated 01 Apr 2026 replaced AP SOP v3.1 10, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 441,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_intake.channels",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice intake channels",
+  "authoritative": {
+   "fact_id": 227,
+   "passage_id": "1ad458bfeb9cc6dfb974",
+   "source": "AP SOP v4.0",
+   "locator": "3.1",
+   "value": "supplier portal, email to AP inbox, paper invoices (from Arvana Infra Projects construction sites)",
+   "statement": "Invoices can arrive via supplier portal, email to AP inbox, or paper invoices from Arvana Infra Projects construction sites.",
+   "quote": "The supplier portal is the preferred channel. Invoices arrive with PO number and GSTIN already validated. E-mail to the AP inbox is accepted for all clients. The inbox is read by the intake bot; PDF and image attachments are sent to OCR. Paper invoices are accepted only from Arvana Infra Projects construction sites, scanned at the Hyderabad mail room within one working day of receipt.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 51,
+   "passage_id": "0aa451221657cd8cc952",
+   "source": "AP SOP v3.1",
+   "locator": "2",
+   "value": "supplier portal, AP e-mail inbox, mail room",
+   "statement": "Invoices arrive through the supplier portal, the AP e-mail inbox, and the mail room.",
+   "quote": "Invoices arrive through the supplier portal, the AP e-mail inbox and the mail room.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 3.1, dated 01 Apr 2026 replaced AP SOP v3.1 2, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 443,
+  "kind": "value",
+  "status": "open",
+  "attribute": "vendor_bank_account_change.approval_chain",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Vendor bank account change process",
+  "authoritative": {
+   "fact_id": 681,
+   "passage_id": "c55fb8b5fb8fb16df990",
+   "source": "AP SOP v4.0",
+   "locator": "8.2, step 3",
+   "value": "Vendor Master lead, AP Controller",
+   "statement": "The change must be approved by the Vendor Master lead and the AP Controller.",
+   "quote": "The change is approved by the Vendor Master lead and the AP Controller.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 682,
+   "passage_id": "b96bb266e7087ca9d7a1",
+   "source": "AP SOP v3.1",
+   "locator": "7",
+   "value": "Vendor Master lead",
+   "statement": "The Vendor Master lead approves bank account changes.",
+   "quote": "The Vendor Master lead approves the change.",
+   "status": "corroborating",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 8.2, step 3, dated 01 Apr 2026 replaced AP SOP v3.1 7, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 447,
+  "kind": "value",
+  "status": "open",
+  "attribute": "pharma_qa_release.payment_block_until_release",
+  "scope": {
+   "client": "Arvana Pharma"
+  },
+  "topic": "Arvana Pharma",
+  "authoritative": {
+   "fact_id": 251,
+   "passage_id": "4645612b02e984863ba2",
+   "source": "CM-PHA-01",
+   "locator": "Part D",
+   "value": "true",
+   "statement": "For Arvana Pharma, the payment block remains until the batch is released, even though the invoice may be posted.",
+   "quote": "The invoice may be posted, but the payment block stays until release.",
+   "status": "current",
+   "valid_from": "2026-01-02T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 73,
+   "passage_id": "804e13d4c6b0b1508055",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "false",
+   "statement": "For excipients and packaging, payment is not blocked until QA release; they can be paid on normal terms.",
+   "quote": "Excipients and packaging can be paid on normal terms.",
+   "status": "pending",
+   "valid_from": "2023-10-09T00:00:00Z"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is stale; CM-PHA-01 Part D, dated 02 Jan 2026 is current (for Arvana Pharma).",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 466,
+  "kind": "practice_vs_rule",
+  "status": "open",
+  "attribute": "quantity_tolerance.applicability",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Quantity tolerance",
+  "authoritative": {
+   "fact_id": 320,
+   "passage_id": "fbbb4c331e748fe5fa18",
+   "source": "Video 1",
+   "locator": "Video 1 [06:55]",
+   "value": "specific materials (Infra bulk materials per client memo)",
+   "statement": "Quantity tolerance applies only to specific materials (Infra bulk materials) per a client memo.",
+   "quote": "except one client memo for Infra's bulk materials",
+   "status": "current",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 325,
+   "passage_id": "7c1d120ea568240a6e9a",
+   "source": "Expert interview 1",
+   "locator": "Expert interview 1 [07:50]",
+   "value": "four materials",
+   "statement": "Infra quantity tolerance applies to only four materials.",
+   "quote": "Infra's tolerance is five per cent and only for four materials, not ten per cent.",
+   "status": "current",
+   "valid_from": "2026-09-08T00:00:00Z"
+  },
+  "reason": "Practice in Expert interview 1 Expert interview 1 [07:50] differs from the rule in Video 1 Video 1 [06:55], dated 01 Feb 2026; practice never overrides.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 473,
+  "kind": "value",
+  "status": "open",
+  "attribute": "exception_handling.codes",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Exception codes and resolution targets",
+  "authoritative": {
+   "fact_id": 831,
+   "passage_id": "4e6e5c36ba75375f5adc",
+   "source": "AP SOP v4.0",
+   "locator": "5.4",
+   "value": "IRN_MISSING",
+   "statement": "An invoice from a supplier required to issue e-invoices that lacks an IRN is returned with the exception code IRN_MISSING.",
+   "quote": "return it as IRN_MISSING",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 588,
+   "passage_id": "dc4cdb0932606355e114",
+   "source": "AP SOP v3.1",
+   "locator": "4",
+   "value": "return their invoices",
+   "statement": "Invoices from suppliers above the turnover threshold must be returned if the IRN is missing.",
+   "quote": "return their invoices if the IRN is missing",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 5.4, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 477,
+  "kind": "value",
+  "status": "open",
+  "attribute": "invoice_intake.paper_invoice_scanning_location",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Invoice intake channels",
+  "authoritative": {
+   "fact_id": 621,
+   "passage_id": "1ad458bfeb9cc6dfb974",
+   "source": "AP SOP v4.0",
+   "locator": "3.1",
+   "value": "Hyderabad mail room",
+   "statement": "Paper invoices are scanned at the Hyderabad mail room.",
+   "quote": "scanned at the Hyderabad mail room",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 620,
+   "passage_id": "0aa451221657cd8cc952",
+   "source": "AP SOP v3.1",
+   "locator": "2",
+   "value": "day of receipt",
+   "statement": "Paper invoices are scanned on the day of receipt.",
+   "quote": "All paper invoices are scanned on the day of receipt.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0 3.1, dated 01 Apr 2026 replaced AP SOP v3.1 2, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 479,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_without_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 222,
+   "passage_id": "24ff09af33216f26bf19",
+   "source": "AP SOP v4.0",
+   "locator": "9",
+   "value": "15 day",
+   "statement": "MSME suppliers without a written agreement must be paid within 15 days from acceptance.",
+   "quote": "If there is no written agreement on terms, pay within 15 days.",
+   "status": "current",
+   "valid_from": "2026-04-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v4.0, dated 01 Apr 2026 replaced AP SOP v3.1 8, dated 01 Jul 2023.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ },
+ {
+  "id": 480,
+  "kind": "value",
+  "status": "open",
+  "attribute": "payment_run_schedule.msme_max_days_without_agreement",
+  "scope": {
+   "client": "all"
+  },
+  "topic": "Payment run schedule",
+  "authoritative": {
+   "fact_id": 340,
+   "passage_id": "cbd8707434198f2a9f13",
+   "source": "Video 1",
+   "locator": "Video 1 [11:40]",
+   "value": "15 day",
+   "statement": "MSME suppliers without a written agreement must be paid within 15 days maximum.",
+   "quote": "Forty-five days maximum, or fifteen if there's no written agreement.",
+   "status": "corroborating",
+   "valid_from": "2026-02-01T00:00:00Z"
+  },
+  "conflicting": {
+   "fact_id": 57,
+   "passage_id": "651d4159a5de2993fcc5",
+   "source": "AP SOP v3.1",
+   "locator": "8",
+   "value": "60 days",
+   "statement": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "quote": "MSME suppliers registered on Udyam must be paid within 60 days.",
+   "status": "superseded",
+   "valid_from": "2023-07-01T00:00:00Z"
+  },
+  "reason": "AP SOP v3.1 8, dated 01 Jul 2023 is superseded; Video 1, dated 01 Feb 2026 is in force.",
+  "detected_at": "2026-11-08T10:50:08.145156Z"
+ }
+]

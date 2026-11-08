@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -29,6 +30,22 @@ def conflict_scan(body: ScanIn | None = None, s: Session = Depends(write_session
     return {"job_id": job_id, "queued": job_id is not None}
 
 
+@router.get("/conflict-scan")
+def last_scan(s: Session = Depends(read_session)) -> dict[str, Any]:
+    """The latest scan job: queued, running, done (with its summary) or failed."""
+    j = jobs.latest(s, "conflict_scan")
+    if j is None:
+        return {"status": "never"}
+    return {
+        "job_id": j.id,
+        "status": j.status,
+        "queued_at": j.run_after,
+        "finished_at": j.finished_at,
+        "result": j.result or {},
+        "error": j.error,
+    }
+
+
 def _side(f: Any) -> dict[str, Any] | None:
     if f is None:
         return None
@@ -39,6 +56,7 @@ def _side(f: Any) -> dict[str, Any] | None:
         "locator": f.locator,
         "value": value_text(f),
         "statement": f.statement,
+        "quote": f.quote,
         "status": f.status,
         "valid_from": f.valid_from,
     }
@@ -88,3 +106,34 @@ def set_status(
     if not kb.set_conflict_status(s, conflict_id, body.status):
         raise HTTPException(409, "conflict changed meanwhile")
     return {"id": conflict_id, "status": body.status}
+
+
+class ToReview(BaseModel):
+    by: str
+
+
+@router.post("/conflicts/{conflict_id}/review", status_code=201)
+def open_in_review(
+    conflict_id: int, body: ToReview, s: Session = Depends(write_session)
+) -> dict[str, Any]:
+    """Put a conflict on the owner's review queue (for example to fix the outdated document)."""
+    c = kb.get_conflict(s, conflict_id)
+    if c is None:
+        raise not_found("conflict")
+    facts = fstore.by_ids(s, [c.fact_a, c.fact_b])
+    auth_id = c.authoritative_fact or c.fact_a
+    other_id = c.fact_b if auth_id == c.fact_a else c.fact_a
+    item = kb.add_review_item(
+        s,
+        "conflict",
+        jsonable_encoder(
+            {
+                "conflict_id": c.id,
+                "summary": f"Conflict on {c.attribute}: {c.reason}",
+                "authoritative": _side(facts.get(auth_id)),
+                "conflicting": _side(facts.get(other_id)),
+                "opened_by": body.by,
+            }
+        ),
+    )
+    return {"review_item": item}

@@ -1,0 +1,351 @@
+[
+ {
+  "id": "14468192326bcc24e000",
+  "channel": "upload",
+  "source_uri": "PS-07_ap_operations.xlsx",
+  "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "sender": null,
+  "sender_role": null,
+  "received_at": "2026-11-07T12:36:28.821742Z",
+  "effective_hint": null,
+  "scope_hint": null,
+  "content_hash": "95bd8a53e970cffe8ae44166887f84391bc99d6c2d697486078106bb244cd3d8",
+  "parse_tier": 1,
+  "parse_quality": 1,
+  "triage_label": null,
+  "status": "published",
+  "error": null,
+  "confirmations": 0,
+  "meta": {
+   "kind": "xlsx",
+   "bytes": 1198619,
+   "sources": 1,
+   "passages": 11821,
+   "versions": [],
+   "parse_notes": []
+  },
+  "created_at": "2026-11-07T12:36:29.125058Z",
+  "passages": 11821,
+  "facts": 0,
+  "sources": [
+   {
+    "id": "dfe2a7928ccf55dca665",
+    "short_label": "AP operations",
+    "title": "Accounts payable operations",
+    "doc_type": "spreadsheet",
+    "version": null,
+    "dated": "2026-10-28",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": [
+     {
+      "field": "dated",
+      "origin": "file modified time",
+      "confidence": 0.3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "4658a87ef73ae415e3ac",
+  "channel": "upload",
+  "source_uri": "PS-07_training_and_expert_transcripts.docx",
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "sender": null,
+  "sender_role": null,
+  "received_at": "2026-11-07T12:36:28.818353Z",
+  "effective_hint": null,
+  "scope_hint": null,
+  "content_hash": "c5858cca79c8ffb509a69b8a97cc28c663d21d05ce17082231f74e51e9569866",
+  "parse_tier": 1,
+  "parse_quality": 1,
+  "triage_label": null,
+  "status": "published",
+  "error": null,
+  "confirmations": 0,
+  "meta": {
+   "kind": "docx",
+   "bytes": 18528,
+   "sources": 6,
+   "passages": 51,
+   "versions": [],
+   "parse_notes": []
+  },
+  "created_at": "2026-11-07T12:36:29.125058Z",
+  "passages": 51,
+  "facts": 119,
+  "sources": [
+   {
+    "id": "bbf587713cab2962fa0f",
+    "short_label": "Video 1",
+    "title": "AP 101: the life of an invoice",
+    "doc_type": "training",
+    "version": null,
+    "dated": "2026-02-01",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "c68bbbc6e6e70cb16bc1",
+    "short_label": "Video 2",
+    "title": "Video 2 — GST and TDS for AP processors",
+    "doc_type": "training",
+    "version": null,
+    "dated": "2022-11-01",
+    "status": "stale",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "1944dfef7ef8e66e0590",
+    "short_label": "Video 3",
+    "title": "Training video transcripts, shadowing notes and expert interviews",
+    "doc_type": "training",
+    "version": null,
+    "dated": "2026-04-01",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "90b9f78f89babc97c7a9",
+    "short_label": "Shadowing notes",
+    "title": "Shadowing notes",
+    "doc_type": "observation",
+    "version": null,
+    "dated": "2026-06-17",
+    "status": "record",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "aa2757da3467bd4db3d5",
+    "short_label": "Expert interview 1",
+    "title": "Expert interview 1 — Lakshmi Reddy, Senior Processor",
+    "doc_type": "interview",
+    "version": null,
+    "dated": "2026-09-08",
+    "status": "record",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "184aa3a09e0ec896b990",
+    "short_label": "Expert interview 2",
+    "title": "Expert interview 2 — Imran Qureshi, Tax Desk Lead",
+    "doc_type": "interview",
+    "version": null,
+    "dated": "2026-09-15",
+    "status": "record",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   }
+  ]
+ },
+ {
+  "id": "c668a5e368ab4ec17699",
+  "channel": "upload",
+  "source_uri": "PS-07_AP_SOP_v4.0_2026.docx",
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "sender": null,
+  "sender_role": null,
+  "received_at": "2026-11-07T12:36:28.818353Z",
+  "effective_hint": null,
+  "scope_hint": null,
+  "content_hash": "753867f9ebb9eb0a3dcde3ede36c69c31222e904a4ce3f544c0c7716867f648c",
+  "parse_tier": 1,
+  "parse_quality": 1,
+  "triage_label": null,
+  "status": "published",
+  "error": null,
+  "confirmations": 0,
+  "meta": {
+   "kind": "docx",
+   "bytes": 21249,
+   "sources": 1,
+   "passages": 76,
+   "versions": [
+    {
+     "added": 76,
+     "carried": 0,
+     "removed": 17,
+     "newer_id": "d6a0b361af98c23e728e",
+     "older_id": "8870ca536f05e92d648d"
+    }
+   ],
+   "parse_notes": []
+  },
+  "created_at": "2026-11-07T12:36:29.125058Z",
+  "passages": 76,
+  "facts": 208,
+  "sources": [
+   {
+    "id": "d6a0b361af98c23e728e",
+    "short_label": "AP SOP v4.0",
+    "title": "Accounts Payable SOP — version 4.0",
+    "doc_type": "sop",
+    "version": "4.0",
+    "dated": "2026-04-01",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   }
+  ]
+ },
+ {
+  "id": "08913914ba1c828a6eaa",
+  "channel": "upload",
+  "source_uri": "PS-07_desk_instructions_and_client_memos.docx",
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "sender": null,
+  "sender_role": null,
+  "received_at": "2026-11-07T12:36:28.818353Z",
+  "effective_hint": null,
+  "scope_hint": null,
+  "content_hash": "23004ce17636e0da7920fd53cc8a8fb40ea178e74830d5070923a2bbd05d412d",
+  "parse_tier": 1,
+  "parse_quality": 1,
+  "triage_label": null,
+  "status": "published",
+  "error": null,
+  "confirmations": 0,
+  "meta": {
+   "kind": "docx",
+   "bytes": 15988,
+   "sources": 6,
+   "passages": 30,
+   "versions": [],
+   "parse_notes": []
+  },
+  "created_at": "2026-11-07T12:36:29.125058Z",
+  "passages": 30,
+  "facts": 63,
+  "sources": [
+   {
+    "id": "73a1e6befb746420f408",
+    "short_label": "DI-03",
+    "title": "Desk instruction DI-03: posting a goods invoice",
+    "doc_type": "work_instruction",
+    "version": "2.2",
+    "dated": "2026-04-12",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "f098f80a40a8ac56708d",
+    "short_label": "DI-07",
+    "title": "DI-07: bank account change requests",
+    "doc_type": "work_instruction",
+    "version": "3.0",
+    "dated": "2026-04-01",
+    "status": "current",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "2b8ac8484579ab82f3ac",
+    "short_label": "CM-INF-02",
+    "title": "Desk instructions, client memos and team FAQ",
+    "doc_type": "memo",
+    "version": null,
+    "dated": "2026-04-15",
+    "status": "current",
+    "client_scope": "Arvana Infra Projects",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "8ed6115ad8394e0a4c70",
+    "short_label": "CM-PHA-01",
+    "title": "Client memo CM-PHA-01",
+    "doc_type": "memo",
+    "version": null,
+    "dated": "2026-01-02",
+    "status": "current",
+    "client_scope": "Arvana Pharma",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "211fd2c242d6368af657",
+    "short_label": "CM-RET-03",
+    "title": "Desk instructions, client memos and team FAQ",
+    "doc_type": "memo",
+    "version": null,
+    "dated": "2026-05-20",
+    "status": "current",
+    "client_scope": "Arvana Retail",
+    "confirmed_by": null,
+    "unsure": []
+   },
+   {
+    "id": "1fe3588202586e2948f9",
+    "short_label": "Part F",
+    "title": "AP team FAQ",
+    "doc_type": "faq",
+    "version": null,
+    "dated": "2023-10-09",
+    "status": "stale",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   }
+  ]
+ },
+ {
+  "id": "c7d34ce644b284baa94b",
+  "channel": "upload",
+  "source_uri": "PS-07_AP_SOP_v3.1_2023.docx",
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "sender": null,
+  "sender_role": null,
+  "received_at": "2026-11-07T12:36:28.809746Z",
+  "effective_hint": null,
+  "scope_hint": null,
+  "content_hash": "05ccbc778eef8676e1aed5189e18a72630b66a8b6106558086913f5e545ef394",
+  "parse_tier": 1,
+  "parse_quality": 1,
+  "triage_label": null,
+  "status": "published",
+  "error": null,
+  "confirmations": 0,
+  "meta": {
+   "kind": "docx",
+   "bytes": 14834,
+   "sources": 1,
+   "passages": 18,
+   "versions": [],
+   "parse_notes": []
+  },
+  "created_at": "2026-11-07T12:36:29.125058Z",
+  "passages": 18,
+  "facts": 65,
+  "sources": [
+   {
+    "id": "8870ca536f05e92d648d",
+    "short_label": "AP SOP v3.1",
+    "title": "Accounts Payable SOP — version 3.1",
+    "doc_type": "sop",
+    "version": "3.1",
+    "dated": "2023-07-01",
+    "status": "superseded",
+    "client_scope": "all",
+    "confirmed_by": null,
+    "unsure": []
+   }
+  ]
+ }
+]

@@ -1,0 +1,1581 @@
+[
+ {
+  "id": "0d3982c37beba392a3d0",
+  "type": "aatoband",
+  "name": "AATO band",
+  "aliases": [
+   "AATO band"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "9430118131d3f5a5da63",
+  "type": "aatoband",
+  "name": "AATO band B or above",
+  "aliases": [
+   "AATO band B or above",
+   "GST threshold"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ba492f26e345cd394620",
+  "type": "apcontroller",
+  "name": "AP Controller",
+  "aliases": [
+   "AP Controller",
+   "AP Controllers"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b72384d01bad785c81ec",
+  "type": "approcessor",
+  "name": "AP Processor",
+  "aliases": [
+   "AP Processor",
+   "AP processors"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "6033dd725f8269d45c2f",
+  "type": "approcessor",
+  "name": "AP staff",
+  "aliases": [
+   "AP staff"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "07187ae967ae92813fcb",
+  "type": "approcessor",
+  "name": "Imran",
+  "aliases": [
+   "Imran"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "4e9b788ab36aca2f8bbf",
+  "type": "approcessor",
+  "name": "Meridian",
+  "aliases": [
+   "Meridian"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "f7082634ccb9917d80df",
+  "type": "approcessor",
+  "name": "Pallavi",
+  "aliases": [
+   "Pallavi"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "bca234cd2024673b4940",
+  "type": "apteam",
+  "name": "Meridian Shared Services",
+  "aliases": [
+   "Meridian Shared Services"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "1ca72e29970794d1ed8b",
+  "type": "bankaccount",
+  "name": "new account",
+  "aliases": [
+   "new account"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "6d450fd0e112189bca69",
+  "type": "bankaccount",
+  "name": "supplier bank changes",
+  "aliases": [
+   "supplier bank changes"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b385233a0ede7ca6a51b",
+  "type": "batch",
+  "name": "batch",
+  "aliases": [
+   "batch"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "bae0440ffb1bbd0bb50e",
+  "type": "cfo",
+  "name": "CFO",
+  "aliases": [
+   "CFO"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "72ae56d30a8a925e8dd6",
+  "type": "client",
+  "name": "all clients",
+  "aliases": [
+   "all clients"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "6b78a51274f67ae85e60",
+  "type": "client",
+  "name": "Arvana Group",
+  "aliases": [
+   "Arvana Group",
+   "Arvana Retail",
+   "Arvana Group companies"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "5b8e71dc74069cecb407",
+  "type": "client",
+  "name": "Arvana Infra Projects",
+  "aliases": [
+   "Arvana Infra Projects",
+   "Arvana Infra"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "11683b365e4bf194f788",
+  "type": "client",
+  "name": "Arvana Pharma",
+  "aliases": [
+   "Arvana Pharma"
+  ],
+  "facts": 6
+ },
+ {
+  "id": "e77a885219958bf94628",
+  "type": "client",
+  "name": "client",
+  "aliases": [
+   "client"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "77e541d40c86a975510e",
+  "type": "client",
+  "name": "client CFO",
+  "aliases": [
+   "client CFO",
+   "client's CFO"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b48bbafbbec26adcf271",
+  "type": "client",
+  "name": "Client QA",
+  "aliases": [
+   "Client QA"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "55f3682724f38a488247",
+  "type": "client",
+  "name": "Meridian Shared Services",
+  "aliases": [
+   "Meridian Shared Services"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "040d70c878cae910e642",
+  "type": "clientmemo",
+  "name": "client memo",
+  "aliases": [
+   "client memo"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "48d0b84955eb44b4264c",
+  "type": "clientmemo",
+  "name": "CM-INF-02",
+  "aliases": [
+   "CM-INF-02"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "9d9a3123b4b74c2ac276",
+  "type": "clientmemo",
+  "name": "Pharma memo",
+  "aliases": [
+   "Pharma memo"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ae1403b1fc6783cffe5c",
+  "type": "department",
+  "name": "Treasury",
+  "aliases": [
+   "Treasury"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "7a43d80a349a9c14c212",
+  "type": "document",
+  "name": "AP SOP v4.0",
+  "aliases": [
+   "AP SOP v4.0"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "60cfdd4b9e7919f88b01",
+  "type": "document",
+  "name": "SOP",
+  "aliases": [
+   "SOP"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "1496bc56750a39e78e1c",
+  "type": "erpsystem",
+  "name": "ERP",
+  "aliases": [
+   "ERP",
+   "system",
+   "ERPSystem"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "0134a81c8bbf1cc5586c",
+  "type": "exceptioncode",
+  "name": "DUP_SUSPECT",
+  "aliases": [
+   "DUP_SUSPECT"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "dce01c9c513c7c764b0a",
+  "type": "exceptioncode",
+  "name": "GSTIN_INACTIVE",
+  "aliases": [
+   "GSTIN_INACTIVE"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "774f1da76e7c52e41dfa",
+  "type": "exceptioncode",
+  "name": "GSTIN_MISMATCH",
+  "aliases": [
+   "GSTIN_MISMATCH"
+  ],
+  "facts": 4
+ },
+ {
+  "id": "0603f01dba592fc83add",
+  "type": "exceptioncode",
+  "name": "INV_INCOMPLETE",
+  "aliases": [
+   "INV_INCOMPLETE"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "13f60ee1f96cab06c2eb",
+  "type": "exceptioncode",
+  "name": "IRN_MISSING",
+  "aliases": [
+   "IRN_MISSING"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "3d8c58f35ba0b8fcf363",
+  "type": "exceptioncode",
+  "name": "MSME_DUE",
+  "aliases": [
+   "MSME_DUE"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "a27b2b274ad9e579ca36",
+  "type": "exceptioncode",
+  "name": "NO_GRN",
+  "aliases": [
+   "NO_GRN"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "165a0da102ad8bce3785",
+  "type": "exceptioncode",
+  "name": "NON_PO_NOT_ALLOWED",
+  "aliases": [
+   "NON_PO_NOT_ALLOWED"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "89d459487ec1d73c344e",
+  "type": "exceptioncode",
+  "name": "NOT_IN_2B",
+  "aliases": [
+   "NOT_IN_2B"
+  ],
+  "facts": 4
+ },
+ {
+  "id": "b4b374f07da6917d4855",
+  "type": "exceptioncode",
+  "name": "PRICE_VAR",
+  "aliases": [
+   "PRICE_VAR"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "871e318dd9c21d5e0a22",
+  "type": "exceptioncode",
+  "name": "QA_RELEASE_PENDING",
+  "aliases": [
+   "QA_RELEASE_PENDING"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "61be6bbf71a7e12c48e6",
+  "type": "exceptioncode",
+  "name": "QTY_VAR",
+  "aliases": [
+   "QTY_VAR"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "17825c9af61e64cdb4d9",
+  "type": "exceptioncode",
+  "name": "RCM_REVIEW",
+  "aliases": [
+   "RCM_REVIEW"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "4b67ee3d4f97a57d9bd9",
+  "type": "exceptioncode",
+  "name": "TDS_SECTION_UNCLEAR",
+  "aliases": [
+   "TDS_SECTION_UNCLEAR"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "1ca464fc85280f3831a6",
+  "type": "faq",
+  "name": "FAQ",
+  "aliases": [
+   "FAQ"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "e2ab3e7393027bb0e754",
+  "type": "form",
+  "name": "GSTR-2A",
+  "aliases": [
+   "GSTR-2A",
+   "GSTR-2B"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ffe6f9529e43bb88d336",
+  "type": "goodsreceiptnote",
+  "name": "GRN",
+  "aliases": [
+   "GRN",
+   "GoodsReceiptNote",
+   "GRNs"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "acd64d6a2da1c62bbb5d",
+  "type": "gstcompliance",
+  "name": "ITC check",
+  "aliases": [
+   "ITC check"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "4a3bace80be31d973277",
+  "type": "gstin",
+  "name": "buyer GSTIN",
+  "aliases": [
+   "buyer GSTIN"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "24d5298e0c608941f680",
+  "type": "gstin",
+  "name": "Input tax credit",
+  "aliases": [
+   "Input tax credit"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "7093dc53155957bd2f2c",
+  "type": "gstin",
+  "name": "supplier GSTIN",
+  "aliases": [
+   "supplier GSTIN",
+   "GSTIN"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "9cb1508079ee39e919a9",
+  "type": "invoice",
+  "name": "invoice",
+  "aliases": [
+   "invoice",
+   "Invoices"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "f1344187a241bc2e9d81",
+  "type": "irn",
+  "name": "E-invoice",
+  "aliases": [
+   "E-invoice"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "7b06e27e7932ae9f095d",
+  "type": "irn",
+  "name": "e-invoice limit",
+  "aliases": [
+   "e-invoice limit"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "6f9532bf9dfd91fa5e72",
+  "type": "irn",
+  "name": "IRN",
+  "aliases": [
+   "IRN",
+   "Invoice Reference Number (IRN)"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ed32555559529b7c5f7e",
+  "type": "irn",
+  "name": "QR code",
+  "aliases": [
+   "QR code"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "528aeaa6057462ea5a64",
+  "type": "material",
+  "name": "active pharmaceutical ingredients",
+  "aliases": [
+   "active pharmaceutical ingredients"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "fa3f613a24850eeb4ffa",
+  "type": "material",
+  "name": "APIs",
+  "aliases": [
+   "APIs"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "70ac4dde7f107f0eb3cb",
+  "type": "material",
+  "name": "cement",
+  "aliases": [
+   "cement"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ee78f7dab4964ba36e8b",
+  "type": "material",
+  "name": "Excipients",
+  "aliases": [
+   "Excipients",
+   "excipient"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "3c48bf158368b68c6997",
+  "type": "material",
+  "name": "Infra",
+  "aliases": [
+   "Infra"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "dc79954ad09df5bc0af9",
+  "type": "material",
+  "name": "packaging",
+  "aliases": [
+   "packaging",
+   "primary packaging material"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "5892b0a6844097e8dd79",
+  "type": "material",
+  "name": "steel",
+  "aliases": [
+   "steel"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ccfaa7e7d30ee166975f",
+  "type": "msmesupplier",
+  "name": "micro or small supplier",
+  "aliases": [
+   "micro or small supplier",
+   "MSME suppliers"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "c171206269a65c584997",
+  "type": "other_tax_type",
+  "name": "tax type",
+  "aliases": [
+   "tax type"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "afea4ce79f8a48854046",
+  "type": "paymentrun",
+  "name": "payment run",
+  "aliases": [
+   "payment run"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "10e9e2ea35576743f42c",
+  "type": "person",
+  "name": "Imran Qureshi",
+  "aliases": [
+   "Imran Qureshi"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "578d89939584890cba88",
+  "type": "person",
+  "name": "Pallavi",
+  "aliases": [
+   "Pallavi"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "22d7f43902af845a8d68",
+  "type": "portal",
+  "name": "Udyam",
+  "aliases": [
+   "Udyam"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "27bd8643ddc44bfdd13e",
+  "type": "purchaseorder",
+  "name": "PO",
+  "aliases": [
+   "PO",
+   "PurchaseOrder"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "bac16c23fb6155af8619",
+  "type": "qrmpflag",
+  "name": "QRMP filing flag",
+  "aliases": [
+   "QRMP filing flag"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "938bf72c2b73c7014bab",
+  "type": "qualitymanagementsystem",
+  "name": "QMS",
+  "aliases": [
+   "QMS",
+   "Quality Management System"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b41d9b4479b0cb916144",
+  "type": "requester",
+  "name": "budget owner",
+  "aliases": [
+   "budget owner"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "5b5e4401d0961ed5239f",
+  "type": "requester",
+  "name": "buyer",
+  "aliases": [
+   "buyer"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "55281ef3a8a4346f0643",
+  "type": "requester",
+  "name": "requester",
+  "aliases": [
+   "requester"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "377d80ded9a34623a292",
+  "type": "requester",
+  "name": "requester's manager",
+  "aliases": [
+   "requester's manager"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "a7f58d56886a0bcb3be5",
+  "type": "requester",
+  "name": "site engineer",
+  "aliases": [
+   "site engineer"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "1d2fbde14b435c993c63",
+  "type": "role",
+  "name": "Budget owner",
+  "aliases": [
+   "Budget owner"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "0c277f55943c880e810e",
+  "type": "role",
+  "name": "Client CFO",
+  "aliases": [
+   "Client CFO"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "0e7b91c030cad4dceee5",
+  "type": "role",
+  "name": "Tax Desk Lead",
+  "aliases": [
+   "Tax Desk Lead"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "dee6b13bd1189424027f",
+  "type": "seniorprocessor",
+  "name": "L",
+  "aliases": [
+   "L"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "24b07a8ae164e41e8f9b",
+  "type": "seniorprocessor",
+  "name": "Lakshmi Reddy",
+  "aliases": [
+   "Lakshmi Reddy"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "526747097e659198b0c9",
+  "type": "seniorprocessor",
+  "name": "Sandeep",
+  "aliases": [
+   "Sandeep"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "f85322fe55a708132d63",
+  "type": "seniorprocessor",
+  "name": "Senior Processor",
+  "aliases": [
+   "Senior Processor",
+   "SeniorProcessor"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "600bd098dd643b7914d5",
+  "type": "service",
+  "name": "courier",
+  "aliases": [
+   "courier"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "621eb640ab2fb5d7aa8b",
+  "type": "service",
+  "name": "lift maintenance AMC",
+  "aliases": [
+   "lift maintenance AMC",
+   "Annual Maintenance Contract"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "ca32af5ae1627d57c1ef",
+  "type": "service",
+  "name": "Professional services",
+  "aliases": [
+   "Professional services"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "14aeb9476da18749c938",
+  "type": "service",
+  "name": "Rent of plant, machinery or equipment",
+  "aliases": [
+   "Rent of plant, machinery or equipment"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "cae02c10f8ae63221f39",
+  "type": "serviceentrysheet",
+  "name": "ServiceEntrySheet",
+  "aliases": [
+   "ServiceEntrySheet",
+   "service entry sheet"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b294aab04872d5ca4108",
+  "type": "supplier",
+  "name": "advocates",
+  "aliases": [
+   "advocates"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "d37bdf0e3ea258993031",
+  "type": "supplier",
+  "name": "small supplier",
+  "aliases": [
+   "small supplier"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "9419d012eda6da349252",
+  "type": "supplier",
+  "name": "supplier",
+  "aliases": [
+   "supplier",
+   "new supplier"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "f55dc54b14f4b20710ee",
+  "type": "supplier",
+  "name": "supplier records",
+  "aliases": [
+   "supplier records"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "b19e96c8e536a247d980",
+  "type": "supplier",
+  "name": "transporter",
+  "aliases": [
+   "transporter"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "9bd55e540e6c1201436d",
+  "type": "system",
+  "name": "AP tracker",
+  "aliases": [
+   "AP tracker"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "18c08eeae753d78183d0",
+  "type": "system",
+  "name": "invoice furnishing facility",
+  "aliases": [
+   "invoice furnishing facility"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "e53e4f5abd8ca9dc8a2b",
+  "type": "system",
+  "name": "Invoice Verification",
+  "aliases": [
+   "Invoice Verification"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "6ca01f3f654577d533bb",
+  "type": "system",
+  "name": "vendor master",
+  "aliases": [
+   "vendor master"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "b1d79dfdba414d414ba3",
+  "type": "taxdesk",
+  "name": "Imran Qureshi",
+  "aliases": [
+   "Imran Qureshi"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "38efa54988dc738783fa",
+  "type": "taxdesk",
+  "name": "Tax Desk",
+  "aliases": [
+   "Tax Desk"
+  ],
+  "facts": 4
+ },
+ {
+  "id": "5994e5f5f40a622fd6b9",
+  "type": "tdssection",
+  "name": "194C",
+  "aliases": [
+   "194C"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "fb4aaedc671fad86d0b3",
+  "type": "tdssection",
+  "name": "194I",
+  "aliases": [
+   "194I",
+   "TDSSection",
+   "194Q"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "fca158bc10b11ab7e198",
+  "type": "tdssection",
+  "name": "194J",
+  "aliases": [
+   "194J"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "4c248fcd325dc4306922",
+  "type": "tdssection",
+  "name": "Section 194J",
+  "aliases": [
+   "Section 194J",
+   "section 194C"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "1c0689612f877fd3916c",
+  "type": "tdssection",
+  "name": "section 197",
+  "aliases": [
+   "section 197"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "e19cdfe35735adba8b84",
+  "type": "tdssection",
+  "name": "TDS section determination for lift AMC",
+  "aliases": [
+   "TDS section determination for lift AMC"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "53d2acf7d72a08f8c0cb",
+  "type": "teamlead",
+  "name": "Team Lead",
+  "aliases": [
+   "Team Lead"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "2e2358c87376aaf129e8",
+  "type": "topic",
+  "name": "AATO",
+  "aliases": [
+   "AATO"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "31b4617034676f467ce4",
+  "type": "topic",
+  "name": "AATO bands for IRN requirement",
+  "aliases": [
+   "AATO bands for IRN requirement",
+   "aato_bands"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "08f1fa981fc0a63fb774",
+  "type": "topic",
+  "name": "AP Processor responsibilities",
+  "aliases": [
+   "AP Processor responsibilities"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "564bacb412cc51a7ec82",
+  "type": "topic",
+  "name": "attempted frauds",
+  "aliases": [
+   "attempted frauds"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "94117ce819244c744233",
+  "type": "topic",
+  "name": "call-back control",
+  "aliases": [
+   "call-back control"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "56cd5d03979f92636c0a",
+  "type": "topic",
+  "name": "CM-PHA-01",
+  "aliases": [
+   "CM-PHA-01"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "2f4a79edcf7feb3bafba",
+  "type": "topic",
+  "name": "Credit note processing",
+  "aliases": [
+   "Credit note processing"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "76170abef5ab2bfa536b",
+  "type": "topic",
+  "name": "Debit note processing",
+  "aliases": [
+   "Debit note processing"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "af8de0b3b5e2f8414015",
+  "type": "topic",
+  "name": "desk instructions",
+  "aliases": [
+   "desk instructions"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "c13c08a062b719ce7890",
+  "type": "topic",
+  "name": "DI-03",
+  "aliases": [
+   "DI-03"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "89a1e7bc9ecf1d4a9682",
+  "type": "topic",
+  "name": "Duplicate invoice check",
+  "aliases": [
+   "Duplicate invoice check",
+   "duplicate_check"
+  ],
+  "facts": 11
+ },
+ {
+  "id": "2472db7620bacacbf557",
+  "type": "topic",
+  "name": "E-invoice threshold",
+  "aliases": [
+   "E-invoice threshold"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "e5374d1b89d5ec91d919",
+  "type": "topic",
+  "name": "Exception codes and resolution targets",
+  "aliases": [
+   "Exception codes and resolution targets",
+   "exception_handling"
+  ],
+  "facts": 32
+ },
+ {
+  "id": "c2837cfd1a224f65f840",
+  "type": "topic",
+  "name": "GRN posting timeline",
+  "aliases": [
+   "GRN posting timeline"
+  ],
+  "facts": 9
+ },
+ {
+  "id": "4a29ab4f61c5265e5a12",
+  "type": "topic",
+  "name": "GST",
+  "aliases": [
+   "GST"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "4e672e90df1a2c314e23",
+  "type": "topic",
+  "name": "GST compliance checks",
+  "aliases": [
+   "GST compliance checks",
+   "gst_compliance"
+  ],
+  "facts": 34
+ },
+ {
+  "id": "15c14ddc319a89e03b9f",
+  "type": "topic",
+  "name": "GSTR-2B",
+  "aliases": [
+   "GSTR-2B"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "c16b34e3cfe17e9e3bc7",
+  "type": "topic",
+  "name": "Hyderabad centre",
+  "aliases": [
+   "Hyderabad centre"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "1c9d1c9d362d8457f549",
+  "type": "topic",
+  "name": "Infra",
+  "aliases": [
+   "Infra"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "8475f91b94334f6ce41d",
+  "type": "topic",
+  "name": "Infra sites",
+  "aliases": [
+   "Infra sites"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ecafcfe8a188437040b1",
+  "type": "topic",
+  "name": "Invoice approval authority",
+  "aliases": [
+   "Invoice approval authority"
+  ],
+  "facts": 23
+ },
+ {
+  "id": "b18931ac0957de047fc0",
+  "type": "topic",
+  "name": "Invoice intake channels",
+  "aliases": [
+   "Invoice intake channels",
+   "invoice_intake"
+  ],
+  "facts": 9
+ },
+ {
+  "id": "176994f78f9ebac043fc",
+  "type": "topic",
+  "name": "Invoice matching rules",
+  "aliases": [
+   "Invoice matching rules",
+   "invoice_matching"
+  ],
+  "facts": 6
+ },
+ {
+  "id": "ada0ae18de8da5914152",
+  "type": "topic",
+  "name": "Invoice posting process",
+  "aliases": [
+   "Invoice posting process",
+   "invoice_posting"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "96979238aea4f4c3715f",
+  "type": "topic",
+  "name": "Invoice retention period",
+  "aliases": [
+   "Invoice retention period",
+   "invoice_retention"
+  ],
+  "facts": 5
+ },
+ {
+  "id": "07b4a956c0df8499d62e",
+  "type": "topic",
+  "name": "Invoice verification process",
+  "aliases": [
+   "Invoice verification process",
+   "invoice_verification"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "18b6eabb745497202a5c",
+  "type": "topic",
+  "name": "IRN requirement",
+  "aliases": [
+   "IRN requirement"
+  ],
+  "facts": 12
+ },
+ {
+  "id": "582c519f7f23bd18f99b",
+  "type": "topic",
+  "name": "ITC check",
+  "aliases": [
+   "ITC check"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "9083641eb92cf79a65d4",
+  "type": "topic",
+  "name": "Knowledge tool configuration",
+  "aliases": [
+   "Knowledge tool configuration"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "d3c4637db55697661ec4",
+  "type": "topic",
+  "name": "Mandatory invoice fields",
+  "aliases": [
+   "Mandatory invoice fields",
+   "mandatory_fields"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "1f2056849918fb7dbf2f",
+  "type": "topic",
+  "name": "Masters' Union Applied AI Challenge",
+  "aliases": [
+   "Masters' Union Applied AI Challenge"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "a088ba6b52fa69d42af4",
+  "type": "topic",
+  "name": "Medium enterprise payment terms",
+  "aliases": [
+   "Medium enterprise payment terms"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "f837c3007ccac70198e7",
+  "type": "topic",
+  "name": "Meridian Shared Services",
+  "aliases": [
+   "Meridian Shared Services"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "6f21c3bbf4951f36d088",
+  "type": "topic",
+  "name": "Month-end procedures",
+  "aliases": [
+   "Month-end procedures"
+  ],
+  "facts": 8
+ },
+ {
+  "id": "d8c9f5655342f688aaed",
+  "type": "topic",
+  "name": "MSME",
+  "aliases": [
+   "MSME"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "f9773a1ffe9e65446f8a",
+  "type": "topic",
+  "name": "MSME payment terms",
+  "aliases": [
+   "MSME payment terms"
+  ],
+  "facts": 6
+ },
+ {
+  "id": "7b40ef5bdb92c7faf732",
+  "type": "topic",
+  "name": "Non-PO invoice categories",
+  "aliases": [
+   "Non-PO invoice categories",
+   "non_po_categories"
+  ],
+  "facts": 12
+ },
+ {
+  "id": "15bb3b428fd03d9f4e14",
+  "type": "topic",
+  "name": "Other",
+  "aliases": [
+   "Other"
+  ],
+  "facts": 24
+ },
+ {
+  "id": "9bb2f44dd1dcfb9fa6f7",
+  "type": "topic",
+  "name": "Payment run schedule",
+  "aliases": [
+   "Payment run schedule"
+  ],
+  "facts": 25
+ },
+ {
+  "id": "18f19aa009630dc3161a",
+  "type": "topic",
+  "name": "Payment runs",
+  "aliases": [
+   "Payment runs"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "830fc28bfc0d66fbbd0a",
+  "type": "topic",
+  "name": "Payment terms",
+  "aliases": [
+   "Payment terms"
+  ],
+  "facts": 1
+ },
+ {
+  "id": "f053d6aefbc82d568dfc",
+  "type": "topic",
+  "name": "Pharma",
+  "aliases": [
+   "Pharma"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "4ce6a5738b17c72ef20c",
+  "type": "topic",
+  "name": "Pharma QA release requirement",
+  "aliases": [
+   "Pharma QA release requirement",
+   "pharma_qa_release"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "69f1ff173bd382fbf19b",
+  "type": "topic",
+  "name": "Price tolerance",
+  "aliases": [
+   "Price tolerance"
+  ],
+  "facts": 21
+ },
+ {
+  "id": "297d1b9efe044138ed9e",
+  "type": "topic",
+  "name": "QRMP",
+  "aliases": [
+   "QRMP"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "0cc79309f009fc711e0f",
+  "type": "topic",
+  "name": "QRMP supplier handling",
+  "aliases": [
+   "QRMP supplier handling"
+  ],
+  "facts": 6
+ },
+ {
+  "id": "62be7ee9c99e4142b405",
+  "type": "topic",
+  "name": "Quantity tolerance",
+  "aliases": [
+   "Quantity tolerance"
+  ],
+  "facts": 16
+ },
+ {
+  "id": "5a608aaf6b7416b25c48",
+  "type": "topic",
+  "name": "Reverse charge mechanism applicability",
+  "aliases": [
+   "Reverse charge mechanism applicability",
+   "reverse_charge_mechanism"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "15b389b980c8dad0d506",
+  "type": "topic",
+  "name": "Rounding difference tolerance",
+  "aliases": [
+   "Rounding difference tolerance",
+   "rounding_tolerance"
+  ],
+  "facts": 3
+ },
+ {
+  "id": "38f099c0722ec4c97022",
+  "type": "topic",
+  "name": "section 14",
+  "aliases": [
+   "section 14"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "bb98828a9d016b67e209",
+  "type": "topic",
+  "name": "SOP governance",
+  "aliases": [
+   "SOP governance"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "10eb92bb63f5d0b5b834",
+  "type": "topic",
+  "name": "SOP scope",
+  "aliases": [
+   "SOP scope"
+  ],
+  "facts": 2
+ },
+ {
+  "id": "83f1f35750442cab217f",
+  "type": "topic",
+  "name": "SOP v4.0",
+  "aliases": [
+   "SOP v4.0",
+   "AP SOP v4.0",
+   "SOP"
+  ],
+  "facts": 14
+ },
+ {
+  "id": "5a61062f12c6243ad52a",
+  "type": "topic",
+  "name": "Supplier behavioural patterns",
+  "aliases": [
+   "Supplier behavioural patterns",
+   "supplier_habits"
+  ],
+  "facts": 8
+ },
+ {
+  "id": "f820a35c1e8fb866c0b5",
+  "type": "topic",
+  "name": "Supplier onboarding",
+  "aliases": [
+   "Supplier onboarding"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "58b0ec13cb1ebd5b5c93",
+  "type": "topic",
+  "name": "Tax Desk",
+  "aliases": [
+   "Tax Desk"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "4bdf05218f657226f58d",
+  "type": "topic",
+  "name": "TDS",
+  "aliases": [
+   "TDS"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "104294cb4ba54ed6bc7e",
+  "type": "topic",
+  "name": "TDS deduction rules",
+  "aliases": [
+   "TDS deduction rules",
+   "tds_deduction"
+  ],
+  "facts": 36
+ },
+ {
+  "id": "62683897b3181eeba6ca",
+  "type": "topic",
+  "name": "Team Lead",
+  "aliases": [
+   "Team Lead"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "0c1600c0d1c19ab83a48",
+  "type": "topic",
+  "name": "Treasury (client)",
+  "aliases": [
+   "Treasury (client)"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "ca484dec242eee517de0",
+  "type": "topic",
+  "name": "Vendor bank account change process",
+  "aliases": [
+   "Vendor bank account change process",
+   "vendor_bank_account_change",
+   "bank account change process"
+  ],
+  "facts": 33
+ },
+ {
+  "id": "6abd7c681c4564f32c45",
+  "type": "topic",
+  "name": "Vendor Master",
+  "aliases": [
+   "Vendor Master"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "36fa181a63b68fc592c9",
+  "type": "topic",
+  "name": "version 3.1",
+  "aliases": [
+   "version 3.1"
+  ],
+  "facts": 0
+ },
+ {
+  "id": "c86c3fdae33f8798cf00",
+  "type": "vendormaster",
+  "name": "vendor master",
+  "aliases": [
+   "vendor master",
+   "VendorMaster",
+   "Vendor Master team"
+  ],
+  "facts": 4
+ },
+ {
+  "id": "e88f2f24e1f56399d5e7",
+  "type": "vendormasterlead",
+  "name": "Vendor Master lead",
+  "aliases": [
+   "Vendor Master lead"
+  ],
+  "facts": 0
+ }
+]

@@ -3,6 +3,8 @@ import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/shell/AppShell";
 import { RoleProvider } from "@/components/shell/RoleContext";
+import { SignalProvider } from "@/components/shell/Signals";
+import { ToastProvider } from "@/components/ui/Primitives";
 
 import "./globals.css";
 
@@ -35,7 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${hanken.variable} ${inter.variable} ${jetbrains.variable}`}>
       <body>
         <RoleProvider>
-          <AppShell>{children}</AppShell>
+          <SignalProvider>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
+          </SignalProvider>
         </RoleProvider>
       </body>
     </html>

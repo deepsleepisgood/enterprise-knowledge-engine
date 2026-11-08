@@ -60,6 +60,23 @@ def put_schema(body: SchemaEdit, s: Session = Depends(write_session)) -> dict[st
     return {"version": body.version, "status": "draft"}
 
 
+class DraftIn(BaseModel):
+    by: str
+
+
+@router.post("/schema/draft", status_code=201)
+def new_draft(body: DraftIn, s: Session = Depends(write_session)) -> dict[str, Any]:
+    """Start editing: copy the frozen schema into a new draft (frozen versions never change)."""
+    latest = kb.latest_schema(s)
+    if latest is not None and latest.status == "draft":
+        return {"version": latest.version, "status": "draft", "created": False}
+    active = kb.active_schema(s)
+    if active is None:
+        raise HTTPException(409, "No schema yet: build the graph first.")
+    version = kb.save_schema(s, active.ontology, active.mode, sample=list(active.sample or []))
+    return {"version": version, "status": "draft", "created": True, "from_version": active.version}
+
+
 class Freeze(BaseModel):
     version: int
     by: str
@@ -81,7 +98,11 @@ def freeze(body: Freeze) -> dict[str, Any]:
 
 @router.get("/entities")
 def list_entities(type: str | None = None, s: Session = Depends(read_session)) -> list[dict]:
-    return [row(e, drop={"score"}) for e in ents.list_entities(s, type_=type)]
+    counts = fstore.counts_by_subject(s)
+    return [
+        {**row(e, drop={"score"}), "facts": counts.get(e.id, 0)}
+        for e in ents.list_entities(s, type_=type)
+    ]
 
 
 @router.get("/entities/{entity_id}")

@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "check:tokens": "node scripts/check-tokens.mjs"
+    "check:tokens": "node scripts/check-tokens.mjs",
+    "test:e2e": "playwright test",
+    "fixtures": "node scripts/snapshot-fixtures.mjs"
   },
   "dependencies": {
     "lucide-react": "0.453.0",
@@ -17,6 +19,7 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.48.2",
     "@types/node": "20.19.43",
     "@types/react": "18.3.31",
     "@types/react-dom": "18.3.7",

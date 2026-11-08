@@ -1,0 +1,280 @@
+[
+ {
+  "id": 1,
+  "kind": "metadata",
+  "payload": {
+   "label": "AP SOP v3.1",
+   "fields": [
+    "doc_date"
+   ],
+   "values": {
+    "doc_date": "None"
+   },
+   "source_id": "8870ca536f05e92d648d"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.490410Z"
+ },
+ {
+  "id": 2,
+  "kind": "metadata",
+  "payload": {
+   "label": "AP SOP v4.0",
+   "fields": [
+    "doc_date"
+   ],
+   "values": {
+    "doc_date": "None"
+   },
+   "source_id": "d6a0b361af98c23e728e"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.647005Z"
+ },
+ {
+  "id": 3,
+  "kind": "retire",
+  "payload": {
+   "summary": "17 passages of AP SOP v3.1 are not in AP SOP v4.0; retire their facts?",
+   "source_id": "8870ca536f05e92d648d",
+   "passage_ids": [
+    "9b7f2a3e6aafabaf4b86",
+    "93b14ce48a3353cdf926",
+    "0aa451221657cd8cc952",
+    "b115ddb6b85f07fe8b19",
+    "dc4cdb0932606355e114",
+    "6ae2f5b6475f4c539ac4",
+    "c726de9cffd5e5368bf3",
+    "b96bb266e7087ca9d7a1",
+    "651d4159a5de2993fcc5",
+    "2f31c22ec7dd099908c8",
+    "f548441877bbf01d7d78",
+    "d3ab296c1f0596064c44",
+    "bdfb3c5e45b57226c186",
+    "e8ee74ad993d2d6678ea",
+    "3f6d6eda3f7b2dc2559d",
+    "b3e82fdb1b031d1d475b",
+    "f24577edd45b0e43363c"
+   ],
+   "superseded_by": "d6a0b361af98c23e728e"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.647005Z"
+ },
+ {
+  "id": 4,
+  "kind": "metadata",
+  "payload": {
+   "label": "DI-03",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Desk instruction DI-03: posting a goods invoice"
+   },
+   "source_id": "73a1e6befb746420f408"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.802533Z"
+ },
+ {
+  "id": 5,
+  "kind": "metadata",
+  "payload": {
+   "label": "DI-07",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "DI-07: bank account change requests"
+   },
+   "source_id": "f098f80a40a8ac56708d"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.802533Z"
+ },
+ {
+  "id": 6,
+  "kind": "metadata",
+  "payload": {
+   "label": "Part F",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "AP team FAQ"
+   },
+   "source_id": "1fe3588202586e2948f9"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:29.802533Z"
+ },
+ {
+  "id": 7,
+  "kind": "metadata",
+  "payload": {
+   "label": "Video 1",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "AP 101: the life of an invoice"
+   },
+   "source_id": "bbf587713cab2962fa0f"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 8,
+  "kind": "metadata",
+  "payload": {
+   "label": "Video 2",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Video 2 — GST and TDS for AP processors"
+   },
+   "source_id": "c68bbbc6e6e70cb16bc1"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 9,
+  "kind": "metadata",
+  "payload": {
+   "label": "Video 3",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Training video transcripts, shadowing notes and expert interviews"
+   },
+   "source_id": "1944dfef7ef8e66e0590"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 10,
+  "kind": "metadata",
+  "payload": {
+   "label": "Shadowing notes",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Shadowing notes"
+   },
+   "source_id": "90b9f78f89babc97c7a9"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 11,
+  "kind": "metadata",
+  "payload": {
+   "label": "Expert interview 1",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Expert interview 1 — Lakshmi Reddy, Senior Processor"
+   },
+   "source_id": "aa2757da3467bd4db3d5"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 12,
+  "kind": "metadata",
+  "payload": {
+   "label": "Expert interview 2",
+   "fields": [
+    "title"
+   ],
+   "values": {
+    "title": "Expert interview 2 — Imran Qureshi, Tax Desk Lead"
+   },
+   "source_id": "184aa3a09e0ec896b990"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:30.055279Z"
+ },
+ {
+  "id": 13,
+  "kind": "metadata",
+  "payload": {
+   "label": "AP operations",
+   "fields": [
+    "doc_date",
+    "title",
+    "dated"
+   ],
+   "values": {
+    "dated": "2026-10-28",
+    "title": "Accounts payable operations",
+    "doc_date": "None"
+   },
+   "source_id": "dfe2a7928ccf55dca665"
+  },
+  "risk_tier": "normal",
+  "status": "open",
+  "row_version": 1,
+  "decided_by": null,
+  "decided_at": null,
+  "created_at": "2026-11-07T12:36:37.939179Z"
+ }
+]

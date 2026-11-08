@@ -109,3 +109,15 @@ def failed_jobs(session: Session, limit: int = 50) -> list[Job]:
         .limit(limit)
     )
     return list(session.scalars(q))
+
+
+def latest(session: Session, kind: str) -> Job | None:
+    """The most recent job of a kind (queued, running or finished)."""
+    return session.scalar(
+        select(Job).where(Job.tenant_id == tenant(), Job.kind == kind).order_by(Job.id.desc())
+    )
+
+
+def retry(session: Session, kind: str, payload: dict[str, Any]) -> int:
+    """Queue a fresh attempt (the failed job row is kept for the record)."""
+    return enqueue(session, kind, payload)

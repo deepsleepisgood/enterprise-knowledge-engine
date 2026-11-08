@@ -23,19 +23,20 @@ import { useEffect, useRef, useState } from "react";
 import { cx } from "@/lib/format";
 
 import { useRole, type Role } from "./RoleContext";
+import { useSignals } from "./Signals";
 
 interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
   roles: Role[];
-  badge?: boolean;
+  badge?: "changes" | "sources";
 }
 
 const NAV: NavItem[] = [
   { href: "/", label: "Ask", icon: Search, roles: ["processor", "owner"] },
-  { href: "/changes", label: "Changes", icon: Bell, roles: ["processor", "owner"], badge: true },
-  { href: "/sources", label: "Sources", icon: Upload, roles: ["owner"], badge: true },
+  { href: "/changes", label: "Changes", icon: Bell, roles: ["processor", "owner"], badge: "changes" },
+  { href: "/sources", label: "Sources", icon: Upload, roles: ["owner"], badge: "sources" },
   { href: "/conflicts", label: "Conflicts", icon: GitCompare, roles: ["owner"] },
   { href: "/review", label: "Review queue", icon: Inbox, roles: ["owner"] },
   { href: "/setup", label: "Setup", icon: SlidersHorizontal, roles: ["owner"] },
@@ -126,19 +127,23 @@ function NavLinks({ items, pathname, layout, onNavigate }: {
   layout: "rail" | "list";
   onNavigate?: () => void;
 }) {
+  const { unseen, attention } = useSignals();
+  const counts = { changes: unseen.length, sources: attention };
   return (
     <>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
+        const count = item.badge ? counts[item.badge] : 0;
+        const label = count ? `${item.label} (${count} new)` : item.label;
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
-            aria-label={layout === "rail" ? item.label : undefined}
-            title={layout === "rail" ? item.label : undefined}
+            aria-label={layout === "rail" ? label : undefined}
+            title={layout === "rail" ? label : undefined}
             className={cx(
               "relative flex items-center rounded-xl transition-colors",
               layout === "rail" ? "h-10 w-10 justify-center" : "gap-3 px-3 py-2.5 text-sm font-medium",
@@ -151,11 +156,16 @@ function NavLinks({ items, pathname, layout, onNavigate }: {
             )}
             <span className="relative">
               <Icon className="h-5 w-5" aria-hidden />
-              {item.badge && (
+              {count > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-rose ring-2 ring-surface" aria-hidden />
               )}
             </span>
-            {layout === "list" && item.label}
+            {layout === "list" && (
+              <span className="flex flex-1 items-center justify-between">
+                {item.label}
+                {count > 0 && <span className="font-mono text-[11px] text-muted">{count}</span>}
+              </span>
+            )}
           </Link>
         );
       })}

@@ -139,4 +139,9 @@ def main() -> None:  # pragma: no cover
 
 
 if __name__ == "__main__":
-    main()
+    # `python -m app.worker` runs this file as __main__, but handler modules register on the
+    # importable `app.worker` (`from app.worker import handler`). Run that module's main, or
+    # this process would serve an empty handler table.
+    from app import worker as _worker
+
+    _worker.main()

@@ -1,0 +1,3371 @@
+{
+ "active": {
+  "id": 3,
+  "version": 2,
+  "status": "frozen",
+  "mode": "induced",
+  "ontology": {
+   "name": "induced",
+   "units": {
+    "%": 0.01,
+    "day": 1,
+    "₹": 1,
+    "lakh": 100000,
+    "crore": 10000000,
+    "rupee": 1,
+    "percent": 0.01,
+    "working day": 1
+   },
+   "topics": [
+    {
+     "key": "irn_requirement",
+     "risk": "high",
+     "label": "IRN requirement",
+     "synonyms": [
+      "e-invoice limit",
+      "IRN threshold",
+      "e-invoicing turnover limit",
+      "IRN",
+      "e-invoice",
+      "invoice reference number",
+      "QR code",
+      "AATO limit",
+      "turnover threshold"
+     ],
+     "description": "Threshold for mandatory Invoice Reference Number (e-invoice) based on supplier turnover."
+    },
+    {
+     "key": "price_tolerance",
+     "risk": "high",
+     "label": "Price tolerance",
+     "synonyms": [
+      "price variance limit",
+      "price tolerance rule",
+      "price match tolerance",
+      "price variance %",
+      "percentage threshold",
+      "price variance amount",
+      "absolute threshold",
+      "PRICE_VAR"
+     ],
+     "description": "Allowed variance between invoice line price and PO/GRN price before raising PRICE_VAR exception."
+    },
+    {
+     "key": "quantity_tolerance",
+     "risk": "high",
+     "label": "Quantity tolerance",
+     "synonyms": [
+      "qty tolerance",
+      "quantity variance limit",
+      "over-receipt tolerance",
+      "qty tolerance %",
+      "quantity variance %",
+      "Infra qty tolerance %",
+      "CM-INF-02 tolerance",
+      "quantity tolerance threshold"
+     ],
+     "description": "Allowed excess of invoice quantity over GRN quantity for specific materials, with a value cap."
+    },
+    {
+     "key": "pharma_qa_release",
+     "risk": "high",
+     "label": "Pharma QA release requirement",
+     "synonyms": [
+      "QA release hold",
+      "pharma payment block",
+      "batch release requirement",
+      "QA release",
+      "pharma",
+      "CM-PHA-01",
+      "batch release",
+      "QA_RELEASE_PENDING"
+     ],
+     "description": "Rule that invoices for certain pharma materials cannot be paid until batch shows Released status in QMS."
+    },
+    {
+     "key": "non_po_categories",
+     "risk": "medium",
+     "label": "Non-PO invoice categories",
+     "synonyms": [
+      "non-PO allowed",
+      "non-PO categories",
+      "non-PO invoice types",
+      "non-PO list",
+      "PO-exempt categories",
+      "non-PO types"
+     ],
+     "description": "Categories of invoices that are processed without a purchase order, and their specific requirements."
+    },
+    {
+     "key": "payment_run_schedule",
+     "risk": "high",
+     "label": "Payment run schedule",
+     "synonyms": [
+      "payment run day",
+      "payment cutoff",
+      "AP payment schedule",
+      "payment days",
+      "run schedule",
+      "cut-off",
+      "MSME",
+      "micro small enterprises",
+      "MSME 45 days",
+      "MSME 15 days"
+     ],
+     "description": "Day of the weekly payment run, cutoff for invoice submission, and MSME payment deadlines."
+    },
+    {
+     "key": "gst_compliance",
+     "risk": "high",
+     "label": "GST compliance checks",
+     "synonyms": [
+      "GST",
+      "GSTIN",
+      "e-invoice",
+      "IRN",
+      "GSTR-2A",
+      "GSTR-2B",
+      "input credit",
+      "GSTIN validation",
+      "IRN check",
+      "GST tab verification",
+      "buyer GSTIN",
+      "place of supply",
+      "GSTIN_MISMATCH",
+      "GSTIN check date",
+      "GSTIN active check",
+      "cancelled GSTIN",
+      "GSTR-2A check",
+      "input credit check date",
+      "missing from 2A",
+      "GSTR-2A missing hold"
+     ],
+     "description": "GSTIN validation, e-invoicing threshold, input tax credit verification, buyer GSTIN and place of supply validation."
+    },
+    {
+     "key": "vendor_bank_account_change",
+     "risk": "high",
+     "label": "Vendor bank account change process",
+     "synonyms": [
+      "bank account update",
+      "vendor master bank change",
+      "bank detail amendment",
+      "bank change",
+      "vendor bank change",
+      "call-back",
+      "call back",
+      "verification call",
+      "fraud prevention",
+      "vendor master lead",
+      "bank change approver",
+      "month-end freeze",
+      "bank change freeze"
+     ],
+     "description": "Steps and controls for changing a supplier's bank account details, including verification, documentation, approval chain, and freeze period."
+    },
+    {
+     "key": "invoice_approval_authority",
+     "risk": "high",
+     "label": "Invoice approval authority",
+     "synonyms": [
+      "AP Controller approval limit",
+      "invoice approval matrix",
+      "high-value invoice approval",
+      "approvals",
+      "CFO approval",
+      "authorisation limits",
+      "AP Controller threshold",
+      "Controller approval limit",
+      "CFO threshold",
+      "CFO approval limit"
+     ],
+     "description": "Role and amount thresholds for mandatory AP Controller or client CFO approval of invoices."
+    },
+    {
+     "key": "invoice_retention",
+     "risk": "medium",
+     "label": "Invoice retention period",
+     "synonyms": [
+      "document retention",
+      "invoice archive period",
+      "record keeping duration",
+      "retention period",
+      "document retention years",
+      "bank details confidentiality",
+      "supplier bank info restriction"
+     ],
+     "description": "Number of years invoices must be retained and restrictions on sharing supplier bank details."
+    },
+    {
+     "key": "tds_deduction",
+     "risk": "high",
+     "label": "TDS deduction rules",
+     "synonyms": [
+      "TDS",
+      "tax deducted at source",
+      "194C",
+      "194J",
+      "194I",
+      "194Q",
+      "lower deduction certificate",
+      "TDS section",
+      "TDS rate",
+      "194I 194C 194J RCM",
+      "TDS base",
+      "taxable value excluding GST",
+      "contractor individual rate",
+      "contractor company rate",
+      "professional services rate",
+      "technical services rate",
+      "equipment rent rate",
+      "building rent rate",
+      "goods purchase limit",
+      "goods purchase TDS rate",
+      "no PAN rate",
+      "20% TDS",
+      "197 certificate",
+      "lower deduction cert",
+      "certificate validity",
+      "AMC TDS",
+      "annual maintenance contract classification",
+      "TDS_SECTION_UNCLEAR",
+      "unclear TDS section",
+      "advocate fees RCM",
+      "legal services reverse charge"
+     ],
+     "description": "TDS sections, rates, PAN requirements, lower-deduction certificates, AMC classification, and reverse charge applicability."
+    },
+    {
+     "key": "duplicate_check",
+     "risk": "medium",
+     "label": "Duplicate invoice check",
+     "synonyms": [
+      "duplicate detection",
+      "DUP_SUSPECT",
+      "invoice duplication check",
+      "normalisation",
+      "number normalisation",
+      "amber flag procedure",
+      "stop on amber",
+      "duplicate suspect target",
+      "DUP_SUSPECT SLA"
+     ],
+     "description": "Mandatory duplicate check step, normalisation rules, and required action on amber flag."
+    },
+    {
+     "key": "grn_posting_timeline",
+     "risk": "low",
+     "label": "GRN posting timeline",
+     "synonyms": [
+      "GRN posting deadline",
+      "goods receipt posting SLA",
+      "GRN delay tolerance",
+      "GRN posting SLA",
+      "goods receipt posting deadline"
+     ],
+     "description": "Expected timeframe for requesters to post Goods Receipt Notes after material receipt."
+    },
+    {
+     "key": "month_end_procedures",
+     "risk": "medium",
+     "label": "Month-end procedures",
+     "synonyms": [
+      "month-end",
+      "month end close",
+      "financial close",
+      "posting cutoff",
+      "invoice posting deadline",
+      "GRN accrual",
+      "accrue goods received not invoiced",
+      "exception review",
+      "team lead review",
+      "month-end freeze",
+      "bank change freeze"
+     ],
+     "description": "Rules for month-end invoice posting, GRN accruals, exception review, and bank change freeze period."
+    },
+    {
+     "key": "msme_payment_terms",
+     "risk": "high",
+     "label": "MSME payment terms",
+     "synonyms": [
+      "MSME payment",
+      "MSME payment terms",
+      "micro small medium enterprises payment",
+      "MSME 45 days",
+      "MSME 15 days",
+      "MSME_DUE exception",
+      "MSME payment escalation",
+      "small supplier due date alert",
+      "MSME_DUE trigger",
+      "small supplier escalation window",
+      "MSME escalation owner",
+      "MSME_DUE owner"
+     ],
+     "description": "Payment terms for Micro, Small and Medium Enterprises (MSME) suppliers and escalation triggers."
+    },
+    {
+     "key": "qrmp_supplier_handling",
+     "risk": "medium",
+     "label": "QRMP supplier handling",
+     "synonyms": [
+      "quarterly filer GST",
+      "QRMP flag",
+      "GSTR-2B mismatch QRMP",
+      "QRMP chase policy",
+      "quarterly filer chase",
+      "GST hold QRMP",
+      "quarterly filer GST hold"
+     ],
+     "description": "Procedure for GST reconciliation with quarterly (QRMP) filers: do not chase in early months, hold GST, wait for quarter-end upload."
+    },
+    {
+     "key": "reverse_charge_mechanism",
+     "risk": "high",
+     "label": "Reverse charge mechanism applicability",
+     "synonyms": [
+      "RCM",
+      "reverse charge",
+      "legal fees RCM",
+      "advocate RCM",
+      "legal fees reverse charge mandatory"
+     ],
+     "description": "Services that are always subject to reverse charge (RCM) where the invoice does not show GST."
+    },
+    {
+     "key": "exception_handling",
+     "risk": "medium",
+     "label": "Exception codes and resolution targets",
+     "synonyms": [
+      "exception types",
+      "park codes",
+      "exception queue codes",
+      "AP tracker codes",
+      "exception queue",
+      "resolution targets",
+      "DUP_SUSPECT SLA",
+      "TDS_SECTION_UNCLEAR SLA",
+      "QA release target",
+      "CM-PHA-01 target"
+     ],
+     "description": "Standard exception codes used in the exception queue and their designated owners and target resolution times."
+    },
+    {
+     "key": "aato_bands",
+     "risk": "medium",
+     "label": "AATO bands for IRN requirement",
+     "synonyms": [
+      "AATO band",
+      "turnover band for e-invoice",
+      "e-invoice eligibility band",
+      "IRN band threshold",
+      "e-invoice band minimum",
+      "IRN band",
+      "e-invoice band"
+     ],
+     "description": "Annual Aggregate Turnover bands that determine IRN applicability."
+    },
+    {
+     "key": "invoice_intake",
+     "risk": "low",
+     "label": "Invoice intake channels",
+     "synonyms": [
+      "intake",
+      "invoice receipt",
+      "submission channels",
+      "submission methods"
+     ],
+     "description": "How invoices arrive into the AP process."
+    },
+    {
+     "key": "mandatory_fields",
+     "risk": "medium",
+     "label": "Mandatory invoice fields",
+     "synonyms": [
+      "required fields",
+      "INV_INCOMPLETE",
+      "INV_INCOMPLETE fields"
+     ],
+     "description": "Fields that must be present on every invoice."
+    },
+    {
+     "key": "rounding_tolerance",
+     "risk": "high",
+     "label": "Rounding difference tolerance",
+     "synonyms": [
+      "rounding difference",
+      "rounding account",
+      "rounding difference limit",
+      "rounding account threshold"
+     ],
+     "description": "Acceptable invoice-total rounding differences from line-level tax rounding."
+    },
+    {
+     "key": "supplier_habits",
+     "risk": "low",
+     "label": "Supplier behavioural patterns",
+     "synonyms": [
+      "supplier behaviour",
+      "supplier patterns",
+      "GRN batching",
+      "resend patterns",
+      "invoice suffixes",
+      "/A",
+      "-REV",
+      "early invoice lead",
+      "GRN delay pharma",
+      "Monday GRN",
+      "GRN wait time",
+      "Tuesday noon"
+     ],
+     "description": "Known supplier habits affecting processing (resend suffixes, early invoicing, GRN batching)."
+    },
+    {
+     "key": "ap_processor_responsibilities",
+     "risk": "low",
+     "label": "AP Processor responsibilities",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "sop_scope",
+     "risk": "low",
+     "label": "SOP scope",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "sop_governance",
+     "risk": "low",
+     "label": "SOP governance",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "credit_note_processing",
+     "risk": "low",
+     "label": "Credit note processing",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "debit_note_processing",
+     "risk": "low",
+     "label": "Debit note processing",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "payment_terms",
+     "risk": "low",
+     "label": "Payment terms",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "invoice_verification",
+     "risk": "low",
+     "label": "Invoice verification process",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "knowledge_tool_configuration",
+     "risk": "low",
+     "label": "Knowledge tool configuration",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "invoice_matching",
+     "risk": "low",
+     "label": "Invoice matching rules",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "medium_enterprise_payment_terms",
+     "risk": "low",
+     "label": "Medium enterprise payment terms",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "supplier_onboarding",
+     "risk": "low",
+     "label": "Supplier onboarding",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "invoice_posting",
+     "risk": "low",
+     "label": "Invoice posting process",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "tax_desk",
+     "risk": "low",
+     "label": "Tax Desk",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "team_lead",
+     "risk": "low",
+     "label": "Team Lead",
+     "synonyms": [],
+     "description": ""
+    },
+    {
+     "key": "vendor_master",
+     "risk": "low",
+     "label": "Vendor Master",
+     "synonyms": [],
+     "description": ""
+    }
+   ],
+   "attributes": [
+    {
+     "key": "irn_requirement.threshold_turnover",
+     "unit": "INR",
+     "label": "IRN mandatory turnover threshold",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "e-invoice turnover limit",
+      "IRN threshold turnover",
+      "IRN threshold",
+      "e-invoice threshold",
+      "turnover limit",
+      "AATO limit"
+     ],
+     "value_type": "money",
+     "description": "Supplier annual turnover above which IRN is mandatory. Changed from ₹10 crore to ₹5 crore in August 2023."
+    },
+    {
+     "key": "irn_requirement.mandatory_fields",
+     "unit": null,
+     "label": "IRN and QR code mandatory fields",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "IRN fields",
+      "QR code fields"
+     ],
+     "value_type": "list",
+     "description": "Fields required on invoice when IRN applies."
+    },
+    {
+     "key": "irn_requirement.effective_date",
+     "unit": null,
+     "label": "E-invoicing effective date",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "IRN mandate date",
+      "e-invoice start date"
+     ],
+     "value_type": "date",
+     "description": "Date from which e-invoicing mandate applies."
+    },
+    {
+     "key": "price_tolerance.general_percentage",
+     "unit": "%",
+     "label": "General price tolerance percentage",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "SOP price tolerance %",
+      "price variance percentage",
+      "price tolerance %",
+      "price variance %"
+     ],
+     "value_type": "percentage",
+     "description": "Percentage tolerance applied per line under SOP v4.0 (lower of this percentage and the cap amount)."
+    },
+    {
+     "key": "price_tolerance.general_cap_amount",
+     "unit": "INR",
+     "label": "General price tolerance cap amount",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "price tolerance cap",
+      "price variance rupee limit",
+      "price tolerance cap",
+      "price variance cap"
+     ],
+     "value_type": "money",
+     "description": "Maximum rupee amount tolerance per line under SOP v4.0 (lower of percentage and this cap)."
+    },
+    {
+     "key": "price_tolerance.infra_cement_steel_percentage",
+     "unit": "%",
+     "label": "Infra cement and steel price tolerance percentage",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "Infra material price tolerance",
+      "cement steel price variance"
+     ],
+     "value_type": "percentage",
+     "description": "Special 10% price tolerance for cement and steel in Infra projects per FAQ."
+    },
+    {
+     "key": "price_tolerance.variance_percentage_threshold",
+     "unit": "%",
+     "label": "Price variance percentage threshold",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "price variance %",
+      "percentage threshold"
+     ],
+     "value_type": "percentage",
+     "description": "Price variance percentage threshold (e.g., 1.5%) above which PRICE_VAR is raised."
+    },
+    {
+     "key": "price_tolerance.variance_absolute_threshold",
+     "unit": "INR",
+     "label": "Price variance absolute threshold",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "price variance amount",
+      "absolute threshold"
+     ],
+     "value_type": "money",
+     "description": "Absolute monetary threshold (e.g., ₹1,000) above which PRICE_VAR is raised."
+    },
+    {
+     "key": "quantity_tolerance.infra_material_percentage",
+     "unit": "%",
+     "label": "Infra material quantity tolerance percentage",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "qty tolerance %",
+      "over-receipt percentage",
+      "Infra qty tolerance %",
+      "CM-INF-02 tolerance",
+      "quantity tolerance percentage"
+     ],
+     "value_type": "percentage",
+     "description": "Allowed invoice quantity excess over GRN quantity for cement, reinforcement steel, sand, aggregates (5%)."
+    },
+    {
+     "key": "quantity_tolerance.infra_material_value_cap",
+     "unit": "INR",
+     "label": "Infra material quantity tolerance value cap",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "qty tolerance value limit",
+      "excess value cap"
+     ],
+     "value_type": "money",
+     "description": "Maximum excess value allowed on invoice for the quantity tolerance (₹25,000)."
+    },
+    {
+     "key": "quantity_tolerance.infra_materials",
+     "unit": null,
+     "label": "Materials eligible for Infra quantity tolerance",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "weighed materials",
+      "site weighbridge materials",
+      "Infra tolerance materials count",
+      "CM-INF-02 materials"
+     ],
+     "value_type": "list",
+     "description": "List of materials to which the 5%/₹25k quantity tolerance applies."
+    },
+    {
+     "key": "quantity_tolerance.general_percentage",
+     "unit": "%",
+     "label": "General quantity tolerance percentage",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "qty tolerance %",
+      "quantity variance %",
+      "quantity tolerance percentage"
+     ],
+     "value_type": "percentage",
+     "description": "Allowed percentage tolerance for invoice quantity over GRN quantity (e.g., 2%)."
+    },
+    {
+     "key": "quantity_tolerance.applicability",
+     "unit": null,
+     "label": "Quantity tolerance applicability",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "qty tolerance scope",
+      "quantity tolerance scope"
+     ],
+     "value_type": "enum",
+     "description": "Whether quantity tolerance applies to all goods or only specific materials."
+    },
+    {
+     "key": "pharma_qa_release.required_materials",
+     "unit": null,
+     "label": "Materials requiring QA release before payment",
+     "topic": "pharma_qa_release",
+     "synonyms": [
+      "QA hold materials",
+      "pharma payment block materials",
+      "QA release materials",
+      "pharma excipients"
+     ],
+     "value_type": "list",
+     "description": "Material types that must have batch status Released in QMS: APIs, excipients, primary packaging material."
+    },
+    {
+     "key": "pharma_qa_release.release_status_required",
+     "unit": null,
+     "label": "Required QMS batch status",
+     "topic": "pharma_qa_release",
+     "synonyms": [
+      "QMS release status",
+      "batch release state"
+     ],
+     "value_type": "enum",
+     "description": "Batch status that allows payment: Released. Quarantine or Rejected blocks payment."
+    },
+    {
+     "key": "pharma_qa_release.payment_block_until_release",
+     "unit": null,
+     "label": "Payment block until QA release",
+     "topic": "pharma_qa_release",
+     "synonyms": [
+      "payment hold",
+      "QA release payment block"
+     ],
+     "value_type": "boolean",
+     "description": "Whether payment is blocked until batch release (true). Invoice may be posted but payment block stays."
+    },
+    {
+     "key": "non_po_categories.categories",
+     "unit": null,
+     "label": "Non-PO allowed categories",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "non-PO types",
+      "PO-exempt categories",
+      "non-PO list"
+     ],
+     "value_type": "list",
+     "description": "Categories that can be processed without a PO: courier, store rent, marketing agency (with campaign ID)."
+    },
+    {
+     "key": "non_po_categories.store_rent_requirements",
+     "unit": null,
+     "label": "Store rent invoice mandatory fields",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "rent invoice requirements",
+      "store rent mandatory data"
+     ],
+     "value_type": "list",
+     "description": "Fields that must appear on store rent invoices: store code and lease agreement number."
+    },
+    {
+     "key": "non_po_categories.marketing_agency_campaign_id_required",
+     "unit": null,
+     "label": "Marketing agency invoice requires approved campaign ID",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "campaign ID mandatory",
+      "marketing invoice campaign reference"
+     ],
+     "value_type": "boolean",
+     "description": "Marketing agency invoices must quote an approved campaign ID; otherwise held as NON_PO_NOT_ALLOWED."
+    },
+    {
+     "key": "payment_run_schedule.run_day",
+     "unit": null,
+     "label": "Payment run day",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "payment day",
+      "AP run day",
+      "payment days",
+      "run schedule"
+     ],
+     "value_type": "enum",
+     "description": "Day of week when payment run occurs."
+    },
+    {
+     "key": "payment_run_schedule.cutoff_day",
+     "unit": null,
+     "label": "Submission cutoff day",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "cutoff day",
+      "invoice submission deadline day",
+      "cut-off"
+     ],
+     "value_type": "enum",
+     "description": "Day by which invoices must be submitted for the payment run."
+    },
+    {
+     "key": "payment_run_schedule.cutoff_time",
+     "unit": null,
+     "label": "Submission cutoff time",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "cutoff time",
+      "submission deadline time",
+      "cut-off"
+     ],
+     "value_type": "text",
+     "description": "Time on cutoff day by which invoices must be submitted (5 pm)."
+    },
+    {
+     "key": "payment_run_schedule.msme_max_days_with_agreement",
+     "unit": "day",
+     "label": "MSME maximum payment days with agreement",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "MSME 45 days",
+      "micro small enterprise deadline"
+     ],
+     "value_type": "days",
+     "description": "Maximum days to pay MSME suppliers when written agreement exists (45)."
+    },
+    {
+     "key": "payment_run_schedule.msme_max_days_without_agreement",
+     "unit": "day",
+     "label": "MSME maximum payment days without agreement",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "MSME 15 days",
+      "no agreement deadline"
+     ],
+     "value_type": "days",
+     "description": "Maximum days to pay MSME suppliers when no written agreement (15)."
+    },
+    {
+     "key": "gst_compliance.gstin_status_check",
+     "unit": null,
+     "label": "GSTIN active status check required",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "GSTIN validation",
+      "GSTIN active check",
+      "GSTIN check date"
+     ],
+     "value_type": "boolean",
+     "description": "Confirm GSTIN status shows green tick (active on invoice date)."
+    },
+    {
+     "key": "gst_compliance.gstin_cancelled_action",
+     "unit": null,
+     "label": "Action when GSTIN cancelled",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "cancelled GSTIN",
+      "GSTIN cancelled hold"
+     ],
+     "value_type": "enum",
+     "description": "What happens if supplier GSTIN is cancelled on invoice date."
+    },
+    {
+     "key": "gst_compliance.einvoice_turnover_threshold",
+     "unit": "INR",
+     "label": "E-invoicing turnover threshold",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "e-invoice threshold",
+      "IRN threshold",
+      "turnover limit"
+     ],
+     "value_type": "money",
+     "description": "Supplier turnover above which e-invoice with IRN is mandatory."
+    },
+    {
+     "key": "gst_compliance.einvoice_effective_date",
+     "unit": null,
+     "label": "E-invoicing effective date",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "IRN mandate date",
+      "e-invoice start date"
+     ],
+     "value_type": "date",
+     "description": "Date from which e-invoicing mandate applies."
+    },
+    {
+     "key": "gst_compliance.itc_form",
+     "unit": null,
+     "label": "GST return form for ITC check",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "ITC verification form",
+      "GSTR-2B",
+      "GSTR-2A check",
+      "input credit check date"
+     ],
+     "value_type": "enum",
+     "description": "Form used to verify Input Tax Credit: GSTR-2B (changed from GSTR-2A)."
+    },
+    {
+     "key": "gst_compliance.itc_available_date",
+     "unit": "day",
+     "label": "ITC form available date",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "GSTR-2B availability",
+      "ITC check date"
+     ],
+     "value_type": "number",
+     "description": "Day of month when GSTR-2B becomes available (14th, changed from 20th)."
+    },
+    {
+     "key": "gst_compliance.missing_itc_action",
+     "unit": null,
+     "label": "Action when invoice missing from GSTR-2B",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "missing from 2A",
+      "GSTR-2A missing hold",
+      "GSTR-2B missing hold"
+     ],
+     "value_type": "enum",
+     "description": "What to do if invoice not reflected in GSTR-2B."
+    },
+    {
+     "key": "gst_compliance.buyer_gstin_mismatch_code",
+     "unit": null,
+     "label": "Buyer GSTIN mismatch exception code",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "GSTIN_MISMATCH",
+      "buyer GSTIN mismatch code"
+     ],
+     "value_type": "text",
+     "description": "Exception code raised when buyer GSTIN does not match."
+    },
+    {
+     "key": "gst_compliance.buyer_gstin_mismatch_action",
+     "unit": null,
+     "label": "Buyer GSTIN mismatch action",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "mismatch resolution",
+      "corrected invoice"
+     ],
+     "value_type": "enum",
+     "description": "Action taken on buyer GSTIN mismatch."
+    },
+    {
+     "key": "vendor_bank_account_change.required_documents",
+     "unit": null,
+     "label": "Required documents for bank change request",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "bank change docs",
+      "vendor bank update documents",
+      "letterhead",
+      "cancelled cheque"
+     ],
+     "value_type": "list",
+     "description": "Documents that must accompany request: letterhead, signed, cancelled cheque for new account."
+    },
+    {
+     "key": "vendor_bank_account_change.verification_call_required",
+     "unit": null,
+     "label": "Verification call mandatory",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "call back verification",
+      "phone verification",
+      "call-back",
+      "verification call"
+     ],
+     "value_type": "boolean",
+     "description": "Must call supplier's phone number from vendor master to confirm old and new account last four digits."
+    },
+    {
+     "key": "vendor_bank_account_change.verification_call_to_vendor_master_phone",
+     "unit": null,
+     "label": "Call only vendor master phone number",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "use master phone only",
+      "ignore request phone number"
+     ],
+     "value_type": "boolean",
+     "description": "If request gives a different phone number or asks to call someone else, do not call it; log as suspicious."
+    },
+    {
+     "key": "vendor_bank_account_change.approval_chain",
+     "unit": null,
+     "label": "Approval chain for bank change",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "bank change approvers",
+      "approval workflow",
+      "vendor master lead",
+      "bank change approver"
+     ],
+     "value_type": "list",
+     "description": "Sequence of approvers: Vendor Master lead then AP Controller."
+    },
+    {
+     "key": "vendor_bank_account_change.payment_block_hours",
+     "unit": "hours",
+     "label": "Payment block duration after approval",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "bank change payment hold",
+      "new account block period"
+     ],
+     "value_type": "number",
+     "description": "ERP blocks payments to new account for this many hours after second approval (24)."
+    },
+    {
+     "key": "vendor_bank_account_change.freeze_period_days",
+     "unit": "working day",
+     "label": "Bank change freeze period before month-end",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "month-end freeze",
+      "bank change freeze"
+     ],
+     "value_type": "days",
+     "description": "Working days before month-end close when no bank changes allowed."
+    },
+    {
+     "key": "invoice_approval_authority.approver_role",
+     "unit": null,
+     "label": "Approver role for high-value invoices",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "AP Controller",
+      "high-value invoice approver"
+     ],
+     "value_type": "enum",
+     "description": "Role that must approve invoices above threshold: AP Controller."
+    },
+    {
+     "key": "invoice_approval_authority.threshold_amount",
+     "unit": "INR",
+     "label": "Auto-park approval threshold",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "AP Controller approval limit",
+      "auto-park threshold",
+      "AP Controller threshold",
+      "Controller approval limit"
+     ],
+     "value_type": "money",
+     "description": "Invoice amount above which system parks automatically for AP Controller approval (₹10 lakh per DI-03)."
+    },
+    {
+     "key": "invoice_approval_authority.cfo_threshold_amount",
+     "unit": "INR",
+     "label": "Client CFO approval threshold",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "CFO threshold",
+      "CFO approval limit"
+     ],
+     "value_type": "money",
+     "description": "Invoice amount above which client CFO approval required."
+    },
+    {
+     "key": "invoice_retention.years",
+     "unit": "years",
+     "label": "Invoice retention years",
+     "topic": "invoice_retention",
+     "synonyms": [
+      "retention period",
+      "archive duration",
+      "document retention years"
+     ],
+     "value_type": "number",
+     "description": "Number of years invoices must be kept (8)."
+    },
+    {
+     "key": "invoice_retention.supplier_bank_details_sharing_restricted",
+     "unit": null,
+     "label": "Supplier bank details sharing restricted",
+     "topic": "invoice_retention",
+     "synonyms": [
+      "bank details confidentiality",
+      "supplier bank info restriction"
+     ],
+     "value_type": "boolean",
+     "description": "Supplier bank details must not be shared outside the AP team."
+    },
+    {
+     "key": "tds_deduction.base_calculation",
+     "unit": null,
+     "label": "TDS calculation base",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "TDS base",
+      "taxable value excluding GST"
+     ],
+     "value_type": "enum",
+     "description": "Value on which TDS is calculated."
+    },
+    {
+     "key": "tds_deduction.contractor_rate_individual",
+     "unit": "%",
+     "label": "TDS rate for contractors (individual)",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194C individual",
+      "contractor individual rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194C for individual contractors."
+    },
+    {
+     "key": "tds_deduction.contractor_rate_other",
+     "unit": "%",
+     "label": "TDS rate for contractors (non-individual)",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194C other",
+      "contractor company rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194C for non-individual contractors."
+    },
+    {
+     "key": "tds_deduction.professional_rate",
+     "unit": "%",
+     "label": "TDS rate for professionals",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194J professional",
+      "professional services rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194J for professionals."
+    },
+    {
+     "key": "tds_deduction.technical_services_rate",
+     "unit": "%",
+     "label": "TDS rate for technical services",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194J technical",
+      "technical services rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194J for technical services."
+    },
+    {
+     "key": "tds_deduction.rent_plant_machinery_rate",
+     "unit": "%",
+     "label": "TDS rate for rent of plant/machinery/equipment",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194I plant machinery",
+      "equipment rent rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194I for rent of plant, machinery or equipment."
+    },
+    {
+     "key": "tds_deduction.rent_building_rate",
+     "unit": "%",
+     "label": "TDS rate for rent of building",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194I building",
+      "building rent rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194I for rent of building."
+    },
+    {
+     "key": "tds_deduction.goods_purchase_threshold",
+     "unit": "INR",
+     "label": "Goods purchase threshold for 194Q",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194Q threshold",
+      "goods purchase limit"
+     ],
+     "value_type": "money",
+     "description": "Annual purchase threshold from one supplier triggering 194Q."
+    },
+    {
+     "key": "tds_deduction.goods_purchase_rate",
+     "unit": "%",
+     "label": "TDS rate for goods purchases under 194Q",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "194Q rate",
+      "goods purchase TDS rate"
+     ],
+     "value_type": "percentage",
+     "description": "TDS rate under section 194Q for goods purchases above threshold."
+    },
+    {
+     "key": "tds_deduction.no_pan_rate",
+     "unit": "%",
+     "label": "TDS rate when no valid PAN",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "no PAN rate",
+      "20% TDS"
+     ],
+     "value_type": "percentage",
+     "description": "Rate applied when supplier has not furnished valid PAN (20%)."
+    },
+    {
+     "key": "tds_deduction.lower_deduction_certificate_check",
+     "unit": null,
+     "label": "Lower deduction certificate validation",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "197 certificate",
+      "lower deduction cert",
+      "certificate validity"
+     ],
+     "value_type": "list",
+     "description": "Checks required before applying section 197 certificate."
+    },
+    {
+     "key": "tds_deduction.amc_classification_rule",
+     "unit": null,
+     "label": "AMC classification rule",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "AMC TDS",
+      "annual maintenance contract classification"
+     ],
+     "value_type": "text",
+     "description": "How to classify annual maintenance contracts for TDS."
+    },
+    {
+     "key": "tds_deduction.unclear_section_action",
+     "unit": null,
+     "label": "Action when TDS section unclear",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "TDS_SECTION_UNCLEAR",
+      "unclear TDS section"
+     ],
+     "value_type": "enum",
+     "description": "What to do when TDS section cannot be determined."
+    },
+    {
+     "key": "tds_deduction.legal_fees_rcm",
+     "unit": null,
+     "label": "Legal fees subject to reverse charge",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "advocate fees RCM",
+      "legal services reverse charge",
+      "advocate RCM",
+      "legal fees reverse charge mandatory"
+     ],
+     "value_type": "boolean",
+     "description": "Legal fees from advocates are always RCM; invoice will not show GST."
+    },
+    {
+     "key": "duplicate_check.normalisation_rules",
+     "unit": null,
+     "label": "Invoice number normalisation rules",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "normalisation",
+      "number normalisation"
+     ],
+     "value_type": "text",
+     "description": "How the system normalises invoice numbers for duplicate detection."
+    },
+    {
+     "key": "duplicate_check.flag_action",
+     "unit": null,
+     "label": "Action on duplicate check amber flag",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "DUP_SUSPECT raise",
+      "amber flag procedure",
+      "stop on amber"
+     ],
+     "value_type": "enum",
+     "description": "Must stop and raise DUP_SUSPECT; do not override."
+    },
+    {
+     "key": "duplicate_check.resolution_target_days",
+     "unit": "working day",
+     "label": "DUP_SUSPECT resolution target",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "duplicate suspect target",
+      "DUP_SUSPECT SLA"
+     ],
+     "value_type": "days",
+     "description": "Target resolution time for possible duplicate exception."
+    },
+    {
+     "key": "grn_posting_timeline.days_after_receipt",
+     "unit": "working_days",
+     "label": "GRN posting deadline (working days)",
+     "topic": "grn_posting_timeline",
+     "synonyms": [
+      "GRN posting SLA",
+      "goods receipt posting deadline",
+      "GRN posting SLA",
+      "goods receipt posting deadline"
+     ],
+     "value_type": "number",
+     "description": "Requesters should post GRNs within this many working days of receipt (2)."
+    },
+    {
+     "key": "month_end_procedures.posting_cutoff_rule",
+     "unit": null,
+     "label": "Posting cutoff rule",
+     "topic": "month_end_procedures",
+     "synonyms": [
+      "posting cutoff",
+      "invoice posting deadline",
+      "month-end cutoff",
+      "accrual vs post threshold"
+     ],
+     "value_type": "text",
+     "description": "Invoices received up to the second-last working day of the month are posted in that month; after third-last working day are accrued."
+    },
+    {
+     "key": "month_end_procedures.accrue_uninvoiced_grns",
+     "unit": null,
+     "label": "Accrue uninvoiced GRNs",
+     "topic": "month_end_procedures",
+     "synonyms": [
+      "GRN accrual",
+      "accrue goods received not invoiced"
+     ],
+     "value_type": "boolean",
+     "description": "GRNs not invoiced are accrued at month-end."
+    },
+    {
+     "key": "month_end_procedures.exception_review_required",
+     "unit": null,
+     "label": "Exception review required",
+     "topic": "month_end_procedures",
+     "synonyms": [
+      "exception review",
+      "team lead review"
+     ],
+     "value_type": "boolean",
+     "description": "Team Lead reviews open exceptions before month-end close."
+    },
+    {
+     "key": "msme_payment_terms.payment_days",
+     "unit": "days",
+     "label": "MSME payment days",
+     "topic": "msme_payment_terms",
+     "synonyms": [
+      "MSME payment period",
+      "payment term days"
+     ],
+     "value_type": "days",
+     "description": "Number of days within which an accepted MSME supplier invoice must be paid (60 days)."
+    },
+    {
+     "key": "msme_payment_terms.escalation_trigger_days",
+     "unit": "days",
+     "label": "Escalation trigger days before due date",
+     "topic": "msme_payment_terms",
+     "synonyms": [
+      "MSME_DUE trigger",
+      "small supplier escalation window"
+     ],
+     "value_type": "number",
+     "description": "If MSME invoice is within this many days of due date and still stuck, escalate (7)."
+    },
+    {
+     "key": "msme_payment_terms.escalate_to",
+     "unit": null,
+     "label": "Escalation recipient",
+     "topic": "msme_payment_terms",
+     "synonyms": [
+      "MSME escalation owner",
+      "MSME_DUE owner"
+     ],
+     "value_type": "text",
+     "description": "Role/person to notify: senior processor (Sandeep)."
+    },
+    {
+     "key": "qrmp_supplier_handling.chase_in_month_one_two",
+     "unit": null,
+     "label": "Chase QRMP supplier in month 1 or 2 of quarter",
+     "topic": "qrmp_supplier_handling",
+     "synonyms": [
+      "QRMP chase policy",
+      "quarterly filer chase"
+     ],
+     "value_type": "boolean",
+     "description": "Whether to chase quarterly filer for missing invoices in first two months of quarter (false)."
+    },
+    {
+     "key": "qrmp_supplier_handling.hold_gst",
+     "unit": null,
+     "label": "Hold GST for QRMP supplier mismatches",
+     "topic": "qrmp_supplier_handling",
+     "synonyms": [
+      "GST hold QRMP",
+      "quarterly filer GST hold"
+     ],
+     "value_type": "boolean",
+     "description": "Pay base amount, hold GST, but do not chase quarterly filer until quarter-end."
+    },
+    {
+     "key": "reverse_charge_mechanism.legal_fees_always_rcm",
+     "unit": null,
+     "label": "Legal fees always under reverse charge",
+     "topic": "reverse_charge_mechanism",
+     "synonyms": [
+      "advocate RCM",
+      "legal fees reverse charge mandatory"
+     ],
+     "value_type": "boolean",
+     "description": "Legal fees from advocates are always RCM; invoice will not show GST."
+    },
+    {
+     "key": "exception_handling.codes",
+     "unit": null,
+     "label": "Standard exception codes",
+     "topic": "exception_handling",
+     "synonyms": [
+      "park codes",
+      "exception types",
+      "invoice exception codes",
+      "AP tracker codes"
+     ],
+     "value_type": "list",
+     "description": "List of exception codes used in the queue: DUP_SUSPECT, NO_GRN, MSME_DUE, PRICE_VAR, QTY_VAR, QA_RELEASE_PENDING, TDS_SECTION_UNCLEAR, NON_PO_NOT_ALLOWED."
+    },
+    {
+     "key": "exception_handling.dup_suspect_target_days",
+     "unit": "working day",
+     "label": "DUP_SUSPECT resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "duplicate suspect target",
+      "DUP_SUSPECT SLA"
+     ],
+     "value_type": "days",
+     "description": "Target resolution time for possible duplicate exception."
+    },
+    {
+     "key": "exception_handling.tds_section_unclear_target_days",
+     "unit": "working day",
+     "label": "TDS_SECTION_UNCLEAR resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "TDS unclear target",
+      "TDS_SECTION_UNCLEAR SLA"
+     ],
+     "value_type": "days",
+     "description": "Target resolution time for unclear TDS section exception."
+    },
+    {
+     "key": "exception_handling.qa_release_pending_target",
+     "unit": null,
+     "label": "QA_RELEASE_PENDING resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "QA release target",
+      "CM-PHA-01 target"
+     ],
+     "value_type": "text",
+     "description": "Target resolution time for Pharma QA release pending exception."
+    },
+    {
+     "key": "aato_bands.irn_required_from_band",
+     "unit": null,
+     "label": "AATO band from which IRN is required",
+     "topic": "aato_bands",
+     "synonyms": [
+      "IRN band threshold",
+      "e-invoice band minimum",
+      "IRN band",
+      "e-invoice band"
+     ],
+     "value_type": "enum",
+     "description": "Band B or above requires IRN."
+    },
+    {
+     "key": "invoice_intake.channels",
+     "unit": null,
+     "label": "Invoice intake channels",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "submission methods",
+      "intake channels",
+      "submission channels"
+     ],
+     "value_type": "list",
+     "description": "Ways invoices can arrive."
+    },
+    {
+     "key": "mandatory_fields.required_fields",
+     "unit": null,
+     "label": "List of mandatory invoice fields",
+     "topic": "mandatory_fields",
+     "synonyms": [
+      "required fields",
+      "INV_INCOMPLETE fields"
+     ],
+     "value_type": "list",
+     "description": "Fields that must appear on every invoice."
+    },
+    {
+     "key": "rounding_tolerance.max_accepted_difference",
+     "unit": "INR",
+     "label": "Maximum accepted rounding difference",
+     "topic": "rounding_tolerance",
+     "synonyms": [
+      "rounding difference limit",
+      "rounding account threshold",
+      "rounding difference",
+      "rounding account"
+     ],
+     "value_type": "money",
+     "description": "Invoice-total rounding difference accepted automatically."
+    },
+    {
+     "key": "supplier_habits.resend_suffixes",
+     "unit": null,
+     "label": "Known supplier resend suffixes",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "resend patterns",
+      "invoice suffixes",
+      "/A",
+      "-REV"
+     ],
+     "value_type": "list",
+     "description": "Suffixes suppliers add when resending same invoice."
+    },
+    {
+     "key": "supplier_habits.pharma_early_invoicing_days",
+     "unit": "day",
+     "label": "Pharma packaging supplier early invoicing lead",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "early invoice lead",
+      "GRN delay pharma"
+     ],
+     "value_type": "days",
+     "description": "Days before dispatch that Pharma packaging supplier invoices."
+    },
+    {
+     "key": "supplier_habits.infra_grn_batching_day",
+     "unit": null,
+     "label": "Infra GRN batching day",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "GRN batching",
+      "Monday GRN"
+     ],
+     "value_type": "enum",
+     "description": "Day when Infra sites batch their GRNs."
+    },
+    {
+     "key": "supplier_habits.infra_grn_batching_cutoff",
+     "unit": null,
+     "label": "Infra GRN batching cut-off",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "GRN wait time",
+      "Tuesday noon"
+     ],
+     "value_type": "text",
+     "description": "When to wait for Infra GRN batching to complete."
+    },
+    {
+     "key": "exception_handling.exception_owner",
+     "unit": null,
+     "label": "Exception owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception owner",
+      "exception code owner"
+     ],
+     "value_type": "text",
+     "description": "Owner responsible for each exception code"
+    },
+    {
+     "key": "exception_handling.exception_meaning",
+     "unit": null,
+     "label": "Exception meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception meaning",
+      "exception code meaning"
+     ],
+     "value_type": "text",
+     "description": "Meaning of each exception code"
+    },
+    {
+     "key": "exception_handling.exception_code_meaning",
+     "unit": null,
+     "label": "Exception code meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception code meaning"
+     ],
+     "value_type": "text",
+     "description": "Meaning of specific exception codes"
+    },
+    {
+     "key": "exception_handling.exception_code_owner",
+     "unit": null,
+     "label": "Exception code owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception code owner",
+      "exception owner"
+     ],
+     "value_type": "text",
+     "description": "Owner for specific exception codes"
+    },
+    {
+     "key": "invoice_approval_authority.ap_controller_approves_payment_proposals",
+     "unit": null,
+     "label": "AP Controller approves payment proposals",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "ap controller approves payment proposals"
+     ],
+     "value_type": "boolean",
+     "description": "Whether AP Controller approves payment proposals"
+    },
+    {
+     "key": "invoice_approval_authority.ap_controller_max_approval_amount",
+     "unit": "INR",
+     "label": "AP Controller maximum approval amount",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "ap controller max approval amount"
+     ],
+     "value_type": "money",
+     "description": "Maximum invoice amount AP Controller can approve"
+    },
+    {
+     "key": "ap_processor_responsibilities.responsibilities",
+     "unit": null,
+     "label": "AP Processor responsibilities",
+     "topic": "ap_processor_responsibilities",
+     "synonyms": [
+      "ap processor responsibilities"
+     ],
+     "value_type": "list",
+     "description": "List of responsibilities for AP Processor"
+    },
+    {
+     "key": "sop_scope.applicable_clients",
+     "unit": null,
+     "label": "Applicable clients",
+     "topic": "sop_scope",
+     "synonyms": [
+      "applicable clients"
+     ],
+     "value_type": "list",
+     "description": "Clients to which the SOP applies"
+    },
+    {
+     "key": "sop_scope.applicable_roles",
+     "unit": null,
+     "label": "Applicable roles",
+     "topic": "sop_scope",
+     "synonyms": [
+      "applicable roles"
+     ],
+     "value_type": "list",
+     "description": "Roles to which the SOP applies"
+    },
+    {
+     "key": "vendor_bank_account_change.approval_count",
+     "unit": null,
+     "label": "Approval count for bank account changes",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "approval count"
+     ],
+     "value_type": "number",
+     "description": "Number of approvals required for bank account changes"
+    },
+    {
+     "key": "gst_compliance.buyer_gstin_place_of_supply_rule",
+     "unit": null,
+     "label": "Buyer GSTIN place of supply rule",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "buyer gstin place of supply rule"
+     ],
+     "value_type": "text",
+     "description": "Rule for buyer GSTIN based on place of supply"
+    },
+    {
+     "key": "gst_compliance.buyer_gstin_state_check",
+     "unit": null,
+     "label": "Buyer GSTIN state check",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "buyer gstin state check"
+     ],
+     "value_type": "text",
+     "description": "Buyer GSTIN must be correct for state of delivery"
+    },
+    {
+     "key": "vendor_bank_account_change.call_recording_details",
+     "unit": null,
+     "label": "Call recording details for change ticket",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "call recording in change ticket"
+     ],
+     "value_type": "text",
+     "description": "Verification call details that must be recorded in change ticket"
+    },
+    {
+     "key": "pharma_qa_release.check_batch_number_on_grn_against_qms",
+     "unit": null,
+     "label": "Check batch number on GRN against QMS",
+     "topic": "pharma_qa_release",
+     "synonyms": [
+      "check batch number on grn against qms"
+     ],
+     "value_type": "text",
+     "description": "For Arvana Pharma, batch number on GRN must be checked against Quality Management System"
+    },
+    {
+     "key": "qrmp_supplier_handling.check_qrmp_before_chase",
+     "unit": null,
+     "label": "Check QRMP before chase",
+     "topic": "qrmp_supplier_handling",
+     "synonyms": [
+      "check qrmp before chase"
+     ],
+     "value_type": "text",
+     "description": "Check whether supplier is quarterly filer under QRMP before chasing for GSTR-2B mismatches"
+    },
+    {
+     "key": "tds_deduction.check_tds_section_against_service_nature",
+     "unit": null,
+     "label": "Check TDS section against service nature",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "check tds section against service nature"
+     ],
+     "value_type": "text",
+     "description": "User must check vendor master's suggested TDS section against nature of service on invoice"
+    },
+    {
+     "key": "sop_governance.client_memo_precedence",
+     "unit": null,
+     "label": "Client memo precedence",
+     "topic": "sop_governance",
+     "synonyms": [
+      "client memo precedence"
+     ],
+     "value_type": "text",
+     "description": "Client memo in desk instructions takes precedence over SOP for that client"
+    },
+    {
+     "key": "non_po_categories.courier_travel_agency_require_po",
+     "unit": null,
+     "label": "Courier and travel agency require PO",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "courier travel agency require po"
+     ],
+     "value_type": "boolean",
+     "description": "Courier and travel agency invoices require a purchase order and are not allowed as non-PO categories"
+    },
+    {
+     "key": "credit_note_processing.apply_against_original_invoice",
+     "unit": null,
+     "label": "Apply credit note against original invoice",
+     "topic": "credit_note_processing",
+     "synonyms": [
+      "credit note apply against original invoice"
+     ],
+     "value_type": "boolean",
+     "description": "Credit note should be applied against the original invoice"
+    },
+    {
+     "key": "credit_note_processing.if_paid_setoff_against_next_invoice_and_record_link",
+     "unit": null,
+     "label": "If paid set off against next invoice and record link",
+     "topic": "credit_note_processing",
+     "synonyms": [
+      "credit note if paid setoff against next invoice and record link"
+     ],
+     "value_type": "text",
+     "description": "If original invoice is paid, set off credit note against next invoice from same supplier and record link"
+    },
+    {
+     "key": "credit_note_processing.must_quote_original_invoice_number_and_date",
+     "unit": null,
+     "label": "Credit note must quote original invoice number and date",
+     "topic": "credit_note_processing",
+     "synonyms": [
+      "credit note must quote original invoice number and date"
+     ],
+     "value_type": "boolean",
+     "description": "A credit note must quote the original invoice number and date"
+    },
+    {
+     "key": "debit_note_processing.approved_by_requester",
+     "unit": null,
+     "label": "Debit note approved by requester",
+     "topic": "debit_note_processing",
+     "synonyms": [
+      "debit note approved by requester"
+     ],
+     "value_type": "boolean",
+     "description": "Debit notes must be approved by the requester"
+    },
+    {
+     "key": "debit_note_processing.issued_within_days_of_grn_rejection",
+     "unit": "days",
+     "label": "Debit note issued within days of GRN rejection",
+     "topic": "debit_note_processing",
+     "synonyms": [
+      "debit note issued within seven days of grn rejection"
+     ],
+     "value_type": "days",
+     "description": "Debit notes must be issued within seven days of GRN rejection"
+    },
+    {
+     "key": "debit_note_processing.raised_for_short_supply_or_rejected_material",
+     "unit": null,
+     "label": "Debit note raised for short supply or rejected material",
+     "topic": "debit_note_processing",
+     "synonyms": [
+      "debit note raised for short supply or rejected material"
+     ],
+     "value_type": "text",
+     "description": "Debit notes are raised by the client for short supply or rejected material"
+    },
+    {
+     "key": "payment_run_schedule.default_payment_terms_days",
+     "unit": "days",
+     "label": "Default payment terms days",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "default payment terms days"
+     ],
+     "value_type": "days",
+     "description": "Default payment terms for non-MSME suppliers are 60 days from invoice acceptance unless PO states otherwise"
+    },
+    {
+     "key": "vendor_bank_account_change.do_not_ask_it_to_lift_block",
+     "unit": null,
+     "label": "Do not ask IT to lift block",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "do not ask it to lift block"
+     ],
+     "value_type": "boolean",
+     "description": "Do not ask IT to lift the payment block on the new bank account"
+    },
+    {
+     "key": "mandatory_fields.do_not_correct_supplier_invoices_by_hand",
+     "unit": null,
+     "label": "Do not correct supplier invoices by hand",
+     "topic": "mandatory_fields",
+     "synonyms": [
+      "do not correct supplier invoices by hand"
+     ],
+     "value_type": "boolean",
+     "description": "Supplier invoices must not be corrected by hand"
+    },
+    {
+     "key": "irn_requirement.do_not_pay_base_value_for_missing_irn",
+     "unit": null,
+     "label": "Do not pay base value for missing IRN",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "do not pay base value for missing irn"
+     ],
+     "value_type": "boolean",
+     "description": "Base value of invoice missing IRN must not be paid; a valid invoice will follow"
+    },
+    {
+     "key": "exception_handling.dup_suspect_routing",
+     "unit": null,
+     "label": "DUP_SUSPECT routing rule",
+     "topic": "exception_handling",
+     "synonyms": [
+      "dup suspect routing"
+     ],
+     "value_type": "text",
+     "description": "DUP_SUSPECT exceptions must always be routed to a Senior Processor regardless of processor's judgment."
+    },
+    {
+     "key": "duplicate_check.lookback_months",
+     "unit": "months",
+     "label": "Duplicate check lookback window",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "duplicate check window months"
+     ],
+     "value_type": "number",
+     "description": "Duplicate checks compare each invoice against invoices received in the last 18 months for the same supplier."
+    },
+    {
+     "key": "duplicate_check.match_criteria",
+     "unit": null,
+     "label": "Duplicate match criteria",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "duplicate match criteria"
+     ],
+     "value_type": "text",
+     "description": "Two invoices are flagged as suspected duplicates if either the supplier GSTIN and normalised invoice number match, or the supplier, invoice date, and total amount (within ₹1) match."
+    },
+    {
+     "key": "vendor_bank_account_change.effective_from_next_payment_run",
+     "unit": null,
+     "label": "New bank account effective from next payment run",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "effective from next payment run"
+     ],
+     "value_type": "boolean",
+     "description": "The new bank account may be used from the next payment run."
+    },
+    {
+     "key": "vendor_bank_account_change.email_confirmation_required",
+     "unit": null,
+     "label": "Email confirmation required for bank account change",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "email confirmation required"
+     ],
+     "value_type": "boolean",
+     "description": "Bank account changes are accepted only when the supplier confirms the change by email from the email address registered in the vendor master."
+    },
+    {
+     "key": "invoice_intake.email_processing_description",
+     "unit": null,
+     "label": "Email invoice processing description",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "email intake processing"
+     ],
+     "value_type": "text",
+     "description": "Email invoices are processed by an intake bot that sends PDF and image attachments to OCR."
+    },
+    {
+     "key": "exception_handling.default_resolution_target_days",
+     "unit": "working days",
+     "label": "Default exception resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception code resolution target days"
+     ],
+     "value_type": "days",
+     "description": "Target resolution for all exception codes is five working days."
+    },
+    {
+     "key": "exception_handling.no_grn_owner",
+     "unit": null,
+     "label": "NO_GRN exception owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception handling no grn owner"
+     ],
+     "value_type": "text",
+     "description": "The owner responsible for resolving NO_GRN exceptions is the Requester."
+    },
+    {
+     "key": "exception_handling.no_grn_resolution_target_days",
+     "unit": "working days",
+     "label": "NO_GRN exception resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception handling no grn target days"
+     ],
+     "value_type": "days",
+     "description": "The target resolution time for NO_GRN exceptions is 5 working days."
+    },
+    {
+     "key": "exception_handling.not_in_2b_meaning",
+     "unit": null,
+     "label": "NOT_IN_2B exception meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception handling not in 2b meaning"
+     ],
+     "value_type": "text",
+     "description": "The exception NOT_IN_2B means an invoice missing from GSTR-2B after two further cycles."
+    },
+    {
+     "key": "exception_handling.not_in_2b_owner",
+     "unit": null,
+     "label": "NOT_IN_2B exception owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception handling not in 2b owner"
+     ],
+     "value_type": "text",
+     "description": "The owner of the NOT_IN_2B exception is the Vendor owner."
+    },
+    {
+     "key": "exception_handling.not_in_2b_resolution_target",
+     "unit": null,
+     "label": "NOT_IN_2B exception resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception handling not in 2b target"
+     ],
+     "value_type": "text",
+     "description": "The target to resolve the NOT_IN_2B exception is the next cycle."
+    },
+    {
+     "key": "exception_handling.every_exception_has_code_and_owner",
+     "unit": null,
+     "label": "Every exception has code and owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception has code and owner"
+     ],
+     "value_type": "boolean",
+     "description": "Every exception is assigned a code and an owner."
+    },
+    {
+     "key": "exception_handling.exception_note_requirement",
+     "unit": null,
+     "label": "Exception note requirement",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception note requirement"
+     ],
+     "value_type": "text",
+     "description": "When parking an invoice with an exception, the user must add a one-line note that a stranger could understand."
+    },
+    {
+     "key": "exception_handling.owner_assignment_source",
+     "unit": null,
+     "label": "Exception owner assignment source",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception owner assignment"
+     ],
+     "value_type": "text",
+     "description": "Each exception is assigned to the owner shown in the AP tracker."
+    },
+    {
+     "key": "exception_handling.processor_role_in_exception_routing",
+     "unit": null,
+     "label": "Processor role in exception routing",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception routing practice"
+     ],
+     "value_type": "text",
+     "description": "The processor's job is to route the exception to the correct owner with an actionable note, not to fix the purchase order themselves."
+    },
+    {
+     "key": "exception_handling.msme_due_resolution_target",
+     "unit": null,
+     "label": "MSME_DUE exception resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "exception target resolution"
+     ],
+     "value_type": "text",
+     "description": "The target resolution for exception code MSME_DUE is before due date."
+    },
+    {
+     "key": "duplicate_check.first_step_is_duplicate_check",
+     "unit": null,
+     "label": "First step in invoice processing is duplicate check",
+     "topic": "duplicate_check",
+     "synonyms": [
+      "first step duplicate check"
+     ],
+     "value_type": "boolean",
+     "description": "The first step in invoice processing is the duplicate check."
+    },
+    {
+     "key": "vendor_bank_account_change.fraud_risk_high",
+     "unit": null,
+     "label": "Bank account changes high fraud risk",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "fraud risk high"
+     ],
+     "value_type": "boolean",
+     "description": "Bank account changes are considered a high fraud risk area."
+    },
+    {
+     "key": "payment_terms.default_payment_terms_days",
+     "unit": "days",
+     "label": "Default payment terms for non-MSM suppliers",
+     "topic": "payment_terms",
+     "synonyms": [
+      "general payment terms days"
+     ],
+     "value_type": "days",
+     "description": "Other suppliers are paid on 60-day terms unless the PO specifies otherwise."
+    },
+    {
+     "key": "grn_posting_timeline.goods_invoice_requires_grn_before_posting",
+     "unit": null,
+     "label": "Goods invoice requires GRN before posting",
+     "topic": "grn_posting_timeline",
+     "synonyms": [
+      "goods invoice requires grn before posting"
+     ],
+     "value_type": "boolean",
+     "description": "A goods invoice must not be posted against a purchase order without a GRN, regardless of requester's verbal instruction."
+    },
+    {
+     "key": "grn_posting_timeline.grn_missing_action",
+     "unit": null,
+     "label": "Action when GRN missing for goods invoice",
+     "topic": "grn_posting_timeline",
+     "synonyms": [
+      "grn missing action"
+     ],
+     "value_type": "text",
+     "description": "A goods invoice without a GRN is held and the requester is e-mailed. The system automatically notifies the requester when a goods invoice has no GRN."
+    },
+    {
+     "key": "gst_compliance.gst_tab_confirmations",
+     "unit": null,
+     "label": "GST tab confirmation requirements",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "gst buyer gstin confirmation"
+     ],
+     "value_type": "text",
+     "description": "Buyer GSTIN must be confirmed on the GST tab. Tax type must be confirmed on the GST tab."
+    },
+    {
+     "key": "exception_handling.gstin_inactive_resolution_target_days",
+     "unit": "working days",
+     "label": "GSTIN_INACTIVE exception resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "gstin inactive target days"
+     ],
+     "value_type": "days",
+     "description": "The target resolution time for exception GSTIN_INACTIVE is 2 working days."
+    },
+    {
+     "key": "mandatory_fields.incomplete_return_code",
+     "unit": null,
+     "label": "Return code for incomplete invoice",
+     "topic": "mandatory_fields",
+     "synonyms": [
+      "inv incomplete code"
+     ],
+     "value_type": "text",
+     "description": "If an invoice is missing any mandatory field, it is returned to the supplier with code INV_INCOMPLETE."
+    },
+    {
+     "key": "invoice_approval_authority.exceptions_cleared_by_senior_processor_threshold",
+     "unit": null,
+     "label": "Exception clearance authority for invoices up to 10 lakh",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "invoice approval authority exceptions cleared by senior processor"
+     ],
+     "value_type": "text",
+     "description": "Exceptions for invoices up to ₹10 lakh are cleared by a Senior Processor."
+    },
+    {
+     "key": "invoice_approval_authority.no_approval_needed_below_10_lakh",
+     "unit": null,
+     "label": "No approval needed for invoices up to 10 lakh",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "invoice approval authority no approval below 10 lakh"
+     ],
+     "value_type": "boolean",
+     "description": "For invoices up to ₹10 lakh, no approval is needed beyond a clean match."
+    },
+    {
+     "key": "invoice_approval_authority.non_po_requires_budget_owner_approval",
+     "unit": null,
+     "label": "Non-PO invoices require budget owner approval",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "invoice approval authority non po requires budget owner"
+     ],
+     "value_type": "boolean",
+     "description": "Any non-PO invoice requires budget owner approval in addition to the applicable threshold approvals."
+    },
+    {
+     "key": "quantity_tolerance.quantity_must_not_exceed_grn",
+     "unit": null,
+     "label": "Quantity must not exceed GRN",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "invoice quantity not exceed grn"
+     ],
+     "value_type": "boolean",
+     "description": "Invoice quantity must not exceed the GRN quantity."
+    },
+    {
+     "key": "invoice_verification.verification_step_description",
+     "unit": null,
+     "label": "Invoice verification step",
+     "topic": "invoice_verification",
+     "synonyms": [
+      "invoice verification step"
+     ],
+     "value_type": "text",
+     "description": "The processor opens the invoice from the work queue in the ERP Invoice Verification screen and verifies the OCR-pre-filled supplier, invoice number, date, and totals against the PDF."
+    },
+    {
+     "key": "irn_requirement.irn_missing_invalid_for_itc",
+     "unit": null,
+     "label": "IRN missing invalid for ITC",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "irn missing invalid for itc"
+     ],
+     "value_type": "boolean",
+     "description": "An invoice from a supplier required to issue e-invoices that lacks an IRN is not valid for input tax credit."
+    },
+    {
+     "key": "exception_handling.irn_missing_meaning",
+     "unit": null,
+     "label": "IRN_MISSING exception meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "irn missing meaning"
+     ],
+     "value_type": "text",
+     "description": "The exception code IRN_MISSING means e-invoice required but absent (referencing section 5.4)."
+    },
+    {
+     "key": "exception_handling.irn_missing_owner",
+     "unit": null,
+     "label": "IRN_MISSING exception owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "irn missing owner"
+     ],
+     "value_type": "text",
+     "description": "The owner of the IRN_MISSING exception is the Supplier."
+    },
+    {
+     "key": "irn_requirement.return_invoice_if_irn_missing",
+     "unit": null,
+     "label": "Return invoice if IRN missing",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "irn missing return invoice"
+     ],
+     "value_type": "text",
+     "description": "Invoices from suppliers above the turnover threshold must be returned if the IRN is missing."
+    },
+    {
+     "key": "exception_handling.irn_missing_resolution_target",
+     "unit": null,
+     "label": "IRN_MISSING resolution target",
+     "topic": "exception_handling",
+     "synonyms": [
+      "irn missing target resolve"
+     ],
+     "value_type": "text",
+     "description": "The IRN_MISSING exception must be resolved when the e-invoice is received."
+    },
+    {
+     "key": "gst_compliance.itc_claim_rule",
+     "unit": null,
+     "label": "ITC claim rule",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "itc claim rule"
+     ],
+     "value_type": "text",
+     "description": "Input tax credit is claimed only for invoices that appear in the client's GSTR-2B."
+    },
+    {
+     "key": "knowledge_tool_configuration.conflict_handling_rule",
+     "unit": null,
+     "label": "Conflict handling rule",
+     "topic": "knowledge_tool_configuration",
+     "synonyms": [
+      "knowledge tool conflict handling"
+     ],
+     "value_type": "text",
+     "description": "A knowledge tool must not give a tax answer with confidence when documents disagree; it must present both versions and indicate which is newer."
+    },
+    {
+     "key": "non_po_categories.marketing_agency_campaign_id_exception",
+     "unit": null,
+     "label": "Marketing agency missing campaign ID exception",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "marketing agency missing campaign id exception"
+     ],
+     "value_type": "text",
+     "description": "Marketing agency invoices without a campaign ID are held as NON_PO_NOT_ALLOWED even when a PO exists."
+    },
+    {
+     "key": "invoice_matching.goods_matching_type",
+     "unit": null,
+     "label": "Goods matching type",
+     "topic": "invoice_matching",
+     "synonyms": [
+      "match type goods"
+     ],
+     "value_type": "list",
+     "description": "Goods invoices must be matched three ways: purchase order, goods receipt note, and invoice."
+    },
+    {
+     "key": "invoice_matching.services_matching_type",
+     "unit": null,
+     "label": "Services matching type",
+     "topic": "invoice_matching",
+     "synonyms": [
+      "match type services"
+     ],
+     "value_type": "list",
+     "description": "Service invoices must be matched two ways: purchase order and approved service entry sheet."
+    },
+    {
+     "key": "invoice_matching.match_type_determined_by",
+     "unit": null,
+     "label": "Match type determined by",
+     "topic": "invoice_matching",
+     "synonyms": [
+      "match type source"
+     ],
+     "value_type": "text",
+     "description": "The match type is determined by the purchase order, not by the invoice."
+    },
+    {
+     "key": "invoice_matching.matching_method_summary",
+     "unit": null,
+     "label": "Matching method summary",
+     "topic": "invoice_matching",
+     "synonyms": [
+      "matching method"
+     ],
+     "value_type": "text",
+     "description": "Goods are matched three ways (PO, GRN, invoice) and services are matched two ways."
+    },
+    {
+     "key": "exception_handling.gstin_mismatch_meaning",
+     "unit": null,
+     "label": "GSTIN_MISMATCH exception meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "meaning"
+     ],
+     "value_type": "text",
+     "description": "The meaning of exception code GSTIN_MISMATCH is 'Wrong buyer GSTIN (5.2)'."
+    },
+    {
+     "key": "medium_enterprise_payment_terms.terms_description",
+     "unit": null,
+     "label": "Payment terms description",
+     "topic": "medium_enterprise_payment_terms",
+     "synonyms": [
+      "medium enterprise payment terms"
+     ],
+     "value_type": "text",
+     "description": "Medium enterprises follow normal payment terms (60 days from invoice acceptance)."
+    },
+    {
+     "key": "grn_posting_timeline.missing_grn_escalation_days",
+     "unit": "days",
+     "label": "Missing GRN escalation days",
+     "topic": "grn_posting_timeline",
+     "synonyms": [
+      "missing grn escalation after days"
+     ],
+     "value_type": "list",
+     "description": "The system escalates to the requester's manager after five working days for a goods invoice with no GRN; a reminder is sent after two working days."
+    },
+    {
+     "key": "exception_handling.missing_grn_exception_code",
+     "unit": null,
+     "label": "Missing GRN exception code",
+     "topic": "exception_handling",
+     "synonyms": [
+      "missing grn exception code"
+     ],
+     "value_type": "text",
+     "description": "A goods invoice with no GRN must be held with exception code NO_GRN."
+    },
+    {
+     "key": "month_end_procedures.late_work_advice",
+     "unit": null,
+     "label": "Late work advice",
+     "topic": "month_end_procedures",
+     "synonyms": [
+      "month end late work advice"
+     ],
+     "value_type": "text",
+     "description": "Staff should not stay late to process invoices after the cutoff."
+    },
+    {
+     "key": "msme_payment_terms.msme_due_flag_urgent",
+     "unit": null,
+     "label": "MSME_DUE flag urgent",
+     "topic": "msme_payment_terms",
+     "synonyms": [
+      "msme due flag urgent"
+     ],
+     "value_type": "boolean",
+     "description": "Every MSME_DUE flag must be treated as urgent."
+    },
+    {
+     "key": "msme_payment_terms.late_payment_consequences",
+     "unit": null,
+     "label": "Late payment consequences",
+     "topic": "msme_payment_terms",
+     "synonyms": [
+      "msme late payment consequences"
+     ],
+     "value_type": "text",
+     "description": "Late payment to an MSME makes the client liable for compound interest and can disallow the expense for income tax."
+    },
+    {
+     "key": "aato_bands.recorded_at_creation_reviewed_april",
+     "unit": null,
+     "label": "AATO band recorded at creation and reviewed annually",
+     "topic": "aato_bands",
+     "synonyms": [
+      "new supplier aatoband recorded"
+     ],
+     "value_type": "boolean",
+     "description": "The AATO band for the e-invoice check is recorded at supplier creation and reviewed every April."
+    },
+    {
+     "key": "qrmp_supplier_handling.recorded_at_creation_reviewed_april",
+     "unit": null,
+     "label": "QRMP flag recorded at creation and reviewed annually",
+     "topic": "qrmp_supplier_handling",
+     "synonyms": [
+      "new supplier qrmp flag recorded"
+     ],
+     "value_type": "boolean",
+     "description": "The QRMP filing flag is recorded at supplier creation and reviewed every April."
+    },
+    {
+     "key": "supplier_onboarding.required_documents",
+     "unit": null,
+     "label": "Required documents for new supplier",
+     "topic": "supplier_onboarding",
+     "synonyms": [
+      "new supplier required documents"
+     ],
+     "value_type": "list",
+     "description": "A new supplier must be created with PAN, GST registration certificate or declaration of non-registration, cancelled cheque or bank letter, Udyam registration certificate if MSME, and signed Supplier Code of Conduct."
+    },
+    {
+     "key": "invoice_approval_authority.no_additional_approval_threshold",
+     "unit": "INR",
+     "label": "No additional approval threshold",
+     "topic": "invoice_approval_authority",
+     "synonyms": [
+      "no additional approval threshold"
+     ],
+     "value_type": "money",
+     "description": "Invoices up to ₹25 lakh require no additional approval."
+    },
+    {
+     "key": "non_po_categories.budget_owner_approval_required",
+     "unit": null,
+     "label": "Budget owner approval required for non-PO invoices",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "non po budget owner approval required"
+     ],
+     "value_type": "boolean",
+     "description": "A non-PO invoice of any amount requires the budget owner's approval in the workflow."
+    },
+    {
+     "key": "non_po_categories.only_listed_categories_allowed",
+     "unit": null,
+     "label": "Only listed non-PO categories allowed",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "non po only listed categories allowed"
+     ],
+     "value_type": "boolean",
+     "description": "Every invoice that is not in the listed non-PO categories requires a purchase order."
+    },
+    {
+     "key": "gst_compliance.not_in_2b_escalation_rule",
+     "unit": null,
+     "label": "Not in GSTR-2B escalation rule",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "not in 2b escalation"
+     ],
+     "value_type": "text",
+     "description": "If an invoice is still missing from GSTR-2B after two further GSTR-2B cycles, raise NOT_IN_2B to the vendor relationship owner."
+    },
+    {
+     "key": "gst_compliance.open_gst_tab_required",
+     "unit": null,
+     "label": "Open GST tab required",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "open gst tab"
+     ],
+     "value_type": "boolean",
+     "description": "The GST tab must be opened."
+    },
+    {
+     "key": "tds_deduction.open_tds_tab_for_goods_invoice",
+     "unit": null,
+     "label": "Open TDS tab for goods invoice",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "open tds tab step"
+     ],
+     "value_type": "boolean",
+     "description": "The user must open the TDS tab when posting a goods invoice."
+    },
+    {
+     "key": "exception_handling.gstin_mismatch_owner",
+     "unit": null,
+     "label": "GSTIN_MISMATCH exception owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "owner"
+     ],
+     "value_type": "text",
+     "description": "The owner of exception code GSTIN_MISMATCH is Supplier."
+    },
+    {
+     "key": "invoice_intake.paper_invoice_accepted_from",
+     "unit": null,
+     "label": "Paper invoice accepted from",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "paper invoice accepted from"
+     ],
+     "value_type": "text",
+     "description": "Paper invoices are accepted only from Arvana Infra Projects construction sites."
+    },
+    {
+     "key": "invoice_intake.paper_invoice_scanning_day",
+     "unit": null,
+     "label": "Paper invoice scanning day",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "paper invoice scanning day"
+     ],
+     "value_type": "text",
+     "description": "Paper invoices are scanned on the day of receipt."
+    },
+    {
+     "key": "invoice_intake.paper_invoice_scanning_location",
+     "unit": null,
+     "label": "Paper invoice scanning location",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "paper invoice scanning location"
+     ],
+     "value_type": "text",
+     "description": "Paper invoices are scanned at the Hyderabad mail room."
+    },
+    {
+     "key": "invoice_intake.paper_invoice_scanning_sla_days",
+     "unit": "days",
+     "label": "Paper invoice scanning SLA",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "paper invoice scanning sla"
+     ],
+     "value_type": "number",
+     "description": "Paper invoices must be scanned within one working day of receipt."
+    },
+    {
+     "key": "payment_run_schedule.frequency",
+     "unit": null,
+     "label": "Payment run frequency",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "payment run frequency"
+     ],
+     "value_type": "text",
+     "description": "Payment runs occur twice weekly."
+    },
+    {
+     "key": "payment_run_schedule.timing_rule",
+     "unit": null,
+     "label": "Payment timing rule",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "payment timing rule"
+     ],
+     "value_type": "text",
+     "description": "Pay on the last payment run on or before the due date; never pay early without Treasury approval."
+    },
+    {
+     "key": "invoice_posting.clean_invoice_action",
+     "unit": null,
+     "label": "Clean invoice posting action",
+     "topic": "invoice_posting",
+     "synonyms": [
+      "posting decision clean"
+     ],
+     "value_type": "text",
+     "description": "If the invoice is clean, the user clicks Post."
+    },
+    {
+     "key": "exception_handling.action_on_not_clean_invoice",
+     "unit": null,
+     "label": "Action on not clean invoice",
+     "topic": "exception_handling",
+     "synonyms": [
+      "posting decision not clean",
+      "park with exception"
+     ],
+     "value_type": "text",
+     "description": "If the invoice is not clean, the user clicks Park with exception and picks an exception code."
+    },
+    {
+     "key": "price_tolerance.lower_price_acceptance",
+     "unit": null,
+     "label": "Lower price acceptance",
+     "topic": "price_tolerance",
+     "synonyms": [
+      "price tolerance lower price acceptance"
+     ],
+     "value_type": "boolean",
+     "description": "If the invoice price is lower than the PO price, the line is accepted and paid at the invoice price."
+    },
+    {
+     "key": "exception_handling.price_var_resolution_process",
+     "unit": null,
+     "label": "PRICE_VAR resolution process",
+     "topic": "exception_handling",
+     "synonyms": [
+      "price tolerance price var process"
+     ],
+     "value_type": "text",
+     "description": "A line that fails the price tolerance check is held with exception PRICE_VAR, sent to the PO buyer, who must either amend the PO or request a credit note from the supplier."
+    },
+    {
+     "key": "exception_handling.price_var_exception_note_guidelines",
+     "unit": null,
+     "label": "PRICE_VAR exception note guidelines",
+     "topic": "exception_handling",
+     "synonyms": [
+      "price var exception note bad practice"
+     ],
+     "value_type": "text",
+     "description": "A bad exception note for price variance is vague and lacks specific details. A good exception note includes line item details, rates, excess amount, quantity, threshold reference, and required resolution action."
+    },
+    {
+     "key": "exception_handling.price_var_meaning",
+     "unit": null,
+     "label": "PRICE_VAR meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "price var meaning"
+     ],
+     "value_type": "text",
+     "description": "PRICE_VAR means unit price above tolerance as per section 4.2."
+    },
+    {
+     "key": "exception_handling.price_var_owner",
+     "unit": null,
+     "label": "PRICE_VAR owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "price var owner"
+     ],
+     "value_type": "text",
+     "description": "The owner of PRICE_VAR exceptions is the PO buyer."
+    },
+    {
+     "key": "exception_handling.price_var_target_resolution_days",
+     "unit": "working days",
+     "label": "PRICE_VAR target resolution days",
+     "topic": "exception_handling",
+     "synonyms": [
+      "price var target resolution days"
+     ],
+     "value_type": "days",
+     "description": "PRICE_VAR exceptions must be resolved within 3 working days."
+    },
+    {
+     "key": "exception_handling.msme_due_priority_reason",
+     "unit": null,
+     "label": "MSME_DUE priority reason",
+     "topic": "exception_handling",
+     "synonyms": [
+      "processor msme due priority"
+     ],
+     "value_type": "text",
+     "description": "The senior processor prioritizes the MSME_DUE exception list at the start of the day because it is the only exception that results in a call from the client's CFO."
+    },
+    {
+     "key": "qrmp_supplier_handling.supplier_upload_timing_pattern",
+     "unit": null,
+     "label": "Supplier upload timing pattern",
+     "topic": "qrmp_supplier_handling",
+     "synonyms": [
+      "qrmp supplier upload timing"
+     ],
+     "value_type": "text",
+     "description": "Small suppliers often upload invoices only at quarter-end unless they use the invoice furnishing facility."
+    },
+    {
+     "key": "exception_handling.qty_var_target_resolution_days",
+     "unit": "working days",
+     "label": "QTY_VAR target resolution days",
+     "topic": "exception_handling",
+     "synonyms": [
+      "qty var target resolution days"
+     ],
+     "value_type": "days",
+     "description": "The target resolution time for exception code QTY_VAR is 3 working days."
+    },
+    {
+     "key": "quantity_tolerance.applicability_per_memo",
+     "unit": null,
+     "label": "Applicability per client memo",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "quantity tolerance exception"
+     ],
+     "value_type": "text",
+     "description": "Quantity tolerance now only applies as per client memo CM-INF-02."
+    },
+    {
+     "key": "sop_governance.question_escalation_to",
+     "unit": null,
+     "label": "Question escalation to",
+     "topic": "sop_governance",
+     "synonyms": [
+      "question escalation to"
+     ],
+     "value_type": "text",
+     "description": "Questions about the SOP should be raised with the Team Lead."
+    },
+    {
+     "key": "pharma_qa_release.raise_qa_release_pending_on_quarantine_or_rejected",
+     "unit": null,
+     "label": "Raise QA_RELEASE_PENDING on quarantine or rejected",
+     "topic": "pharma_qa_release",
+     "synonyms": [
+      "raise qa release pending on quarantine or rejected"
+     ],
+     "value_type": "boolean",
+     "description": "For Arvana Pharma, if the batch is in Quarantine or Rejected, the QA_RELEASE_PENDING exception must be raised."
+    },
+    {
+     "key": "reverse_charge_mechanism.flagging_and_routing",
+     "unit": null,
+     "label": "RCM_REVIEW flagging and routing",
+     "topic": "reverse_charge_mechanism",
+     "synonyms": [
+      "rcm review flagging and routing"
+     ],
+     "value_type": "text",
+     "description": "Services subject to reverse charge are flagged RCM_REVIEW and routed to the Tax Desk before posting."
+    },
+    {
+     "key": "exception_handling.rcm_review_meaning",
+     "unit": null,
+     "label": "RCM_REVIEW meaning",
+     "topic": "exception_handling",
+     "synonyms": [
+      "rcm review meaning"
+     ],
+     "value_type": "text",
+     "description": "The meaning of exception code RCM_REVIEW is Reverse-charge service (5.6)."
+    },
+    {
+     "key": "exception_handling.rcm_review_owner",
+     "unit": null,
+     "label": "RCM_REVIEW owner",
+     "topic": "exception_handling",
+     "synonyms": [
+      "rcm review owner"
+     ],
+     "value_type": "text",
+     "description": "The owner of exception code RCM_REVIEW is Tax Desk."
+    },
+    {
+     "key": "exception_handling.rcm_review_target_resolution_days",
+     "unit": "working days",
+     "label": "RCM_REVIEW target resolution days",
+     "topic": "exception_handling",
+     "synonyms": [
+      "rcm review target days"
+     ],
+     "value_type": "days",
+     "description": "The target resolution time for exception code RCM_REVIEW is 2 working days."
+    },
+    {
+     "key": "irn_requirement.reject_plain_invoice_above_threshold",
+     "unit": null,
+     "label": "Reject plain invoice above threshold",
+     "topic": "irn_requirement",
+     "synonyms": [
+      "reject plain invoice above threshold"
+     ],
+     "value_type": "boolean",
+     "description": "If a supplier with turnover above ten crore sends a plain invoice without IRN, the AP processor must send it back."
+    },
+    {
+     "key": "grn_posting_timeline.remote_site_patience_advised",
+     "unit": null,
+     "label": "Remote site patience advised",
+     "topic": "grn_posting_timeline",
+     "synonyms": [
+      "remote site patience"
+     ],
+     "value_type": "boolean",
+     "description": "AP processors should be patient with remote sites when waiting for GRN posting."
+    },
+    {
+     "key": "gst_compliance.rent_invoice_gst_exemption_if_landlord_unregistered",
+     "unit": null,
+     "label": "Rent invoice GST exemption if landlord unregistered",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "rent invoice gst if landlord unregistered"
+     ],
+     "value_type": "boolean",
+     "description": "Rent invoices may not show GST if the landlord is not registered."
+    },
+    {
+     "key": "exception_handling.report_tolerance_discrepancy",
+     "unit": null,
+     "label": "Report tolerance discrepancy",
+     "topic": "exception_handling",
+     "synonyms": [
+      "report tolerance discrepancy"
+     ],
+     "value_type": "boolean",
+     "description": "If a tolerance different from the SOP v4.0 rule is observed, the processor must report it to the Team Lead."
+    },
+    {
+     "key": "exception_handling.senior_processor_resolves_escalated_exceptions",
+     "unit": null,
+     "label": "Senior processor resolves escalated exceptions",
+     "topic": "exception_handling",
+     "synonyms": [
+      "senior processor exception resolution"
+     ],
+     "value_type": "boolean",
+     "description": "The Senior Processor resolves exceptions that a Processor cannot resolve."
+    },
+    {
+     "key": "quantity_tolerance.short_invoicing_accepted",
+     "unit": null,
+     "label": "Short invoicing accepted",
+     "topic": "quantity_tolerance",
+     "synonyms": [
+      "short invoicing accepted"
+     ],
+     "value_type": "boolean",
+     "description": "Short invoicing (invoice quantity below GRN quantity) is accepted, and the balance stays open on the GRN."
+    },
+    {
+     "key": "non_po_categories.store_rent_missing_fields_action",
+     "unit": null,
+     "label": "Store rent missing fields action",
+     "topic": "non_po_categories",
+     "synonyms": [
+      "store rent missing fields action"
+     ],
+     "value_type": "text",
+     "description": "If a store rent invoice lacks both store code and lease agreement number, it must be returned to the landlord."
+    },
+    {
+     "key": "supplier_habits.habits_documented",
+     "unit": null,
+     "label": "Habits documented",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "supplier habits documented"
+     ],
+     "value_type": "boolean",
+     "description": "Supplier habits (which supplier does what) are not documented."
+    },
+    {
+     "key": "supplier_habits.tacit_knowledge_loss_risk",
+     "unit": null,
+     "label": "Tacit knowledge loss risk",
+     "topic": "supplier_habits",
+     "synonyms": [
+      "supplier habits tacit knowledge"
+     ],
+     "value_type": "boolean",
+     "description": "Senior processors maintain mental lists of supplier habits, and this tacit knowledge is lost when they leave the organization."
+    },
+    {
+     "key": "invoice_intake.supplier_portal_prevalidated",
+     "unit": null,
+     "label": "Supplier portal prevalidated",
+     "topic": "invoice_intake",
+     "synonyms": [
+      "supplier portal validation"
+     ],
+     "value_type": "boolean",
+     "description": "Supplier portal invoices arrive with PO number and GSTIN already validated."
+    },
+    {
+     "key": "exception_handling.gstin_mismatch_target_resolution",
+     "unit": null,
+     "label": "GSTIN_MISMATCH target resolution",
+     "topic": "exception_handling",
+     "synonyms": [
+      "target to resolve"
+     ],
+     "value_type": "text",
+     "description": "The target to resolve exception code GSTIN_MISMATCH is until corrected invoice."
+    },
+    {
+     "key": "exception_handling.tax_desk_referral_codes",
+     "unit": null,
+     "label": "Tax Desk Referral Codes",
+     "topic": "exception_handling",
+     "synonyms": [
+      "tax desk referral codes",
+      "tax_desk_referral_exception_codes"
+     ],
+     "value_type": "list",
+     "description": "Exception codes that are referred to the Tax Desk for resolution."
+    },
+    {
+     "key": "tax_desk.responsibility",
+     "unit": null,
+     "label": "Tax Desk Responsibility",
+     "topic": "tax_desk",
+     "synonyms": [
+      "tax desk responsibility"
+     ],
+     "value_type": "text",
+     "description": "Scope of decisions made by the Tax Desk for referred cases."
+    },
+    {
+     "key": "gst_compliance.tax_type_by_supply_type",
+     "unit": null,
+     "label": "Tax Type by Supply Type",
+     "topic": "gst_compliance",
+     "synonyms": [
+      "tax type inter state",
+      "inter_state_tax_type",
+      "intra_state_tax_type"
+     ],
+     "value_type": "text",
+     "description": "GST tax types applicable for inter-state and intra-state supplies."
+    },
+    {
+     "key": "exception_handling.wrong_tax_type_handling",
+     "unit": null,
+     "label": "Wrong Tax Type Handling",
+     "topic": "exception_handling",
+     "synonyms": [
+      "tax type wrong handling",
+      "tax_type_wrong_return"
+     ],
+     "value_type": "text",
+     "description": "Action taken when an invoice has an incorrect tax type."
+    },
+    {
+     "key": "tds_deduction.section_determination_basis",
+     "unit": null,
+     "label": "TDS Section Determination Basis",
+     "topic": "tds_deduction",
+     "synonyms": [
+      "tds section determination",
+      "tds_section_basis"
+     ],
+     "value_type": "text",
+     "description": "Basis for determining TDS section and rate."
+    },
+    {
+     "key": "team_lead.owns_queue_age_and_service_levels",
+     "unit": null,
+     "label": "Team Lead Owns Queue Age and Service Levels",
+     "topic": "team_lead",
+     "synonyms": [
+      "team lead queue age ownership",
+      "team_lead_queue_age_ownership"
+     ],
+     "value_type": "boolean",
+     "description": "Whether the Team Lead is responsible for queue age and service levels."
+    },
+    {
+     "key": "team_lead.write_off_limit",
+     "unit": "INR",
+     "label": "Team Lead Write-off Limit",
+     "topic": "team_lead",
+     "synonyms": [
+      "team lead write off limit",
+      "team_lead_write_off_approval_limit"
+     ],
+     "value_type": "money",
+     "description": "Maximum amount a Team Lead can approve for write-offs."
+    },
+    {
+     "key": "payment_run_schedule.payment_file_releaser",
+     "unit": null,
+     "label": "Payment File Releaser",
+     "topic": "payment_run_schedule",
+     "synonyms": [
+      "treasury releases payment files",
+      "treasury_releases_payment_files"
+     ],
+     "value_type": "text",
+     "description": "Entity responsible for releasing payment files."
+    },
+    {
+     "key": "vendor_master.has_qrmp_flag",
+     "unit": null,
+     "label": "Vendor Master Has QRMP Flag",
+     "topic": "vendor_master",
+     "synonyms": [
+      "vendor master has qrmp flag"
+     ],
+     "value_type": "boolean",
+     "description": "Indicates whether the vendor master includes a QRMP flag for quarterly filers."
+    },
+    {
+     "key": "vendor_master.records_aato_band",
+     "unit": null,
+     "label": "Vendor Master Records AATO Band",
+     "topic": "vendor_master",
+     "synonyms": [
+      "vendor master records aato band"
+     ],
+     "value_type": "boolean",
+     "description": "Whether the vendor master stores the supplier's AATO band."
+    },
+    {
+     "key": "vendor_master.suggests_tds_section",
+     "unit": null,
+     "label": "Vendor Master Suggests TDS Section",
+     "topic": "vendor_master",
+     "synonyms": [
+      "vendor master suggested tds section"
+     ],
+     "value_type": "boolean",
+     "description": "Whether the vendor master suggests a TDS section for invoices."
+    },
+    {
+     "key": "vendor_master.team_responsibility",
+     "unit": null,
+     "label": "Vendor Master Team Responsibility",
+     "topic": "vendor_master",
+     "synonyms": [
+      "vendor master team responsibility"
+     ],
+     "value_type": "text",
+     "description": "Responsibilities of the Vendor Master team."
+    },
+    {
+     "key": "vendor_bank_account_change.verification_call_requires_named_person",
+     "unit": null,
+     "label": "Verification Call Requires Named Person",
+     "topic": "vendor_bank_account_change",
+     "synonyms": [
+      "verification call confirms with named person"
+     ],
+     "value_type": "boolean",
+     "description": "Whether the verification call must confirm the change with a named person at the supplier."
+    }
+   ],
+   "scope_keys": [
+    "client"
+   ],
+   "entity_types": [
+    {
+     "name": "topic",
+     "description": ""
+    },
+    {
+     "name": "Supplier",
+     "description": "Vendor/supplier entity with master data including GSTIN, PAN, bank details, QRMP flag, AATO band."
+    },
+    {
+     "name": "Invoice",
+     "description": "Supplier invoice document being verified, posted, or parked."
+    },
+    {
+     "name": "PurchaseOrder",
+     "description": "Purchase order (PO) referenced for goods/service invoices."
+    },
+    {
+     "name": "GoodsReceiptNote",
+     "description": "GRN recording receipt of materials at site/warehouse."
+    },
+    {
+     "name": "ServiceEntrySheet",
+     "description": "Record of services received for two-way matching."
+    },
+    {
+     "name": "Batch",
+     "description": "Pharma batch in Quality Management System (QMS) with status Released, Quarantine, Rejected."
+    },
+    {
+     "name": "Campaign",
+     "description": "Marketing campaign with approved ID required for agency invoices."
+    },
+    {
+     "name": "Store",
+     "description": "Retail store with code used on rent invoices."
+    },
+    {
+     "name": "LeaseAgreement",
+     "description": "Lease agreement number required on store rent invoices."
+    },
+    {
+     "name": "BankAccount",
+     "description": "Supplier bank account details subject to change control process."
+    },
+    {
+     "name": "VendorMaster",
+     "description": "Master record for supplier including phone, bank details, QRMP flag, TDS section suggestion."
+    },
+    {
+     "name": "APController",
+     "description": "Role that approves high-value invoices and bank account changes."
+    },
+    {
+     "name": "VendorMasterLead",
+     "description": "Role that approves vendor master changes including bank account."
+    },
+    {
+     "name": "TaxDesk",
+     "description": "Team handling TDS section determination, RCM, GST issues."
+    },
+    {
+     "name": "Requester",
+     "description": "Person who raises GRNs for received materials."
+    },
+    {
+     "name": "SeniorProcessor",
+     "description": "Experienced AP processor handling exceptions and escalations."
+    },
+    {
+     "name": "TeamLead",
+     "description": "Supervisor to whom discrepancies (e.g., wrong tolerance setting) are reported; reviews open exceptions at month-end."
+    },
+    {
+     "name": "QualityManagementSystem",
+     "description": "QMS holding batch release status for pharma materials."
+    },
+    {
+     "name": "ERPSystem",
+     "description": "ERP used for invoice verification, posting, parking, duplicate check, GST/TDS tabs."
+    },
+    {
+     "name": "GSTIN",
+     "description": "Goods and Services Tax Identification Number of supplier/buyer."
+    },
+    {
+     "name": "IRN",
+     "description": "Invoice Reference Number for e-invoices."
+    },
+    {
+     "name": "TDSSection",
+     "description": "Income Tax section for tax deduction at source (e.g., 194I, 194C, 194J)."
+    },
+    {
+     "name": "AATOBand",
+     "description": "Annual Aggregate Turnover band (A, B, etc.) determining IRN applicability."
+    },
+    {
+     "name": "QRMPFlag",
+     "description": "Flag on vendor master indicating supplier files quarterly returns (QRMP)."
+    },
+    {
+     "name": "ExceptionCode",
+     "description": "Standard code for invoice exception (e.g., DUP_SUSPECT, PRICE_VAR)."
+    },
+    {
+     "name": "Material",
+     "description": "Material type (cement, steel, sand, aggregates, API, excipient, packaging)."
+    },
+    {
+     "name": "Service",
+     "description": "Service type (AMC maintenance, software support, legal fees, courier, rent, marketing)."
+    },
+    {
+     "name": "Client",
+     "description": "Arvana Group company served by Meridian Shared Services (e.g., Pharma, Infra, Retail)."
+    },
+    {
+     "name": "APProcessor",
+     "description": "Staff member processing invoices."
+    },
+    {
+     "name": "PaymentRun",
+     "description": "Scheduled payment execution event."
+    },
+    {
+     "name": "ClientMemo",
+     "description": "Client-specific rule overriding SOP (e.g., CM-INF-02, CM-PHA-01, CM-RET-03)."
+    },
+    {
+     "name": "APTeam",
+     "description": "Accounts Payable team responsible for processing invoices."
+    },
+    {
+     "name": "MSMESupplier",
+     "description": "A supplier classified as Micro, Small or Medium Enterprise."
+    }
+   ],
+   "base_currency": "INR",
+   "source_ranking": [
+    {
+     "rank": 1,
+     "reason": "Current, controlled, owner-approved standard operating procedure.",
+     "doc_type": "sop",
+     "practice": false
+    },
+    {
+     "rank": 2,
+     "reason": "Client-specific, current, owner-approved memo overriding SOP for that client.",
+     "doc_type": "memo",
+     "practice": false
+    },
+    {
+     "rank": 3,
+     "reason": "Current, controlled work instruction.",
+     "doc_type": "work_instruction",
+     "practice": false
+    },
+    {
+     "rank": 4,
+     "reason": "Current reference data but owner unknown.",
+     "doc_type": "spreadsheet",
+     "practice": false
+    },
+    {
+     "rank": 5,
+     "reason": "Training material, current but less authoritative than controlled documents.",
+     "doc_type": "training",
+     "practice": false
+    },
+    {
+     "rank": 6,
+     "reason": "Expert interview record capturing personal practice, not rules.",
+     "doc_type": "interview",
+     "practice": true
+    },
+    {
+     "rank": 7,
+     "reason": "Shadowing notes recording observed practice, not rules.",
+     "doc_type": "observation",
+     "practice": true
+    },
+    {
+     "rank": 8,
+     "reason": "Stale FAQ, not current or controlled.",
+     "doc_type": "faq",
+     "practice": false
+    },
+    {
+     "rank": 9,
+     "reason": "Superseded SOP version, no longer current.",
+     "doc_type": "sop",
+     "practice": false
+    },
+    {
+     "rank": 10,
+     "reason": "Stale training material.",
+     "doc_type": "training",
+     "practice": false
+    }
+   ],
+   "sender_authority": [
+    {
+     "who": "AP Process Excellence, Meridian Shared Services",
+     "client": "all",
+     "topics": [
+      "all"
+     ]
+    },
+    {
+     "who": "Financial Controller, Arvana Infra Projects",
+     "client": "Arvana Infra Projects",
+     "topics": [
+      "quantity_tolerance",
+      "price_tolerance"
+     ]
+    },
+    {
+     "who": "Head of Quality, Arvana Pharma",
+     "client": "Arvana Pharma",
+     "topics": [
+      "pharma_qa_release"
+     ]
+    },
+    {
+     "who": "Finance Director, Arvana Retail",
+     "client": "Arvana Retail",
+     "topics": [
+      "non_po_categories",
+      "tds_deduction"
+     ]
+    },
+    {
+     "who": "Vendor Master team",
+     "client": "all",
+     "topics": [
+      "vendor_bank_account_change"
+     ]
+    },
+    {
+     "who": "Pallavi Joshi, AP Trainer",
+     "client": "all",
+     "topics": [
+      "invoice_intake",
+      "mandatory_fields",
+      "duplicate_check",
+      "gst_compliance",
+      "payment_run_schedule"
+     ]
+    },
+    {
+     "who": "Sandeep Rao, Team Lead, Arvana Infra desk",
+     "client": "all",
+     "topics": [
+      "msme_payment_terms",
+      "exception_handling",
+      "month_end_procedures"
+     ]
+    },
+    {
+     "who": "Imran Qureshi, Tax Desk Lead",
+     "client": "all",
+     "topics": [
+      "tds_deduction",
+      "gst_compliance",
+      "reverse_charge_mechanism"
+     ]
+    },
+    {
+     "who": "Knowledge Management team",
+     "client": "all",
+     "topics": [
+      "all"
+     ]
+    },
+    {
+     "who": "Ritu Verma",
+     "client": "all",
+     "topics": [
+      "supplier_habits",
+      "grn_posting_timeline"
+     ]
+    }
+   ]
+  },
+  "sample": [],
+  "created_at": "2026-11-07T19:22:23.675631Z",
+  "frozen_at": "2026-11-07T19:31:13.686262Z",
+  "frozen_by": "auto"
+ },
+ "draft": null,
+ "kb_version": 28
+}

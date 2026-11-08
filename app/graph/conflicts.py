@@ -248,7 +248,10 @@ def _authoritative(group: list[FactRow]) -> FactRow | None:
 def _label(sources: dict[str, Source], f: FactRow) -> str:
     s = sources.get(f.source_id or "")
     label = f.source_label or (s.short_label if s else "unknown source")
-    return f"{label} {f.locator}" if f.locator and f.locator not in label else label
+    if not f.locator or f.locator in label:
+        return label
+    # A transcript locator already names its source ("Video 1 [02:10]").
+    return f.locator if f.locator.startswith(label) else f"{label} {f.locator}"
 
 
 def reason(a: FactRow, b: FactRow, kind: str, sources: dict[str, Source]) -> str:

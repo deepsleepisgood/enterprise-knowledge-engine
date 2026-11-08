@@ -247,3 +247,55 @@ def notifications_for(session: Session, user_id: str, unread_only: bool = False)
         }
         for n in session.scalars(q.order_by(Notification.at.desc(), Notification.id.desc()))
     ]
+
+
+def mark_read(session: Session, notification_id: int, user_id: str) -> bool:
+    res = session.execute(
+        update(Notification)
+        .where(
+            Notification.tenant_id == tenant(),
+            Notification.id == notification_id,
+            Notification.user_id == user_id,
+        )
+        .values(read_at=utcnow())
+    )
+    return bool(res.rowcount)
+
+
+def distinct_users(session: Session) -> int:
+    from sqlalchemy import func
+
+    return (
+        session.scalar(
+            select(func.count(func.distinct(AnswerLog.user_id))).where(
+                AnswerLog.tenant_id == tenant(), ~AnswerLog.user_id.startswith("eval")
+            )
+        )
+        or 0
+    )
+
+
+def recent_answers(session: Session, limit: int = 2000) -> list[dict[str, Any]]:
+    """The latest answers, for analytics (evaluation runs excluded)."""
+    q = (
+        select(AnswerLog)
+        .where(AnswerLog.tenant_id == tenant(), ~AnswerLog.user_id.startswith("eval"))
+        .order_by(AnswerLog.id.desc())
+        .limit(limit)
+    )
+    return [
+        {
+            "id": a.id,
+            "user_id": a.user_id,
+            "question": a.question,
+            "client": a.client,
+            "route": a.route,
+            "status": (a.card or {}).get("status"),
+            "entities": (a.card or {}).get("entities") or [],
+            "cited_passage_ids": list(a.cited_passage_ids or []),
+            "latency_ms": a.latency_ms,
+            "kb_version": a.kb_version,
+            "created_at": a.created_at,
+        }
+        for a in session.scalars(q)
+    ]

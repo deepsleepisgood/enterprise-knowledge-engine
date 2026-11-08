@@ -1,11 +1,13 @@
 "use client";
 
-import { Clock, FileText, Plus, X } from "lucide-react";
+import { Clock, ExternalLink, FileText, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { DEMO_MODE, getPassage, originalUrl } from "@/lib/api";
 import { cx, fmtDate } from "@/lib/format";
-import type { Citation, InvoiceContext, OlderSource, SourceStatus } from "@/lib/types";
+import type { Citation, InvoiceContext, OlderSource, PassageDetail, SourceStatus } from "@/lib/types";
 
+import { groupOlder } from "./AnswerBlocks";
 import { DocGlyph } from "./DocGlyph";
 
 const STATUS_LABEL: Record<SourceStatus, string> = {
@@ -150,9 +152,9 @@ export function InvoiceContextCard({ invoice }: { invoice: InvoiceContext }) {
     ["PO-backed", invoice.po_backed ? "Yes" : "No — non-PO"],
     ["MSME", invoice.msme_category],
     ["E-invoice", invoice.einvoice_required ? "Required (IRN)" : "Not required"],
-    ["Due date", fmtDate(invoice.due_date)],
+    ["Due date", invoice.due_date ? fmtDate(invoice.due_date) : ""],
     ["Payment run", invoice.payment_run],
-  ];
+  ].filter(([, v]) => v) as [string, string][];
   return (
     <section aria-labelledby="invoice-ctx" className="mb-6 rounded-2xl border border-hairline bg-surface p-4 shadow-card">
       <div className="flex items-center gap-2">
@@ -234,7 +236,7 @@ export function SourcesRail({
         <>
           <h2 className="eyebrow mt-7">Older sources</h2>
           <ul className="mt-3 space-y-2.5">
-            {older.map((o, i) => (
+            {groupOlder(older).map((o, i) => (
               <OlderSourceItem key={i} item={o} />
             ))}
           </ul>
@@ -253,9 +255,27 @@ export function SourcesRail({
   );
 }
 
-/** Side drawer with the full passage, its version, date and status. */
+/** The passage text with the cited quote marked (whitespace-insensitive match). */
+function Highlighted({ text, quote }: { text: string; quote: string }) {
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+  const flat = norm(text);
+  const q = norm(quote).replace(/[.…]+$/, "");
+  const at = q.length > 8 ? flat.toLowerCase().indexOf(q.toLowerCase()) : -1;
+  if (at < 0) return <p className="whitespace-pre-line">{text}</p>;
+  return (
+    <p>
+      {flat.slice(0, at)}
+      <mark className="rounded bg-rose-tint px-0.5 text-ink ring-1 ring-rose-line">{flat.slice(at, at + q.length)}</mark>
+      {flat.slice(at + q.length)}
+    </p>
+  );
+}
+
+/** Side drawer with the full passage, its version, date and status, and the original. */
 export function SourceDrawer({ citation, onClose }: { citation: Citation | null; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [detail, setDetail] = useState<PassageDetail | null>(null);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!citation) return;
     closeRef.current?.focus();
@@ -263,7 +283,17 @@ export function SourceDrawer({ citation, onClose }: { citation: Citation | null;
     document.addEventListener("keydown", esc);
     return () => document.removeEventListener("keydown", esc);
   }, [citation, onClose]);
+  useEffect(() => {
+    setDetail(null);
+    if (!citation || DEMO_MODE) return;
+    setLoading(true);
+    void getPassage(citation.passage_id)
+      .then(setDetail)
+      .finally(() => setLoading(false));
+  }, [citation]);
   if (!citation) return null;
+  const src = detail?.source;
+  const pos = detail?.position_in_source;
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       <button type="button" aria-label="Close" className="absolute inset-0 bg-ink/20" onClick={onClose} />
@@ -298,10 +328,56 @@ export function SourceDrawer({ citation, onClose }: { citation: Citation | null;
             </dd>
           </div>
         </dl>
-        <blockquote className="mt-5 border-l-[3px] border-rose pl-4 text-[15px] leading-[1.65] text-ink">
-          {citation.quote}
-        </blockquote>
-        <p className="mt-auto pt-6 font-mono text-[11px] text-muted">passage {citation.passage_id}</p>
+        {src && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {src.version && <span className="rounded-full bg-fill px-2.5 py-0.5 font-mono text-[11px] text-muted">v{src.version}</span>}
+            {src.dated && <span className="rounded-full bg-fill px-2.5 py-0.5 font-mono text-[11px] text-muted">{fmtDate(src.dated)}</span>}
+            <span className="rounded-full bg-fill px-2.5 py-0.5 font-mono text-[11px] text-muted">{src.status}</span>
+            {src.client_scope !== "all" && (
+              <span className="rounded-full bg-fill px-2.5 py-0.5 font-mono text-[11px] text-muted">{src.client_scope}</span>
+            )}
+          </div>
+        )}
+        <h3 className="eyebrow mt-6">{detail ? "Passage, cited words marked" : "Cited words"}</h3>
+        {loading ? (
+          <div className="mt-3 space-y-2" aria-hidden>
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-3.5 animate-pulse rounded bg-fill" />
+            ))}
+          </div>
+        ) : detail ? (
+          <div className="mt-3 rounded-2xl border border-hairline bg-canvas p-4 text-[15px] leading-[1.7] text-ink">
+            {detail.speaker && <p className="mb-1 font-mono text-[11px] text-muted">{detail.speaker}</p>}
+            <Highlighted text={detail.text} quote={citation.quote} />
+          </div>
+        ) : (
+          <blockquote className="mt-3 border-l-[3px] border-rose pl-4 text-[15px] leading-[1.65] text-ink">
+            {citation.quote}
+          </blockquote>
+        )}
+        {pos && (
+          <div className="mt-4 space-y-1.5 font-mono text-[11px] text-muted">
+            <p>
+              part {(pos.index ?? 0) + 1} of {pos.of} in {src?.short_label}
+            </p>
+            {pos.previous && <p>before: {pos.previous.locator} {pos.previous.section_title}</p>}
+            {pos.next && <p>after: {pos.next.locator} {pos.next.section_title}</p>}
+          </div>
+        )}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-6">
+          <p className="truncate font-mono text-[11px] text-muted">passage {citation.passage_id}</p>
+          {detail && (
+            <a
+              href={originalUrl(detail.episode_id)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-rose hover:text-rose-hover"
+            >
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              Open original
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

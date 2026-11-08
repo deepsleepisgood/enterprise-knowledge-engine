@@ -1,0 +1,310 @@
+[
+ {
+  "id": 7,
+  "plugin": "ap",
+  "param": "approvals.cfo_above_lakh",
+  "attribute_key": "invoice_approval_authority.cfo_threshold_amount",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 6,
+  "plugin": "ap",
+  "param": "approvals.controller_above_lakh",
+  "attribute_key": "invoice_approval_authority.threshold_amount",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 8,
+  "plugin": "ap",
+  "param": "einvoice.aato_threshold_crore",
+  "attribute_key": "irn_requirement.threshold_turnover",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 9,
+  "plugin": "ap",
+  "param": "msme.max_term_days",
+  "attribute_key": "payment_run_schedule.msme_max_days_with_agreement",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "days"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 10,
+  "plugin": "ap",
+  "param": "msme.no_agreement_days",
+  "attribute_key": "payment_run_schedule.msme_max_days_without_agreement",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "days"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 13,
+  "plugin": "ap",
+  "param": "payments.cutoff",
+  "attribute_key": "payment_run_schedule.cutoff_time",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "text"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 11,
+  "plugin": "ap",
+  "param": "payments.default_term_days",
+  "attribute_key": "payment_run_schedule.default_payment_terms_days",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "days"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 12,
+  "plugin": "ap",
+  "param": "payments.run_days",
+  "attribute_key": "payment_run_schedule.run_day",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "list"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 2,
+  "plugin": "ap",
+  "param": "price_tolerance.cap_inr",
+  "attribute_key": "price_tolerance.general_cap_amount",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 1,
+  "plugin": "ap",
+  "param": "price_tolerance.pct_of_line",
+  "attribute_key": "price_tolerance.general_percentage",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 4,
+  "plugin": "ap",
+  "param": "quantity_tolerance.cap_value_inr",
+  "attribute_key": "quantity_tolerance.infra_material_value_cap",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 5,
+  "plugin": "ap",
+  "param": "quantity_tolerance.materials",
+  "attribute_key": "quantity_tolerance.infra_materials",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "list"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 3,
+  "plugin": "ap",
+  "param": "quantity_tolerance.pct",
+  "attribute_key": "quantity_tolerance.general_percentage",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 15,
+  "plugin": "ap",
+  "param": "tds.goods_purchase_threshold_inr",
+  "attribute_key": "tds_deduction.goods_purchase_threshold",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "money"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 14,
+  "plugin": "ap",
+  "param": "tds.no_pan_rate",
+  "attribute_key": "tds_deduction.no_pan_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 16,
+  "plugin": "ap",
+  "param": "tds.rate_contract_individual_huf",
+  "attribute_key": "tds_deduction.contractor_rate_individual",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 17,
+  "plugin": "ap",
+  "param": "tds.rate_contract_other",
+  "attribute_key": "tds_deduction.contractor_rate_other",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 22,
+  "plugin": "ap",
+  "param": "tds.rate_goods_purchase",
+  "attribute_key": "tds_deduction.goods_purchase_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 18,
+  "plugin": "ap",
+  "param": "tds.rate_professional",
+  "attribute_key": "tds_deduction.professional_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 21,
+  "plugin": "ap",
+  "param": "tds.rate_rent_land_building",
+  "attribute_key": "tds_deduction.rent_building_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 20,
+  "plugin": "ap",
+  "param": "tds.rate_rent_plant_machinery",
+  "attribute_key": "tds_deduction.rent_plant_machinery_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ },
+ {
+  "id": 19,
+  "plugin": "ap",
+  "param": "tds.rate_technical_service",
+  "attribute_key": "tds_deduction.technical_services_rate",
+  "subject_entity_id": null,
+  "confidence": 0.8,
+  "confirmed_by": null,
+  "meta": {
+   "method": "embedding + LLM",
+   "value_type": "percentage"
+  },
+  "updated_at": "2026-11-08T08:16:02.663230Z"
+ }
+]

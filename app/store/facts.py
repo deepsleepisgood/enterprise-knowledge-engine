@@ -424,3 +424,23 @@ def live_groups(session: Session) -> set[tuple[str, str]]:
         Fact.tenant_id == tenant(), Fact.retracted_at.is_(None)
     )
     return {(sid, attr) for sid, attr in session.execute(q.distinct())}
+
+
+def counts_by_episode(session: Session) -> dict[str, int]:
+    """Episode id -> live facts it produced."""
+    rows = session.execute(
+        select(Fact.episode_id, func.count())
+        .where(Fact.tenant_id == tenant(), Fact.retracted_at.is_(None))
+        .group_by(Fact.episode_id)
+    )
+    return {e: n for e, n in rows if e}
+
+
+def counts_by_subject(session: Session) -> dict[str, int]:
+    """Entity id -> live facts about it."""
+    rows = session.execute(
+        select(Fact.subject_id, func.count())
+        .where(Fact.tenant_id == tenant(), Fact.retracted_at.is_(None))
+        .group_by(Fact.subject_id)
+    )
+    return dict(rows.all())
