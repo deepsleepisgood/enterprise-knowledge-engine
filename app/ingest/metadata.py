@@ -10,6 +10,7 @@ date > file modified time > ingestion time.
 from __future__ import annotations
 
 import contextlib
+import itertools
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -98,6 +99,8 @@ KEY_CLASSES: dict[str, list[str]] = {
         "recorded",
         "published",
         "approved",
+        "last reviewed",
+        "reviewed",
     ],
     "valid_until": ["valid until", "valid till", "expires", "expiry", "review date"],
     "owner": [
@@ -270,6 +273,21 @@ def _from_table(m: DocMeta, kv: dict[str, str]) -> None:
             break
 
 
+_KV_LINE = re.compile(r"^\s*([A-Za-z][A-Za-z ]{1,28}?)\s*:\s*(\S.{0,120}?)\s*$")
+
+
+def _kv_lines(texts: Any) -> dict[str, str]:
+    """'Key: value' lines whose key is a known header field (Version, Effective, Owner...)."""
+    known = {k for keys in KEY_CLASSES.values() for k in keys}
+    out: dict[str, str] = {}
+    for text in texts:
+        for line in (text or "").splitlines():
+            mm = _KV_LINE.match(line)
+            if mm and norm_key(mm.group(1)) in known:
+                out.setdefault(mm.group(1).strip(), mm.group(2))
+    return out
+
+
 def _from_text(m: DocMeta, text: str, origin: str, conf: float, refs: bool = False) -> None:
     vm = _VERSION.search(text)
     if vm:
@@ -277,10 +295,16 @@ def _from_text(m: DocMeta, text: str, origin: str, conf: float, refs: bool = Fal
     rm = _REF.search(text) if refs else None
     if rm:
         m.put("ref", rm.group(1), origin, conf - 0.05)
-    eff = re.search(r"\b(?:effective|in force|applies)\s+(?:from\s+|on\s+)?(.{0,40})", text, re.I)
+    eff = re.search(
+        r"\b(?:effective|in force|applies)[:\s]+(?:from\s+|on\s+)?(.{0,40})", text, re.I
+    )
     if eff and (pd := parse_date(eff.group(1))):
         m.put("effective", pd[0], f"{origin} (effective)", conf)
-    upd = re.search(r"\b(?:last updated|updated|dated|issued)\s+(?:on\s+)?(.{0,40})", text, re.I)
+    upd = re.search(
+        r"\b(?:last updated|updated|last reviewed|reviewed|dated|issued)[:\s]+(?:on\s+)?(.{0,40})",
+        text,
+        re.I,
+    )
     if upd and (pd := parse_date(upd.group(1))):
         m.put("doc_date", pd[0], f"{origin} (updated)", conf - 0.05)
     for rx, status in _STATUS_WORDS:
@@ -300,6 +324,14 @@ def infer(
 ) -> DocMeta:
     m = DocMeta(raw={"header": doc.meta_kv, "file": file_meta})
     _from_table(m, doc.meta_kv)
+    # Formats without a header table (PDF, Markdown) write it as "Key: value" lines on top.
+    lead = list(
+        itertools.takewhile(lambda b: b.type != "heading", [*doc.preamble, *doc.blocks][:12])
+    )
+    lines = _kv_lines(b.text for b in lead if b.type == "paragraph")
+    if lines:
+        _from_table(m, {k: v for k, v in lines.items() if k not in doc.meta_kv})
+        m.raw["header"] = {**lines, **doc.meta_kv}
     heading = doc.heading.text if doc.heading is not None else (doc.title or "")
     if heading:
         _from_text(m, heading, "heading", 0.85, refs=True)
@@ -309,7 +341,10 @@ def infer(
     _from_text(m, filename, "file name", 0.6)
     if doc.label:
         m.put("part_label", doc.label, "heading", 0.95)
-    if file_meta.get("date") and channel in ("email", "expert_answer"):
+    is_email = channel in ("email", "expert_answer") or bool(
+        file_meta.get("from") and file_meta.get("subject")
+    )
+    if file_meta.get("date") and is_email:
         from email.utils import parsedate_to_datetime
 
         with contextlib.suppress(TypeError, ValueError):

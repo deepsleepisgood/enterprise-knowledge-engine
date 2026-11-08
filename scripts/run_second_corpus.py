@@ -35,7 +35,7 @@ from app.store.base import use_tenant  # noqa: E402
 
 CORPUS = ROOT / "synthetic" / "corpus2_hr"
 REPORTS = ROOT / "reports"
-TODAY = date(2026, 11, 7)
+TODAY = date.today()  # the corpus files are dated by when they were written
 
 
 def build(tenant: str) -> dict[str, float]:

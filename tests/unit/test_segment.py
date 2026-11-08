@@ -191,3 +191,41 @@ def test_metadata_without_llm_has_provenance() -> None:
     assert m.get("doc_type") == "memo" and m.get("short_label") == "CM-X-02"
     assert m.fields["dated"].origin.startswith("header table")
     assert m.fields["dated"].confidence >= 0.9
+
+
+def test_key_value_lines_on_top_act_as_header() -> None:
+    blocks = [
+        P("Handbook, version 2"),
+        P("Version: 2.0"),
+        P("Effective: 1 April 2026"),
+        P("Owner: People Team"),
+        H("1. Purpose"),
+        P("Note: this line is body text, not a header."),
+    ]
+    doc = split_documents(blocks)[0]
+    m = infer(
+        doc,
+        filename="handbook.pdf",
+        file_meta={},
+        received_at=datetime(2026, 11, 8, tzinfo=UTC),
+        channel="upload",
+    )
+    assert m.get("dated") == date(2026, 4, 1)
+    assert m.get("version") == "2.0"
+    assert m.get("owner") == "People Team"
+
+
+def test_uploaded_email_file_uses_its_date_header() -> None:
+    doc = split_documents([P("Hello, from 1 January the rule changes.")])[0]
+    m = infer(
+        doc,
+        filename="note.eml",
+        file_meta={
+            "from": "a@x.example",
+            "subject": "Rule",
+            "date": "Tue, 20 Oct 2026 09:00:00 +0000",
+        },
+        received_at=datetime(2026, 11, 8, tzinfo=UTC),
+        channel="upload",
+    )
+    assert m.get("dated") == date(2026, 10, 20)
