@@ -206,3 +206,27 @@ def test_induction_ranks_strictly_and_drops_client_named_keys() -> None:
     assert _names_scope("client_specific_rules.northwind_qty_cap", words)
     assert _names_scope("tolerance.contoso_cap", words)
     assert not _names_scope("quantity_tolerance.percentage", words)
+
+
+def test_restatement_needs_no_model_check() -> None:
+    ev = ["Annual leave must be requested at least 10 days before the first day of leave."]
+    assert verify.restates("Annual leave must be requested at least 10 days before leave.", ev)
+    assert not verify.restates("Annual leave must be requested at least 14 days before leave.", ev)
+    assert not verify.restates("Annual leave must not be requested 10 days before leave.", ev)
+
+    calls = []
+
+    def fake(prompt, schema, **kw):
+        calls.append(prompt)
+        return schema(items=[{"sentence": 1, "supported": False, "problem": "x"}])
+
+    problems = verify.support_check(
+        [
+            ("Annual leave must be requested at least 10 days before leave.", [("1", ev[0])]),
+            ("Sick leave is unlimited for everyone.", [("1", ev[0])]),
+        ],
+        None,
+        fake,
+    )
+    assert len(calls) == 1 and "Sentence 1: Sick leave" in calls[0]
+    assert problems and problems[0].startswith("sentence 2 ")

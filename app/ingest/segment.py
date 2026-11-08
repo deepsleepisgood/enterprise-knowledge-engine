@@ -443,16 +443,22 @@ def _turn_passages(
         i += 1
 
 
+SMALL_SHEET_ROWS = 30
+
+
 def _records(bld: _Builder, table: Block, label: str, path: list[str], title: str | None) -> None:
     header, rows = table.rows[0], table.rows[1:]
     sheet = table.position.get("sheet") or label
     first = table.position.get("first_row", 1)
+    # A small sheet is a reference table (grades, rates): one retrievable passage holds all of
+    # it. A large one is a data export: a summary, with the rows as records only.
+    small = len(rows) <= SMALL_SHEET_ROWS
     desc = (
         f"Sheet {sheet}: {len(rows)} rows. Columns: {', '.join(h for h in header if h)}.\n\n"
-        + table_to_markdown([header, *rows[:3]])
+        + table_to_markdown([header, *(rows if small else rows[:3])])
     )
     parent = bld.add(
-        "table", label, path, title, desc, leaf=False, position={"sheet": sheet, "rows": len(rows)}
+        "table", label, path, title, desc, leaf=small, position={"sheet": sheet, "rows": len(rows)}
     )
     for n, r in enumerate(rows, 1):
         text = "; ".join(f"{h}: {v}" for h, v in zip(header, r, strict=False) if v)

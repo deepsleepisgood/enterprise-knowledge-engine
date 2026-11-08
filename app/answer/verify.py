@@ -267,6 +267,26 @@ paraphrase is fine. The facts of the asker's own case (figures, names and dates 
 question) are given: repeating them is supported. Return one item per sentence."""
 
 
+_WORD = re.compile(r"[a-z0-9]+(?:[.'][a-z0-9]+)*")
+_NEGATIONS = {"not", "no", "never", "cannot", "cant", "none", "nor", "without"}
+_FILLER = {"the", "a", "an", "is", "are", "be", "you", "your", "it", "this", "that", "of", "to"}
+
+
+def restates(sentence: str, evidence: list[str], share: float = 0.9) -> bool:
+    """True when the sentence's words (90%+, and every negation) and every number it contains
+    occur in its cited evidence: a lexical restatement, supported without a model call."""
+    words = [w for w in _WORD.findall(norm(sentence)) if w not in _FILLER]
+    if len(words) < 4 or not evidence:
+        return False
+    hay = norm(" ".join(evidence))
+    have = set(_WORD.findall(hay))
+    if not numbers(sentence) <= numbers(hay):
+        return False
+    if any(w in _NEGATIONS and w not in have for w in words):
+        return False
+    return sum(w in have for w in words) / len(words) >= share
+
+
 def support_check(
     sentences: list[tuple[str, list[tuple[str, str]]]],
     calc_text: str | None,
@@ -274,10 +294,17 @@ def support_check(
     question: str = "",
 ) -> list[str]:
     """`sentences`: (text, [(label, passage text)]). Returns the problems found."""
-    if not sentences:
+    # Sentences that restate their evidence word for word need no model check.
+    todo = [
+        (n, s)
+        for n, s in enumerate(sentences, start=1)
+        if not restates(s[0], [body for _, body in s[1]])
+    ]
+    if not todo:
         return []
+    numbering = {i: n for i, (n, _) in enumerate(todo, start=1)}
     blocks = [f"Question (the asker's case, given): {question}"] if question else []
-    for i, (text, cited) in enumerate(sentences, start=1):
+    for i, (_, (text, cited)) in enumerate(todo, start=1):
         ev = "\n".join(f"    [{lbl}] {body[:1500]}" for lbl, body in cited)
         blocks.append(f"Sentence {i}: {text}\n  Evidence:\n{ev}")
     if calc_text:
@@ -292,9 +319,9 @@ def support_check(
     )
     problems = []
     for item in out.items:
-        if not item.supported and 1 <= item.sentence <= len(sentences):
+        if not item.supported and item.sentence in numbering:
             problems.append(
-                f"sentence {item.sentence} is not supported by its citations: "
+                f"sentence {numbering[item.sentence]} is not supported by its citations: "
                 f"{item.problem or 'no backing found'}"
             )
     return problems

@@ -296,7 +296,7 @@ def extractable_passages(session: Session, episode_id: str | None = None) -> lis
     q = select(Passage).where(
         Passage.tenant_id == tenant(),
         Passage.retired_at.is_(None),
-        Passage.segment_kind.not_in(["record", "table"]),
+        Passage.segment_kind != "record",  # a data export's summary is not a leaf
         Passage.meta["leaf"].astext == "true",
     )
     if episode_id:

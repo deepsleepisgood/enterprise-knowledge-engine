@@ -229,3 +229,24 @@ def test_uploaded_email_file_uses_its_date_header() -> None:
         channel="upload",
     )
     assert m.get("dated") == date(2026, 10, 20)
+
+
+def test_small_sheet_is_one_retrievable_passage_large_sheet_is_not() -> None:
+    from pathlib import Path
+
+    from app.ingest.detect import detect
+    from app.ingest.parsers import parse
+    from app.ingest.segment import segment
+
+    f = Path(__file__).resolve().parents[2] / "synthetic" / "corpus2_hr" / "leave_entitlements.xlsx"
+    data = f.read_bytes()
+    doc = split_documents(parse(data, detect(data, f.name)[0]).blocks)[0]
+    tables = [p for p in segment(doc) if p.segment_kind == "table"]
+    assert len(tables) == 1 and tables[0].leaf is True
+    assert "| L4 | 30 | 10 |" in tables[0].text
+
+    rows = [["Id", "Amount"], *[[str(i), str(i * 10)] for i in range(40)]]
+    big = Block(type="table", rows=rows, meta={"spreadsheet": True}, position={"sheet": "Data"})
+    big_doc = split_documents([big])[0]
+    summary = [p for p in segment(big_doc) if p.segment_kind == "table"][0]
+    assert summary.leaf is False and "| 39 |" not in summary.text
