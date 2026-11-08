@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     model_smart: str = "claude-sonnet-5-5"
     model_vision: str = ""  # empty: use model_smart
     api_base_url: str = "http://localhost:8000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"  # comma-separated
+    cors_origin_regex: str = r"https://[\w-]+\.vercel\.app"  # the deployed web app
+    max_upload_mb: int = 50
     tenant_id: str = "default"
     schema_mode: str = "induced"  # induced | baseline (a plug-in's hand-written schema)
     plugins: str = "ap"  # comma-separated plug-in folders under plugins_dir to enable

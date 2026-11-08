@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",
   "uvicorn>=0.30",
+  "python-multipart>=0.0.9",
   "pydantic>=2.7",
   "pydantic-settings>=2.3",
   "sqlalchemy>=2.0",
@@ -27,7 +28,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6", "pgserver>=0.1.4"]
+dev = ["pytest>=8", "ruff>=0.6", "pgserver>=0.1.4", "httpx>=0.27"]
 
 [tool.ruff]
 line-length = 100
@@ -36,6 +37,10 @@ extend-exclude = ["web", ".pgdata", "migrations/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency markers are evaluated once by design.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query", "fastapi.Header"]
 
 [tool.ruff.lint.per-file-ignores]
 # Prompt text is part of the LLM cache key: do not reflow it for line length.

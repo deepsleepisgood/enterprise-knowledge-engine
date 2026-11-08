@@ -90,7 +90,7 @@ def add_alias(session: Session, entity_id: str, alias: str, episode_id: str | No
 
 def get(session: Session, entity_id: str) -> EntityRow | None:
     e = session.get(Entity, entity_id)
-    if e is None:
+    if e is None or e.tenant_id != tenant():
         return None
     aliases = list(
         session.scalars(select(EntityAlias.alias).where(EntityAlias.entity_id == entity_id))

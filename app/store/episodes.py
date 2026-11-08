@@ -112,7 +112,8 @@ def update_source(session: Session, source_id: str, **values: Any) -> None:
 
 
 def get_source(session: Session, source_id: str) -> Source | None:
-    return session.get(Source, source_id)
+    src = session.get(Source, source_id)
+    return src if src is not None and src.tenant_id == tenant() else None
 
 
 def list_sources(session: Session, episode_id: str | None = None) -> list[Source]:
@@ -187,7 +188,8 @@ def passages_for_episode(session: Session, episode_id: str) -> list[Passage]:
 
 
 def get_passage(session: Session, passage_id: str) -> Passage | None:
-    return session.get(Passage, passage_id)
+    p = session.get(Passage, passage_id)
+    return p if p is not None and p.tenant_id == tenant() else None
 
 
 def all_passages(session: Session) -> list[Passage]:

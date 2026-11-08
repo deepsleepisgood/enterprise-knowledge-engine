@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import lru_cache
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
@@ -39,3 +39,12 @@ def session_scope() -> Iterator[Session]:
         raise
     finally:
         session.close()
+
+
+@contextmanager
+def snapshot_scope() -> Iterator[Session]:
+    """A read-only transaction on one snapshot: every read in it sees the same kb_version
+    (REPEATABLE READ in Postgres is snapshot isolation)."""
+    with session_scope() as session:
+        session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
+        yield session

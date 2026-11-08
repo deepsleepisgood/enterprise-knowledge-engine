@@ -6,3 +6,5 @@ calculators: [price, quantity, approvals, einvoice, msme, tds]
 entry: calc.registry
 hooks:
   on_spreadsheet: loaders.ops.on_spreadsheet
+  invoice_search: loaders.ops.invoice_search   # GET /invoices
+  context: loaders.ops.context                 # GET /context, POST /ask with invoice_id

@@ -365,6 +365,27 @@ def by_ids(session: Session, fact_ids: list[int]) -> dict[int, FactRow]:
     return {f.id: _row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)}
 
 
+def timeline(session: Session, subject_id: str, attribute: str | None = None) -> list[FactRow]:
+    """Every version of every fact about a subject, retracted rows included (nothing is
+    deleted), in valid-time then transaction-time order: the history behind the timeline page."""
+    q = _joined().where(Fact.tenant_id == tenant(), Fact.subject_id == subject_id)
+    if attribute is not None:
+        q = q.where(Fact.attribute == attribute)
+    q = q.order_by(Fact.attribute, Fact.valid_from.asc().nulls_first(), Fact.recorded_at, Fact.id)
+    return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
+
+
+def scope_values(session: Session, key: str = "client") -> dict[str, int]:
+    """Distinct values of one scope key on live facts, with counts ("all ..." is general)."""
+    col = Fact.scope[key].astext
+    rows = session.execute(
+        select(col, func.count())
+        .where(Fact.tenant_id == tenant(), Fact.retracted_at.is_(None), col.is_not(None))
+        .group_by(col)
+    )
+    return {v: n for v, n in rows if v and not v.lower().startswith("all")}
+
+
 def live_for_episode(
     session: Session, episode_id: str, statuses: list[str] | None = None
 ) -> list[FactRow]:

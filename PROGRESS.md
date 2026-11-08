@@ -10,7 +10,7 @@ Running log of what was built, test results, assumptions and open issues. Newest
 1. Read the live run (`reports/live_p2_p4.log`): P2 graph acceptance, P3 92 scenarios (induced), P4 T1-T8. Fix what fails.
 2. `python scripts/run_replay.py` (re-extracts under the current schema: ~45 min on NIM), `python scripts/run_second_corpus.py` (report in `reports/second_corpus_<date>.md`), `python scripts/run_eval.py --split dev`, then `--config ablation`. Format invariance and the baseline-schema scenarios are slow on NIM: run them after switching to Anthropic.
 3. Hand-grade `eval/judge/hand_graded.csv` (written by the first full run of `run_eval.py`) for judge calibration.
-4. Phase 6 (fix loop on dev failures, conflict scan), Phase 7 (API).
+4. Phase 6 fix loop on dev failures (conflict scan done: 14/15). Phase 7 API done (`uvicorn app.api.main:app`); next Phase 8 wiring (set `NEXT_PUBLIC_API_BASE_URL`) and an API key before the public deploy.
 
 **v2 migration plan (phases 0–3 redone)**
 - [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
@@ -306,3 +306,34 @@ The user asked to use NVIDIA NIM keys for now and Anthropic later. This deviates
 **Phase 6 conflict scan:** `app/graph/conflicts.py`, run after every build (`build_graph.py`, test build) and by `scripts/conflict_report.py --score`. Recall 12/15 on the whole graph and 12/15 with SOP v4.0 14 excluded; authoritative right 11/12 (C15: the key names v4.0 7, the scan reports v3.1's self-contradiction). Missed C03 (FAQ price tolerance on cement vs memo quantity tolerance), C07, C11. 46 extra conflicts to label for precision (`reports/conflicts_20261108_extra.csv`). C14 matched on a weak pair (exception review) rather than the cut-off change.
 
 **Open issues:** live acceptance and full eval numbers pending; T11 needs Phase 9 governance (expert replies held for the owner); NIM cost is not priced (cost_usd 0); `bge-reranker-base` is 1 GB (watch memory on the deploy host); schema v2 has some value-in-key attributes and a near-duplicate default-payment-term pair.
+
+## 2026-11-08 — Phase 7 (API) and conflict scan v2
+
+### Phase 7: API (`app/api/`, `uvicorn app.api.main:app --port 8000`, docs at `/docs`)
+
+Every BUILD_PLAN endpoint, as thin routers over the same store, answer and graph functions the scripts and worker use: `POST /ask`; `POST /episodes` (text or base64 .eml), `POST /episodes/upload` (files, zips), `GET /episodes[/{id}[/original]]`; `GET/PUT /schema`, `POST /schema/freeze`; `GET /entities[/{id}[/timeline]]`, `POST /entities/merge`, `POST /entities/{id}/split` (501: cut line); `GET /facts` (`valid_on`, `known_at`); `GET /plugins`, `GET /bindings`, `PUT /bindings/{id}`, `POST /calculate/{plugin}/{family}`; `GET /context`, `GET /invoices`, `GET /scopes`; `GET /changes`, `POST /changes/{id}/ack`; `GET /review-queue`, `POST /review/{id}` (`row_version`, 409); `POST/GET /escalations`, `/reply`, `/close`; `POST /answers/{id}/report`; `POST /conflict-scan` (queued as worker job `conflict_scan`), `GET /conflicts`, `POST /conflicts/{id}` (resolve/dismiss); `GET /passages/{id}`; `GET /version`, `GET /health`.
+
+- Tenant from `X-Tenant` (else TENANT_ID), set by an ASGI middleware for the whole request. Every response carries `X-KB-Version`; object bodies also `kb_version` (lists stay lists: the web client reads them as arrays). Reads use one REPEATABLE READ, read-only snapshot. CORS: localhost:3000 and `*.vercel.app` (`CORS_ORIGINS`, `CORS_ORIGIN_REGEX`), `X-KB-Version` exposed.
+- AP specifics stay in the plug-in: new hooks `invoice_search` and `context` in `plugins/ap/plugin.yaml`; the core calls `registry.hooks(...)`. `/ask` with `invoice_id` takes the invoice's client (mapped onto a rule scope: "Arvana Infra Projects Ltd" -> "Arvana Infra Projects") and returns `invoice_context` on the card.
+- `/scopes` lists client scopes rules are actually scoped to (`facts.scope_values`), not every entity typed `client` (extraction had typed "client CFO", "Client QA" as clients).
+- Review decisions are recorded with the optimistic lock; publishing their effects is Phase 9.
+- Tests: `tests/integration/test_api_db.py` (14) covers every endpoint on the leave-policy graph with fake LLM: answers and as-of, intake and dedupe, timeline with superseded versions kept, merge, calculator errors (422, never a default), change feed and acks, review 409s, escalation reply/close/report, conflict queue/list/status, tenant isolation, CORS, OpenAPI. Full suite 206 passed.
+- Live check (uvicorn on the dev graph): `/ask` T1 answered with SOP v4.0 4.2 and 14 (2 min 17 s while the conflict scan held the NIM rate budget; ~10 s normally); `/passages`, timeline (2% superseded -> 1%), `/facts?valid_on=2025-06-01` (2%), `/invoices`, `/context`, `/docs` all correct.
+
+Bugs the API work exposed and fixed:
+- `get_source`, `get_passage` and `entities.get` did not check the tenant (a known id from another tenant was readable). Fixed in the store.
+- The AP operations loader wrote NaN into JSONB for blank cells (Postgres rejects it), so vendors and invoices never loaded; the hook job had also run before the hook was declared. Cells are now cleaned per record (pandas re-infers a None column as NaN); dev DB reloaded: 650 vendors, 9,000 invoices. Test: `tests/plugins/test_ops_loader.py`.
+- Conflicts piled up across scans (77 + new, never closed). Scans now upsert (an owner's resolve/dismiss survives a rescan) and a complete scan marks open conflicts it no longer finds `cleared` (kept, not deleted).
+
+**Not in the MVP:** no authentication (anyone with the URL can call write endpoints: needs at least a shared key before the public deploy); entity split; SSE `/stream` (Phase 11).
+
+### Conflict scan v2 (`conflict-v2`): recall 14/15 both ways (was 12/15)
+
+`scripts/conflict_report.py --score` on the dev graph: **14/15 with and 14/15 without SOP v4.0 14; authoritative source right 13/14; extras to label 36 (was 46) and 28 without the change table.** Report: `reports/conflicts_20261108.md`. Changes, all generic:
+- A shorter list from an outdated document (superseded or stale source, or a non-current fact) is no longer settled as "narrower" without a model: the judge reads it (C07: one approver in v3.1 vs two in v4.0).
+- The judge sees each fact's source passage, not only the extractor's paraphrase, and is told parameter names can be imprecise.
+- When a neighbour finds the passage stating a rule, the outdated fact is also compared with that passage's numeric facts in the same unit (the matching number can sit in a sibling fact).
+- Judge calls run 4 at a time through the gateway's rate limiter (the scan was serial: 34 min for 168 judgements).
+- Scorer (test code): when several known conflicts share the same sections, ties on topic words are broken by the values each one names (C11's "45 vs 60 days" had been credited to C08 "Payment runs").
+
+Still missed: **C03**. The FAQ row ("Infra cement over-invoiced by 6%? ... 10% tolerance on cement and steel") was extracted as a *price* tolerance and the memo's 5% is a *quantity* tolerance; the judge calls them unrelated even with both passages. The FAQ wording is ambiguous; not tuned further to avoid fitting one case. C14 now has the real cut-off pair (third-last vs second-last working day); the scorer's listed match is a weaker pair from the same sections (accrual restated), which is also one of the extras to label. One judge call failed (NIM) and stayed undecided.
