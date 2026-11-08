@@ -35,6 +35,7 @@ HANDLER_MODULES = (
     "app.graph.pipeline",
     "app.answer.index",
     "app.answer.escalate",
+    "app.graph.conflicts",
 )
 
 

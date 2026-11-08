@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.store.base import tenant, utcnow
 from app.store.models import (
+    Ack,
     Change,
     Conflict,
     KbVersion,
@@ -146,6 +147,30 @@ def add_conflict(session: Session, **values: Any) -> int | None:
     return session.scalar(stmt)
 
 
+def upsert_conflict(session: Session, **values: Any) -> int:
+    """Record a conflict found by a scan; a pair seen before keeps its id and owner status
+    (a dismissed conflict stays dismissed) but takes the new reason."""
+    a, b = sorted((values.pop("fact_a"), values.pop("fact_b")))
+    stmt = pg_insert(Conflict).values(tenant_id=tenant(), fact_a=a, fact_b=b, **values)
+    stmt = stmt.on_conflict_do_update(
+        constraint="uq_conflicts_pair",
+        set_={
+            "reason": stmt.excluded.reason,
+            "authoritative_fact": stmt.excluded.authoritative_fact,
+        },
+    ).returning(Conflict.id)
+    return int(session.scalar(stmt))
+
+
+def clear_conflicts_except(session: Session, keep: set[int]) -> int:
+    """After a full scan: open conflicts it no longer finds are marked `cleared` (kept, never
+    deleted, so the history of what was flagged survives)."""
+    q = update(Conflict).where(Conflict.tenant_id == tenant(), Conflict.status == "open")
+    if keep:
+        q = q.where(Conflict.id.not_in(keep))
+    return session.execute(q.values(status="cleared")).rowcount or 0
+
+
 def list_conflicts(session: Session, status: str | None = None) -> list[Conflict]:
     q = select(Conflict).where(Conflict.tenant_id == tenant())
     if status:
@@ -195,14 +220,79 @@ def get_schema(session: Session, version: int) -> Schema | None:
     )
 
 
-def decide_review_item(session: Session, item_id: int, status: str, by: str) -> None:
-    session.execute(
-        update(ReviewItem)
-        .where(ReviewItem.id == item_id)
-        .values(
-            status=status,
-            decided_by=by,
-            decided_at=utcnow(),
-            row_version=ReviewItem.row_version + 1,
-        )
+def decide_review_item(
+    session: Session,
+    item_id: int,
+    status: str,
+    by: str,
+    row_version: int | None = None,
+    payload: dict[str, Any] | None = None,
+) -> bool:
+    """Record a decision. With `row_version`, only if nobody decided or edited the item since
+    (optimistic lock): returns False when the version no longer matches."""
+    where = [ReviewItem.tenant_id == tenant(), ReviewItem.id == item_id]
+    if row_version is not None:
+        where.append(ReviewItem.row_version == row_version)
+    values: dict[str, Any] = {
+        "status": status,
+        "decided_by": by,
+        "decided_at": utcnow(),
+        "row_version": ReviewItem.row_version + 1,
+    }
+    if payload is not None:
+        values["payload"] = payload
+    res = session.execute(update(ReviewItem).where(*where).values(**values))
+    return bool(res.rowcount)
+
+
+def get_review_item(session: Session, item_id: int) -> ReviewItem | None:
+    return session.scalar(
+        select(ReviewItem).where(ReviewItem.tenant_id == tenant(), ReviewItem.id == item_id)
     )
+
+
+# ---------------------------------------------------------------- acknowledgements
+
+
+def ack_change(session: Session, change_id: int, user_id: str) -> None:
+    session.execute(
+        pg_insert(Ack)
+        .values(tenant_id=tenant(), change_id=change_id, user_id=user_id)
+        .on_conflict_do_nothing(constraint="uq_ack")
+    )
+
+
+def ack_counts(session: Session, change_ids: list[int]) -> dict[int, int]:
+    if not change_ids:
+        return {}
+    rows = session.execute(
+        select(Ack.change_id, func.count())
+        .where(Ack.tenant_id == tenant(), Ack.change_id.in_(change_ids))
+        .group_by(Ack.change_id)
+    )
+    return dict(rows.all())
+
+
+def get_change(session: Session, change_id: int) -> Change | None:
+    return session.scalar(
+        select(Change).where(Change.tenant_id == tenant(), Change.id == change_id)
+    )
+
+
+def get_conflict(session: Session, conflict_id: int) -> Conflict | None:
+    return session.scalar(
+        select(Conflict).where(Conflict.tenant_id == tenant(), Conflict.id == conflict_id)
+    )
+
+
+def set_conflict_status(session: Session, conflict_id: int, status: str) -> bool:
+    res = session.execute(
+        update(Conflict)
+        .where(Conflict.tenant_id == tenant(), Conflict.id == conflict_id)
+        .values(status=status)
+    )
+    return bool(res.rowcount)
+
+
+def ping(session: Session) -> bool:
+    return session.execute(select(1)).scalar() == 1

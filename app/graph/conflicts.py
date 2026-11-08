@@ -39,10 +39,12 @@ from app.store.base import tenant
 from app.store.facts import FactRow
 from app.store.models import Source
 
-PROMPT_VERSION = "conflict-v1"
+PROMPT_VERSION = "conflict-v2"
 Judgement = Literal["same", "narrower", "different", "unrelated"]
 NEIGHBOURS = 4
 MIN_SIMILARITY = 0.75
+JUDGE_THREADS = 4  # the LLM gateway still enforces the provider's rate and concurrency limits
+OUTDATED = {"superseded", "overridden", "pending", "provisional", "stale"}
 
 
 class ConflictVerdict(BaseModel):
@@ -59,7 +61,9 @@ Answer:
   contradict it;
 - 'different' if both are about the same parameter and following B would give a different
   result from following A (a different value, threshold, date, step, approver or list).
-Judge only the rule, not the wording."""
+Judge only the rule, not the wording. The statements and parameter names were written by an
+extraction model and can name the parameter imprecisely: when the source passages show that both
+are about the same parameter, judge them as such."""
 
 
 @dataclass
@@ -84,6 +88,7 @@ class ScanReport:
     undecided: int = 0
     found: list[Found] = field(default_factory=list)
     failures: list[str] = field(default_factory=list)
+    cleared: int = 0  # open conflicts from earlier scans this one no longer finds
 
     def summary(self) -> dict[str, Any]:
         kinds: dict[str, int] = defaultdict(int)
@@ -97,6 +102,7 @@ class ScanReport:
             "conflicts": len(self.found),
             "by_kind": dict(kinds),
             "failures": len(self.failures),
+            "cleared": self.cleared,
         }
 
 
@@ -148,14 +154,18 @@ class ModelJudge:
             structured_fn = structured
         self._structured = structured_fn
         self.failures: list[str] = []
+        self.passage_text: dict[str, str] = {}  # filled by `scan` before judging
+
+    def _side(self, tag: str, f: FactRow) -> str:
+        source = self.passage_text.get(f.passage_id or "") or f.quote or ""
+        return (
+            f"Statement {tag} ({f.attribute}, about {f.subject_name or f.subject_id}):\n"
+            f"{f.statement}\nValue {tag}: {value_text(f)}\n"
+            f"Source passage {tag} ({f.source_label or ''} {f.locator or ''}):\n{source[:900]}"
+        )
 
     def __call__(self, a: FactRow, b: FactRow) -> Judgement | None:
-        prompt = (
-            f"Statement A ({a.attribute}, about {a.subject_name or a.subject_id}):\n"
-            f"{a.statement}\nValue A: {value_text(a)}\nQuote A: {(a.quote or '')[:600]}\n\n"
-            f"Statement B ({b.attribute}, about {b.subject_name or b.subject_id}):\n"
-            f"{b.statement}\nValue B: {value_text(b)}\nQuote B: {(b.quote or '')[:600]}"
-        )
+        prompt = f"{self._side('A', a)}\n\n{self._side('B', b)}"
         try:
             out: ConflictVerdict = self._structured(
                 prompt,
@@ -170,6 +180,48 @@ class ModelJudge:
             self.failures.append(f"{a.id} vs {b.id}: {type(exc).__name__}: {exc}")
             return None
         return out.verdict
+
+
+IN_FORCE = ("current", "corroborating")
+
+
+@dataclass
+class _Pair:
+    auth: FactRow
+    other: FactRow
+    via: str
+    group: list[FactRow]
+    verdict: Judgement | None
+    by: str = "deterministic"
+
+
+def _unit(f: FactRow) -> str | None:
+    """The unit of a numeric value ('' when unitless), None for text and lists."""
+    v = f.value or {}
+    if v.get("type") not in NUMERIC or v.get("number") is None:
+        return None
+    return _norm(str(v.get("unit") or "")).rstrip("s")
+
+
+def _judge_all(session: Session, pairs: list[_Pair], judge: Judge | None, rep: ScanReport) -> None:
+    """Judge every pair `quick_verdict` left open, in parallel (results are cached)."""
+    todo = [p for p in pairs if p.verdict is None]
+    if judge is None or not todo:
+        return
+    if isinstance(judge, ModelJudge):
+        from app.store import episodes as estore
+
+        pids = sorted({x.passage_id for p in todo for x in (p.auth, p.other) if x.passage_id})
+        judge.passage_text.update(
+            {pid: p.text or "" for pid, p in estore.passages_by_ids(session, pids).items()}
+        )
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=JUDGE_THREADS) as pool:
+        verdicts = list(pool.map(lambda p: judge(p.auth, p.other), todo))
+    for p, v in zip(todo, verdicts, strict=True):
+        rep.judged += 1
+        p.verdict, p.by = v, "model"
 
 
 def _client(f: FactRow) -> str:
@@ -318,6 +370,11 @@ def scan(
 
     rep = ScanReport()
     seen: set[tuple[int, str, str]] = set()  # (authoritative id, other source, other value)
+    pairs: list[_Pair] = []
+
+    def outdated(f: FactRow) -> bool:
+        s = sources.get(f.source_id or "")
+        return f.status in OUTDATED or (s is not None and s.status in OUTDATED)
 
     def compare(auth: FactRow, other: FactRow, via: str, group: list[FactRow] = ()) -> None:
         key = (auth.id, other.source_id or "", _norm(value_text(other)))
@@ -325,31 +382,19 @@ def scan(
             return
         seen.add(key)
         rep.compared += 1
-        verdict, by = quick_verdict(auth, other), "deterministic"
+        verdict = quick_verdict(auth, other)
         # A neighbour is another attribute: equal or different values say nothing until the
         # judge has read both statements. Inside one group, different numbers settle a conflict
-        # only across two sources (one source may state two conditions).
-        if via == "neighbour" or (verdict == "different" and _kind(auth, other) != "value"):
+        # only across two sources (one source may state two conditions). A shorter list in an
+        # outdated document is usually the old rule (one approver where there are now two),
+        # not a partial mention, so the judge reads it.
+        if (
+            via == "neighbour"
+            or (verdict == "different" and _kind(auth, other) != "value")
+            or (verdict == "narrower" and outdated(other))
+        ):
             verdict = None
-        if verdict is None and judge is not None:
-            rep.judged += 1
-            verdict, by = judge(auth, other), "model"
-        if verdict is None:
-            rep.undecided += 1
-            return
-        if verdict == "different":
-            kind = _kind(auth, other)
-            support = [
-                f
-                for f in group
-                if f.id != auth.id
-                and f.source_id == auth.source_id
-                and f.passage_id != auth.passage_id
-                and quick_verdict(auth, f) == "same"
-            ]
-            rep.found.append(
-                Found(auth, other, kind, reason(auth, other, kind, sources), by, via, None, support)
-            )
+        pairs.append(_Pair(auth, other, via, list(group), verdict))
 
     orphans: list[FactRow] = []
     for _key, group in sorted(groups.items()):
@@ -391,10 +436,11 @@ def scan(
 
     # Passages that correct themselves.
     structured_fn = judge._structured if isinstance(judge, ModelJudge) else None
+    self_found: list[Found] = []
     for facts_, why in passage_self_check(session, rows, structured_fn):
         rep.judged += 1
         a, b = facts_[0], facts_[-1]
-        rep.found.append(
+        self_found.append(
             Found(
                 a,
                 b,
@@ -409,20 +455,69 @@ def scan(
     firsts: dict[tuple[str, str, str], FactRow] = {}
     for f in orphans:
         firsts.setdefault((f.source_id or "", f.attribute, _norm(value_text(f))), f)
-    pairs = fstore.nearest_current(
+    hits = fstore.nearest_current(
         session, [f.id for f in firsts.values()], k=neighbours, min_sim=min_similarity
     )
-    near = fstore.by_ids(session, sorted({c for _, c, _ in pairs} - set(by_id)))
-    for fid, cid, _sim in pairs:
+    near = fstore.by_ids(session, sorted({c for _, c, _ in hits} - set(by_id)))
+    hit_passages: dict[int, set[str]] = defaultdict(set)
+    for fid, cid, _sim in hits:
         cur = by_id.get(cid) or near.get(cid)
         if cur is not None and cur.passage_id not in exclude and fid in by_id:
             compare(cur, by_id[fid], "neighbour")
+            if cur.passage_id:
+                hit_passages[fid].add(cur.passage_id)
+    # The neighbour found the passage that states the rule, but the matching number may sit in
+    # a sibling fact of that passage ("cement, steel, sand: up to 5%" -> materials and 5%).
+    siblings = fstore.live_for_passages(
+        session, sorted({p for ps in hit_passages.values() for p in ps})
+    )
+    by_passage: dict[str, list[FactRow]] = defaultdict(list)
+    for c in siblings:
+        if c.status in IN_FORCE and c.kind != "practice" and not c.attribute.startswith("other:"):
+            by_passage[c.passage_id or ""].append(c)
+    for fid, pids in sorted(hit_passages.items()):
+        f = by_id[fid]
+        unit = _unit(f)
+        if unit is None:
+            continue
+        for pid in sorted(pids):
+            for c in by_passage.get(pid, []):
+                if _unit(c) == unit:
+                    compare(c, f, "neighbour")
+
+    _judge_all(session, pairs, judge, rep)
+    for p in pairs:
+        if p.verdict is None:
+            rep.undecided += 1
+        elif p.verdict == "different":
+            kind = _kind(p.auth, p.other)
+            support = [
+                f
+                for f in p.group
+                if f.id != p.auth.id
+                and f.source_id == p.auth.source_id
+                and f.passage_id != p.auth.passage_id
+                and quick_verdict(p.auth, f) == "same"
+            ]
+            rep.found.append(
+                Found(
+                    p.auth,
+                    p.other,
+                    kind,
+                    reason(p.auth, p.other, kind, sources),
+                    p.by,
+                    p.via,
+                    None,
+                    support,
+                )
+            )
+    rep.found += self_found
 
     if isinstance(judge, ModelJudge):
         rep.failures += judge.failures
     if record:
         for c in rep.found:
-            c.conflict_id = kb.add_conflict(
+            c.conflict_id = kb.upsert_conflict(
                 session,
                 subject_id=c.authoritative.subject_id,
                 attribute=c.authoritative.attribute,
@@ -432,6 +527,10 @@ def scan(
                 kind=c.kind,
                 authoritative_fact=c.authoritative.id,
                 reason=c.reason,
+            )
+        if not exclude and not rep.failures:  # only a complete scan can say what is gone
+            rep.cleared = kb.clear_conflicts_except(
+                session, {c.conflict_id for c in rep.found if c.conflict_id}
             )
     return rep
 
@@ -443,6 +542,20 @@ def scan_tenant(exclude_passages: set[str] | None = None, judge: Judge | None = 
     with session_scope() as s:
         rep = scan(s, judge=judge or ModelJudge(), exclude_passages=exclude_passages)
         return rep.summary()
+
+
+def conflict_scan_job(payload: dict[str, Any]) -> dict[str, Any]:
+    """Worker job `conflict_scan` (queued by POST /conflict-scan)."""
+    return scan_tenant(exclude_passages=set(payload.get("exclude_passages") or []))
+
+
+def _register() -> None:
+    from app.worker import handler
+
+    handler("conflict_scan")(conflict_scan_job)
+
+
+_register()
 
 
 def describe(f: Found) -> dict[str, Any]:

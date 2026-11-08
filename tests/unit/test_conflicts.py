@@ -110,3 +110,45 @@ def test_key_places_and_matching() -> None:
     assert match(wrong, key) is None
     sc = score([d], key)
     assert sc["recall"] == 1 and sc["authoritative_right"] == ["K2"]
+
+
+def test_tie_on_topic_words_is_broken_by_stated_values() -> None:
+    from evaluation.conflict_key import Known
+
+    key = [
+        Known(
+            "K1",
+            "Payment runs",
+            places("PS-07_N.docx §9: x"),
+            places("PS-07_O.docx §8: y"),
+            "SOP v4.0",
+            detail="Tuesday and Friday Thursday",
+        ),
+        Known(
+            "K2",
+            "MSME payment term",
+            places("PS-07_N.docx §9: x"),
+            places("PS-07_O.docx §8: y"),
+            "SOP v4.0",
+            detail="45 days 15 days 60 days",
+        ),
+    ]
+    # "payment" and "run" tie K1 (2 words) with K2 ("payment", "msme"); the values decide
+    d = Detected(
+        "PS-07_N.docx",
+        "9",
+        "PS-07_O.docx",
+        "8",
+        "AP SOP v4.0",
+        "value",
+        "payment_run_schedule.msme_max_days 45 day 60 days",
+    )
+    assert match(d, key).id == "K2"
+
+
+def test_unit_only_for_numbers() -> None:
+    from app.graph.conflicts import _unit
+
+    assert _unit(fact(1, {"type": "percentage", "number": 5, "unit": "%"})) == "%"
+    assert _unit(fact(1, {"type": "days", "number": 45, "unit": "days"})) == "day"
+    assert _unit(fact(1, {"type": "enum", "text": "Friday"})) is None

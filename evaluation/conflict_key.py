@@ -33,6 +33,7 @@ class Known:
     conflicting: list[Place]
     authoritative: str
     internal: bool = False
+    detail: str = ""  # the values both sides state (after each "file §x:"), for tie-breaks
 
 
 @dataclass
@@ -91,6 +92,10 @@ def load_known(path: Path = EVAL) -> list[Known]:
                 conflicting=con,
                 authoritative=str(d["authoritative_source"]),
                 internal=not con,
+                detail=" ".join(
+                    _after_colon(str(d[c]))
+                    for c in ("current_rule_and_source", "conflicting_statement_and_source")
+                ),
             )
         )
     return out
@@ -120,6 +125,16 @@ def words(s: str) -> set[str]:
     return {w.rstrip("s") for w in re.findall(r"[a-z]{3,}", s.lower())} - _STOP
 
 
+def _after_colon(text: str) -> str:
+    return re.sub(r"\[[^\]]*\]", " ", text).partition(":")[2]
+
+
+def tokens(s: str) -> set[str]:
+    """Words and numbers ("45 days" -> {"45", "day"}), for comparing stated values."""
+    nums = {n.replace(",", "").rstrip(".") for n in re.findall(r"\d[\d,.]*", s)}
+    return words(s) | {n for n in nums if n}
+
+
 def candidates(d: Detected, key: list[Known]) -> list[Known]:
     out = []
     for k in key:
@@ -140,8 +155,10 @@ def match(d: Detected, key: list[Known]) -> Known | None:
     cands = candidates(d, key)
     if len(cands) <= 1:
         return cands[0] if cands else None
-    dw = words(d.text)
-    scored = sorted(cands, key=lambda k: -len(words(k.topic) & dw))
+    # Topic words first; on a tie, the values each known conflict names ("45 days ... 60 days"
+    # vs "Tuesday and Friday") decide which one the detected pair is.
+    dw, dt = words(d.text), tokens(d.text)
+    scored = sorted(cands, key=lambda k: (-len(words(k.topic) & dw), -len(tokens(k.detail) & dt)))
     best = scored[0]
     return best if words(best.topic) & dw else None
 
