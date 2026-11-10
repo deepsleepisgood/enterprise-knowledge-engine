@@ -77,20 +77,30 @@ def post_episode(body: EpisodeTextIn, s: Session = Depends(write_session)) -> di
     return {"episodes": _submit_all(s, eps)}
 
 
+@router.get("/connectors")
+def connectors() -> dict[str, Any]:
+    """Connector status for the Sources page (the watched folder's path and last scan)."""
+    from app.ingest import watch
+
+    return {"watched_folder": watch.status()}
+
+
 @router.post("/episodes/upload", status_code=202)
 async def upload(
     files: list[UploadFile] = File(...),
     sender: str | None = None,
+    sender_role: str | None = None,
     s: Session = Depends(write_session),
 ) -> dict[str, Any]:
-    """One or more files; a folder is sent as its files, a zip expands to its members."""
+    """One or more files; a folder is sent as its files, a zip expands to its members.
+    `sender_role` lets governance match the sender-authority map (app/govern)."""
     limit = get_settings().max_upload_mb * 1024 * 1024
     eps: list[EpisodeIn] = []
     for f in files:
         data = await f.read(limit + 1)
         if len(data) > limit:
             raise HTTPException(413, f"{f.filename} is larger than {limit // 2**20} MB")
-        eps += from_upload(f.filename or "upload.bin", data, sender=sender)
+        eps += from_upload(f.filename or "upload.bin", data, sender=sender, sender_role=sender_role)
     if not eps:
         raise HTTPException(422, "no usable files (empty, hidden or system files are skipped)")
     return {"episodes": _submit_all(s, eps)}

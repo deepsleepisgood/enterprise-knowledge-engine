@@ -20,6 +20,7 @@ Every variant re-extracts its passages with the LLM; run it with a fast provider
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from datetime import date, datetime
@@ -27,6 +28,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+# The owner seeding or measuring the knowledge base: no approval step for these inputs.
+os.environ.setdefault("GOVERNANCE", "false")
 
 from app.core.db import session_scope  # noqa: E402
 from app.store import episodes as estore  # noqa: E402

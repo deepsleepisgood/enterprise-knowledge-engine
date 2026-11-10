@@ -1,14 +1,14 @@
-# Conflict scan — 10 Nov 2026 12:09 (tenant default)
+# Conflict scan — 10 Nov 2026 14:04 (tenant default)
 
-- scan: {'groups': 59, 'compared': 203, 'judged': 123, 'undecided': 0, 'conflicts': 64, 'by_kind': {'value': 56, 'practice_vs_rule': 3, 'self_contradiction': 5}, 'failures': 0, 'cleared': 5} in 4s
+- scan: {'groups': 59, 'compared': 203, 'judged': 122, 'undecided': 0, 'conflicts': 65, 'by_kind': {'value': 57, 'practice_vs_rule': 3, 'self_contradiction': 5}, 'failures': 0, 'cleared': 0} in 1s
 - judge: MODEL_SMART, thinking off
 
 ## Recall against the known conflicts
 
 | run | recall | authoritative right | missed | extra (to label) |
 | --- | --- | --- | --- | --- |
-| all | 14/15 | 13/14 | C03 | 30 |
-| without caveat | 14/15 | 13/14 | C03 | 22 |
+| all | 15/15 | 14/15 | - | 30 |
+| without caveat | 15/15 | 14/15 | - | 22 |
 
 'without caveat' excludes passages in PS-07_AP_SOP_v4.0_2026.docx:14 (the change table).
 
@@ -16,6 +16,7 @@
 
 - **C01** Price tolerance price_tolerance.general_cap_amount: AP SOP v4.0 4.2 = 500 INR vs AP SOP v3.1 3 = 1000 INR. AP SOP v4.0 4.2, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.
 - **C02** Quantity tolerance quantity_tolerance.general_percentage: AP SOP v4.0 4.3 = 0 % vs AP SOP v3.1 3 = 2 %. AP SOP v4.0 4.3, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.
+- **C03** Quantity tolerance quantity_tolerance.infra_material_percentage: CM-INF-02 Part C = 5 % vs Part F Part F = 10 %. Part F, dated 09 Oct 2023 is stale; CM-INF-02 Part C, dated 15 Apr 2026 is current (for Arvana Infra Projects).
 - **C04** Rounding difference tolerance rounding_tolerance.max_accepted_difference: AP SOP v4.0 4.4 = 10 INR vs AP SOP v3.1 3 = 50 INR. AP SOP v4.0 4.4, dated 01 Apr 2026 replaced AP SOP v3.1, dated 01 Jul 2023.
 - **C05** IRN requirement irn_requirement.threshold_turnover: AP SOP v4.0 5.4 = 5e+07 INR vs AP SOP v3.1 4 = 1e+08 INR. AP SOP v4.0 5.4, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.
 - **C06** GST compliance checks gst_compliance.itc_available_date: AP SOP v4.0 5.5 = 14 day vs AP SOP v3.1 4 = 20 day. AP SOP v4.0 5.5, dated 01 Apr 2026 replaced AP SOP v3.1 4, dated 01 Jul 2023.
@@ -72,6 +73,7 @@
 | value | Invoice approval authority invoice_approval_authority.threshold_amount | AP SOP v4.0 2: 1e+06 INR | AP SOP v3.1 6: 2.5e+06 INR | AP SOP v4.0 2, dated 01 Apr 2026 replaced AP SOP v3.1 6, dated 01 Jul 2023. | deterministic/group |
 | value | Invoice approval authority invoice_approval_authority.threshold_amount | AP SOP v4.0 2: 1e+06 INR | Part F Part F: 2.5e+06 INR | Part F, dated 09 Oct 2023 is superseded; AP SOP v4.0 2, dated 01 Apr 2026 is in force. | deterministic/group |
 | value | Arvana Pharma pharma_qa_release.payment_block_until_release | CM-PHA-01 Part D: true | Part F Part F: false | Part F, dated 09 Oct 2023 is stale; CM-PHA-01 Part D, dated 02 Jan 2026 is current (for Arvana Pharma). | model/scope |
+| value | Quantity tolerance quantity_tolerance.infra_material_percentage | CM-INF-02 Part C: 5 % | Part F Part F: 10 % | Part F, dated 09 Oct 2023 is stale; CM-INF-02 Part C, dated 15 Apr 2026 is current (for Arvana Infra Projects). | deterministic/materials |
 | self_contradiction | Payment run schedule payment_run_schedule.run_day | AP SOP v4.0 9: Tuesday | AP SOP v4.0 9: Friday | AP SOP v4.0 9 states two different values (Tuesday; Friday); the one resolved as in force is Tuesday. | model/self |
 | self_contradiction | Payment run schedule payment_run_schedule.run_day | AP SOP v4.0 9: Tuesday | AP SOP v4.0 14: Tuesday, Friday | AP SOP v4.0 9 states two different values (Tuesday; Tuesday, Friday); the one resolved as in force is Tuesday. | model/self |
 | self_contradiction | Vendor bank account change process vendor_bank_account_change.approval_chain | AP SOP v4.0 2: AP Controller | AP SOP v4.0 8.2, step 3: Vendor Master lead, AP Controller | AP SOP v4.0 2 states two different values (AP Controller; Vendor Master lead, AP Controller); the one resolved as in force is AP Controller. | model/self |

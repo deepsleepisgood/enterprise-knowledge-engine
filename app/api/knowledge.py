@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.api.deps import not_found, parse_day, parse_instant, read_session, row, write_session
@@ -22,7 +23,14 @@ router = APIRouter(tags=["knowledge"])
 
 
 def _schema(sc: Any) -> dict[str, Any] | None:
-    return row(sc) if sc is not None else None
+    """A schema as the engine reads it (validated: one rank per document type)."""
+    if sc is None:
+        return None
+    out = row(sc)
+    # An unparseable draft is shown as stored, so the owner can fix it.
+    with contextlib.suppress(ValueError):
+        out["ontology"] = Ontology.model_validate(sc.ontology).model_dump(mode="json")
+    return out
 
 
 @router.get("/schema")
@@ -150,10 +158,22 @@ def merge(body: Merge, s: Session = Depends(write_session)) -> dict[str, Any]:
     return {"kept": body.keep_id, "merged": body.drop_id, "by": body.by}
 
 
-@router.post("/entities/{entity_id}/split", status_code=501)
-def split(entity_id: str) -> dict[str, Any]:
-    """Cut line (BUILD_PLAN Phase 7): splitting needs per-mention provenance on facts."""
-    raise HTTPException(501, "Splitting an entity is not available in the MVP (cut line).")
+class Split(BaseModel):
+    name: str = Field(min_length=1, max_length=200, description="the new entity's name")
+    aliases: list[str] = Field(min_length=1, description="names that belong to the new entity")
+    by: str
+
+
+@router.post("/entities/{entity_id}/split")
+def split(entity_id: str, body: Split) -> dict[str, Any]:
+    """Owner correction: some of this entity's names are a different entity. Facts whose own
+    words name them move to the new entity as new versions; both sides are resolved again."""
+    from app.graph.split import split_entity
+
+    try:
+        return split_entity(entity_id, body.name.strip(), body.aliases, body.by)
+    except LookupError as exc:
+        raise not_found("entity") from exc
 
 
 # ---------------------------------------------------------------- facts and passages

@@ -1,0 +1,10 @@
+RESULT dev  Q004 correct  7s The answer matches the gold answer exactly, stating payment runs on Tuesday and Friday with a 1 pm cut-off on the previous working day.
+RESULT dev  Q007 correct  28s The answer correctly identifies GSTR-2B as the return used for ITC eligibility and includes the generation date (14th of the following month) matching the gold 
+RESULT dev  Q035 correct  117s The answer correctly states that the invoice is not wrong because legal services from advocates fall under reverse charge (RCM), the buyer pays GST, and such in
+RESULT dev  Q048 correct  10s The answer correctly identifies the invoice as a re-sent copy, explains the transporter's '/A' suffix practice, references the DUP_SUSPECT flag, and includes th
+RESULT dev  Q055 correct  11s The answer correctly states that invoices received after the third-last working day are not posted in the current month and that open GRNs are accrued instead, 
+RESULT dev  Q060 correct  24s The answer correctly states that an invoice missing HSN/SAC code must be returned to the supplier with INV_INCOMPLETE and that supplier invoices must not be cor
+RESULT hold Q017 partial generation 9s 
+RESULT hold Q039 correct  11s 
+RESULT hold Q065 correct  24s 
+RESULT hold Q092 wrong calculator 14s 

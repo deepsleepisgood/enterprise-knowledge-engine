@@ -28,7 +28,7 @@ from app.graph.scope import distinctive_words, fact_client, infers_scope
 from app.store import episodes as estore
 from app.store import facts as fstore
 from app.store import kb
-from app.store.base import advisory_lock, day_start, tenant, utcnow
+from app.store.base import advisory_lock, day_after, day_start, tenant, utcnow
 
 
 @dataclass
@@ -41,6 +41,12 @@ class PublishReport:
     kb_version: int | None = None
     statuses: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     entity_decisions: list[dict[str, Any]] = field(default_factory=list)
+    held_ids: list[int] = field(default_factory=list)  # facts inserted under governance hold
+
+
+def governed(meta: dict[str, Any] | None) -> bool:
+    """A fact held for the owner (app/govern): resolution leaves it alone until a decision."""
+    return bool((meta or {}).get("governance"))
 
 
 def _d(x: Any) -> date | None:
@@ -88,6 +94,47 @@ def _assertion_from_row(
     )
 
 
+def _new_fact(
+    d: Draft,
+    subject_id: str,
+    scope: dict[str, Any],
+    status: str,
+    rank: int,
+    valid_from: datetime | None,
+    valid_to: datetime | None,
+    extra_meta: dict[str, Any],
+    value: dict[str, Any] | None = None,
+    attribute: str | None = None,
+) -> fstore.NewFact:
+    return fstore.NewFact(
+        origin_key=d.origin_key,
+        subject_id=subject_id,
+        attribute=attribute or d.attribute,
+        value=value if value is not None else d.value,
+        statement=d.statement,
+        kind=d.kind,
+        status=status,
+        scope=scope,
+        condition=d.condition,
+        quote=d.quote,
+        passage_id=d.passage_id,
+        episode_id=d.episode_id,
+        source_id=d.source_id,
+        authority_rank=rank,
+        valid_from=valid_from,
+        valid_to=valid_to,
+        confidence=1.0 if d.quote_verified else 0.5,
+        meta={
+            "asserted_from": str(d.asserted_from) if d.asserted_from else None,
+            "asserted_to": str(d.asserted_to) if d.asserted_to else None,
+            "quote_verified": d.quote_verified,
+            "topic": d.topic,
+            **extra_meta,
+            **d.meta,
+        },
+    )
+
+
 def client_context(session: Session, onto: Ontology) -> tuple[dict[str, set[str]], list[int]]:
     """Known clients (the scopes documents declare) and the ranks of the sources declaring them."""
     scoped = [x for x in estore.list_sources(session) if x.client_scope and x.client_scope != "all"]
@@ -105,7 +152,11 @@ def publish(
     summary: str,
     episode_id: str | None = None,
     extra_groups: set[tuple[str, str]] | None = None,
+    hold: str | None = None,
 ) -> PublishReport:
+    """Write drafts into the graph. With `hold` ('provisional' or 'pending'), the drafts are
+    stored with that status for the owner's decision (app/govern) and no group is resolved:
+    nothing in force is retired until the change is approved."""
     advisory_lock(session, f"graph-write:{tenant()}")  # one writer per tenant at a time
     now = utcnow()
     rep = PublishReport()
@@ -158,15 +209,49 @@ def publish(
     touched |= {(subj, d.attribute) for d, subj, _ in new}
     touched |= extra_groups or set()
 
+    if hold:
+        for d, subj, sc in new:
+            live = fstore.live_by_origin(session, [d.origin_key]).get(d.origin_key)
+            if live is not None:
+                rep.unchanged += 1
+                rep.held_ids.append(live.id)
+                continue
+            src = sources[d.source_id]
+            rep.held_ids.append(
+                fstore.insert(
+                    session,
+                    _new_fact(
+                        d,
+                        subj,
+                        sc,
+                        hold,
+                        onto.rank_of(src.doc_type).rank,
+                        day_start(d.asserted_from),
+                        day_after(d.asserted_to),
+                        {"governance": hold, "reason": "held for the process owner"},
+                    ),
+                    at=now,
+                )
+            )
+            rep.inserted += 1
+            rep.statuses[hold] += 1
+        touched = set()
+
     # 3. Resolve each touched group over its own facts only.
     by_group: dict[tuple[str, str], list[tuple[Draft, str, dict[str, Any]]]] = defaultdict(list)
     for item in new:
         by_group[(item[1], item[0].attribute)].append(item)
     key_to_id: dict[str, int] = {}
     pending_supersedes: list[tuple[int, str]] = []
+    changed_keys: set[str] = set()  # inserted or revised in this write
+    rule_changes: list[tuple[str, str, datetime | None, str]] = []  # new, old, effective, what
     group_conflicts = []
     for subject_id, attribute in sorted(touched):
-        rows = {r.origin_key: r for r in fstore.related(session, subject_id, attribute)}
+        rows = {
+            r.origin_key: r
+            for r in fstore.related(session, subject_id, attribute)
+            if not governed(r.meta)
+        }
         extra_src = estore.sources_by_ids(
             session,
             [r.source_id for r in rows.values() if r.source_id and r.source_id not in sources],
@@ -214,6 +299,7 @@ def publish(
                     key_to_id[k] = r.id
                     rep.unchanged += 1
                     continue
+                changed_keys.add(k)
                 key_to_id[k] = fstore.revise(
                     session,
                     r.id,
@@ -229,38 +315,25 @@ def publish(
                 src = sources[d.source_id]
                 key_to_id[k] = fstore.insert(
                     session,
-                    fstore.NewFact(
-                        origin_key=k,
-                        subject_id=a.subject_id,
-                        attribute=a.attribute,
+                    _new_fact(
+                        d,
+                        a.subject_id,
+                        sc,
+                        a.status,
+                        onto.rank_of(src.doc_type).rank,
+                        vf,
+                        vt,
+                        {"reason": a.reason},
                         value=a.value,
-                        statement=d.statement,
-                        kind=d.kind,
-                        status=a.status,
-                        scope=sc,
-                        condition=d.condition,
-                        quote=d.quote,
-                        passage_id=d.passage_id,
-                        episode_id=d.episode_id,
-                        source_id=d.source_id,
-                        authority_rank=onto.rank_of(src.doc_type).rank,
-                        valid_from=vf,
-                        valid_to=vt,
-                        confidence=1.0 if d.quote_verified else 0.5,
-                        meta={
-                            "asserted_from": str(d.asserted_from) if d.asserted_from else None,
-                            "asserted_to": str(d.asserted_to) if d.asserted_to else None,
-                            "quote_verified": d.quote_verified,
-                            "topic": d.topic,
-                            "reason": a.reason,
-                            **d.meta,
-                        },
+                        attribute=a.attribute,
                     ),
                     at=now,
                 )
                 rep.inserted += 1
+                changed_keys.add(k)
             if a.supersedes_key:
                 pending_supersedes.append((key_to_id[k], a.supersedes_key))
+                rule_changes.append((k, a.supersedes_key, vf, a.statement or a.attribute))
         group_conflicts += conflicts
 
     for fid, loser_key in pending_supersedes:
@@ -291,5 +364,20 @@ def publish(
             f"{summary}: {rep.inserted} new, {rep.revised} revised, {rep.retired} retired facts",
             source_episode=episode_id,
         )
+        # One change per rule that changed in this write: what replaced what, from when.
+        for new_key, old_key, effective, what in rule_changes:
+            if new_key not in key_to_id or old_key not in key_to_id:
+                continue
+            if new_key not in changed_keys and old_key not in changed_keys:
+                continue  # resolved again with the same outcome: not news
+            kb.record_change(
+                session,
+                v,
+                what,
+                new_fact=key_to_id[new_key],
+                old_fact=key_to_id[old_key],
+                effective_at=effective,
+                source_episode=episode_id,
+            )
     rep.entity_decisions = resolver.decisions
     return rep

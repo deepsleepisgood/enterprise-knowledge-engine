@@ -364,3 +364,21 @@ Still missed: **C03**. The FAQ row ("Infra cement over-invoiced by 6%? ... 10% t
 - **Dev graph cleanup:** `episodes.delete_episodes` (test data only; the graph itself still never deletes) and `kb.discard_schema_draft`, driven by `scripts/delete_episodes.py` (dry run by default). Removed the canteen expert reply, the visitor parking note and the smoke-test note (3 facts, 3 review items, 8 jobs, 1 escalation and its notification) and schema draft v4; kb v31. Schema draft v3 (from the original corpus) is kept for the owner.
 - `pytest -q`: 215 passed (4 new: three scan rules, one delete test). Ruff clean.
 - **Not fixed:** extraction still labels 26 SOP facts as `practice`; the scan now ignores them as practice-vs-rule, but re-extraction would correct the label itself.
+
+## 2026-11-10 (later) — Client scopes, answer completeness, and the MVP gaps closed
+
+**Client memos:** "Arvana Retail" had been aliased to "Arvana Group" by entity resolution, so the Retail memo's 7 facts were filed under the group. New `app/graph/scope.py`: clients a document declares (`client_scope`) are pinned by exact name (`entities.pin`, `Resolver.resolve(exact=True)`), a client-scoped source keeps its client unless a fact names another known client, and a general source below the memos that names exactly one known client by a distinctive word is that client's fact (not when the condition calls it general). `pipeline.rescope_clients()` moved 21 live facts (kb v32). Verified live per client (Retail, Pharma, Infra).
+
+**Evaluation (160 questions, config D):** 147/160 (91.9%), 3 were NIM 429s → 150/160 (93.8%), citations 97.5%. Answer prompt `answer-v4`: a `details` field filled before the sentences (cut-offs, dates, codes, actions, owners) and a "Can I…" rule; the 10 misses rechecked: 8 now correct → **158/160 (98.8%)** (remaining: Q092 answer-key defect, Q017 partial). The other 150 questions have not been re-run on v4 yet.
+
+**MVP gaps implemented:**
+- **Governance** (`app/govern/`): live inputs after setup (upload, email, API, expert replies, watched folder; `GOVERNANCE=true`, bulk/eval scripts set it false) are held: registered sender + own scope + no high-risk topic → provisional (answerable, labelled), else pending (not applied; sources pending so passages are not evidence). `publish(hold=...)` keeps held facts out of resolution; a new version's link to the old one is deferred until approval. Review approve/reject runs `apply_review`: approve → facts current, sources current, groups resolved, change recorded with sender and reviewer, escalations re-asked; reject → retracted, sources rejected. Retire items now apply too. Live T11: canteen reply held (answer stayed unsupported), approved in Review, asker notified, answer cited the reply; then removed.
+- **Watched folder** (`app/ingest/watch.py`): worker scans `WATCH_DIR` (default `data/inbox`) every 30 s; new/changed files only; `/connectors` and the Sources card show the last scan. Verified live (picked up, dated from its "Effective:" line, held for review).
+- **Entity split** (`app/graph/split.py`, `POST /entities/{id}/split`, Setup → Entities): aliases move to a new entity; facts whose own words name them move as new versions; groups re-resolved.
+- **Department/site scopes:** the metadata classifier's `client_scope` now covers any one audience (client, department, site, region); router wording likewise (`docmeta-v2`, `route-v4`). Not yet re-verified on the Kestrel corpus (needs a re-ingest).
+- **Per-rule changes:** `publish` records one change per replaced rule (old → new, effective date) when the outcome changed.
+- **"Effective:" under the title** is read as header metadata.
+- **Ranking:** one rank per document type (`Ontology` validator; `/schema` returns the validated form): Meridian shows 1–8.
+- **No client chosen:** a rule that exists only for named clients is answered for them by name.
+- **C03:** an outdated numeric statement is compared with in-force rules of the same client, unit and materials under another attribute. **Conflict recall 15/15** both ways, authoritative right 14/15, extras unchanged (30 / 22).
+- Tests: 225 passed (new: governance 4, watch 1, split 1, scope 3, conflict rules 3, delete 1, metadata 1).

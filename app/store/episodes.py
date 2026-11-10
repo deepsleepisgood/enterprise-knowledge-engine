@@ -421,7 +421,11 @@ def delete_episodes(session: Session, episode_ids: list[str]) -> dict[str, int]:
     ).rowcount
     out["review_items"] = session.execute(
         delete(ReviewItem).where(
-            ReviewItem.tenant_id == t, ReviewItem.payload["source_id"].as_string().in_(src_ids)
+            ReviewItem.tenant_id == t,
+            or_(
+                ReviewItem.payload["source_id"].as_string().in_(src_ids),
+                ReviewItem.payload["episode_id"].as_string().in_(ids),
+            ),
         )
     ).rowcount
     out["jobs"] = session.execute(

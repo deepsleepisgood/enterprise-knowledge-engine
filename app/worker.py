@@ -36,6 +36,7 @@ HANDLER_MODULES = (
     "app.answer.index",
     "app.answer.escalate",
     "app.graph.conflicts",
+    "app.govern.apply",
 )
 
 
@@ -118,6 +119,13 @@ def serve(threads: int, poll_s: float = 1.0) -> None:  # pragma: no cover - long
     for i in range(threads):
         threading.Thread(target=loop, args=(i,), daemon=True).start()
     log.info("worker running with %d threads", threads)
+    from app.core.config import get_settings
+
+    if get_settings().watch_enabled:
+        from app.ingest import watch
+
+        threading.Thread(target=watch.loop, daemon=True).start()
+        log.info("watching %s every %ds", watch.folder(), get_settings().watch_interval_s)
     while True:
         time.sleep(60)
         with session_scope() as s:

@@ -451,6 +451,38 @@ def scan(
             for rule_ in client_rules.get(f.attribute, []):
                 compare(rule_, f, "scope")
 
+    # An outdated number about the same materials, client scope and unit as a rule in force
+    # under another attribute (an old FAQ filing "10% on cement and steel" as a price tolerance
+    # where the memo's 5% is a quantity tolerance). Different numbers go to the owner.
+    def materials(f: FactRow) -> set[str]:
+        return {
+            w
+            for m in (f.scope or {}).get("materials") or []
+            for w in re.findall(r"[a-z]+", str(m).lower())
+            if len(w) > 2
+        }
+
+    numeric_rules = [
+        f
+        for f in rows
+        if f.status in IN_FORCE
+        and f.kind != "practice"
+        and not outdated(f)
+        and _unit(f) is not None
+        and materials(f)
+    ]
+    for f in rows:
+        if not outdated(f) or f.kind == "practice" or _unit(f) is None or not materials(f):
+            continue
+        for rule_ in numeric_rules:
+            if (
+                rule_.attribute != f.attribute
+                and _client(rule_) == _client(f)
+                and _unit(rule_) == _unit(f)
+                and materials(rule_) & materials(f)
+            ):
+                compare(rule_, f, "materials")
+
     # Inside one document, whatever its status: two values for one parameter (a worked example
     # that contradicts its own rule). Judged for each source separately.
     own: dict[tuple[str, str, str, str], list[FactRow]] = defaultdict(list)

@@ -135,11 +135,14 @@ export async function apiSend<T>(
 export async function uploadFiles(
   files: File[],
   sender: string,
+  senderRole?: string,
 ): Promise<{ episodes: { episode_id: string; file: string; created: boolean }[] }> {
   if (DEMO_MODE) throw new DemoReadOnlyError();
   const form = new FormData();
   for (const f of files) form.append("files", f, f.webkitRelativePath || f.name);
-  const res = await fetch(`${API_BASE}/episodes/upload?sender=${encodeURIComponent(sender)}`, {
+  const qs = new URLSearchParams({ sender });
+  if (senderRole) qs.set("sender_role", senderRole);
+  const res = await fetch(`${API_BASE}/episodes/upload?${qs.toString()}`, {
     method: "POST",
     body: form,
   });

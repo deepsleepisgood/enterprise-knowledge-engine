@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 ValueType = Literal[
     "percentage", "money", "days", "number", "date", "enum", "text", "list", "boolean"
@@ -63,6 +63,16 @@ class Ontology(BaseModel):
     source_ranking: list[SourceRank] = Field(default_factory=list)
     scope_keys: list[str] = Field(default_factory=lambda: ["client"])
     sender_authority: list[SenderAuthority] = Field(default_factory=list)
+
+    @field_validator("source_ranking")
+    @classmethod
+    def _one_rank_per_type(cls, ranking: list[SourceRank]) -> list[SourceRank]:
+        """A type ranked twice ('superseded SOP' as a second 'sop' entry) only ever uses its
+        first rank; outdated versions lose by their status, not by a second rank."""
+        seen: dict[str, SourceRank] = {}
+        for r in sorted(ranking, key=lambda r: r.rank):
+            seen.setdefault(r.doc_type, r)
+        return list(seen.values())
 
     # ------------------------------------------------------------ lookups
 

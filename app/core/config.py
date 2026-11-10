@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     schema_mode: str = "induced"  # induced | baseline (a plug-in's hand-written schema)
     plugins: str = "ap"  # comma-separated plug-in folders under plugins_dir to enable
     worker_threads: int = 4
+    # Owner approval of inputs that arrive after setup (BUILD_PLAN Phase 9). Bulk seeding and
+    # evaluation scripts turn it off for their own runs.
+    governance: bool = True
+    # Watched folder (SCOPE 4.1): polled by the worker; empty WATCH_DIR means data/inbox.
+    watch_enabled: bool = True
+    watch_dir: str = ""
+    watch_interval_s: int = 30
 
     # Answer pipeline (BUILD_PLAN Phase 4)
     rerank_model: str = "BAAI/bge-reranker-base"  # fastembed cross-encoder; "none" disables

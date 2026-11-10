@@ -108,6 +108,15 @@ def test_complete_returns_text(fake: FakeMessages) -> None:
     assert res.cost_usd == pytest.approx(1200 * 0.10 / 1e6 + 40 * 0.50 / 1e6)
 
 
+def test_thinking_off_uses_each_models_lowest_setting(fake: FakeMessages) -> None:
+    llm.structured("Rule text.", Tolerance, model="smart", thinking=False, prompt_version="th")
+    llm.structured("Rule text.", Tolerance, model="fast", thinking=False, prompt_version="th")
+    llm.structured("Rule text.", Tolerance, model="smart", prompt_version="th")
+    assert fake.calls[0]["thinking"] == {"type": "between_tools"}
+    assert fake.calls[1]["thinking"] == {"type": "disabled"}
+    assert "thinking" not in fake.calls[2] and "thinking_off" not in fake.calls[0]
+
+
 def test_refusal_raises(fake: FakeMessages) -> None:
     fake.stop_reason = "refusal"
     with pytest.raises(llm.LLMError):

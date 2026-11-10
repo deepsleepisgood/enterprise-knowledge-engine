@@ -90,17 +90,42 @@ function ItemBody({ item }: { item: ReviewItem }) {
     case "change": {
       const before = str(p.old_value ?? p.before);
       const after = str(p.new_value ?? p.after);
+      const facts = (p.facts ?? []) as { statement: string; client?: string; valid_from?: string | null }[];
+      const reasons = (p.reasons ?? []) as string[];
+      const held = p.status === "pending";
       return (
         <div className="mt-2 text-sm text-ink">
           <p>{str(p.summary)}</p>
+          {p.status ? (
+            <p className="mt-1.5 text-[13px] text-muted">
+              {held ? "Not applied: answers ignore it until you approve." : "Provisional: answers use it now, labelled provisional, until you confirm."}
+              {reasons.length > 0 && <> Why: {reasons.join("; ")}.</>}
+            </p>
+          ) : null}
           {(before || after) && (
             <p className="mt-2 rounded-xl bg-canvas p-3 leading-relaxed">
               {before && <s className="text-muted">{before}</s>} {after && <span className="underline decoration-ink underline-offset-2">{after}</span>}
             </p>
           )}
+          {facts.length > 0 && (
+            <ul className="mt-2 space-y-1 rounded-xl bg-canvas p-3">
+              {facts.slice(0, 6).map((f, i) => (
+                <li key={i} className="text-[13px] leading-relaxed">
+                  {f.statement}
+                  <span className="font-mono text-[11px] text-muted">
+                    {f.client && f.client !== "all" ? ` · ${f.client}` : ""}
+                    {f.valid_from ? ` · from ${fmtDate(f.valid_from)}` : ""}
+                  </span>
+                </li>
+              ))}
+              {facts.length > 6 && <li className="font-mono text-[11px] text-muted">+{facts.length - 6} more</li>}
+            </ul>
+          )}
           {Boolean(p.sender || p.channel) && (
             <p className="mt-1.5 font-mono text-[11px] text-muted">
-              {[str(p.sender), str(p.channel), p.effective ? `from ${fmtDate(str(p.effective))}` : ""].filter(Boolean).join(" · ")}
+              {[str(p.sender), str(p.sender_role), str(p.channel), p.effective ? `from ${fmtDate(str(p.effective))}` : ""]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
           )}
         </div>

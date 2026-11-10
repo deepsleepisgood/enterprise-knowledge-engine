@@ -256,7 +256,7 @@ function EpisodeRow({ e, onChanged }: { e: Episode; onChanged: () => void }) {
 }
 
 function DropZone({ onUploaded }: { onUploaded: () => void }) {
-  const { userId } = useRole();
+  const { userId, role } = useRole();
   const toast = useToast();
   const files = useRef<HTMLInputElement>(null);
   const folder = useRef<HTMLInputElement>(null);
@@ -267,7 +267,7 @@ function DropZone({ onUploaded }: { onUploaded: () => void }) {
     if (!list.length) return;
     setBusy(true);
     try {
-      const out = await uploadFiles(list, userId);
+      const out = await uploadFiles(list, userId, role === "owner" ? "process owner" : "processor");
       const fresh = out.episodes.filter((e) => e.created).length;
       const dup = out.episodes.length - fresh;
       toast(
@@ -340,12 +340,29 @@ function DropZone({ onUploaded }: { onUploaded: () => void }) {
   );
 }
 
+interface WatchStatus {
+  path: string;
+  enabled: boolean;
+  interval_s: number;
+  last_scan_at: string | null;
+}
+
 function Connectors() {
+  const { data } = useApi<{ watched_folder: WatchStatus }>(DEMO_MODE ? null : "/connectors", 30_000);
+  const w = data?.watched_folder;
+  const watchOn = Boolean(w?.enabled && w.last_scan_at);
   const items = [
     { icon: Upload, name: "Upload", detail: "Files, folders, zips", on: true },
     { icon: Mail, name: "Email", detail: "Drop .eml files; attachments split out", on: true },
     { icon: Globe, name: "API endpoint", detail: DEMO_MODE ? "POST /episodes" : `POST ${API_URL}/episodes`, on: !DEMO_MODE },
-    { icon: FolderOpen, name: "Watched folder", detail: "Not enabled", on: false },
+    {
+      icon: FolderOpen,
+      name: "Watched folder",
+      detail: !w
+        ? "Not enabled"
+        : `${w.path} · every ${w.interval_s} s${w.last_scan_at ? ` · scanned ${fmtAgo(w.last_scan_at)}` : " · waiting for the worker"}`,
+      on: watchOn,
+    },
   ];
   return (
     <div className="mt-4 grid gap-2.5 sm:grid-cols-2">

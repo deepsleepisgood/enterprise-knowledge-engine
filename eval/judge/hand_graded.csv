@@ -1,0 +1,157 @@
+question_id,type,question,gold,answer,grader_1,grader_2,resolved
+Q001,conflict,What is the price tolerance for an invoice line where the unit price is higher than the PO?,The excess on the line must be no more than the lower of 1% of the PO line value and ₹500.,"Status: answered
+Decision: Tolerance is the lower of 1% of PO line value and ₹500 per line
+Answer: When the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1]
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",,,
+Q002,conflict,Is there a quantity tolerance when the invoice quantity is above the GRN?,"No, except the Arvana Infra bulk-material tolerance in client memo CM-INF-02.","Status: unverified
+Decision: No general tolerance; only Arvana Infra Projects has a 5% bulk-material tolerance per CM-INF-02.
+Answer: The general rule is that invoice quantity must not exceed the GRN quantity and there is no quantity tolerance for any client. [1] The only exception is the bulk-material tolerance agreed with Arvana Infra Projects in Client Memo CM-INF-02, which allows up to 5% above the GRN quantity for cement, reinforcement steel, sand and aggregates provided the excess value does not exceed ₹25,000. [1][2]
+Route to: AP Processor
+Older sources (superseded): client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55]); 2% (AP SOP v3.1)",,,
+Q003,conflict,How much rounding difference is accepted automatically?,Up to ₹10 at invoice-total level.,"Status: answered
+Decision: Up to ₹10
+Answer: Rounding differences of up to ₹10 at invoice-total level caused by line-level tax rounding are accepted automatically and posted to the rounding-difference account. [1]
+Expert tip: Transporters add '/A' or '-REV' suffixes when resending the same invoice.
+Older sources (superseded): ₹50 (AP SOP v3.1)",,,
+Q004,conflict,On which days are payment runs held?,Tuesday and Friday; cut-off 1 pm on the previous working day.,"Status: answered
+Decision: Tuesday and Friday
+Answer: Payment runs are held on Tuesday and Friday. [1][2]
+Expert tip: For QRMP suppliers, the team does not chase for missing invoices in the first two months of the quarter.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",,,
+Q005,conflict,What is the cut-off time for an invoice to be included in a payment run?,1 pm on the working day before the run.,"Status: answered
+Decision: 1 pm on the previous working day
+Answer: The cut-off time for an invoice to be included in a payment run is 1 pm on the previous working day. [1]
+Expert tip: Payment runs occur on Friday.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",,,
+Q006,conflict,Above what turnover must a supplier issue an e-invoice with an IRN?,Aggregate annual turnover above ₹5 crore in any financial year since 2017-18.,"Status: answered
+Decision: Above ₹5 crore aggregate annual turnover
+Answer: A supplier must issue an e-invoice with an IRN when its aggregate annual turnover has exceeded ₹5 crore in any financial year since 2017-18. [1]
+Expert tip: A Pharma packaging supplier invoices two or three days before dispatch, causing GRN to be delayed.
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",,,
+Q007,conflict,Which GST return is used to decide whether input tax credit can be claimed?,"GSTR-2B, generated on the 14th of the following month.","Status: answered
+Decision: GSTR-2B
+Answer: Input tax credit is claimed only for invoices that appear in the client's GSTR-2B. [1]
+Expert tip: Do not chase QRMP suppliers in month one or two of a quarter for missing invoices.
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); GSTR-2A (AP SOP v3.1 §4)",,,
+Q008,conflict,An invoice is not in GSTR-2B by the 14th of the next month. What do I pay?,Pay the base value on the due date and hold the GST amount until the invoice appears; escalate as NOT_IN_2B after two further cycles.,"Status: answered
+Decision: Pay base value on due date; hold GST until invoice appears in GSTR-2B
+Answer: If an invoice does not appear in GSTR-2B by the 14th of the following month, you pay the base value on the due date and hold the GST amount until the invoice appears. [1] If the invoice is still missing after two further GSTR-2B cycles, you raise a NOT_IN_2B exception to the vendor relationship owner. [1][2]
+Expert tip: For QRMP suppliers, the team does not chase for missing invoices in the first two months of the quarter.
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); GSTR-2A (AP SOP v3.1 §4)",,,
+Q009,conflict,Who approves an invoice of ₹30 lakh including GST?,The AP Controller (above ₹10 lakh up to ₹50 lakh).,"Status: answered
+Decision: AP Controller
+Answer: An invoice of ₹30 lakh including GST requires AP Controller approval before posting. [1][2] The approval threshold table shows that invoices above ₹10 lakh up to ₹50 lakh need AP Controller approval. [1] The work instruction confirms that invoices above ₹10 lakh park automatically for AP Controller approval after posting checks. [2]
+  Invoice total (incl. GST): ₹30,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Expert tip: Lakshmi holds the invoice as per SOP.
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",,,
+Q010,conflict,Who approves an invoice of ₹75 lakh?,"The client CFO, through the approval workflow.","Status: answered
+Decision: Client CFO
+Answer: An invoice of ₹75 lakh requires approval from the Client CFO through the approval workflow before posting. [1]
+  Invoice total (incl. GST): ₹75,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Expert tip: Lakshmi holds the invoice as per SOP.
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",,,
+Q011,factual,Does a non-PO rent invoice need any approval?,"Yes. Any non-PO invoice needs the budget owner's approval, in addition to the amount-based approval.","Status: answered
+Decision: Yes, budget owner approval is required
+Answer: A non-PO rent invoice does need approval because any non-PO invoice requires the budget owner's approval in the workflow. [1][2]
+Expert tip: Duplicate invoices must be sent to DUP_SUSPECT with a note and not overridden.
+Older sources (superseded): courier (Part F); ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",,,
+Q014,procedural,A goods invoice has no GRN. What should I do?,"Hold it as NO_GRN; the system notifies the requester, reminds after two working days and escalates to the requester's manager after five. Never post without a GRN.","Status: answered
+Decision: Hold as NO_GRN; do not post without GRN
+Answer: Hold the goods invoice with exception code NO_GRN and the system will automatically notify the requester. [1] Do not post the invoice against the purchase order without a GRN, regardless of any verbal instruction from the requester. [1] The requester is the owner responsible for resolving the NO_GRN exception, with a target resolution time of 5 working days. [2] The system sends a reminder after two working days and escalates to the requester's manager after five working days. [1]
+Expert tip: A Pharma packaging supplier invoices two or three days before dispatch, causing GRN to be delayed.
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1)",,,
+Q016,procedural,Who clears a suspected duplicate?,"A Senior Processor, before the invoice can be posted.","Status: answered
+Decision: Cleared by a Senior Processor
+Answer: A suspected duplicate is cleared by a Senior Processor. [1][2][3]
+Expert tip: Duplicate invoices must be sent to DUP_SUSPECT with a note and not overridden.
+Older sources (superseded): reject the new invoice as a duplicate (AP SOP v3.1 §2); stop and raise DUP_SUSPECT; do not override (DI-03 Part A, step 2); stop_and_raise_DUP_SUSPECT (Video 1 [02:10]); ₹1 crore (AP SOP v3.1 §6)",,,
+Q018,procedural,A bank change request asks me to call a mobile number to verify. What do I do?,"Do not call it. Call the number already in the vendor master, log the request as suspicious and tell the AP Controller.","Status: answered
+Decision: Do not call the number in the request; call the vendor master number and follow verification steps.
+Answer: Do not call the mobile number provided in the request. [1][2] Look up the supplier's phone number in the vendor master and call that number instead. [3][2] When you call, ask for the authorised signatory named in the request and confirm the last four digits of both the old and new bank accounts. [3] Also verify that the request arrived on company letterhead, is signed by an authorised signatory, and includes a cancelled cheque for the new account. [4][5] If the request gives a different phone number or asks you to call someone else, log it as suspicious and inform the AP Controller. [1]
+Expert tip: A verification call to the supplier's phone number in the vendor master is required when a bank account change request is received.",,,
+Q020,factual,Can bank details be changed just before month-end?,No. Bank changes are frozen for the three working days before month-end close.,"Status: answered
+Decision: Not allowed
+Answer: Bank details cannot be changed in the three working days before month-end close. [1][2]
+Expert tip: Never call a phone number provided in the bank change request letter; always call the supplier's phone number from the vendor master.
+Older sources (superseded): GRNs not invoiced are accrued. (AP SOP v3.1 §10); The Team Lead reviews open exceptions before close. (AP SOP v3.1 §10); Invoices received up to the second-last working day of the month are posted in that month. (AP SOP v3.1 §10)",,,
+Q022,factual,Do the MSME payment limits apply to medium enterprises?,No. Only micro and small enterprises; medium enterprises follow normal terms.,"Status: answered
+Decision: No, the MSME payment limits do not apply to medium enterprises.
+Answer: The MSME payment limits of 45 days with a written agreement and 15 days without one apply only to micro and small enterprises, not to medium enterprises. [1] Medium enterprises follow the normal payment terms, which for non-MSME suppliers default to 60 days from invoice acceptance unless the purchase order states otherwise. [1]
+Expert tip: New joiners often mistakenly apply the ₹500 cap without checking the 1% percentage first.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",,,
+Q023,factual,What are the default payment terms for non-MSME suppliers?,60 days from invoice acceptance unless the PO says otherwise.,"Status: answered
+Decision: 60 days from invoice acceptance unless PO states otherwise
+Answer: The default payment terms for non-MSME suppliers are 60 days from invoice acceptance unless the purchase order states otherwise. [1]
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",,,
+Q024,factual,Is TDS calculated on the amount including GST?,No. On the taxable value excluding GST where GST is shown separately.,"Status: answered
+Decision: TDS is calculated on the amount excluding GST when GST is shown separately.
+Answer: TDS is calculated on the taxable value excluding GST when GST is shown separately on the invoice. [1]
+Expert tip: Hold GST amount for QRMP suppliers until quarter-end.
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",,,
+Q025,factual,What TDS rate applies to professional fees such as legal or audit?,10% under section 194J.,"Status: answered
+Decision: 10%
+Answer: The TDS rate for professional fees such as legal or audit services is 10% under section 194J. [1]",,,
+Q026,factual,What TDS rate applies to fees for technical services?,2% under section 194J.,"Status: answered
+Decision: 2%
+Answer: The TDS rate for fees for technical services (not professional), including software support, is 2% under section 194J. [1]",,,
+Q032,tacit,Which TDS section applies to a lift maintenance AMC?,"Usually 194C because it is mostly technicians and parts, but it is the Tax Desk's decision: raise TDS_SECTION_UNCLEAR rather than guessing.","Status: needs_specialist
+Answer: A lift maintenance AMC is mostly technicians and parts, which the Tax Desk usually classifies under section 194C. [1][2] Because the contract is mixed or unclear, the SOP requires raising TDS_SECTION_UNCLEAR to the Tax Desk rather than guessing the section. [3]
+Expert tip: Tax Desk usually classifies lift maintenance AMC under TDS section 194C as it involves technicians and parts.
+Route to: Tax Desk
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",,,
+Q033,tacit,Which TDS section applies to an ERP software support AMC?,194J at 2% (technical or software support).,"Status: answered
+Decision: Section 194J at 2%
+Answer: An ERP software support AMC falls under TDS section 194J at 2% because it is mainly technical or software support. [1][2]
+Expert tip: The Tax Desk classifies lift/HVAC/DG set maintenance AMCs under section 194C, software/ERP/network monitoring AMCs under section 194J at 2%, and security system AMCs on a case-by-case basis.
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",,,
+Q034,tacit,How is a CCTV maintenance contract with remote monitoring classified for TDS?,It is a mixed case decided by the Tax Desk case by case; raise TDS_SECTION_UNCLEAR.,"Status: needs_specialist
+Answer: CCTV maintenance with remote monitoring is a mixed AMC that the Tax Desk decides case by case. [1] The SOP requires raising the TDS_SECTION_UNCLEAR exception to the Tax Desk and not guessing the section. [2]
+Expert tip: The Tax Desk sees AMCs (Annual Maintenance Contracts) most frequently.
+Route to: Tax Desk
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",,,
+Q047,tacit,An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on Monday morning?,"Hold it (the system reminds after two working days), but experienced staff wait until Tuesday noon before any manual chase because Infra sites post GRNs in a Monday-morning batch.","Status: answered
+Decision: Wait until Tuesday noon
+Answer: Do not chase the site on Monday morning; wait until Tuesday noon before raising a NO_GRN exception. [1][2][3][4]
+Expert tip: Infra sites batch their GRNs on Monday morning.
+Older sources (superseded): client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55])",,,
+Q048,tacit,A transporter's invoice 'TR/2026/0881/A' looks like an earlier 'TR/2026/881'. Is it a new invoice?,Almost certainly the same invoice re-sent — some transporters add /A or -REV when resending. Raise DUP_SUSPECT with a note; a Senior Processor clears it.,"Status: answered
+Decision: Not a new invoice
+Answer: The invoice 'TR/2026/0881/A' is not a new invoice; it is a re-sent copy of the earlier invoice 'TR/2026/881'. [1][2] The transporter adds the suffix '/A' whenever they re-send the same invoice, and this behavior is known for several transporters. [1][2] The system normalises invoice numbers so that variations like '/A' or '-REV' are treated as the same invoice, and the duplicate check will flag it. [3][4]
+Expert tip: The transporter adds the suffix '/A' when re-sending invoices.
+Older sources (superseded): reject the new invoice as a duplicate (AP SOP v3.1 §2); stop and raise DUP_SUSPECT; do not override (DI-03 Part A, step 2); stop_and_raise_DUP_SUSPECT (Video 1 [02:10])",,,
+Q049,tacit,A small supplier's invoice is missing from GSTR-2B. Should I chase them this month?,"Pay base and hold GST per the SOP, but first check the QRMP flag: quarterly filers often upload only at quarter-end, so do not chase them in months one and two of a quarter.","Status: answered
+Decision: Do not chase this month; hold GST and wait for quarter-end upload or two further GSTR-2B cycles.
+Answer: Do not chase the small supplier this month if they are a quarterly (QRMP) filer, as they often upload invoices only at quarter-end. [1][2] If the invoice is missing from GSTR-2B by the 14th, pay the base value on the due date and hold the GST amount until the invoice appears. [3] Only raise a NOT_IN_2B exception to the vendor relationship owner if the invoice is still missing after two further GSTR-2B cycles. [3][4]
+Expert tip: Check whether the supplier is a quarterly filer under QRMP before chasing for GSTR-2B mismatches.
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); GSTR-2A (AP SOP v3.1 §4)",,,
+Q050,tacit,A Pharma packaging supplier's invoice arrives before the GRN. Should I raise NO_GRN immediately?,"Hold it, but this supplier invoices before dispatch so the GRN usually follows in two or three days; avoid an immediate manual chase.","Status: answered
+Decision: Do not raise NO_GRN immediately
+Answer: Do not raise NO_GRN immediately for this packaging supplier because they always invoice before dispatch and the GRN typically arrives two or three days later. [1] The standard rule is to hold a goods invoice with no GRN as NO_GRN and notify the requester automatically. [2] In practice, colleagues wait for the GRN to appear before raising the exception for this supplier. [1][3]
+Expert tip: A Pharma packaging supplier invoices two or three days before dispatch, causing GRN to be delayed.
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1)",,,
+Q051,tacit,What mistake do new joiners make most often with price variances?,Applying the ₹500 limit without first checking 1% of the line value; on small lines the 1% limit is lower.,"Status: answered
+Answer: New joiners most often apply the ₹500 cap without first checking whether 1% of the PO line value is lower. [1][2] The SOP v4.0 rule states the tolerance is the lower of 1% of the PO line value and ₹500 per line. [3][4]
+Expert tip: New joiners often mistakenly apply the ₹500 cap without checking the 1% percentage first.
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",,,
+Q052,tacit,Is a request to rush a bank change before month-end a concern?,"Yes. Changes are frozen three working days before close, so a rush request near month-end is itself a warning sign.","Status: answered
+Decision: Concern
+Answer: Yes, a request to rush a bank change before month-end is a concern because it is itself a warning sign of potential fraud. [1] The standard operating procedure freezes vendor master bank changes for the three working days before month-end close, so any request to bypass that freeze is irregular. [2][3]
+Expert tip: Never call a phone number provided in the bank change request letter; always call the supplier's phone number from the vendor master.
+Older sources (superseded): GRNs not invoiced are accrued. (AP SOP v3.1 §10); The Team Lead reviews open exceptions before close. (AP SOP v3.1 §10); Invoices received up to the second-last working day of the month are posted in that month. (AP SOP v3.1 §10)",,,
+Q066,scenario,"Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice charges ₹1,218 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹18,000 on a line value of ₹1,200,000; limit is the lower of 1% (₹12,000) and ₹500 = ₹500.","Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: The line cannot pass the price match because the excess of ₹18,000 exceeds the tolerance limit of ₹500. [1][2]
+  PO line value (₹1,200 × 1000): ₹12,00,000
+  Excess on line (₹18 × 1000): ₹18,000
+  1% of PO line value: ₹12,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",,,

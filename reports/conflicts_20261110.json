@@ -1181,6 +1181,33 @@
   "conflict_id": 447
  },
  {
+  "kind": "value",
+  "topic": "Quantity tolerance quantity_tolerance.infra_material_percentage",
+  "authoritative": {
+   "fact_id": 79,
+   "passage_id": "502134b3a6eaf7905636",
+   "source": "CM-INF-02",
+   "locator": "Part C",
+   "value": "5 %",
+   "statement": "For cement, reinforcement steel, sand, and aggregates, an invoice quantity up to 5% above the GRN quantity is accepted.",
+   "status": "current"
+  },
+  "also_stated_in": [],
+  "conflicting": {
+   "fact_id": 855,
+   "passage_id": "ed1a615fe1f6a8e4d943",
+   "source": "Part F",
+   "locator": "Part F",
+   "value": "10 %",
+   "statement": "Infra projects have a 10% price tolerance for cement and steel.",
+   "status": "pending"
+  },
+  "reason": "Part F, dated 09 Oct 2023 is stale; CM-INF-02 Part C, dated 15 Apr 2026 is current (for Arvana Infra Projects).",
+  "judged_by": "deterministic",
+  "via": "materials",
+  "conflict_id": 744
+ },
+ {
   "kind": "self_contradiction",
   "topic": "Payment run schedule payment_run_schedule.run_day",
   "authoritative": {

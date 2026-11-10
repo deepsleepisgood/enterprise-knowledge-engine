@@ -92,3 +92,73 @@
   Q092  D wrong      15.0s calculator
   Q093  D ok         21.4s 
   Q094  D ok         78.5s 
+  Q096  D ok         46.2s 
+  Q095  D ok        198.6s 
+  Q098  D ok         77.5s 
+  Q099  D ok         43.0s 
+  Q100  D ok        122.5s 
+  Q091  D wrong     481.9s routing
+  Q097  D ok        331.1s 
+  Q101  D ok        117.4s 
+  Q102  D ok        137.7s 
+  Q105  D ok         28.0s 
+  Q106  D ok         39.0s 
+  Q104  D ok        148.7s 
+  Q103  D ok        299.2s 
+  Q107  D ok        127.8s 
+  Q109  D ok        135.9s 
+  Q110  D ok        104.7s 
+  Q111  D ok         49.9s 
+  Q113  D ok         27.8s 
+  Q114  D ok         25.8s 
+  Q112  D ok        121.0s 
+  Q115  D ok         19.3s 
+  Q117  D ok          3.6s 
+  Q118  D ok         79.2s 
+  Q119  D ok        104.8s 
+  Q108  D wrong     485.5s routing
+  Q120  D ok         77.3s 
+  Q122  D ok         23.9s 
+  Q121  D ok        160.7s 
+  Q123  D ok         72.9s 
+  Q124  D ok         69.9s 
+  Q126  D ok          2.1s 
+  Q116  D wrong     466.0s routing
+  Q127  D ok         44.6s 
+  Q128  D ok          3.5s 
+  Q129  D ok          3.4s 
+  Q130  D ok          5.1s 
+  Q131  D ok          5.3s 
+  Q132  D ok          5.1s 
+  Q133  D ok          5.2s 
+  Q134  D ok          5.2s 
+  Q136  D ok        127.9s 
+  Q137  D ok         33.2s 
+  Q125  D ok        386.9s 
+  Q138  D ok        108.7s 
+  Q135  D ok        282.1s 
+  Q140  D ok         22.2s 
+  Q139  D ok         72.5s 
+  Q143  D ok         59.5s 
+  Q144  D ok         86.1s 
+  Q141  D ok        258.8s 
+  Q142  D ok        247.7s 
+  Q147  D ok         14.3s 
+  Q146  D ok         74.1s 
+  Q148  D ok        106.5s 
+  Q150  D ok         42.4s 
+  Q151  D ok         86.9s 
+  Q152  D ok         53.6s 
+  Q153  D ok          2.1s 
+  Q154  D ok         55.4s 
+  Q155  D ok         50.9s 
+  Q145  D ok        495.2s 
+  Q156  D ok         45.8s 
+  Q157  D ok         60.2s 
+  Q158  D ok        109.4s 
+  Q160  D ok          2.0s 
+  Q159  D ok         76.1s 
+  Q149  D ok        586.0s 
+config D: accuracy 91.9% (147/160), citations 97.5% (156/160), outdated (conflict) 8.7% (2/23), p50 22.9s
+wrote 30 answers to eval/judge/hand_graded.csv for hand grading
+report: D:\antigravity\company knowledge engine\reports\eval_20261110_all.md

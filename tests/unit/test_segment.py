@@ -215,6 +215,27 @@ def test_key_value_lines_on_top_act_as_header() -> None:
     assert m.get("owner") == "People Team"
 
 
+def test_key_value_lines_under_the_title_act_as_header() -> None:
+    blocks = [
+        H("Visitor parking note"),
+        P("Effective: 1 November 2026"),
+        P("Owner: Facilities desk"),
+        P("Visitors park in bay C only."),
+        H("Badges"),
+        P("Owner: reception (body text, not a header)."),
+    ]
+    doc = split_documents(blocks)[0]
+    m = infer(
+        doc,
+        filename="parking.md",
+        file_meta={},
+        received_at=datetime(2026, 11, 8, tzinfo=UTC),
+        channel="upload",
+    )
+    assert m.get("dated") == date(2026, 11, 1)
+    assert m.get("owner") == "Facilities desk"
+
+
 def test_uploaded_email_file_uses_its_date_header() -> None:
     doc = split_documents([P("Hello, from 1 January the rule changes.")])[0]
     m = infer(

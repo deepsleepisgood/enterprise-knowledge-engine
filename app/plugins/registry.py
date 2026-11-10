@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import threading
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -20,6 +21,8 @@ from typing import Any
 import yaml
 
 from app.core.config import get_settings
+
+_LOAD_LOCK = threading.RLock()  # re-entrant: loading a module may load its parent package
 
 
 @dataclass
@@ -43,8 +46,14 @@ class Plugin:
     def module(self, dotted: str) -> ModuleType:
         """Import `<plugin>/<dotted path>.py` by file path (e.g. 'calc.registry')."""
         modname = f"_plugin_{self.name}." + dotted
-        if modname in sys.modules:
-            return sys.modules[modname]
+        # The module is in sys.modules before its code has run; without the lock a second
+        # thread would get it half-loaded (missing names).
+        with _LOAD_LOCK:
+            if modname in sys.modules:
+                return sys.modules[modname]
+            return self._load(modname, dotted)
+
+    def _load(self, modname: str, dotted: str) -> ModuleType:
         self._ensure_package()
         rel = Path(*dotted.split("."))
         target = self.path / f"{rel}.py"
@@ -63,7 +72,11 @@ class Plugin:
         assert spec and spec.loader
         mod = importlib.util.module_from_spec(spec)
         sys.modules[modname] = mod
-        spec.loader.exec_module(mod)
+        try:
+            spec.loader.exec_module(mod)
+        except BaseException:
+            del sys.modules[modname]  # never leave a broken module for the next caller
+            raise
         return mod
 
     def _ensure_package(self) -> None:

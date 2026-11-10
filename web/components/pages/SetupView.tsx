@@ -312,12 +312,33 @@ function EntitiesTab() {
   const { data, loading, reload } = useApi<EntitySummary[]>("/entities");
   const [q, setQ] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
+  const [moving, setMoving] = useState<string[]>([]);
   const list = (data ?? []).filter((e) =>
     `${e.name} ${e.type} ${e.aliases.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase()),
   );
   const byId = new Map((data ?? []).map((e) => [e.id, e]));
-  const toggle = (id: string) =>
+  const toggle = (id: string) => {
+    setMoving([]);
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p.slice(-1), id]));
+  };
+  const one = picked.length === 1 ? byId.get(picked[0]!) : undefined;
+  const flip = (alias: string) => setMoving((m) => (m.includes(alias) ? m.filter((x) => x !== alias) : [...m, alias]));
+  const split = async () => {
+    if (!one || !moving.length) return;
+    try {
+      const out = await apiSend<{ moved_facts: number }>("POST", `/entities/${one.id}/split`, {
+        name: moving[0],
+        aliases: moving,
+        by: userId,
+      });
+      toast(`${moving[0]} is now its own entity; ${plural(out.moved_facts, "fact")} moved with it.`);
+      setPicked([]);
+      setMoving([]);
+      void reload();
+    } catch (e) {
+      toast((e as Error).message, "error");
+    }
+  };
   const merge = async () => {
     const [keep, drop] = picked;
     if (!keep || !drop) return;
@@ -346,12 +367,13 @@ function EntitiesTab() {
         <Button icon={GitMerge} disabled={picked.length !== 2} onClick={() => void merge()}>
           Merge {picked.length === 2 ? `${byId.get(picked[1]!)?.name} into ${byId.get(picked[0]!)?.name}` : "two"}
         </Button>
-        <Button variant="ghost" icon={Scissors} disabled title="Splitting an entity is not in the MVP">
-          Split
+        <Button variant="ghost" icon={Scissors} disabled={!one || moving.length === 0} onClick={() => void split()}>
+          {one && moving.length ? `Split ${moving[0]} out of ${one.name}` : "Split"}
         </Button>
       </div>
       <p className="mt-2 font-mono text-[11px] text-muted">
-        Pick the entity to keep, then the one to merge into it. Facts stay where they are; nothing is deleted.
+        Merge: pick the entity to keep, then the one to merge into it. Split: pick one entity, then click the names that
+        are really a different entity. Facts that name them move with them; nothing is deleted.
       </p>
       {loading && !data ? (
         <div className="mt-4">
@@ -377,12 +399,30 @@ function EntitiesTab() {
                         <span className="mt-1 flex flex-wrap gap-1">
                           {e.aliases
                             .filter((a) => a !== e.name)
-                            .slice(0, 6)
-                            .map((a) => (
-                              <span key={a} className="rounded-full bg-fill px-2 py-0.5 text-[11px] text-muted">
-                                {a}
-                              </span>
-                            ))}
+                            .slice(0, one?.id === e.id ? 50 : 6)
+                            .map((a) =>
+                              one?.id === e.id ? (
+                                <button
+                                  key={a}
+                                  type="button"
+                                  aria-pressed={moving.includes(a)}
+                                  onClick={(ev) => {
+                                    ev.preventDefault();
+                                    flip(a);
+                                  }}
+                                  className={cx(
+                                    "rounded-full border px-2 py-0.5 text-[11px]",
+                                    moving.includes(a) ? "border-rose bg-rose-tint text-rose" : "border-hairline bg-fill text-muted hover:text-ink",
+                                  )}
+                                >
+                                  {a}
+                                </button>
+                              ) : (
+                                <span key={a} className="rounded-full bg-fill px-2 py-0.5 text-[11px] text-muted">
+                                  {a}
+                                </span>
+                              ),
+                            )}
                         </span>
                       )}
                     </span>

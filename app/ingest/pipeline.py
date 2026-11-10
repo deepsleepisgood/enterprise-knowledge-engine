@@ -252,7 +252,10 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
                     },
                 )
         links = []
+        govern = get_settings().governance
         for src, _, _ in sources:
+            if govern:
+                break  # a governed new version replaces the old one only once approved
             for link in versions.link_versions(s, src["id"]):
                 links.append(link.__dict__)
                 refresh_context_headers(s, link.older_id)
@@ -272,9 +275,10 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
                 "passages": sum(len(r) for _, r, _ in sources),
                 "versions": links,
                 "parse_notes": result.notes,
+                "defer_versions": govern,
             },
         )
-        jobs.enqueue(s, "extract_episode", {"episode_id": eid})
+        jobs.enqueue(s, "extract_episode", {"episode_id": eid, "govern": govern})
         jobs.enqueue_once(s, "index_embeddings", {})
         if kind in ("xlsx", "csv"):
             jobs.enqueue(s, "plugin_hooks", {"episode_id": eid, "event": "on_spreadsheet"})

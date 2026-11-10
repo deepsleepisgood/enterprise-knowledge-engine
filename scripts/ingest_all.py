@@ -10,6 +10,7 @@ Nothing here is specific to one company: the same path serves any folder of file
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from collections import Counter
@@ -17,6 +18,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+# The owner seeding or measuring the knowledge base: no approval step for these inputs.
+os.environ.setdefault("GOVERNANCE", "false")
 
 from app import worker  # noqa: E402
 from app.core.config import get_settings  # noqa: E402

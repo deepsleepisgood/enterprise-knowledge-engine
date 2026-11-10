@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+# Inputs in tests are the owner's own seeding unless a test turns governance on itself.
+os.environ.setdefault("GOVERNANCE", "false")
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 

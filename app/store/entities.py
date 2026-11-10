@@ -200,3 +200,33 @@ def count(session: Session) -> dict[str, int]:
         .group_by(Entity.type)
     )
     return dict(rows.all())
+
+
+def split(session: Session, entity_id: str, new_name: str, aliases: list[str]) -> str:
+    """Owner correction: the names in `aliases` are a different entity, `new_name`. Creates it
+    (same type), moves those aliases, and re-points any entity that had been merged in under one
+    of those names. Facts are moved by the graph layer (app/graph/split.py)."""
+    src = session.get(Entity, entity_id)
+    if src is None or src.tenant_id != tenant():
+        raise LookupError(entity_id)
+    new_id = create(session, src.type, new_name)
+    norms = {norm_name(a) for a in [*aliases, new_name]}
+    session.execute(
+        delete(EntityAlias).where(
+            EntityAlias.tenant_id == tenant(),
+            EntityAlias.entity_id == entity_id,
+            EntityAlias.alias_norm.in_(norms),
+        )
+    )
+    for a in aliases:
+        add_alias(session, new_id, a)
+    session.execute(
+        update(Entity)
+        .where(
+            Entity.tenant_id == tenant(),
+            Entity.merged_into == entity_id,
+            func.lower(Entity.name).in_([a.lower() for a in aliases]),
+        )
+        .values(merged_into=new_id)
+    )
+    return new_id

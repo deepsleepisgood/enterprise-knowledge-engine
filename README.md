@@ -296,10 +296,12 @@ npm run check:tokens
 
 The system was evaluated against extensive scenario test benches and multi-company corpora:
 
+- **Full Evaluation Benchmark:** **158 / 160 (98.8%)** overall accuracy across 160 questions with **97.5% citation precision** (`answer-v4`).
+- **Conflict Scan Precision & Recall:** **15 / 15 (100% recall)** known conflicts detected both with and without explicit document change tables (`reports/conflicts_20261110.md`).
 - **Scenario Calculation Accuracy:** **90 / 92** correct on induced schema mode (1 evaluation-set defect identified; 1 network rate-limit).
-- **Conflict Scan Precision & Recall:** **14 / 15** known conflicts detected both with and without explicit document change tables (`reports/conflicts_20261110.md`).
 - **Metadata Extraction Accuracy:** **92.9%** (78/84) match against ground-truth indexes across varied formats.
 - **Cross-Domain Generalization:** **10 / 10** citations and queries answered correctly on the unmodeled Kestrel Freight HR corpus with zero code alterations.
+- **Active Governance & Escalation:** Unvetted uploads and expert replies are held provisionally/pending review; approving an escalated answer re-evaluates and notifies askers with updated citations.
 - **Retrieval & Answer Latency:** Median response time **~9.9 seconds** with closed-book reasoning, full citation matching, and 4-point verification.
 
 ---

@@ -1,0 +1,23 @@
+id,after_episode,param,client,as_of,known_after,expected,covers,got,ok
+R01,PS-07_AP_SOP_v3.1_2023.docx,price_tolerance.pct_of_line,,2026-03-01,,2,valid time: v3.1 in force on 1 Mar 2026,2.0 (AP SOP v3.1 current),True
+R02,PS-07_AP_SOP_v3.1_2023.docx,price_tolerance.cap_inr,,2026-03-01,,1000,valid time: v3.1 in force on 1 Mar 2026,1000.0 (AP SOP v3.1 current),True
+R03,PS-07_AP_SOP_v4.0_2026.docx,price_tolerance.pct_of_line,,2026-03-01,,2,valid time: v3.1 still the rule on 1 Mar 2026 after v4.0 arrives,2.0 (AP SOP v3.1 superseded),True
+R04,PS-07_AP_SOP_v4.0_2026.docx,price_tolerance.pct_of_line,,2026-04-01,,1,valid time: v4.0 from 1 Apr 2026,1.0 (AP SOP v4.0 current),True
+R05,PS-07_AP_SOP_v4.0_2026.docx,price_tolerance.cap_inr,,,,500,current rule after v4.0,500.0 (AP SOP v4.0 current),True
+R06,PS-07_AP_SOP_v4.0_2026.docx,einvoice.aato_threshold_crore,,2026-03-31,,100000000,e-invoice threshold before the SOP 14 date,100000000.0 (AP SOP v3.1 superseded),True
+R07,PS-07_AP_SOP_v4.0_2026.docx,einvoice.aato_threshold_crore,,2026-04-01,,50000000,e-invoice threshold after the SOP 14 date,50000000.0 (AP SOP v4.0 current),True
+R08,PS-07_AP_SOP_v4.0_2026.docx,approvals.controller_above_lakh,,,,1000000,approvals: AP Controller above 10 lakh,1000000.0 (AP SOP v4.0 current),True
+R09,PS-07_AP_SOP_v4.0_2026.docx,approvals.controller_above_lakh,,2026-01-15,,2500000,approvals before v4.0: 25 lakh,2500000.0 (AP SOP v3.1 superseded),True
+R10,PS-07_AP_SOP_v4.0_2026.docx,payments.run_days,,,,items:Tuesday|Friday,payment runs Tuesday and Friday,tuesday and friday,False
+R11,PS-07_AP_SOP_v4.0_2026.docx,payments.run_days,,2026-03-01,,items:Thursday,payment runs before v4.0: Thursday,thursday,True
+R12,PS-07_AP_SOP_v4.0_2026.docx,msme.no_agreement_days,,,,15,MSME without agreement 15 days,15.0 (AP SOP v4.0 current),True
+R13,PS-07_training_and_expert_transcripts.docx,einvoice.aato_threshold_crore,,,,50000000,out of order: older training video (ten crore) arrives after v4.0 and does not override,50000000.0 (AP SOP v4.0 current),True
+R14,PS-07_training_and_expert_transcripts.docx,price_tolerance.pct_of_line,,,,1,out of order: training material arrives after v4.0 and does not override,1.0 (AP SOP v4.0 current),True
+R15,PS-07_desk_instructions_and_client_memos.docx,quantity_tolerance.pct,Arvana Infra Projects,2026-11-07,,5,client memo: Infra bulk tolerance 5%,2.0 (AP SOP v3.1 superseded),False
+R16,PS-07_desk_instructions_and_client_memos.docx,quantity_tolerance.pct,Arvana Infra Projects,2027-04-01,,none,client memo expired after 31 Mar 2027,2% (AP SOP v3.1),False
+R17,PS-07_desk_instructions_and_client_memos.docx,quantity_tolerance.pct,Arvana Infra Projects,2026-12-01,,5,before the Infra email: 5% for all dates,2.0 (AP SOP v3.1 superseded),False
+R18,01_infra_bulk_tolerance.eml,quantity_tolerance.pct,Arvana Infra Projects,2026-11-15,,5,future-dated change: 5% until 15 Nov,2.0 (AP SOP v3.1 superseded),False
+R19,01_infra_bulk_tolerance.eml,quantity_tolerance.pct,Arvana Infra Projects,2026-11-16,,7,future-dated change: provisional 7% from 16 Nov,2.0 (AP SOP v3.1 superseded),False
+R20,END,price_tolerance.pct_of_line,,2026-03-01,PS-07_AP_SOP_v3.1_2023.docx,2,transaction time: what was known after v3.1 only,2.0 (AP SOP v3.1 current),True
+R21,END,price_tolerance.pct_of_line,,2026-04-01,PS-07_AP_SOP_v3.1_2023.docx,none,transaction time: v4.0 not yet known after v3.1 only,2% (AP SOP v3.1),False
+R22,END,price_tolerance.pct_of_line,,2026-04-01,PS-07_AP_SOP_v4.0_2026.docx,1,transaction time: known once v4.0 arrived,1.0 (AP SOP v4.0 current),True

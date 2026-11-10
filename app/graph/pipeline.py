@@ -133,7 +133,10 @@ def extract_and_publish(
     embed_fn: Any = "default",
     workers: int = EXTRACT_WORKERS,
     limit: int | None = None,
+    govern: bool = False,
 ) -> dict[str, Any]:
+    """Extract and publish. `govern` (a live input after setup) holds the facts for the
+    process owner instead of applying them (app/govern)."""
     with session_scope() as s:
         onto = active_ontology(s)
         if onto is None:
@@ -198,6 +201,19 @@ def extract_and_publish(
             structured_fn=structured_fn if structured_fn else _default_structured(),
             embed_fn=embed_fn,
         )
+        verdict = None
+        if govern and episode_id and drafts:
+            from app.govern.policy import decide
+
+            ep = estore.get_episode(s, episode_id)
+            clients = {d.client or sources[d.source_id].client_scope or "all" for d in drafts}
+            verdict = decide(
+                onto,
+                ep.sender if ep else None,
+                ep.sender_role if ep else None,
+                {d.topic for d in drafts},
+                clients,
+            )
         rep: PublishReport = publish(
             s,
             drafts,
@@ -205,11 +221,19 @@ def extract_and_publish(
             onto,
             compare,
             resolver,
-            summary=f"extraction of {episode_id or 'all episodes'}",
+            summary=f"extraction of {episode_id or 'all episodes'}"
+            + (f" ({verdict.status}, waiting for the owner)" if verdict else ""),
             episode_id=episode_id,
+            hold=verdict.status if verdict else None,
         )
+        review_item = None
+        if verdict is not None:
+            from app.govern.apply import hold
+
+            review_item = hold(s, episode_id, verdict, rep.held_ids)
         for eid in episodes if episode_id is None else [episode_id]:
-            estore.set_status(s, eid, "published")
+            if review_item is None:
+                estore.set_status(s, eid, "published")
     return {
         "passages": len(passages),
         "carried": len(carried),
@@ -225,6 +249,8 @@ def extract_and_publish(
         "kb_version": rep.kb_version,
         "compare_failures": getattr(compare, "failures", []),
         "entity_decisions": rep.entity_decisions,
+        "governance": verdict.status if verdict else None,
+        "review_item": review_item,
     }
 
 
@@ -452,12 +478,12 @@ def extract_episode(payload: dict[str, Any]) -> dict[str, Any]:
     with session_scope() as s:
         if active_ontology(s) is None:
             return {"skipped": "no frozen schema yet; build_graph will re-queue"}
-    out = extract_and_publish(payload["episode_id"])
+    out = extract_and_publish(payload["episode_id"], govern=bool(payload.get("govern")))
     out.pop("entity_decisions", None)
     with session_scope() as s:
         jobs.enqueue_once(s, "index_embeddings", {})
         ep = estore.get_episode(s, payload["episode_id"])
-        if ep is not None and ep.channel == "expert_answer":
+        if ep is not None and ep.channel == "expert_answer" and out.get("governance") != "pending":
             jobs.enqueue(s, "reask_escalations", {"episode_id": ep.id})
     if out.get("unplaced") and get_settings().schema_mode == "induced":
         # New facts the schema has no attribute for: propose attributes for the owner.

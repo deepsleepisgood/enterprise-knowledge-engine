@@ -44,6 +44,14 @@ PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
 }
 
 
+# `thinking=False` on Anthropic: the lowest thinking setting each model accepts (Sonnet 5.5
+# rejects "disabled" and takes "between_tools"; Opus 5.5 cannot turn thinking off).
+NO_THINKING: dict[str, dict[str, str]] = {
+    "claude-sonnet-5-5": {"type": "between_tools"},
+    "claude-haiku-5-5": {"type": "disabled"},
+}
+
+
 class LLMError(RuntimeError):
     pass
 
@@ -222,6 +230,8 @@ def _call(
         request["output_config"] = {"effort": effort}
     if thinking is False and _provider() == "nim":
         request["thinking_off"] = True  # read by the NIM adapters, never sent to Anthropic
+    elif thinking is False and model_id in NO_THINKING:
+        request["thinking"] = NO_THINKING[model_id]
 
     started = time.perf_counter()
     try:

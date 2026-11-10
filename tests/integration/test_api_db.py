@@ -129,7 +129,9 @@ def test_entities_timeline_facts_and_passages(api: TestClient) -> None:
     assert "embedding" not in p and "tsv" not in p
     assert api.get("/passages/nope").status_code == 404
     assert api.get(f"/entities/{eid}/timeline?attribute=none.none").json()["attributes"] == []
-    assert api.post(f"/entities/{eid}/split").status_code == 501
+    assert api.post(f"/entities/{eid}/split").status_code == 422  # names to split out needed
+    body = {"name": "X", "aliases": ["X"], "by": "owner-1"}
+    assert api.post("/entities/nope/split", json=body).status_code == 404
 
 
 def test_entity_merge(api: TestClient) -> None:
@@ -169,6 +171,9 @@ def test_changes_and_acknowledgements(api: TestClient) -> None:
     assert feed, "publishing the graph records changes"
     c = feed[0]
     assert {"id", "kb_version", "summary", "old_value", "new_value", "status"} <= set(c)
+    # Each replaced rule is its own change, from the old value to the new one.
+    rule = next(x for x in feed if x["old_value"] and x["new_value"])
+    assert "20" in rule["old_value"] and "24" in rule["new_value"]
     r = api.post(f"/changes/{c['id']}/ack", json={"user_id": "u1"})
     assert r.status_code == 200
     api.post(f"/changes/{c['id']}/ack", json={"user_id": "u1"})  # idempotent

@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 
 from app.ingest.segment import DocPart, norm_key
 
-PROMPT_VERSION = "docmeta-v1"
+PROMPT_VERSION = "docmeta-v2"
 LOW_CONFIDENCE = 0.7
 
 DOC_TYPES = [
@@ -186,10 +186,11 @@ class _LLMDocMeta(BaseModel):
     )
     title: str = Field(description="A clean document title")
     client_scope: str = Field(
-        description="The one external client or customer this document's "
-        "rules are restricted to. 'all' if it applies "
-        "generally, names several clients, or is about the "
-        "organisation's own teams, roles or people"
+        description="The one audience this document's rules are restricted to: an "
+        "external client or customer, or one department, site, region or business unit "
+        "of the organisation (a memo that applies only to one warehouse). 'all' if it "
+        "applies to everyone who uses these documents, names several audiences, or only "
+        "describes who does what"
     )
     owner: str | None = Field(None, description="Team, role or person responsible for it")
     status: Literal[tuple(STATUSES)] = Field(  # type: ignore[valid-type]
@@ -324,9 +325,13 @@ def infer(
 ) -> DocMeta:
     m = DocMeta(raw={"header": doc.meta_kv, "file": file_meta})
     _from_table(m, doc.meta_kv)
-    # Formats without a header table (PDF, Markdown) write it as "Key: value" lines on top.
+    # Formats without a header table (PDF, Markdown) write it as "Key: value" lines on top,
+    # either before the title or right under it (up to the first section heading).
     lead = list(
-        itertools.takewhile(lambda b: b.type != "heading", [*doc.preamble, *doc.blocks][:12])
+        itertools.takewhile(
+            lambda b: b.type != "heading",
+            itertools.dropwhile(lambda b: b.type == "heading", [*doc.preamble, *doc.blocks][:12]),
+        )
     )
     lines = _kv_lines(b.text for b in lead if b.type == "paragraph")
     if lines:

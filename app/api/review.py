@@ -1,8 +1,8 @@
 """People in the loop: the owner's review queue, escalations to experts, wrong-answer reports.
 
 A review decision is recorded with an optimistic lock (`row_version`; 409 when someone else
-decided or edited the item first). Publishing the effects of an approval (governance) is
-BUILD_PLAN Phase 9; until then a decision is recorded and the item leaves the queue.
+decided or edited the item first). Approving or rejecting a held change
+(`change`) or a `retire` item takes effect through the worker job `apply_review` (app/govern).
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from app.answer import escalate as esc
 from app.api.deps import not_found, read_session, row, write_session
 from app.store import answers as astore
-from app.store import kb
+from app.store import jobs, kb
 
 router = APIRouter(tags=["review"])
 DECISIONS = {"approve": "approved", "reject": "rejected", "edit": "edited"}
@@ -59,7 +59,15 @@ def review(item_id: int, body: Decision, s: Session = Depends(write_session)) ->
         raise HTTPException(
             409, f"item {item_id} changed since version {body.row_version}: reload it"
         )
-    return {"id": item_id, "status": DECISIONS[body.decision], "row_version": body.row_version + 1}
+    job = None
+    if item.kind in ("change", "retire") and body.decision in ("approve", "reject"):
+        job = jobs.enqueue(s, "apply_review", {"item_id": item_id})
+    return {
+        "id": item_id,
+        "status": DECISIONS[body.decision],
+        "row_version": body.row_version + 1,
+        "apply_job": job,
+    }
 
 
 # ---------------------------------------------------------------- escalations
