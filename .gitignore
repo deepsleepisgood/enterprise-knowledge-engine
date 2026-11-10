@@ -15,5 +15,6 @@ web/playwright-report/
 ~$*
 web/tsconfig.tsbuildinfo
 data/blobs/
+data/watch/
 web/.env.local
 web/e2e-results/
