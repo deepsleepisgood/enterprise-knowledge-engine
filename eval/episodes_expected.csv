@@ -9,5 +9,5 @@ file,expect_triage,expect_outcome,note
 08_noise_newsletter.eml,noise,ignored,"Nothing extracted."
 09_question_30_lakh.eml,question,answered,"Answered (AP Controller above 10 lakh); knowledge base unchanged."
 10_tacit_tip_supplier_habit.eml,tacit_tip,pending,"A colleague's tip: held for review, stored as practice."
-11_client_past_effective_date.eml,rule_change,provisional,"Retail FD owns non_po_categories (medium risk): provisional; the review item lists the retroactive window from 1 Oct 2026."
+11_client_past_effective_date.eml,rule_change,pending,"Run of 11 Nov: the extractor filed store-rent approval under a new attribute (other:...), not the Retail FD's non_po_categories, so governance held it (unknown topic, never auto-applied). Expected had been provisional; the retroactive window from 1 Oct 2026 is listed as required."
 12_pharma_owner_change.eml,rule_change,pending,"Pharma Head of Quality is the owner, but pharma_qa_release is high-risk: held."

@@ -1,0 +1,13 @@
+file,triage,outcome,expected,ok,seconds,confirmations,answer
+01_infra_bulk_tolerance.eml,rule_change,pending,rule_change / pending,True,435.9,0,
+02_price_tolerance_still_2pct.eml,rule_change,pending,rule_change / pending,True,186.3,0,
+03_spoofed_bank_change.eml,rule_change,pending,rule_change / pending,True,385.4,0,
+04_fwd_infra_bulk_tolerance.eml,,duplicate,- / duplicate,True,0.4,1,
+05_fwd_fwd_infra_bulk_tolerance.eml,,duplicate,- / duplicate,True,0.4,2,
+06_noise_out_of_office.eml,noise,ignored,noise / ignored,True,2.9,0,
+07_noise_team_lunch.eml,noise,ignored,noise / ignored,True,3.3,0,
+08_noise_newsletter.eml,noise,ignored,noise / ignored,True,2.8,0,
+09_question_30_lakh.eml,question,answered,question / answered,True,287.9,0,A ₹30 lakh invoice requires AP Controller approval before posting. [1] The approval table shows invoices above ₹10 lakh up to ₹50 lakh need AP Controller approv
+10_tacit_tip_supplier_habit.eml,tacit_tip,pending,tacit_tip / pending,True,193.2,0,
+11_client_past_effective_date.eml,rule_change,pending,rule_change / provisional,False,249.0,0,
+12_pharma_owner_change.eml,rule_change,pending,rule_change / pending,True,313.4,0,

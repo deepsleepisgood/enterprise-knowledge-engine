@@ -1,0 +1,14 @@
+PASS 01_infra_bulk_tolerance.eml: rule_change -> pending (436s)
+PASS 02_price_tolerance_still_2pct.eml: rule_change -> pending (186s)
+PASS 03_spoofed_bank_change.eml: rule_change -> pending (385s)
+PASS 04_fwd_infra_bulk_tolerance.eml: - -> duplicate (0s)
+PASS 05_fwd_fwd_infra_bulk_tolerance.eml: - -> duplicate (0s)
+PASS 06_noise_out_of_office.eml: noise -> ignored (3s)
+PASS 07_noise_team_lunch.eml: noise -> ignored (3s)
+PASS 08_noise_newsletter.eml: noise -> ignored (3s)
+PASS 09_question_30_lakh.eml: question -> answered (288s)
+PASS 10_tacit_tip_supplier_habit.eml: tacit_tip -> pending (193s)
+FAIL 11_client_past_effective_date.eml: rule_change -> pending (249s)
+PASS 12_pharma_owner_change.eml: rule_change -> pending (313s)
+removed 10 test episodes from default
+11/12 -> reports/intake_20261111.md

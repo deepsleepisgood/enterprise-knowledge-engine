@@ -1,0 +1,13 @@
+
+Running 6 tests using 1 worker
+
+  ok 1 gate_a.spec.ts:30:9 › desktop 1440px › T1 price tolerance: current rule, cited, older versions labelled (9.1s)
+  ok 2 gate_a.spec.ts:48:9 › desktop 1440px › T5 ₹395 vs ₹400 × 500: excess ₹2,500 over the ₹500 limit, PRICE_VAR (8.6s)
+  ok 3 gate_a.spec.ts:56:9 › desktop 1440px › T8 canteen subsidy: not covered, routed to a named role (7.3s)
+  ok 4 gate_a.spec.ts:30:9 › phone 390px › T1 price tolerance: current rule, cited, older versions labelled (10.2s)
+  ok 5 gate_a.spec.ts:48:9 › phone 390px › T5 ₹395 vs ₹400 × 500: excess ₹2,500 over the ₹500 limit, PRICE_VAR (9.5s)
+  ok 6 gate_a.spec.ts:56:9 › phone 390px › T8 canteen subsidy: not covered, routed to a named role (13.6s)
+
+  Slow test file: gate_a.spec.ts (58.3s)
+  Consider splitting slow test files to speed up parallel execution
+  6 passed (1.0m)

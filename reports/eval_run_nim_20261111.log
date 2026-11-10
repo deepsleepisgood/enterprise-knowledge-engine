@@ -1,0 +1,45 @@
+160 questions (all), configs ['D']
+  Q002  D ok         32.6s 
+  Q001  D ok         65.0s 
+  Q004  D ok         82.6s 
+  Q003  D ok        260.1s 
+  Q005  D ok        125.9s 
+  Q006  D ok         37.6s 
+  Q009  D ok        121.7s 
+  Q010  D ok         50.4s 
+  Q008  D ok        263.4s 
+  Q012  D ok         84.5s 
+  Q007  D wrong     479.2s generation
+  Q013  D ok        147.4s 
+  Q014  D ok         95.8s 
+  Q016  D ok         69.9s 
+  Q011  D wrong     517.5s generation
+  Q017  D partial    73.9s generation
+  Q019  D ok         38.9s 
+  Q018  D ok        262.4s 
+  Q015  D wrong     467.3s generation
+  Q021  D ok        249.1s 
+  Q020  D wrong     466.6s generation
+  Q023  D ok         76.6s 
+  Q022  D wrong     466.9s generation
+  Q026  D ok         37.7s 
+  Q024  D ok        265.1s 
+  Q027  D ok         75.7s 
+  Q028  D ok        145.4s 
+  Q029  D ok        161.9s 
+  Q031  D ok        129.8s 
+  Q032  D ok        118.6s 
+  Q030  D ok        305.2s 
+  Q025  D wrong     737.2s generation
+  Q034  D ok         50.2s 
+  Q035  D ok        114.9s 
+  Q033  D ok        177.5s 
+  Q037  D ok         82.8s 
+  Q038  D ok        122.2s 
+  Q039  D wrong     171.2s verifier
+  Q041  D ok         19.8s 
+  Q042  D ok         24.0s 
+  Q043  D ok          8.3s 
+  Q044  D ok        147.8s 
+  Q036  D wrong     596.0s generation
+  Q045  D ok        134.3s 
