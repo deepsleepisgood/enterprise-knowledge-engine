@@ -164,12 +164,42 @@ The codebase enforces a strict architectural boundary:
 
 ---
 
-## Quickstart & Installation
+## Quick Start: Just Run `.\run.ps1`
+
+The entire application runs with a single command from your terminal:
+
+```powershell
+.\run.ps1
+```
+
+> [!TIP]
+> **What `.\run.ps1` does under the hood:**
+> - Automatically launches the embedded PostgreSQL instance with `pgvector`
+> - Boots the FastAPI backend server on `http://localhost:8000` (docs at `/docs`)
+> - Starts the asynchronous background queue worker
+> - Starts the Next.js development server on `http://localhost:3000`
+> - Streams live, color-coded process logs (`[api]`, `[worker]`, `[web]`) directly to your terminal
+> - Waits for services to become healthy and automatically opens your browser to `http://localhost:3000`
+> - Cleans up and cleanly terminates all background processes, freeing ports 3000 and 8000 upon `Ctrl+C`
+
+### Optional Flags
+```powershell
+.\run.ps1 --no-browser    # Starts the stack without auto-opening the browser
+.\run.ps1 --no-worker     # Starts without spawning the background queue worker
+```
+
+*(On Windows Command Prompt you can also run `run.cmd`, or across platforms run `python scripts/run_app.py`)*
+
+---
+
+## First-Time Setup & Prerequisites
+
+If setting up on a fresh machine:
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+ (Node 20+ recommended)
-- PostgreSQL 16 with `pgvector` (or use the built-in embedded DB script `dev_db.py`)
+- PostgreSQL 16 with `pgvector` (optional: the embedded DB script `dev_db.py` handles this automatically)
 
 ### 1. Setup Python Environment
 ```bash
@@ -191,7 +221,7 @@ Key configuration values in `.env`:
 - `LLM_PROVIDER`: `nim` (NVIDIA NIM) or `anthropic` (Anthropic Claude).
 - `NVIDIA_API_KEY` / `ANTHROPIC_API_KEY`: API credentials.
 - `SCHEMA_MODE`: `induced` (learns schema automatically) or `baseline`.
-- `DATABASE_URL`: Postgres connection string (if omitted, `scripts/dev_db.py` launches an embedded instance).
+- `DATABASE_URL`: Postgres connection string (if omitted, `scripts/dev_db.py` launches an embedded instance automatically).
 
 ### 3. Setup Frontend
 ```bash
@@ -200,26 +230,12 @@ npm install
 cd ..
 ```
 
+Once installed, simply run `.\run.ps1`!
+
 ---
 
-## Running the Application
-
-### Option A: One-Command Launcher (Recommended)
-You can start the database, run migrations, launch the API, worker, and Next.js frontend together with:
-```powershell
-# PowerShell:
-.\run.ps1
-
-# Or Windows Command Prompt:
-run.cmd
-
-# Or directly with Python:
-python scripts/run_app.py
-```
-This manages all child processes, prefixes logs (`[api]`, `[worker]`, `[web]`), opens your browser at `http://localhost:3000`, and cleanly frees all ports on `Ctrl+C`.
-
-### Option B: Manual Service Execution
-If you prefer running components in dedicated terminals:
+## Manual Service Execution (Optional)
+If you prefer running services individually in separate terminals:
 
 1. **Start Database & Apply Migrations:**
    ```bash
@@ -291,3 +307,4 @@ The system was evaluated against extensive scenario test benches and multi-compa
 ## License
 
 Proprietary / Internal — Meridian & Enterprise Knowledge Engine Team.
+
