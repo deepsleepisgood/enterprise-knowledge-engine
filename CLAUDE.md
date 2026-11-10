@@ -77,6 +77,8 @@ reports/                       evaluation outputs (committed)
 
 ```
 .\run.ps1                             # everything at once: db, API, worker, web; Ctrl+C stops all
+.\run_public.ps1                      # demo from this laptop: API+worker on Neon, Cloudflare tunnel,
+                                      # Vercel web rebuilt with the tunnel address (VERCEL_TOKEN)
                                       # (run.cmd from cmd; scripts/run_app.py elsewhere)
                                       # files dropped in data/inbox (WATCH_DIR) are ingested
                                       # live inputs wait for owner approval (GOVERNANCE)
