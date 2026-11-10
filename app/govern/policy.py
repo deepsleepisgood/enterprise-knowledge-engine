@@ -35,6 +35,22 @@ def _matches(who: str, sender: str | None, role: str | None) -> bool:
     return False
 
 
+def same_client(granted: str | None, client: str | None) -> bool:
+    """A grant's client names the same client ('Acme Retail' ~ 'Acme Retail Pvt Ltd')."""
+    g, c = _norm(granted), _norm(client)
+    if not g or not c:
+        return False
+    return g == c or (len(g) > 3 and (c.startswith(g + " ") or g.startswith(c + " ")))
+
+
+def owns_client(onto: Ontology, sender: str | None, role: str | None, client: str | None) -> bool:
+    """The sender is registered as the owner of this one client's scope (not a global grant)."""
+    return any(
+        _norm(a.client) != "all" and same_client(a.client, client) and _matches(a.who, sender, role)
+        for a in onto.sender_authority
+    )
+
+
 @dataclass
 class Verdict:
     status: str  # provisional | pending
@@ -67,7 +83,7 @@ def decide(
                 reasons.append(f"{sender_role or sender} may not change {t}")
                 continue
             for c in sorted(clients):
-                if not any(a.client in ("all", c) for a in ok_topic):
+                if not any(a.client == "all" or same_client(a.client, c) for a in ok_topic):
                     reasons.append(f"{sender_role or sender} may not change {t} for {c}")
     status = PENDING if reasons else PROVISIONAL
     if not reasons:

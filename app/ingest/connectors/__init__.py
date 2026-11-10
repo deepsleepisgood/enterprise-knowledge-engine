@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import email
 import io
+import re
 import zipfile
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
@@ -55,6 +56,10 @@ def from_upload(name: str, data: bytes, **kw: Any) -> list[EpisodeIn]:
         return out
     if _skip(name):
         return []
+    if name.lower().endswith(".eml"):
+        # Read as an email (sender, date, attachments). An uploader given by the caller is
+        # who governance judges; the From header counts only when nobody is named.
+        return from_eml(data, channel="upload", **kw)
     return [EpisodeIn(channel="upload", data=data, filename=name, **kw)]
 
 
@@ -88,10 +93,28 @@ def from_text(
     )
 
 
+def _from_header(value: str) -> tuple[str, str]:
+    """(display name, address). Lenient: 'Financial Controller, Client X <a@b>' keeps the
+    whole name although the unquoted comma makes it two addresses by the RFC."""
+    m = re.match(r"\s*(.*?)\s*<([^<>@\s]+@[^<>\s]+)>\s*$", value)
+    if m:
+        return m.group(1).replace('"', "").strip(), m.group(2)
+    return parseaddr(value)
+
+
 def from_eml(raw: bytes, channel: str = "email", **kw: Any) -> list[EpisodeIn]:
     """An RFC 822 message: the message itself plus one episode per attachment."""
     msg = email.message_from_bytes(raw, policy=policy.default)
-    sender = parseaddr(str(msg.get("From", "")))[1] or None
+    display, address = _from_header(str(msg.get("From", "")))
+    uploader = kw.pop("sender", None)
+    if uploader:
+        # Someone handed this file in: governance judges them, never the header they carry.
+        sender = uploader
+    else:
+        sender = address or None
+        if not kw.get("sender_role"):
+            # The From display name ("Financial Controller, Client X") names the role.
+            kw["sender_role"] = display or None
     try:
         received = parsedate_to_datetime(str(msg.get("Date")))
         received = received if received.tzinfo else received.replace(tzinfo=UTC)

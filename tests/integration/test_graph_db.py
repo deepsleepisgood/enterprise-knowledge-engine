@@ -18,7 +18,7 @@ from app.core.db import session_scope
 from app.graph import pipeline as gp
 from app.graph.compare import deterministic
 from app.graph.extract import XFact, XResult, XValue
-from app.graph.ontology import Attribute, Ontology, SourceRank, Topic
+from app.graph.ontology import Attribute, Ontology, SenderAuthority, SourceRank, Topic
 from app.graph.rules import RuleNotFound, expert_tips, get_rule
 from app.ingest import pipeline as ip
 from app.ingest.connectors import from_text
@@ -135,6 +135,7 @@ def fake_structured(prompt, schema, **kw):
                     kind="rule",
                     statement=f"Staff get {m.group(2)} days.",
                     quote=m.group(0),
+                    effective_date="2026-06-01" if "From 1 June 2026" in text else None,
                 )
             )
         if "cashed out up to 2 k" in text:
@@ -332,3 +333,58 @@ def test_out_of_order_arrival_and_known_at(graph) -> None:
             get_rule(s, ONTO, "annual_leave", "days", as_of=date(2025, 6, 1), known_at=before_old)
         topic = entities.by_alias(s, "annual_leave", "topic")
         assert topic is not None
+
+
+def _email(sender: str) -> bytes:
+    lines = [
+        f"From: {sender} <hr@northwind.example>",
+        "To: HR team <hr@example.com>",
+        "Subject: Leave update",
+        "Date: Mon, 4 May 2026 10:00:00 +0000",
+        "Content-Type: text/plain; charset=utf-8",
+        "",
+        "From 1 June 2026, Northwind Builders staff get 32 days of annual leave a year.",
+    ]
+    return "\r\n".join(lines).encode()
+
+
+@pytest.mark.parametrize(
+    ("sender", "june"),
+    [("HR Director, Northwind Builders", 32), ("Someone Else, Elsewhere", 30)],
+)
+def test_the_clients_owner_amends_their_memo_by_email(graph, sender, june) -> None:
+    """An email ranks below a memo, but from the client's registered owner, about that
+    client, it carries the memo's authority: the later-starting value wins from its date.
+    From anyone else the memo stays in force."""
+    from app.ingest.connectors import from_upload
+    from app.store import episodes as estore
+
+    ingest, build = graph
+    owner = ONTO.model_copy(deep=True)
+    owner.source_ranking.append(SourceRank(doc_type="email", rank=4))
+    owner.sender_authority = [
+        SenderAuthority(who="HR Director, Northwind Builders", client="Northwind Builders Ltd")
+    ]
+    with session_scope() as s:
+        kb.save_schema(s, owner.model_dump(), "induced", frozen_by="test")
+    ingest(V2, "leave_v2.md")
+    ingest(MEMO, "memos.md")
+    with session_scope() as s:
+        [ep] = from_upload("update.eml", _email(sender))
+        eid, _ = submit(s, ep)
+    worker.drain(kinds=["parse_episode"])
+    with session_scope() as s:  # what metadata inference reads from the memo and the email
+        for src in estore.list_sources(s):
+            if src.short_label == "M-1":
+                estore.update_source(s, src.id, client_scope="Northwind Builders Ltd")
+        for src in estore.list_sources(s, episode_id=eid):
+            estore.update_source(s, src.id, doc_type="email", client_scope="Northwind Builders Ltd")
+    assert not build()["failures"]
+
+    def nw(day: date) -> float:
+        with session_scope() as s:
+            rv = get_rule(s, owner, "annual_leave", "days", client="Northwind Builders", as_of=day)
+            return rv.number
+
+    assert nw(date(2026, 5, 15)) == 30  # the memo until the change would take effect
+    assert nw(date(2026, 6, 15)) == june

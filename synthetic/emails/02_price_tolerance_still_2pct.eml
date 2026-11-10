@@ -1,0 +1,14 @@
+From: Ravi Kumar, AP Processor <ravi.kumar@meridian.example>
+To: AP Team <ap.team@meridian.example>
+Subject: Price tolerance reminder
+Date: Tue, 3 Nov 2026 09:20:00 +0530
+Message-ID: <synthetic-02@meridian.example>
+X-Synthetic: true (PS-07 team test data, not a real message)
+Content-Type: text/plain; charset="utf-8"
+
+Hi all,
+
+Quick reminder since a few lines got held last week: the price tolerance is still 2% of the
+PO line value. Anything within 2% can be posted without raising PRICE_VAR.
+
+Ravi

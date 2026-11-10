@@ -214,6 +214,19 @@ def extract_and_publish(
                 {d.topic for d in drafts},
                 clients,
             )
+            if ep is not None and ep.triage_label == "tacit_tip":
+                verdict.status = "pending"
+                verdict.reasons.append("a colleague's tip, not an official rule: held for review")
+            got = ep.received_at.date() if ep is not None and ep.received_at else None
+            back = sorted(
+                d.asserted_from for d in drafts if got and d.asserted_from and d.asserted_from < got
+            )
+            if back:
+                # Answers given between the effective date and receipt may have been wrong.
+                verdict.reasons.append(
+                    f"applies retroactively from {back[0]:%d %b %Y} (received {got:%d %b %Y}): "
+                    "answers given in between may need review; nothing was corrected automatically"
+                )
         rep: PublishReport = publish(
             s,
             drafts,

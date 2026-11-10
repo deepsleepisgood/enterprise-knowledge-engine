@@ -1,0 +1,13 @@
+file,expect_triage,expect_outcome,note
+01_infra_bulk_tolerance.eml,rule_change,pending,"Infra FC is the registered owner, but quantity_tolerance is high-risk in the frozen schema, so CLAUDE.md rule 9 holds it (TEST_PLAN's 'provisional' assumes a non-high-risk topic). Once approved: 5% until 15 Nov, 7% from 16 Nov."
+02_price_tolerance_still_2pct.eml,rule_change,pending,"Not the scope owner and a high-risk topic; answers unchanged (1% / Rs 500 stays)."
+03_spoofed_bank_change.eml,rule_change,pending,"High-risk topic (vendor bank account change); not applied."
+04_fwd_infra_bulk_tolerance.eml,,duplicate,"Same message as 01: no new episode, one more confirmation."
+05_fwd_fwd_infra_bulk_tolerance.eml,,duplicate,"Same message as 01 forwarded twice: no new episode, one more confirmation."
+06_noise_out_of_office.eml,noise,ignored,"Nothing extracted."
+07_noise_team_lunch.eml,noise,ignored,"Nothing extracted."
+08_noise_newsletter.eml,noise,ignored,"Nothing extracted."
+09_question_30_lakh.eml,question,answered,"Answered (AP Controller above 10 lakh); knowledge base unchanged."
+10_tacit_tip_supplier_habit.eml,tacit_tip,pending,"A colleague's tip: held for review, stored as practice."
+11_client_past_effective_date.eml,rule_change,provisional,"Retail FD owns non_po_categories (medium risk): provisional; the review item lists the retroactive window from 1 Oct 2026."
+12_pharma_owner_change.eml,rule_change,pending,"Pharma Head of Quality is the owner, but pharma_qa_release is high-risk: held."

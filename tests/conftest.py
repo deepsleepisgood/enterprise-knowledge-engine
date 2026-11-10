@@ -20,9 +20,10 @@ collect_ignore = []
 
 
 def _server_url() -> str | None:
-    """A URL for some database on the server: DATABASE_URL, else the embedded dev server."""
-    if os.environ.get("DATABASE_URL"):
-        return os.environ["DATABASE_URL"]
+    """The server tests create their scratch database on: TEST_DATABASE_URL if set, else the
+    embedded dev server. Never DATABASE_URL: that may be a deployed database."""
+    if os.environ.get("TEST_DATABASE_URL"):
+        return os.environ["TEST_DATABASE_URL"]
     try:
         sys.path.insert(0, str(ROOT / "scripts"))
         import dev_db  # type: ignore[import-not-found]

@@ -17,7 +17,7 @@ from app.core.config import get_settings
 from app.core.db import session_scope
 from app.core.redaction import redact
 from app.ingest import metadata as md
-from app.ingest import versions
+from app.ingest import triage, versions
 from app.ingest.detect import detect
 from app.ingest.parsers import QUALITY_FLOOR, parse
 from app.ingest.segment import DocPart, PassageDraft, infer_headings, segment, split_documents
@@ -42,6 +42,11 @@ def _llm_structured() -> Any | None:
     from app.core.llm import structured
 
     return structured
+
+
+def _triage_structured() -> Any | None:
+    """The LLM call used for triage (its own hook, so tests can fake it alone)."""
+    return _llm_structured()
 
 
 def _repair(structured: Any):
@@ -181,6 +186,35 @@ def plugin_hooks(payload: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _triage(episode: Any, blocks: list[Any], structured: Any, summary: dict[str, Any]) -> bool:
+    """Sort a message before anything is extracted. True when it is fully handled here
+    (noise: nothing to keep; a question: answered, the knowledge base unchanged)."""
+    text = "\n".join(b.text for b in blocks if b.text)
+    t = triage.triage(text, episode.sender, structured)
+    summary["triage"] = t.label
+    meta = {**(episode.meta or {}), "triage_reason": t.reason}
+    if t.label == "noise":
+        with session_scope() as s:
+            store.set_status(s, episode.id, "ignored", triage_label=t.label, meta=meta)
+        return True
+    if t.label == "question":
+        from app.answer.pipeline import ask
+
+        card = ask(t.question or text[:500], user_id=episode.sender or "email")
+        meta["answer"] = {
+            "question": t.question,
+            "status": card.get("status"),
+            "text": ((card.get("rule") or {}).get("text") or "")[:2000],
+            "kb_version": card.get("kb_version"),
+        }
+        with session_scope() as s:
+            store.set_status(s, episode.id, "answered", triage_label=t.label, meta=meta)
+        return True
+    with session_scope() as s:
+        store.set_status(s, episode.id, "queued", triage_label=t.label, meta=meta)
+    return False
+
+
 @handler("parse_episode")
 def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
     eid = payload["episode_id"]
@@ -191,7 +225,12 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
         data = Path(ep.blob_path).read_bytes()
         filename = ep.source_uri or ""
         episode = type(
-            "E", (), {c: getattr(ep, c) for c in ("id", "channel", "received_at", "source_uri")}
+            "E",
+            (),
+            {
+                c: getattr(ep, c)
+                for c in ("id", "channel", "received_at", "source_uri", "sender", "meta")
+            },
         )()
     kind, _mime = detect(data, filename)
     result = parse(data, kind)
@@ -214,6 +253,11 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
         return summary
 
     structured = _llm_structured()
+    triage_fn = _triage_structured()
+    if triage_fn and triage.is_message(kind, episode.channel):
+        done = _triage(episode, result.blocks, triage_fn, summary)
+        if done:
+            return summary
     blocks = infer_headings(result.blocks, repair=_repair(structured) if structured else None)
     docs = split_documents(blocks)
 
@@ -227,6 +271,8 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
             llm_fn=structured,
         )
         src = _source_row(episode, doc, m)
+        if summary.get("triage") == "tacit_tip":  # know-how, never a rule
+            src["meta"] = {**(src.get("meta") or {}), "practice": True}
         return src, passage_rows(src, segment(doc)), m.low_confidence()
 
     from concurrent.futures import ThreadPoolExecutor

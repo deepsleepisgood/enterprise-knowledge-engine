@@ -128,6 +128,9 @@ def _tags(p: PassageHit, as_of: date | None) -> str:
     return ", ".join(f"[{t}]" if t in ("practice", "superseded") else t for t in tags)
 
 
+evidence_tags = _tags  # what the verifier may also treat as cited (dates in the tags)
+
+
 def build_prompt(
     question: str,
     client: str | None,

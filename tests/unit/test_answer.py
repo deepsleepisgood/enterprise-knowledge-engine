@@ -356,3 +356,13 @@ def test_a_list_written_as_one_phrase_is_split_into_items() -> None:
     assert rv({"type": "enum", "text": "Thursday"}).items == []
     assert rv({"type": "text", "text": "Terms and conditions"}).items == []
     assert rv({"type": "enum", "text": "x", "items": ["A", "B"]}).items == ["A", "B"]
+
+
+def test_a_date_from_the_passage_tags_is_a_cited_number() -> None:
+    from app.answer.generate import evidence_tags
+
+    h = hit("a", "Up to 5% above the GRN quantity is accepted.")
+    h.valid_until = date(2027, 3, 31)
+    text = "Up to 5% is accepted until 31 March 2027 [1]."
+    assert verify.check_numbers(text, [h.text])  # the body alone does not carry the date
+    assert verify.check_numbers(text, [h.text, evidence_tags(h, None)]) == []

@@ -14,12 +14,14 @@ status and rank, so the result does not depend on the order episodes arrive.
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.govern.policy import owns_client
 from app.graph.entities import Resolver, norm_type
 from app.graph.extract import Draft
 from app.graph.ontology import Ontology
@@ -72,7 +74,7 @@ def topic_entity(resolver: Resolver, onto: Ontology, topic_key: str) -> str:
 
 
 def _assertion_from_row(
-    r: fstore.FactRow, src: Any, onto: Ontology, order: dict[str, int] | None = None
+    r: fstore.FactRow, src: Any, rank: int, order: dict[str, int] | None = None
 ) -> Assertion:
     m = r.meta or {}
     return Assertion(
@@ -86,7 +88,7 @@ def _assertion_from_row(
         source_id=r.source_id or "",
         source_label=src.short_label,
         source_status=src.status,
-        authority_rank=onto.rank_of(src.doc_type).rank,
+        authority_rank=rank,
         asserted_from=_d(m.get("asserted_from")),
         asserted_to=_d(m.get("asserted_to")),
         scope=r.scope or {},
@@ -135,6 +137,38 @@ def _new_fact(
     )
 
 
+def source_ranker(session: Session, onto: Ontology) -> Callable[[Any], int]:
+    """A source's authority. Normally its document type's rank; but a source scoped to one
+    client and sent by that client's registered owner (the schema's sender authority) ranks
+    with that client's own documents: the owner amending their memo by email carries the
+    memo's authority, so the later-starting change wins the tie."""
+    cache: dict[str, int] = {}
+    scoped: list[Any] | None = None
+
+    def rank(src: Any) -> int:
+        nonlocal scoped
+        if src.id in cache:
+            return cache[src.id]
+        own = onto.rank_of(src.doc_type).rank
+        client = src.client_scope
+        ep = (
+            estore.get_episode(session, src.episode_id) if client not in (None, "", "all") else None
+        )
+        if ep is not None and owns_client(onto, ep.sender, ep.sender_role, client):
+            if scoped is None:
+                scoped = [x for x in estore.list_sources(session) if x.status == "current"]
+            peers = [
+                onto.rank_of(x.doc_type).rank
+                for x in scoped
+                if x.id != src.id and x.client_scope == client
+            ]
+            own = min([own, *peers])
+        cache[src.id] = own
+        return own
+
+    return rank
+
+
 def client_context(session: Session, onto: Ontology) -> tuple[dict[str, set[str]], list[int]]:
     """Known clients (the scopes documents declare) and the ranks of the sources declaring them."""
     scoped = [x for x in estore.list_sources(session) if x.client_scope and x.client_scope != "all"]
@@ -168,6 +202,8 @@ def publish(
             | {r.source_id for r in fstore.live_for_passages(session, passage_ids) if r.source_id}
         ),
     )
+
+    rank = source_ranker(session, onto)
 
     # 1. Entities. The client comes from the source's declared scope and the fact's own words
     # (app/graph/scope.py); declared clients are pinned, never merged into another entity.
@@ -225,7 +261,7 @@ def publish(
                         subj,
                         sc,
                         hold,
-                        onto.rank_of(src.doc_type).rank,
+                        rank(src),
                         day_start(d.asserted_from),
                         day_after(d.asserted_to),
                         {"governance": hold, "reason": "held for the process owner"},
@@ -261,7 +297,7 @@ def publish(
         pids += [d.passage_id for d, _, _ in by_group.get((subject_id, attribute), [])]
         order = {pid: p.ordinal for pid, p in estore.passages_by_ids(session, pids).items()}
         assertions: dict[str, Assertion] = {
-            k: _assertion_from_row(r, sources[r.source_id], onto, order)
+            k: _assertion_from_row(r, sources[r.source_id], rank(sources[r.source_id]), order)
             for k, r in rows.items()
             if r.source_id in sources
         }
@@ -283,7 +319,7 @@ def publish(
                 source_id=d.source_id,
                 source_label=src.short_label,
                 source_status=src.status,
-                authority_rank=onto.rank_of(src.doc_type).rank,
+                authority_rank=rank(src),
                 asserted_from=d.asserted_from,
                 asserted_to=d.asserted_to,
                 scope=sc,
@@ -295,11 +331,13 @@ def publish(
             rep.statuses[a.status] += 1
             if k in rows:
                 r = rows[k]
-                if (r.status, r.valid_from, r.valid_to) == (a.status, vf, vt):
+                same_state = (r.status, r.valid_from, r.valid_to) == (a.status, vf, vt)
+                if same_state and r.authority_rank == a.authority_rank:
                     key_to_id[k] = r.id
                     rep.unchanged += 1
                     continue
-                changed_keys.add(k)
+                if not same_state:  # a new rank alone is bookkeeping, not a rule change
+                    changed_keys.add(k)
                 key_to_id[k] = fstore.revise(
                     session,
                     r.id,
@@ -307,6 +345,7 @@ def publish(
                     status=a.status,
                     valid_from=vf,
                     valid_to=vt,
+                    authority_rank=a.authority_rank,
                     meta={**(r.meta or {}), "reason": a.reason},
                 )
                 rep.revised += 1
@@ -320,7 +359,7 @@ def publish(
                         a.subject_id,
                         sc,
                         a.status,
-                        onto.rank_of(src.doc_type).rank,
+                        rank(src),
                         vf,
                         vt,
                         {"reason": a.reason},

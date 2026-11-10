@@ -9,12 +9,13 @@ graph values; every answer is logged with its citations and verifier result.
 from __future__ import annotations
 
 import time
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import date, datetime
 from typing import Any
 
 from app.answer import card as cards
 from app.answer import verify
-from app.answer.generate import CalcView, GenOut, evidence_ids, generate
+from app.answer.generate import CalcView, GenOut, evidence_ids, evidence_tags, generate
 from app.answer.retrieve import EmbedFn, RerankFn, retrieve
 from app.answer.router import route
 from app.core.config import get_settings
@@ -29,6 +30,9 @@ from app.store import facts as fstore
 from app.store import kb, search
 
 MAX_EVIDENCE = 12
+# Calculator inputs are read from the question while routing and search run; for a lookup the
+# result is dropped. Shared and never waited on at shutdown, so a lookup is not slowed down.
+_EARLY = ThreadPoolExecutor(max_workers=4, thread_name_prefix="early-inputs")
 UNSUPPORTED = "The documents in the knowledge base do not cover this."
 
 
@@ -135,8 +139,30 @@ def ask(
             raise RuntimeError("no frozen schema: build the graph first")
         kbv = kb.current_kb_version(s)
         clients = [e.name for e in estore.list_entities(s, "client")]
+        timings: dict[str, float] = {}
+        diag["timings_s"] = timings
 
+        def mark(step: str, since: float) -> float:
+            now = time.perf_counter()
+            timings[step] = round(now - since, 2)
+            return now
+
+        # With one calculator plug-in, start reading its inputs now (needs only the question).
+        plugins = sorted({k.split(":", 1)[1].split(".", 1)[0] for k in calculators})
+        early: Future | None = None
+        if cfg.early_calculator_inputs and len(plugins) == 1:
+            early = _EARLY.submit(
+                calc_mod.inputs_for,
+                plugins[0],
+                question,
+                clients,
+                onto,
+                _with_model(structured, cfg.router_model),
+            )
+
+        t = time.perf_counter()
         r = route(question, clients, calculators, roles, structured)
+        t = mark("route", t)
         asked = client if client and client != "all" else r.client
         client_name = canonical_client(s, asked) if asked else None
         diag["router"] = r.model_dump()
@@ -174,6 +200,7 @@ def ask(
             return finish(base, [], [])
 
         got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+        t = mark("retrieve", t)
         base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
         diag["retrieval"] = {
             "scorer": got.scorer,
@@ -187,9 +214,13 @@ def ask(
         if r.route.startswith("calculator:"):
             plugin = r.route.split(":", 1)[1].split(".", 1)[0]
             try:
-                prep = calc_mod.inputs_for(
-                    plugin, question, clients, onto, _with_model(structured, cfg.router_model)
-                )
+                if early is not None and plugin == plugins[0]:
+                    prep = early.result()  # usually already done while routing and searching
+                else:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                t = mark("calculator_inputs_wait", t)
                 if prep is not None:
                     family, inputs = prep
                     stray = grounded_inputs(
@@ -252,6 +283,8 @@ def ask(
             cited_hits = [h for h in evidence.values() if h.id in cited]
             allowed = [h.text for h in cited_hits]
             allowed += [f"{h.label} {h.locator} {h.section_title or ''}" for h in cited_hits]
+            # The tags the model saw with each passage (e.g. "in force until 2027-03-31").
+            allowed += [evidence_tags(h, as_of) for h in cited_hits]
             allowed += [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
             if res is not None:
                 allowed.append(str(res.result))
@@ -282,6 +315,8 @@ def ask(
             attempts.append(problems)
             failures = problems
         diag["verifier"] = {"verified": verified, "problems": problems, "attempts": attempts}
+        t = mark("answer_and_check", t)
+        timings["attempts"] = len(attempts) + (1 if verified else 0)
 
         assert gen is not None
         if gen.status == "unsupported":

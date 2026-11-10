@@ -188,7 +188,8 @@ def test_out_of_scope_never_reaches_generation(kb_built) -> None:
     llm = FakeLLM()
     card = run("What will the weather be tomorrow?", llm)
     assert card["status"] == "unsupported" and card["route"] == "out_of_scope"
-    assert llm.calls == ["RouteOut"]
+    # Only the router (plus the calculator inputs read early, in parallel) — never generation.
+    assert "RouteOut" in llm.calls and set(llm.calls) <= {"RouteOut", "ScenarioParams"}
 
 
 def test_superseded_value_is_withheld_after_one_retry(kb_built) -> None:

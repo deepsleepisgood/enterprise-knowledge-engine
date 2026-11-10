@@ -165,7 +165,9 @@ export type EpisodeStatus =
   | "published"
   | "pending_review"
   | "needs_attention"
-  | "failed";
+  | "failed"
+  | "ignored" // triage: noise, nothing extracted
+  | "answered"; // triage: an emailed question, answered without changing the knowledge base
 
 export interface Episode {
   id: string;

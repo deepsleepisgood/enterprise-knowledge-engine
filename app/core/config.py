@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     abstain_vector_score: float = 0.55  # used when the reranker is off
     router_min_confidence: float = 0.6  # below this a calculator route falls back to lookup
     router_model: str = "fast"  # fast | smart | a model id
+    early_calculator_inputs: bool = True  # read calculator inputs while routing (faster)
     answer_thinking: bool = False  # let reasoning models think on the answer path (slower)
 
     data_dir: Path = ROOT / "data"

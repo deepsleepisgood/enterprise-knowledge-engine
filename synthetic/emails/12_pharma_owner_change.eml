@@ -1,0 +1,17 @@
+From: Head of Quality, Arvana Pharma <quality@arvana-pharma.example>
+To: AP Process Excellence <ap.process@meridian.example>
+Subject: CM-PHA-01: QA release check also covers secondary packaging from 1 December 2026
+Date: Tue, 10 Nov 2026 11:00:00 +0530
+Message-ID: <synthetic-12@arvana-pharma.example>
+X-Synthetic: true (PS-07 team test data, not a real message)
+Content-Type: text/plain; charset="utf-8"
+
+Hello,
+
+From 1 December 2026, invoices for secondary packaging material for Arvana Pharma also must not
+be paid until the batch shows status Released in QMS, in addition to the materials already
+listed in client memo CM-PHA-01. Everything else in CM-PHA-01 is unchanged.
+
+Regards,
+Head of Quality
+Arvana Pharma

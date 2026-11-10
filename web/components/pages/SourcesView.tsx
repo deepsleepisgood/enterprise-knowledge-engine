@@ -8,6 +8,7 @@ import {
   FolderOpen,
   Globe,
   Mail,
+  MailX,
   MessageSquare,
   Pencil,
   RotateCw,
@@ -32,6 +33,8 @@ const HELD: Partial<Record<EpisodeStatus, { label: string; icon: typeof ShieldAl
   needs_attention: { label: "Needs attention", icon: FileWarning },
   pending_review: { label: "Pending review", icon: ShieldAlert },
   failed: { label: "Failed", icon: FileWarning },
+  ignored: { label: "Ignored: no knowledge in it", icon: MailX },
+  answered: { label: "Question: answered", icon: MessageSquare },
 };
 const TYPES = "docx pdf xlsx csv pptx html md txt eml vtt srt json zip";
 

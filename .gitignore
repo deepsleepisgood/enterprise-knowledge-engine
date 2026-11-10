@@ -4,8 +4,7 @@ __pycache__/
 .env
 .pgdata/
 .cache/
-logs/*.jsonl
-logs/*.log
+logs/
 .pytest_cache/
 .ruff_cache/
 web/node_modules/
@@ -18,3 +17,9 @@ data/blobs/
 data/watch/
 web/.env.local
 web/e2e-results/
+.neon
+node_modules/
+
+# local helper binaries (cloudflared)
+tools/
+web/.vercel

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.ingest.connectors import EpisodeIn
 from app.ingest.detect import detect
+from app.ingest.triage import message_key
 from app.store import episodes as store
 from app.store import jobs
 from app.store.base import tenant
@@ -27,8 +28,11 @@ def store_blob(data: bytes, digest: str, filename: str) -> Path:
 
 def submit(session: Session, ep: EpisodeIn, enqueue: bool = True) -> tuple[str, bool]:
     """Register one episode. Returns (episode_id, created); duplicates only add a confirmation."""
-    digest = hashlib.sha256(ep.data).hexdigest()
     kind, mime = detect(ep.data, ep.filename)
+    # An email is identified by the message it carries, so forwards of it are duplicates.
+    digest = (message_key(ep.data) if kind == "eml" else None) or hashlib.sha256(
+        ep.data
+    ).hexdigest()
     path = store_blob(ep.data, digest, ep.filename)
     eid, created = store.add_episode(
         session,
