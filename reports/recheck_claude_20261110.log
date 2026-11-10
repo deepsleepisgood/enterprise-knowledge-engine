@@ -1,0 +1,51 @@
+46 questions: 34 affected + 12 controls
+  Q007  D ok         26.0s 
+  Q010  D ok         28.2s 
+  Q002  D ok         34.5s 
+  Q011  D ok         10.1s 
+  Q012  D ok         10.2s 
+  Q016  D ok          9.6s 
+  Q013  D ok         14.5s 
+  Q017  D partial    13.0s generation
+  Q023  D ok          8.1s 
+  Q032  D ok         17.2s 
+  Q033  D ok         14.6s 
+  Q034  D ok         15.2s 
+  Q039  D ok         14.6s 
+  Q038  D ok         17.4s 
+  Q047  D ok         14.9s 
+  Q048  D partial    11.7s generation
+  Q049  D ok         13.2s 
+  Q050  D ok         15.4s 
+  Q052  D ok          9.2s 
+  Q056  D ok          7.8s 
+  Q051  D ok         20.6s 
+  Q060  D ok         10.0s 
+  Q071  D ok         11.1s 
+  Q080  D ok         11.6s 
+  Q062  D ok         20.1s 
+  Q082  D ok         13.1s 
+  Q092  D wrong      12.2s calculator
+  Q094  D ok         17.0s 
+  Q098  D ok         15.7s 
+  Q102  D ok         18.1s 
+  Q113  D wrong      19.9s calculator
+  Q115  D ok         21.5s 
+  Q122  D ok         24.5s 
+  Q130  D ok         17.8s 
+  Q123  D ok         26.6s 
+  Q134  D ok         14.6s 
+  Q136  D ok         23.2s 
+  Q138  D ok         29.5s 
+  Q139  D ok         34.9s 
+  Q140  D ok         28.8s 
+  Q141  D ok         32.7s 
+  Q142  D ok         31.1s 
+  Q143  D ok         28.5s 
+  Q144  D ok         31.1s 
+  Q145  D ok         22.8s 
+  Q146  D ok         22.7s 
+affected dev: n=17 correct 15->16; unverified 13->0
+affected holdout: n=17 correct 12->14; unverified 11->1
+control dev: n=12 correct 12->12; unverified 0->0
+cost 0.794 -> D:\antigravity\company knowledge engine\reports\recheck_claude_20261110.csv

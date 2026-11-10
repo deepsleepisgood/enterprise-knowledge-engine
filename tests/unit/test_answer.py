@@ -106,6 +106,27 @@ def test_values_not_in_force_are_caught_with_their_unit() -> None:
     assert verify.check_not_in_force("Raise PRICE_VAR [1].", other, now, UNITS) == []
 
 
+def test_values_from_the_case_or_calculator_are_not_old_rules() -> None:
+    now = [
+        fact(1, "tol.pct", {"type": "percentage", "number": 1, "text": "1%"}),
+        fact(2, "tol.cap", {"type": "money", "number": 500, "text": "₹500"}),
+        fact(3, "run.day", {"type": "text", "text": "Tuesday and Friday"}),
+    ]
+    old = [
+        fact(4, "tol.pct", {"type": "percentage", "number": 2, "text": "2%"}, "superseded"),
+        fact(5, "tol.cap", {"type": "money", "number": 1000, "text": "₹1,000"}, "superseded"),
+        fact(6, "run.day", {"type": "text", "text": "Thursday"}, "superseded"),
+    ]
+    calc = "Excess on line (₹2 × 500): ₹1,000\nCut-off: 1 pm → Thursday 23 July 2026"
+    text = "The excess is ₹1,000, above ₹500 [1]. The cut-off is Thursday 23 July 2026 [1]."
+    assert len(verify.check_not_in_force(text, old, now, UNITS, currencies=["₹"])) == 2
+    assert verify.check_not_in_force(text, old, now, UNITS, currencies=["₹"], given=[calc]) == []
+    # A figure in the calculator output only excuses a value of the same kind: "₹2" there
+    # does not let the retired 2% through.
+    stale = "The tolerance is 2% [1]."
+    assert verify.check_not_in_force(stale, old, now, UNITS, currencies=["₹"], given=[calc])
+
+
 def test_assemble_numbers_citations_in_order_and_checks_quotes() -> None:
     ev = {"P1": hit("a", "Rule one says pay in 45 days."), "P2": hit("b", "Rule two is here.")}
     gen = GenOut(
@@ -322,3 +343,16 @@ def test_stated_agreed_term_counts_as_written_unless_said_otherwise() -> None:
     assert p.msme.written_agreement
     p = extract_params("Small enterprise; term of 60 days, no written agreement.", [], fake)
     assert not p.msme.written_agreement
+
+
+def test_a_list_written_as_one_phrase_is_split_into_items() -> None:
+    from app.graph.rules import RuleValue
+
+    def rv(value: dict) -> RuleValue:
+        return RuleValue(1, "a", None, value, "", "current", None, None, None, None, None, None)
+
+    assert rv({"type": "enum", "text": "Tuesday and Friday"}).items == ["Tuesday", "Friday"]
+    assert rv({"type": "list", "text": "cement, steel & sand"}).items == ["cement", "steel", "sand"]
+    assert rv({"type": "enum", "text": "Thursday"}).items == []
+    assert rv({"type": "text", "text": "Terms and conditions"}).items == []
+    assert rv({"type": "enum", "text": "x", "items": ["A", "B"]}).items == ["A", "B"]

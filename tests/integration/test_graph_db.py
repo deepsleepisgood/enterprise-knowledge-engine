@@ -227,6 +227,25 @@ def test_versions_memo_and_practice(graph) -> None:
         assert any(c.kind == "practice_vs_rule" for c in conflicts)
 
 
+def test_a_rule_dropped_by_the_next_version_ends_with_its_document(graph) -> None:
+    """v1 has a cash-out cap that v2 leaves out. Until the owner retires v1's facts they stay
+    open, but v1 ended on 31 Dec 2025, so its cap is not the rule in force after that."""
+    ingest, build = graph
+    cash = "\n## 2. Cash out\n\nUnused leave can be cashed out up to 2 k per year.\n"
+    v2 = (
+        V1.replace("version 1", "version 2")
+        .replace("| 1.0 |", "| 2.0 |")
+        .replace("1 January 2025", "1 January 2026")
+    )
+    # v1 is published before v2 arrives (as in a live feed), so its facts start open.
+    assert not build(ingest(V1 + cash, "leave_v1.md"))["failures"]
+    assert not build(ingest(v2, "leave_v2.md"))["failures"]
+    with session_scope() as s:
+        assert get_rule(s, ONTO, "annual_leave", "cash_cap", as_of=date(2025, 6, 1)).number == 2000
+        with pytest.raises(RuleNotFound):
+            get_rule(s, ONTO, "annual_leave", "cash_cap", today=date(2026, 6, 1))
+
+
 def test_rebuild_is_idempotent_and_rows_only_grow(graph) -> None:
     ingest, build = graph
     ingest(V1, "v1.md")

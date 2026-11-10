@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 
 from app.store.facts import FactRow
 
-PROMPT_VERSION = "support-v2"
+PROMPT_VERSION = "support-v3"
 
 # ---------------------------------------------------------------- text helpers
 
@@ -214,8 +214,15 @@ def check_not_in_force(
     units: dict[str, float],
     when: str = "current",
     currencies: list[str] | None = None,
+    given: list[str] | None = None,
 ) -> list[str]:
+    """Values from facts not in force that the answer states. A value that also appears in
+    `given` (the asker's question, the calculator output: computed only from rules in force)
+    is the case's own figure or a result, not an old rule, e.g. an excess that happens to
+    equal a retired cap, or a cut-off weekday that was once the run day."""
     found = mentions(rule_text, units, currencies)
+    given_text = norm(_strip_markers(" ".join(g for g in (given or []) if g)))
+    given_found = mentions(given_text, units, currencies)
     in_force_keys = {(f.subject_id, f.attribute) for f in in_force}
     not_in_force = [f for f in not_in_force if (f.subject_id, f.attribute) in in_force_keys]
     t = norm(_strip_markers(rule_text))
@@ -229,6 +236,8 @@ def check_not_in_force(
         if kind and n is not None:
             if any(f.value.get("number") == n for f in attr_now):
                 continue
+            if float(n) in given_found[kind]:
+                continue
             if float(n) in found[kind]:
                 problems.append(
                     f"'{old.value.get('text') or n}' ({old.attribute}) is not the {when} rule "
@@ -239,6 +248,7 @@ def check_not_in_force(
             if (
                 len(txt) >= 6
                 and txt in t
+                and txt not in given_text
                 and not any(txt in norm(str(f.value.get("text") or "")) for f in attr_now)
             ):
                 problems.append(f"'{old.value.get('text')}' ({old.attribute}) is not in force")
@@ -250,8 +260,11 @@ def check_not_in_force(
 
 class SupportItem(BaseModel):
     sentence: int
-    supported: bool
-    problem: str = Field("", description="What is not backed by the evidence, if anything")
+    check: str = Field(
+        "", description="What the sentence claims and where the evidence states or implies it"
+    )
+    problem: str = Field("", description="A claim that is wrong or has no basis, if any")
+    supported: bool  # decided last, after the check is written
 
 
 class SupportOut(BaseModel):
@@ -259,12 +272,16 @@ class SupportOut(BaseModel):
 
 
 SUPPORT_SYSTEM = """You check an answer sentence by sentence against the evidence it cites.
-A sentence is supported when the cited evidence states it or it follows directly from it
-(restating a calculator result counts as supported when the calculator output is given).
-It is NOT supported if it adds facts, numbers, conditions or advice the evidence does not
-contain, or if it presents an older or different value as the rule. Be strict but fair:
-paraphrase is fine. The facts of the asker's own case (figures, names and dates stated in the
-question) are given: repeating them is supported. Return one item per sentence."""
+A sentence is supported when the cited evidence states it or it follows from it together with
+the asker's case and the calculator output: a conclusion such as "this amount falls in the
+first band, so no approval is needed" is supported when the bands and the amount are given.
+The facts of the asker's own case (figures, names and dates in the question) are given, and
+restating a calculator result is supported when the calculator output is given.
+A sentence is NOT supported only if it states something wrong, or adds a fact, number,
+condition or piece of advice that nothing given backs, or presents an older or different
+value as the rule. Paraphrase, framing, emphasis, order and what a sentence leaves out are
+not problems. For each sentence write the check first, then any problem, then decide.
+Return one item per sentence."""
 
 
 _WORD = re.compile(r"[a-z0-9]+(?:[.'][a-z0-9]+)*")

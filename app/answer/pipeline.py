@@ -268,6 +268,7 @@ def ask(
                 onto.units,
                 when=f"in force on {as_of}" if as_of else "current",
                 currencies=[onto.base_currency or ""],
+                given=given,
             )
             if not problems:
                 sentences = [

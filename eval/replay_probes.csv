@@ -19,5 +19,5 @@ R17,PS-07_desk_instructions_and_client_memos.docx,quantity_tolerance.pct,Arvana 
 R18,01_infra_bulk_tolerance.eml,quantity_tolerance.pct,Arvana Infra Projects,2026-11-15,,5,future-dated change: 5% until 15 Nov
 R19,01_infra_bulk_tolerance.eml,quantity_tolerance.pct,Arvana Infra Projects,2026-11-16,,7,future-dated change: provisional 7% from 16 Nov
 R20,END,price_tolerance.pct_of_line,,2026-03-01,PS-07_AP_SOP_v3.1_2023.docx,2,transaction time: what was known after v3.1 only
-R21,END,price_tolerance.pct_of_line,,2026-04-01,PS-07_AP_SOP_v3.1_2023.docx,none,transaction time: v4.0 not yet known after v3.1 only
+R21,END,price_tolerance.pct_of_line,,2026-04-01,PS-07_AP_SOP_v3.1_2023.docx,2,transaction time: v4.0 not yet known after v3.1 only (v3.1 has no end date: 2% still applies)
 R22,END,price_tolerance.pct_of_line,,2026-04-01,PS-07_AP_SOP_v4.0_2026.docx,1,transaction time: known once v4.0 arrived

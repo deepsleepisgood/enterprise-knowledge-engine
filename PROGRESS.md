@@ -382,3 +382,27 @@ Still missed: **C03**. The FAQ row ("Infra cement over-invoiced by 6%? ... 10% t
 - **No client chosen:** a rule that exists only for named clients is answered for them by name.
 - **C03:** an outdated numeric statement is compared with in-force rules of the same client, unit and materials under another attribute. **Conflict recall 15/15** both ways, authoritative right 14/15, extras unchanged (30 / 22).
 - Tests: 225 passed (new: governance 4, watch 1, split 1, scope 3, conflict rules 3, delete 1, metadata 1).
+
+## 2026-11-10 (evening) — Claude as the LLM provider, full evaluation, replay findings
+
+**Provider switched to Anthropic** (`.env`: `LLM_PROVIDER=anthropic`, Sonnet 5.5 smart, Haiku 5.5 fast, `ROUTER_MODEL=fast`; the NIM lines are kept, commented). The key has $5 of credit, so the graph is **not** rebuilt on Claude: the knowledge base built on NIM is answered from. LLM cache keys include the model, so nothing cached on NIM is reused; rebuilding the graph or `pytest -m live_llm` (which rebuilds it) would cost tens of dollars. Gateway: `thinking=False` now reaches Anthropic too (`between_tools` on Sonnet 5.5, `disabled` on Haiku 5.5); before, every Claude call thought at the default effort.
+
+**Fixed: plug-in modules loaded half-way under concurrency.** Three eval workers importing the AP plug-in at once could get a module before its code had run (`no attribute 'CALCULATORS'`), and the broken module then failed every later question. `Plugin.module` now loads under a re-entrant lock and never leaves a failed module in `sys.modules` (test fails without the fix).
+
+**Full evaluation on Claude (answer-v4, support-v2): 153/160 (95.6%)**, citations strict 98.8%, outdated on conflict questions 2/23, 0 errors, p50 14 s, $2.67 (`reports/eval_20261110_all.md`; the NIM run is kept as `eval_20261110_all_nim.*`). Dev 94/96, holdout 59/64. Weak spots: tacit questions 5/9 (Claude kept to the written rule and dropped or contradicted the colleagues' know-how) and 24 answers (15%) unverified, which processors would see as "not covered".
+
+**Fixes, then a targeted recheck (46 questions, $0.79):**
+- Outdated-value check: a value that also appears in the asker's question or the calculator output (of the same kind: money, percentage, days) is the case's own figure or a result, not an old rule. It had blocked a ₹1,000 excess (equal to the retired ₹1,000 cap) and a Thursday cut-off (Thursday was the old run day).
+- Support check `support-v3`: conclusions that follow from the evidence plus the case and calculator are supported; wording, framing and omissions are not problems; the model writes its check before the verdict (it had written "On reflection the sentence is supported" and still failed it).
+- Answer prompt `answer-v5`, rule 6: practice is given after the rule as "In practice, ..." advice when it concerns the asker's case; it never changes or overrides a rule and is not dismissed when it works within the rule.
+- Result: affected dev 15→16 correct, unverified 13→0; affected holdout 12→14 (scores only), unverified 11→1; 12 dev controls 12→12. The other 114 questions were not re-run on v5/v3.
+
+**Replay (`run_replay.py`, on NIM, first complete run): 15/22**, now **18/22** on the same graph after these fixes (probes re-run on the replay tenant; no re-extraction):
+- `get_rule` no longer returns a fact whose document has ended (a source's `valid_until`, set when a newer version supersedes it) for what the engine believes now. A rule dropped from the new version stays open until the owner approves the retire item, and the replay has no owner, so v3.1's 2% quantity tolerance had come back as current in Nov 2026. Not applied to `known_at` queries: source end dates are not bitemporal.
+- A list value written as one phrase ("Tuesday and Friday") is split into items (R10).
+- Probe R21 corrected (expected `none` → `2`): v3.1 has no end date of its own, so with only v3.1 known its 2% applies on 1 Apr 2026. The probe file is ours, not the answer key.
+- **Open: R15, R17, R18, R19 (Infra bulk-material tolerance).** The induced schema files the memo's 5% under its own attribute (`quantity_tolerance.infra_material_percentage`), not as an Infra-scoped value of the general tolerance the plug-in binds (`general_percentage`). The answer path finds the memo (Q040, Q041, Q002 correct), but rule lookups through the binding do not, so the quantity calculator would apply 0% to an Infra cement invoice. Fix proposed, not built: let the schema mark an attribute as a client-specific version of another (owner-editable on Setup), and have client lookups search those versions. R19 (the email's provisional 7% from 16 Nov) also depends on how an owner's email ranks against the memo it amends; the replay graph currently marks the 7% overridden.
+
+Spend on the Claude key so far: about $3.53 of $5.
+
+**Next (deferred until the user's usage limit resets):** build the Infra fix described above (schema marks an attribute as a client-specific version of another, editable on Setup; client rule lookups search those versions), then re-run the replay probes (on NIM or against the existing replay tenant, never a Claude re-extraction) and an Infra cement quantity check through the calculator.

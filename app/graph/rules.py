@@ -20,8 +20,11 @@ from sqlalchemy.orm import Session
 
 from app.graph.ontology import Ontology
 from app.store import entities as ent
+from app.store import episodes as estore
 from app.store import facts as fstore
 from app.store.base import last_day, utcnow
+
+_LIST_SEP = re.compile(r"\s*(?:,|;|&|\band\b)\s*", re.I)
 
 CURRENT = ["current", "provisional"]
 IN_FORCE_THEN = ["current", "superseded", "provisional"]
@@ -67,7 +70,13 @@ class RuleValue:
 
     @property
     def items(self) -> list[str]:
-        return list(self.value.get("items") or [])
+        """The listed values. A list written as one phrase ("Tuesday and Friday") is split."""
+        if self.value.get("items"):
+            return list(self.value["items"])
+        if (self.value.get("type") or "").lower() not in ("list", "enum"):
+            return []
+        parts = [p.strip() for p in _LIST_SEP.split(self.text) if p.strip()]
+        return parts if len(parts) > 1 else []
 
     @property
     def citation(self) -> str:
@@ -141,6 +150,8 @@ def get_rule(
         )
         if r.kind != "practice"
     ]
+    if known_at is None:
+        rows = _within_source_life(session, rows, day)
     name = canonical_client(session, client)
     for scope_client in ([name] if name else []) + [None]:
         hits = [r for r in rows if ((r.scope or {}).get("client") or None) == scope_client]
@@ -160,6 +171,17 @@ def get_rule(
     where = f" for {client}" if client else ""
     when = f" on {day}" if as_of else ""
     raise RuleNotFound(f"no rule in force for {attr}{where}{when}")
+
+
+def _within_source_life(
+    session: Session, rows: list[fstore.FactRow], day: date
+) -> list[fstore.FactRow]:
+    """Drop facts whose document had ended by `day` (e.g. an SOP version replaced by a newer
+    one). Its facts stay open until the owner retires them, but a document past its last day
+    is never the rule in force. Source end dates are not bitemporal, so this applies to what
+    the engine believes now only (known_at=None)."""
+    ends = estore.last_days(session, {r.source_id for r in rows if r.source_id})
+    return [r for r in rows if not (r.source_id in ends and ends[r.source_id] < day)]
 
 
 def _tokens(s: str) -> set[str]:

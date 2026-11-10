@@ -116,6 +116,16 @@ def get_source(session: Session, source_id: str) -> Source | None:
     return src if src is not None and src.tenant_id == tenant() else None
 
 
+def last_days(session: Session, source_ids: set[str]) -> dict[str, date]:
+    """The last day each source is in force, for sources that have one (e.g. superseded)."""
+    if not source_ids:
+        return {}
+    q = select(Source.id, Source.valid_until).where(
+        Source.tenant_id == tenant(), Source.id.in_(source_ids), Source.valid_until.is_not(None)
+    )
+    return {sid: until for sid, until in session.execute(q)}
+
+
 def list_sources(session: Session, episode_id: str | None = None) -> list[Source]:
     q = select(Source).where(Source.tenant_id == tenant())
     if episode_id:

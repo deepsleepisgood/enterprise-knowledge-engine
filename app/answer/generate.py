@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 from app.store.facts import FactRow
 from app.store.search import PassageHit
 
-PROMPT_VERSION = "answer-v4"
+PROMPT_VERSION = "answer-v5"
 PASSAGE_CHARS = 1800
 
 SYSTEM = """You answer a colleague's question using ONLY the evidence below: passages from the
@@ -33,8 +33,13 @@ Rules:
 4. Copy numbers, amounts, dates, codes and names exactly as they appear in the evidence or the
    calculator output. Never do arithmetic yourself: the calculator has done it.
 5. {time_rule}
-6. Passages marked [practice] describe how colleagues work in practice. Never present practice
-   as the rule; the engine shows it separately as a tip.
+6. Passages marked [practice] describe how experienced colleagues work: know-how such as a
+   supplier's habit, what usually happens next, or how a step is carried out. Never present
+   practice as the rule, and never let it change or override a rule. When it is about the
+   asker's case, give the rule first, then add the know-how as practical advice in its own
+   sentence that starts "In practice," and cites the practice passage (for example when to
+   wait instead of chasing, what to note, which code colleagues raise, who clears it). Do
+   not dismiss or contradict practice that works within the rule.
 7. A client-specific passage applies only to that client. Say so when you use one. When no
    client is specified and the evidence answers the question only for named clients, answer
    for those clients by name ("For <client>, ...") and say there is no general rule; do not
