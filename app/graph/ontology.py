@@ -38,6 +38,11 @@ class Attribute(BaseModel):
     value_type: ValueType
     unit: str | None = None
     synonyms: list[str] = Field(default_factory=list)
+    variant_of: str | None = Field(
+        None,
+        description="Key of the general attribute this one is a client-specific version of "
+        "(e.g. a client memo's own tolerance): lookups for that client also read it",
+    )
 
 
 class SourceRank(BaseModel):
@@ -73,6 +78,21 @@ class Ontology(BaseModel):
         for r in sorted(ranking, key=lambda r: r.rank):
             seen.setdefault(r.doc_type, r)
         return list(seen.values())
+
+    @field_validator("attributes")
+    @classmethod
+    def _variants_point_at_a_peer(cls, attrs: list[Attribute]) -> list[Attribute]:
+        """`variant_of` must name another attribute with the same value type."""
+        types = {a.key: a.value_type for a in attrs}
+        for a in attrs:
+            if a.variant_of is None:
+                continue
+            if a.variant_of == a.key or types.get(a.variant_of) != a.value_type:
+                raise ValueError(
+                    f"{a.key}: variant_of must be another {a.value_type} attribute "
+                    f"(got {a.variant_of!r})"
+                )
+        return attrs
 
     # ------------------------------------------------------------ lookups
 

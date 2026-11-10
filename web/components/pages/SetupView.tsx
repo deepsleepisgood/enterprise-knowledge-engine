@@ -194,6 +194,30 @@ function SchemaTab({ onto, editable, onChange, stats, bindings, onBindingsChange
                           <Pill tone="outline">{a.value_type}</Pill>
                           {a.unit && <Pill tone="outline">{a.unit}</Pill>}
                         </span>
+                        {(() => {
+                          // Only a same-type attribute can be the general rule this is a client's version of.
+                          const peers = onto.attributes.filter((p) => p.key !== a.key && p.value_type === a.value_type);
+                          if (peers.length === 0) return null;
+                          return (
+                            <label className="flex flex-wrap items-center gap-2 text-[12px] text-muted sm:col-span-3">
+                              Client-specific version of
+                              <select
+                                value={a.variant_of ?? ""}
+                                disabled={!editable}
+                                onChange={(e) => setAttr(a.key, { variant_of: e.target.value || null })}
+                                aria-label={`General rule that ${a.key} is a client-specific version of`}
+                                className={`${input} w-auto max-w-full`}
+                              >
+                                <option value="">— none (a rule of its own) —</option>
+                                {peers.map((p) => (
+                                  <option key={p.key} value={p.key}>
+                                    {p.label} ({p.key})
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          );
+                        })()}
                         {a.synonyms.length > 0 && (
                           <span className="flex flex-wrap gap-1 sm:col-span-3">
                             {a.synonyms.slice(0, 6).map((s, i) => (

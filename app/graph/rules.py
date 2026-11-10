@@ -143,12 +143,15 @@ def get_rule(
     attr = attribute or resolve_attribute(onto, topic, parameter)
     day = as_of or today or utcnow().date()
     statuses = IN_FORCE_THEN if as_of else CURRENT
+    # A client's own version of this attribute (schema `variant_of`) counts for that client.
+    variants = [a.key for a in onto.attributes if a.variant_of == attr] if client else []
     rows = [
         r
         for r in fstore.get_facts(
-            session, attribute=attr, valid_on=day, known_at=known_at, statuses=statuses
+            session, attribute=[attr, *variants], valid_on=day, known_at=known_at, statuses=statuses
         )
         if r.kind != "practice"
+        and (r.attribute == attr or ((r.scope or {}).get("client") or None) is not None)
     ]
     if known_at is None:
         rows = _within_source_life(session, rows, day)

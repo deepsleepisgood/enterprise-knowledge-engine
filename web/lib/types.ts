@@ -213,6 +213,8 @@ export interface OntologyAttribute {
   value_type: string;
   unit: string | null;
   synonyms: string[];
+  /** Key of the general attribute this one is a client-specific version of. */
+  variant_of?: string | null;
 }
 
 export interface OntologyTopic {

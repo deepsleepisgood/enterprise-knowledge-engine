@@ -406,3 +406,13 @@ Still missed: **C03**. The FAQ row ("Infra cement over-invoiced by 6%? ... 10% t
 Spend on the Claude key so far: about $3.53 of $5.
 
 **Next (deferred until the user's usage limit resets):** build the Infra fix described above (schema marks an attribute as a client-specific version of another, editable on Setup; client rule lookups search those versions), then re-run the replay probes (on NIM or against the existing replay tenant, never a Claude re-extraction) and an Infra cement quantity check through the calculator.
+
+## 2026-11-10 (night) — Infra fix: client-specific versions of an attribute
+
+- Schema: an attribute may carry `variant_of` = the general attribute it is a client-specific version of (validated: another attribute of the same value type). `get_rule` for a client also reads that client's facts on its variants; general lookups and other clients are unchanged.
+- Setup → Topics and attributes: a "Client-specific version of" selector per attribute (same-type peers only; editable in a draft).
+- Meridian: new schema v4 (from frozen v2, not from the unreviewed v3 draft) links `quantity_tolerance.infra_material_percentage` → `general_percentage`; replay tenant v3 likewise (from v1, not its v2 draft). Frozen as owner actions, nothing re-keyed, no LLM calls.
+- Quantity calculator on the Meridian graph: Infra cement +3% passes (5%, cap ₹25,000), Infra cement +7% and Infra cables +3% hold with QTY_VAR, Retail +3% holds.
+- Replay probes on the existing replay tenant: **21/22**. Open: R19 expects the email's provisional 7% from 16 Nov; the email ranks below the client memo, so authority keeps 5%. A policy question (should an owner's email amending a memo rank with it?), not a lookup bug.
+- Not linked: `price_tolerance.infra_cement_steel_percentage` (the FAQ's 10%, an outdated low-ranked claim): linking it would make it count for Infra.
+- Tests: 236 pass, including new unit (validator) and integration (variant lookup) tests; ruff, tsc, eslint, token check clean.

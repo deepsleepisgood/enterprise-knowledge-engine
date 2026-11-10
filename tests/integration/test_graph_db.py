@@ -42,6 +42,13 @@ ONTO = Ontology(
             unit="days",
         ),
         Attribute(
+            key="annual_leave.fabrikam_days",
+            topic="annual_leave",
+            label="Fabrikam leave days",
+            value_type="days",
+            unit="days",
+        ),
+        Attribute(
             key="annual_leave.cash_cap",
             topic="annual_leave",
             label="cash-out cap",
@@ -138,6 +145,22 @@ def fake_structured(prompt, schema, **kw):
                     kind="rule",
                     statement="Cash-out cap is 2k.",
                     quote="cashed out up to 2 k",
+                )
+            )
+        if m2 := re.search(r"Fabrikam staff are allowed (\d+) days", text):
+            facts.append(
+                XFact(
+                    attribute="annual_leave.fabrikam_days",
+                    value=XValue(
+                        type="days",
+                        number=float(m2.group(1)),
+                        unit="days",
+                        text=f"{m2.group(1)} days",
+                    ),
+                    client="Fabrikam",
+                    kind="rule",
+                    statement=f"Fabrikam staff are allowed {m2.group(1)} days.",
+                    quote=m2.group(0),
                 )
             )
         if "take 22 days" in text:
@@ -244,6 +267,36 @@ def test_a_rule_dropped_by_the_next_version_ends_with_its_document(graph) -> Non
         assert get_rule(s, ONTO, "annual_leave", "cash_cap", as_of=date(2025, 6, 1)).number == 2000
         with pytest.raises(RuleNotFound):
             get_rule(s, ONTO, "annual_leave", "cash_cap", today=date(2026, 6, 1))
+
+
+def test_a_client_version_of_an_attribute_counts_for_that_client(graph) -> None:
+    """A memo filed under its own attribute (not as a client-scoped value of the general one)
+    is found for its client once the schema marks it as that attribute's client version."""
+    ingest, build = graph
+    memo = """# Memo M-3 (Fabrikam)
+
+| Issued | 1 March 2026 |
+| --- | --- |
+| From | HR, Fabrikam |
+
+Fabrikam staff are allowed 28 days of leave.
+"""
+    ingest(V2, "leave_v2.md")
+    ingest(memo, "memo_fabrikam.md")
+    assert not build()["failures"]
+    linked = ONTO.model_copy(deep=True)
+    next(
+        a for a in linked.attributes if a.key == "annual_leave.fabrikam_days"
+    ).variant_of = "annual_leave.days"
+    today = date(2026, 6, 1)
+
+    def days(onto: Ontology, client: str | None = None) -> float:
+        with session_scope() as s:
+            return get_rule(s, onto, "annual_leave", "days", client=client, today=today).number
+
+    assert days(ONTO, "Fabrikam") == 24  # not linked: the client gets the general rule
+    assert days(linked, "Fabrikam") == 28  # linked: the client's own version wins
+    assert days(linked, "Contoso") == 24 and days(linked) == 24  # for that client only
 
 
 def test_rebuild_is_idempotent_and_rows_only_grow(graph) -> None:
