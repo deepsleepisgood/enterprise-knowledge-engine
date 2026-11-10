@@ -1,0 +1,12 @@
+﻿built tenant corpus2: schema v1 (frozen); {'parse_s': 2.6102163000032306, 'schema_s': 137.1708365000086, 'build_s': 625.0731487999437}
+  H01 PASS ok
+  H02 PASS ok
+  H03 PASS ok
+  H04 FAIL cites ['leave_entitlements.xlsx', 'leave_faq.md'], expected leave_policy_v2.pdf
+  H05 PASS ok
+  H06 PASS ok
+  H07 FAIL status unverified, expected answered
+  H08 PASS ok
+  H09 PASS abstained and routed
+  H10 PASS ok
+8/10 passed; report D:\antigravity\company knowledge engine\reports\second_corpus_20261108.md

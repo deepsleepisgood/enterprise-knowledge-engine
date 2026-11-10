@@ -1,0 +1,343 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- D:\antigravity\company knowledge engine\.venv\Scripts\python.exe
+rootdir: D:\antigravity\company knowledge engine
+configfile: pyproject.toml
+plugins: anyio-4.16.0, platformdirs-4.14.5
+collecting ... collected 110 items
+
+tests/integration/test_graph_acceptance.py::test_price_tolerance_current_and_as_of PASSED [  0%]
+tests/integration/test_graph_acceptance.py::test_sop_v31_values_are_superseded_on_31_march_2026 PASSED [  1%]
+tests/integration/test_graph_acceptance.py::test_section_14_rows_state_current_values PASSED [  2%]
+tests/integration/test_graph_acceptance.py::test_infra_memo_scoped_and_expires FAILED [  3%]
+tests/integration/test_graph_acceptance.py::test_einvoice_threshold_and_video_2_staleness PASSED [  4%]
+tests/integration/test_graph_acceptance.py::test_faq_excipient_answer_is_not_current_and_pharma_memo_rules PASSED [  5%]
+tests/integration/test_graph_acceptance.py::test_practice_is_never_a_rule PASSED [  6%]
+tests/integration/test_graph_acceptance.py::test_known_at_before_ingestion_returns_nothing PASSED [  7%]
+tests/integration/test_graph_acceptance.py::test_clients_resolve_to_three_entities PASSED [  8%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q066-induced] PASSED   [  9%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q067-induced] PASSED   [ 10%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q068-induced] PASSED   [ 10%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q069-induced] PASSED   [ 11%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q070-induced] PASSED   [ 12%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q071-induced] PASSED   [ 13%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q072-induced] PASSED   [ 14%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q073-induced] PASSED   [ 15%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q074-induced] PASSED   [ 16%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q075-induced] PASSED   [ 17%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q076-induced] PASSED   [ 18%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q077-induced] PASSED   [ 19%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q078-induced] PASSED   [ 20%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q079-induced] PASSED   [ 20%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q080-induced] PASSED   [ 21%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q081-induced] PASSED   [ 22%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q082-induced] PASSED   [ 23%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q083-induced] PASSED   [ 24%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q084-induced] PASSED   [ 25%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q085-induced] PASSED   [ 26%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q086-induced] PASSED   [ 27%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q087-induced] PASSED   [ 28%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q088-induced] PASSED   [ 29%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q089-induced] PASSED   [ 30%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q090-induced] PASSED   [ 30%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q091-induced] PASSED   [ 31%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q092-induced] FAILED   [ 32%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q093-induced] PASSED   [ 33%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q094-induced] PASSED   [ 34%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q095-induced] PASSED   [ 35%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q096-induced] PASSED   [ 36%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q097-induced] PASSED   [ 37%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q098-induced] PASSED   [ 38%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q099-induced] PASSED   [ 39%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q100-induced] PASSED   [ 40%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q101-induced] PASSED   [ 40%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q102-induced] PASSED   [ 41%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q103-induced] PASSED   [ 42%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q104-induced] PASSED   [ 43%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q105-induced] PASSED   [ 44%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q106-induced] PASSED   [ 45%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q107-induced] PASSED   [ 46%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q108-induced] PASSED   [ 47%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q109-induced] PASSED   [ 48%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q110-induced] PASSED   [ 49%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q111-induced] PASSED   [ 50%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q112-induced] FAILED   [ 50%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q113-induced] PASSED   [ 51%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q114-induced] PASSED   [ 52%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q115-induced] PASSED   [ 53%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q116-induced] PASSED   [ 54%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q117-induced] PASSED   [ 55%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q118-induced] PASSED   [ 56%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q119-induced] PASSED   [ 57%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q120-induced] PASSED   [ 58%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q121-induced] PASSED   [ 59%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q122-induced] PASSED   [ 60%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q123-induced] PASSED   [ 60%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q124-induced] PASSED   [ 61%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q125-induced] PASSED   [ 62%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q126-induced] PASSED   [ 63%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q127-induced] PASSED   [ 64%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q128-induced] PASSED   [ 65%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q129-induced] PASSED   [ 66%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q130-induced] PASSED   [ 67%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q131-induced] PASSED   [ 68%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q132-induced] PASSED   [ 69%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q133-induced] PASSED   [ 70%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q134-induced] PASSED   [ 70%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q135-induced] PASSED   [ 71%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q136-induced] PASSED   [ 72%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q137-induced] PASSED   [ 73%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q138-induced] PASSED   [ 74%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q139-induced] PASSED   [ 75%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q140-induced] PASSED   [ 76%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q141-induced] PASSED   [ 77%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q142-induced] PASSED   [ 78%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q143-induced] PASSED   [ 79%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q144-induced] PASSED   [ 80%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q145-induced] PASSED   [ 80%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q146-induced] PASSED   [ 81%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q147-induced] PASSED   [ 82%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q148-induced] PASSED   [ 83%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q149-induced] PASSED   [ 84%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q150-induced] PASSED   [ 85%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q151-induced] PASSED   [ 86%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q152-induced] PASSED   [ 87%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q153-induced] PASSED   [ 88%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q154-induced] PASSED   [ 89%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q155-induced] PASSED   [ 90%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q156-induced] PASSED   [ 90%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q159-induced] PASSED   [ 91%]
+tests/acceptance/test_answers_live.py::test_t1_price_tolerance PASSED    [ 92%]
+tests/acceptance/test_answers_live.py::test_t1_as_of_1_march_2026_returns_v31 PASSED [ 93%]
+tests/acceptance/test_answers_live.py::test_t2_einvoice_above_threshold PASSED [ 94%]
+tests/acceptance/test_answers_live.py::test_t3_pharma_excipients FAILED  [ 95%]
+tests/acceptance/test_answers_live.py::test_t4_infra_saturday_no_grn FAILED [ 96%]
+tests/acceptance/test_answers_live.py::test_t5_price_calculation PASSED  [ 97%]
+tests/acceptance/test_answers_live.py::test_t6_tds_software_support PASSED [ 98%]
+tests/acceptance/test_answers_live.py::test_t7_msme_due_date FAILED      [ 99%]
+tests/acceptance/test_answers_live.py::test_t8_canteen_subsidy_is_unsupported PASSED [100%]
+
+================================== FAILURES ===================================
+_____________________ test_infra_memo_scoped_and_expires ______________________
+
+g = {'onto': Ontology(name='induced', base_currency='INR', units={'%': 0.01, 'bag': 1.0, 'day': 1.0, '₹': 1.0, 'bags': 1.0..._days_with_agreement', ...}, 'started': datetime.datetime(2026, 11, 8, 7, 59, 8, 654993, tzinfo=datetime.timezone.utc)}
+
+    def test_infra_memo_scoped_and_expires(g) -> None:
+        infra = rule(g, "quantity_tolerance.pct", client="Arvana Infra Projects")
+        assert infra.number == 5 and infra.source_label == "CM-INF-02"
+        assert infra.valid_until == date(2027, 3, 31)
+>       assert rule(g, "quantity_tolerance.pct").number == 0  # general: no tolerance
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_graph_acceptance.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = RuleValue(fact_id=109, attribute='invoice_matching.quantity_tolerance_percentage', client=None, value={'text': 'None, ...20d4d01bfd92447a1b9', valid_from=datetime.date(2026, 4, 1), valid_until=None, condition='except client memo CM-INF-02')
+
+    @property
+    def number(self) -> float:
+        n = self.value.get("number")
+        if n is None:
+            # "20% or the applicable rate, whichever is higher": the rule's own figure is its
+            # one percentage (how it combines with other rules is the caller's logic).
+            pcts = re.findall(r"(\d+(?:\.\d+)?)\s*(?:%|per ?cent)", self.text, re.I)
+            if len(set(pcts)) == 1:
+                return float(pcts[0])
+>           raise RuleNotFound(f"{self.attribute} has no numeric value ({self.value.get('text')})")
+E           app.graph.rules.RuleNotFound: invoice_matching.quantity_tolerance_percentage has no numeric value (None, except client memo CM-INF-02)
+
+app\graph\rules.py:59: RuleNotFound
+_________________________ test_scenario[Q092-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q092'
+
+    @pytest.mark.parametrize("mode", MODES)
+    @pytest.mark.parametrize("qid", _ids())
+    def test_scenario(scenario_results, mode, qid) -> None:
+        r = scenario_results[mode][qid]
+>       assert r["ok"], f"{mode} {qid}: {r['cause']} | expected {r['expected']} got {r['got']}"
+E       AssertionError: induced Q092: mismatch; inputs={'po_unit_price': 120.0, 'invoice_unit_price': 121.0, 'quantity': 100.0, 'client': None} | expected {'passed': False, 'excess': 132.0, 'limit': 120.0} got {'passed': True, 'excess': 100.0, 'limit': 120.0}
+E       assert False
+
+tests\plugins\test_ap_scenarios.py:161: AssertionError
+_________________________ test_scenario[Q112-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q112'
+
+    @pytest.mark.parametrize("mode", MODES)
+    @pytest.mark.parametrize("qid", _ids())
+    def test_scenario(scenario_results, mode, qid) -> None:
+        r = scenario_results[mode][qid]
+>       assert r["ok"], f"{mode} {qid}: {r['cause']} | expected {r['expected']} got {r['got']}"
+E       AssertionError: induced Q112: extraction: NimError: NIM request failed after retries: NIM HTTP 429: {"status":429,"title":"Too Many Requests"} | expected {'section': '194I', 'rate': 2.0, 'amount': 30000.0} got None
+E       assert False
+
+tests\plugins\test_ap_scenarios.py:161: AssertionError
+__________________________ test_t3_pharma_excipients __________________________
+
+asker = <function asker.<locals>.run at 0x000001B34F25C360>
+
+    def test_t3_pharma_excipients(asker) -> None:
+        card = asker("Do Arvana Pharma excipient invoices need QA release before payment?")
+        assert card["status"] in ("answered", "provisional", "needs_specialist"), _why(card)
+        labels = " ".join(c["short_label"] for c in card["rule"]["citations"])
+        assert "PHA" in labels, _why(card)
+        assert "yes" in card["rule"]["text"].lower(), _why(card)
+        flagged = json.dumps(card["older_sources"], ensure_ascii=False) + card["rule"]["text"]
+>       assert "FAQ" in flagged or "Part F" in flagged, _why(card)
+E       AssertionError: {"status": "answered", "route": "lookup", "rule": {"text": "Yes, Arvana Pharma excipient invoices must not be paid until the batch shows status Released in the QMS. [1] The rule applies to excipients without exception, and the invoice may be posted but the payment block remains until release. [1]", "citations": [{"n": 1, "passage_id": "73bcdcfa740c4f484351", "file": "PS-07_desk_instructions_and_client_memos.docx", "short_label": "CM-PHA-01 Part D", "locator": "Part D", "section_title": "Client memo CM-PHA-01 (Arvana Pharma)", "doc_type": "memo", "status": "current", "quote": "Invoices for active pharmaceutical ingredients, excipients and primary packaging material must not be paid until the batch shows status Released in the Quality Management System (QMS)."}]}, "working": null, "diagnostics": {"router": {"route": "lookup", "client": "Arvana Pharma", "confidence": 0.9, "out_of_scope_reason": "", "role": "client_qa"}, "retrieval": {"scorer": "rerank", "top_score": 7.123279094696045, "passages": [["CM-PHA-01 Part D", "73bcdcfa740c4f484351", 7.123], ["Shadowing notes 11:30", "614e7d6a6bbaa72058c4", 2.465], ["AP SOP v4.0 §10", "718ea9788d8eb652a498", -3.921], ["AP SOP v4.0 §1", "fa4b6cceba3a5946395e", -5.0], ["AP SOP v4.0 §3.1", "96124b842b49d1ecc508", -5.302], ["Video 1 [00:45]", "2576ca0e0aa056b902d6", -6.093]], "facts": [544, 483, 311, 554, 199, 198, 486, 174, 293, 543]}, "verifier": {"verified": true, "problems": [], "attempts": []}}}
+E       assert ('FAQ' in '[]Yes, Arvana Pharma excipient invoices must not be paid until the batch shows status Released in the QMS. [1] The rule applies to excipients without exception, and the invoice may be posted but the payment block remains until release. [1]' or 'Part F' in '[]Yes, Arvana Pharma excipient invoices must not be paid until the batch shows status Released in the QMS. [1] The rule applies to excipients without exception, and the invoice may be posted but the payment block remains until release. [1]')
+
+tests\acceptance\test_answers_live.py:97: AssertionError
+________________________ test_t4_infra_saturday_no_grn ________________________
+
+asker = <function asker.<locals>.run at 0x000001B34F25C360>
+
+    def test_t4_infra_saturday_no_grn(asker) -> None:
+        card = asker(
+            "An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on "
+            "Monday morning?"
+        )
+        labels = " ".join(c["short_label"] for c in card["rule"]["citations"])
+        assert "4.6" in labels or "two working days" in card["rule"]["text"].lower(), _why(card)
+        tip = card["expert_tip"] or {}
+        practice = f"{tip.get('text', '')} {card['rule']['text']}".lower()
+        assert "tuesday" in practice, _why(card)
+        cited = labels + " " + str((tip.get("citation") or {}).get("short_label", ""))
+>       assert "Interview 1" in cited, _why(card)
+E       AssertionError: {"status": "answered", "route": "lookup", "rule": {"text": "Do not chase the site on Monday morning; the system will automatically notify the requester and send a reminder after two working days. [1][2][3] The exception code NO_GRN means Goods invoice without GRN and its owner is the Requester with a target resolution of 5 working days. [2] For Arvana Infra Projects, requesters are reminded to post GRNs within two working days of receipt, and the system escalates to the requester's manager after five working days. [1][3]", "citations": [{"n": 1, "passage_id": "7b5af5be3aaafea190e8", "file": "PS-07_AP_SOP_v4.0_2026.docx", "short_label": "AP SOP v4.0 §4.6", "locator": "4.6", "section_title": "Missing GRN", "doc_type": "sop", "status": "current", "quote": "If a goods invoice has no GRN, hold it as NO_GRN and notify the requester automatically. The system sends a reminder after two working days and escalates to the requester's manager after five working days."}, {"n": 2, "passage_id": "c6477cdacd61e549527d", "file": "PS-07_AP_SOP_v4.0_2026.docx", "short_label": "AP SOP v4.0 §10", "locator": "10", "section_title": "Exceptions", "doc_type": "sop", "status": "current", "quote": "NO_GRN | Goods invoice without GRN (4.6) | Requester | 5 working days"}, {"n": 3, "passage_id": "fed7c6b59bf8b0ff3000", "file": "PS-07_desk_instructions_and_client_memos.docx", "short_label": "CM-INF-02 Part C", "locator": "Part C", "section_title": "Client memo CM-INF-02 (Arvana Infra Projects)", "doc_type": "memo", "status": "current", "quote": "Requesters are reminded to post GRNs within two working days of receipt."}]}, "working": null, "diagnostics": {"router": {"route": "lookup", "client": "Arvana Infra Projects", "confidence": 0.85, "out_of_scope_reason": "", "role": "requester"}, "retrieval": {"scorer": "rerank", "top_score": 3.5898847579956055, "passages": [["Expert interview 1 [02:30]", "5e1db62831f1ae5efee2", 3.59], ["Shadowing notes 10:05", "280a6b6194024117be14", 2.877], ["AP SOP v4.0 §4.6", "7b5af5be3aaafea190e8", -0.849], ["Video 3 [05:45]", "1ee2673c958ac4f329e4", -1.916], ["AP SOP v4.0 §10", "c6477cdacd61e549527d", -3.694], ["CM-INF-02 Part C", "fed7c6b59bf8b0ff3000", -5.045]], "facts": [99, 533, 190, 553, 535, 321, 534, 543, 495, 532]}, "verifier": {"verified": true, "problems": [], "attempts": []}}}
+E       assert 'Interview 1' in 'AP SOP v4.0 §4.6 AP SOP v4.0 §10 CM-INF-02 Part C Shadowing notes 10:05'
+
+tests\acceptance\test_answers_live.py:111: AssertionError
+____________________________ test_t7_msme_due_date ____________________________
+
+asker = <function asker.<locals>.run at 0x000001B34F25C360>
+
+    def test_t7_msme_due_date(asker) -> None:
+>       card = asker(
+            "A micro enterprise supplier registered on Udyam; invoice accepted on 01 August 2026; "
+            "no written agreement on payment terms. What is the due date and which payment run "
+            "should pay it?"
+        )
+
+tests\acceptance\test_answers_live.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\answer\pipeline.py:327: in ask
+    return finish(card, sorted(set(cited_facts)), cited)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\answer\pipeline.py:142: in finish
+    aid = astore.log_answer(
+app\store\answers.py:46: in log_answer
+    session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4626: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4769: in _flush
+    with util.safe_reraise():
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4730: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:92: in _save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1250: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1494: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:534: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1714: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1868: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1996: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2354: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self.dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: in do_execute
+    cursor.execute(statement, parameters)
+.venv\Lib\site-packages\psycopg\cursor.py:113: in execute
+    self._conn.wait(
+.venv\Lib\site-packages\psycopg\connection.py:495: in wait
+    return waiting.wait(
+.venv\Lib\site-packages\psycopg\waiting.py:341: in wait_select
+    s = next(gen)
+        ^^^^^^^^^
+.venv\Lib\site-packages\psycopg\_cursor_base.py:205: in _execute_gen
+    pgq = self._convert_query(query, params)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\psycopg\_cursor_base.py:465: in _convert_query
+    pgq.convert(query, params)
+.venv\Lib\site-packages\psycopg\_queries.py:92: in convert
+    self.dump(vars)
+.venv\Lib\site-packages\psycopg\_queries.py:103: in dump
+    self.params = self._tx.dump_sequence(params, self._want_formats)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg_binary/_psycopg/transform.pyx:355: in psycopg_binary._psycopg.Transformer.dump_sequence
+    ???
+psycopg_binary/_psycopg/transform.pyx:407: in psycopg_binary._psycopg.Transformer.dump_sequence
+    ???
+.venv\Lib\site-packages\psycopg\types\json.py:218: in dump
+    if isinstance((data := dumps(obj)), str):
+                           ^^^^^^^^^^
+C:\Program Files\Python311\Lib\json\__init__.py:231: in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python311\Lib\json\encoder.py:200: in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python311\Lib\json\encoder.py:258: in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <json.encoder.JSONEncoder object at 0x000001B37D1AD610>
+o = datetime.date(2026, 8, 1)
+
+    def default(self, o):
+        """Implement this method in a subclass such that it returns
+        a serializable object for ``o``, or calls the base implementation
+        (to raise a ``TypeError``).
+    
+        For example, to support arbitrary iterators, you could
+        implement default like this::
+    
+            def default(self, o):
+                try:
+                    iterable = iter(o)
+                except TypeError:
+                    pass
+                else:
+                    return list(iterable)
+                # Let the base class default method raise the TypeError
+                return JSONEncoder.default(self, o)
+    
+        """
+>       raise TypeError(f'Object of type {o.__class__.__name__} '
+                        f'is not JSON serializable')
+E       TypeError: Object of type date is not JSON serializable
+
+C:\Program Files\Python311\Lib\json\encoder.py:180: TypeError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_graph_acceptance.py::test_infra_memo_scoped_and_expires
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q092-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q112-induced] - Asse...
+FAILED tests/acceptance/test_answers_live.py::test_t3_pharma_excipients - Ass...
+FAILED tests/acceptance/test_answers_live.py::test_t4_infra_saturday_no_grn
+FAILED tests/acceptance/test_answers_live.py::test_t7_msme_due_date - TypeErr...
+================= 6 failed, 104 passed in 3340.03s (0:55:40) ==================

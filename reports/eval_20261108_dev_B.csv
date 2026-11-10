@@ -1,0 +1,4 @@
+id,split,type,difficulty,question,gold,config,status,route,latency_s,error,answer_text,verified,cite_strict,cite_lenient,outdated,has_must_not_say,verdict,correct,judge_reason,cause,calls,cached,input_tokens,output_tokens,cost_usd
+Q066,dev,scenario,medium,"Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice charges ₹1,218 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹18,000 on a line value of ₹1,200,000; limit is the lower of 1% (₹12,000) and ₹500 = ₹500.",B,answered,ablation,19.28,,"Status: answered
+Decision: Fail price match
+Answer: No, the line cannot pass the price match. The excess of ₹18,000 exceeds the tolerance of ₹500 (the lower of 1% of the PO line value (₹12,000) and ₹500). A PRICE_VAR exception must be raised.",,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 18000.0, 'limit': 500.0}; calculator None: None",,1,0,10760,257,0.0

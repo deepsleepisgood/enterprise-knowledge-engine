@@ -28,6 +28,25 @@ export function safeStorageSet(key: string, value: string): void {
   }
 }
 
+/** Per-tab storage: survives moving between pages and reloads, not a new tab. */
+export function sessionGet<T>(key: string): T | null {
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function sessionSet(key: string, value: unknown): void {
+  try {
+    if (value === null || value === "") window.sessionStorage.removeItem(key);
+    else window.sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage blocked or full: the page still works, it just forgets */
+  }
+}
+
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
 }

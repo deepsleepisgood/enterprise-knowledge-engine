@@ -256,3 +256,65 @@ def test_stale_running_job_is_requeued(db) -> None:
         )
         assert jobs.requeue_stale(s, older_than_s=60) == 1
         assert jobs.claim(s, "w", ["test_stale"]).id == jid
+
+
+def test_delete_episodes_removes_only_what_they_produced(db) -> None:
+    """Test uploads can be removed from a dev graph without touching anything else."""
+    now = datetime(2026, 11, 8, tzinfo=UTC)
+    with use_tenant("purge"), session_scope() as s:
+        keep_ep, _ = episodes.add_episode(s, channel="upload", content_hash="keep", received_at=now)
+        drop_ep, _ = episodes.add_episode(s, channel="upload", content_hash="drop", received_at=now)
+        for ep, sid in ((keep_ep, "src-keep"), (drop_ep, "src-drop")):
+            episodes.upsert_source(
+                s,
+                {
+                    "id": sid,
+                    "episode_id": ep,
+                    "title": sid,
+                    "short_label": sid,
+                    "doc_type": "memo",
+                    "status": "current",
+                },
+            )
+        shared = entities.create(s, "policy", "Visitor parking")
+        only_drop = entities.create(s, "policy", "Smoke test")
+
+        def add(key: str, sub: str, ep: str, sid: str, n: int) -> int:
+            return facts.insert(
+                s,
+                facts.NewFact(
+                    origin_key=key,
+                    subject_id=sub,
+                    attribute="parking.hours",
+                    value={"type": "number", "number": n},
+                    statement=f"{n} hours",
+                    kind="rule",
+                    status="current",
+                    episode_id=ep,
+                    source_id=sid,
+                ),
+            )
+
+        kept = add("k", shared, keep_ep, "src-keep", 2)
+        dropped = add("d", shared, drop_ep, "src-drop", 3)
+        add("d2", only_drop, drop_ep, "src-drop", 1)
+        kb.add_conflict(
+            s, fact_a=kept, fact_b=dropped, kind="value", authoritative_fact=kept, reason="r"
+        )
+        kb.add_review_item(s, "metadata", {"source_id": "src-drop"})
+        kb.add_review_item(s, "metadata", {"source_id": "src-keep"})
+        draft = kb.save_schema(s, {"topics": []}, mode="induced")
+
+    with use_tenant("purge"), session_scope() as s:
+        out = episodes.delete_episodes(s, [drop_ep])
+        assert out["facts"] == 2 and out["conflicts"] == 1 and out["review_items"] == 1
+        assert out["entities"] == 1  # "Smoke test" had nothing else; "Visitor parking" stays
+        assert kb.discard_schema_draft(s, draft)
+    with use_tenant("purge"), session_scope() as s:
+        assert [e.id for e in episodes.list_episodes(s)] == [keep_ep]
+        assert [f.id for f in facts.get_facts(s, attribute="parking.hours")] == [kept]
+        assert entities.get(s, shared) is not None and entities.get(s, only_drop) is None
+        assert [r.payload["source_id"] for r in kb.list_review_items(s)] == ["src-keep"]
+        assert kb.get_schema(s, draft) is None
+    with session_scope() as s:  # other tenants untouched
+        assert episodes.get_episode(s, keep_ep) is None

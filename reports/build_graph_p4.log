@@ -1,0 +1,68 @@
+﻿5 episodes, 156 passages to extract (records and parent passages are not sent to the LLM)
+schema v2 (induced, frozen) in 0s
+  38 topics, 218 attributes, 34 entity types, units {'%': 0.01, 'day': 1.0, '₹': 1.0, 'lakh': 100000.0, 'crore': 10000000.0, 'rupee': 1.0, 'percent': 0.01, 'working day': 1.0}
+  ranking: [('sop', 1), ('memo', 2), ('work_instruction', 3), ('spreadsheet', 4), ('training', 5), ('interview', 6), ('observation', 7), ('faq', 8), ('sop', 9), ('training', 10)]
+  coverage of the baseline schema: {'topics': '15/22', 'topics_missing': ['credit_notes', 'exceptions', 'missing_grn', 'month_end', 'non_po', 'records', 'rent_and_agency'], 'attributes_induced': 218, 'attributes_baseline': 71}
+0 episodes to extract
+re-resolution: {'groups': 288, 'revised': 9, 'kb_version': 10}
+ran 0 jobs in 1s
+  FAILED job 32 extract_episode: stopped: resolve-only rebuild instead
+  FAILED job 31 extract_episode: stopped: resolve-only rebuild instead
+  FAILED job 30 extract_episode: stopped: resolve-only rebuild instead
+  FAILED job 29 extract_episode: stopped: resolve-only rebuild instead
+  FAILED job 28 extract_episode: stopped: resolve-only rebuild instead
+facts (live): {'corroborating': 60, 'overridden': 22, 'superseded': 70, 'current': 286, 'pending': 17} | rows total 684
+  256 attributes used; other:* 46
+     15 exception_handling.codes
+      8 price_tolerance.general_cap_amount
+      8 irn_requirement.threshold_turnover
+      8 invoice_approval_authority.threshold_amount
+      8 price_tolerance.general_percentage
+      8 payment_run_schedule.run_day
+      7 vendor_bank_account_change.verification_call_to_vendor_master_phone
+      6 gst_compliance.itc_available_date
+      6 vendor_bank_account_change.verification_call_required
+      5 duplicate_check.flag_action
+      5 invoice_approval_authority.approver_role
+      5 tds_deduction.unclear_section_action
+      5 quantity_tolerance.general_percentage
+      5 exception_handling.exception_owner
+      5 vendor_bank_account_change.approval_chain
+      5 gst_compliance.itc_form
+      4 non_po_categories.categories
+      4 tds_deduction.technical_services_rate
+      4 payment_run_schedule.cutoff_time
+      4 invoice_approval_authority.cfo_threshold_amount
+      4 tds_deduction.amc_classification_rule
+      4 exception_handling.exception_meaning
+      4 pharma_qa_release.required_materials
+      4 tds_deduction.rent_building_rate
+      4 gst_compliance.gstin_status_check
+entities: {'topic': 63, 'requester': 5, 'qrmpflag': 1, 'department': 1, 'gstin': 3, 'role': 3, 'person': 2, 'msmesupplier': 1, 'batch': 1, 'erpsystem': 1, 'qualitymanagementsystem': 1, 'service': 4, 'vendormaster': 1, 'portal': 1, 'document': 2, 'apcontroller': 1, 'goodsreceiptnote': 1, 'vendormasterlead': 1, 'aatoband': 2, 'seniorprocessor': 4, 'invoice': 1, 'faq': 1, 'form': 1, 'material': 7, 'teamlead': 1, 'apteam': 1, 'gstcompliance': 1, 'system': 4, 'purchaseorder': 1, 'irn': 4, 'bankaccount': 2, 'client': 8, 'clientmemo': 3, 'taxdesk': 2, 'paymentrun': 1, 'cfo': 1, 'approcessor': 5, 'supplier': 5, 'tdssection': 6, 'serviceentrysheet': 1, 'exceptioncode': 14, 'other_tax_type': 1}
+conflicts: Counter({'value': 31, 'practice_vs_rule': 9})
+kb version: 10
+plug-in ap: 22/22 parameters bound
+  price_tolerance.pct_of_line -> price_tolerance.general_percentage (embedding + LLM)
+  price_tolerance.cap_inr -> price_tolerance.general_cap_amount (embedding + LLM)
+  quantity_tolerance.pct -> quantity_tolerance.general_percentage (embedding + LLM)
+  quantity_tolerance.cap_value_inr -> quantity_tolerance.infra_material_value_cap (embedding + LLM)
+  quantity_tolerance.materials -> quantity_tolerance.infra_materials (embedding + LLM)
+  approvals.controller_above_lakh -> invoice_approval_authority.threshold_amount (embedding + LLM)
+  approvals.cfo_above_lakh -> invoice_approval_authority.cfo_threshold_amount (embedding + LLM)
+  einvoice.aato_threshold_crore -> irn_requirement.threshold_turnover (embedding + LLM)
+  msme.max_term_days -> payment_run_schedule.msme_max_days_with_agreement (embedding + LLM)
+  msme.no_agreement_days -> payment_run_schedule.msme_max_days_without_agreement (embedding + LLM)
+  payments.default_term_days -> payment_run_schedule.default_payment_terms_days (embedding + LLM)
+  payments.run_days -> payment_run_schedule.run_day (embedding + LLM)
+  payments.cutoff -> payment_run_schedule.cutoff_time (embedding + LLM)
+  tds.no_pan_rate -> tds_deduction.no_pan_rate (embedding + LLM)
+  tds.goods_purchase_threshold_inr -> tds_deduction.goods_purchase_threshold (embedding + LLM)
+  tds.rate_contract_individual_huf -> tds_deduction.contractor_rate_individual (embedding + LLM)
+  tds.rate_contract_other -> tds_deduction.contractor_rate_other (embedding + LLM)
+  tds.rate_professional -> tds_deduction.professional_rate (embedding + LLM)
+  tds.rate_technical_service -> tds_deduction.technical_services_rate (embedding + LLM)
+  tds.rate_rent_plant_machinery -> tds_deduction.rent_plant_machinery_rate (embedding + LLM)
+  tds.rate_rent_land_building -> tds_deduction.rent_building_rate (embedding + LLM)
+  tds.rate_goods_purchase -> tds_deduction.goods_purchase_rate (embedding + LLM)
+embedding index: {'passages': 0, 'facts': 0, 'entities': 0} in 0s
+LLM: {'calls': 75, 'cache_hits': 33, 'input_tokens': 19674, 'output_tokens': 54121}

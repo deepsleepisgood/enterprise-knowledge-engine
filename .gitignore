@@ -5,6 +5,7 @@ __pycache__/
 .pgdata/
 .cache/
 logs/*.jsonl
+logs/*.log
 .pytest_cache/
 .ruff_cache/
 web/node_modules/

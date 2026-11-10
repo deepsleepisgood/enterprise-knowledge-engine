@@ -24,6 +24,7 @@ from app.graph.entities import Resolver, norm_type
 from app.graph.extract import Draft
 from app.graph.ontology import Ontology
 from app.graph.resolve import Assertion, Comparator, resolve_group
+from app.graph.scope import distinctive_words, fact_client, infers_scope
 from app.store import episodes as estore
 from app.store import facts as fstore
 from app.store import kb
@@ -87,6 +88,13 @@ def _assertion_from_row(
     )
 
 
+def client_context(session: Session, onto: Ontology) -> tuple[dict[str, set[str]], list[int]]:
+    """Known clients (the scopes documents declare) and the ranks of the sources declaring them."""
+    scoped = [x for x in estore.list_sources(session) if x.client_scope and x.client_scope != "all"]
+    known = distinctive_words({x.client_scope for x in scoped})
+    return known, [onto.rank_of(x.doc_type).rank for x in scoped]
+
+
 def publish(
     session: Session,
     drafts: list[Draft],
@@ -110,7 +118,9 @@ def publish(
         ),
     )
 
-    # 1. Entities.
+    # 1. Entities. The client comes from the source's declared scope and the fact's own words
+    # (app/graph/scope.py); declared clients are pinned, never merged into another entity.
+    known, client_ranks = client_context(session, onto) if drafts else ({}, [])
     new: list[tuple[Draft, str, dict[str, Any]]] = []
     for d in drafts:
         if d.about:
@@ -118,8 +128,18 @@ def publish(
         else:
             subject = topic_entity(resolver, onto, d.topic)
         scope = dict(d.scope)
-        if d.client:
-            cid = resolver.resolve(d.client, "client", d.episode_id)
+        src = sources.get(d.source_id)
+        client = fact_client(
+            d.client,
+            " ".join(x for x in (d.statement, d.condition) if x),
+            src.client_scope if src else None,
+            known,
+            infer=src is not None and infers_scope(onto.rank_of(src.doc_type).rank, client_ranks),
+            condition=d.condition,
+        )
+        scope.pop("client", None)
+        if client:
+            cid = resolver.resolve(client, "client", d.episode_id, exact=client in known)
             scope["client"] = resolver.canonical_name(cid)
             scope["client_id"] = cid
         for name, typ in d.mentions:

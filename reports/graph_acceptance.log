@@ -1,0 +1,46 @@
+﻿F..F.....                                                                [100%]
+================================== FAILURES ===================================
+___________________ test_price_tolerance_current_and_as_of ____________________
+
+g = {'onto': Ontology(name='induced', base_currency='INR', units={'%': 0.01, 'bag': 1.0, 'day': 1.0, '₹': 1.0, 'bags': 1.0...days_with_agreement', ...}, 'started': datetime.datetime(2026, 11, 7, 19, 36, 4, 464685, tzinfo=datetime.timezone.utc)}
+
+    def test_price_tolerance_current_and_as_of(g) -> None:
+        pct, cap = rule(g, "price_tolerance.pct_of_line"), rule(g, "price_tolerance.cap_inr")
+        assert (pct.number, cap.number) == (1, 500)
+>       assert pct.source_label == "AP SOP v4.0" and pct.locator == "4.2"
+E       AssertionError: assert ('DI-03' == 'AP SOP v4.0'
+E         
+E         - AP SOP v4.0
+E         + DI-03)
+
+tests\integration\test_graph_acceptance.py:61: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Generic bitemporal schema (BUILD_PLAN v2, Phase 0). Replaces the v1 claims schema.
+_____________________ test_infra_memo_scoped_and_expires ______________________
+
+g = {'onto': Ontology(name='induced', base_currency='INR', units={'%': 0.01, 'bag': 1.0, 'day': 1.0, '₹': 1.0, 'bags': 1.0...days_with_agreement', ...}, 'started': datetime.datetime(2026, 11, 7, 19, 36, 4, 464685, tzinfo=datetime.timezone.utc)}
+
+    def test_infra_memo_scoped_and_expires(g) -> None:
+        infra = rule(g, "quantity_tolerance.pct", client="Arvana Infra Projects")
+>       assert infra.number == 5 and infra.source_label == "CM-INF-02"
+               ^^^^^^^^^^^^
+
+tests\integration\test_graph_acceptance.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = RuleValue(fact_id=229, attribute='invoice_matching.quantity_tolerance_percentage', client=None, value={'text': 'None, ...ocator='14', passage_id='520d4d01bfd92447a1b9', valid_from=datetime.date(2026, 4, 1), valid_until=None, condition=None)
+
+    @property
+    def number(self) -> float:
+        n = self.value.get("number")
+        if n is None:
+>           raise RuleNotFound(f"{self.attribute} has no numeric value ({self.value.get('text')})")
+E           app.graph.rules.RuleNotFound: invoice_matching.quantity_tolerance_percentage has no numeric value (None, except client memo CM-INF-02)
+
+app\graph\rules.py:53: RuleNotFound
+=========================== short test summary info ===========================
+FAILED tests/integration/test_graph_acceptance.py::test_price_tolerance_current_and_as_of
+FAILED tests/integration/test_graph_acceptance.py::test_infra_memo_scoped_and_expires
+2 failed, 7 passed in 2856.41s (0:47:36)

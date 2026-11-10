@@ -296,3 +296,24 @@ def set_conflict_status(session: Session, conflict_id: int, status: str) -> bool
 
 def ping(session: Session) -> bool:
     return session.execute(select(1)).scalar() == 1
+
+
+def discard_schema_draft(session: Session, version: int) -> bool:
+    """Drop an unfrozen schema draft and its review item (a frozen schema is never removed)."""
+    from sqlalchemy import delete
+
+    t = tenant()
+    res = session.execute(
+        delete(Schema).where(
+            Schema.tenant_id == t, Schema.version == version, Schema.status == "draft"
+        )
+    )
+    if res.rowcount:
+        session.execute(
+            delete(ReviewItem).where(
+                ReviewItem.tenant_id == t,
+                ReviewItem.kind == "schema",
+                ReviewItem.payload["version"].as_string() == str(version),
+            )
+        )
+    return bool(res.rowcount)

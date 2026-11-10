@@ -1,0 +1,94 @@
+160 questions (all), configs ['D']
+  Q001  D ok         11.4s 
+  Q003  D ok         12.9s 
+  Q004  D partial     8.3s generation
+  Q005  D ok          9.5s 
+  Q002  D ok         31.5s 
+  Q006  D ok          9.4s 
+  Q007  D partial    11.6s generation
+  Q008  D ok         11.7s 
+  Q010  D ok         18.9s 
+  Q009  D ok         27.4s 
+  Q011  D ok         27.5s 
+  Q013  D ok          9.4s 
+  Q014  D ok         13.1s 
+  Q012  D ok         26.7s 
+  Q015  D ok         11.2s 
+  Q016  D ok          4.7s 
+  Q019  D ok          9.8s 
+  Q018  D ok         22.3s 
+  Q017  D partial    26.4s verifier
+  Q020  D ok         16.0s 
+  Q021  D ok         11.1s 
+  Q022  D ok         20.6s 
+  Q024  D ok          9.8s 
+  Q025  D ok          8.9s 
+  Q023  D ok         16.5s 
+  Q026  D ok         10.4s 
+  Q028  D ok         22.7s 
+  Q029  D ok         23.1s 
+  Q030  D ok         10.7s 
+  Q027  D ok         38.5s 
+  Q031  D ok          9.6s 
+  Q033  D ok         10.1s 
+  Q034  D ok         17.0s 
+  Q032  D ok         23.3s 
+  Q035  D partial     9.6s generation
+  Q036  D ok         21.7s 
+  Q037  D ok         25.7s 
+  Q038  D ok         16.7s 
+  Q040  D ok         13.8s 
+  Q041  D ok         14.5s 
+  Q042  D ok          7.7s 
+  Q044  D ok          5.7s 
+  Q039  D wrong      38.3s verifier
+  Q043  D ok         23.5s 
+  Q046  D ok         18.5s 
+  Q045  D ok         21.8s 
+  Q047  D ok         25.4s 
+  Q048  D partial    14.3s generation
+  Q049  D ok         21.2s 
+  Q051  D ok         14.7s 
+  Q050  D ok         17.5s 
+  Q054  D ok          8.0s 
+  Q053  D ok         13.5s 
+  Q055  D partial    13.0s generation
+  Q052  D ok         38.4s 
+  Q056  D ok         10.4s 
+  Q057  D ok         13.2s 
+  Q059  D ok          8.9s 
+  Q061  D ok          7.9s 
+  Q058  D ok         29.9s 
+  Q060  D wrong      16.9s generation
+  Q063  D ok         11.2s 
+  Q062  D ok         24.2s 
+  Q064  D ok         16.5s 
+  Q065  D partial    17.4s generation
+  Q066  D ok         18.8s 
+  Q067  D ok         26.0s 
+  Q068  D ok         31.0s 
+  Q069  D ok         26.3s 
+  Q070  D ok         12.6s 
+  Q072  D ok         14.7s 
+  Q073  D ok         20.0s 
+  Q071  D ok         25.2s 
+  Q074  D ok         22.0s 
+  Q075  D ok         15.1s 
+  Q076  D ok         34.8s 
+  Q077  D ok         29.7s 
+  Q079  D ok         11.4s 
+  Q080  D ok          4.3s 
+  Q078  D ok         31.9s 
+  Q082  D ok         15.2s 
+  Q083  D ok         22.0s 
+  Q081  D ok         25.4s 
+  Q084  D ok         14.9s 
+  Q086  D ok         21.9s 
+  Q085  D ok         26.3s 
+  Q087  D ok         34.8s 
+  Q088  D ok         18.9s 
+  Q089  D ok         29.6s 
+  Q090  D ok         17.7s 
+  Q092  D wrong      15.0s calculator
+  Q093  D ok         21.4s 
+  Q094  D ok         78.5s 

@@ -228,11 +228,16 @@ def _client(f: FactRow) -> str:
     return str((f.scope or {}).get("client") or "all")
 
 
-def _authoritative(group: list[FactRow]) -> FactRow | None:
+def _authoritative(
+    group: list[FactRow], outdated: Callable[[FactRow], bool] = lambda f: False
+) -> FactRow | None:
     """The group's rule in force: `current` first, else one that `corroborates` a rule in force
-    (its winner may sit in another group after re-keying)."""
+    (its winner may sit in another group after re-keying). Never a fact from an outdated source:
+    a superseded version that agrees with today's rule still cannot stand for it."""
     for statuses in (("current",), ("corroborating",)):
-        rules = [f for f in group if f.status in statuses and f.kind != "practice"]
+        rules = [
+            f for f in group if f.status in statuses and f.kind != "practice" and not outdated(f)
+        ]
         if rules:
             return min(
                 rules,
@@ -243,6 +248,29 @@ def _authoritative(group: list[FactRow]) -> FactRow | None:
                 ),
             )
     return None
+
+
+def comparable(
+    auth: FactRow, other: FactRow, via: str, outdated: Callable[[FactRow], bool]
+) -> bool:
+    """Pairs that can never be a real conflict, whatever a judge says."""
+    if outdated(auth):  # the rule side must be in force
+        return False
+    # "Practice" stated by a document at least as authoritative as the rule is that
+    # document's own rule (a responsibilities table read as practice), not someone's habit.
+    if (
+        other.kind == "practice"
+        and auth.kind != "practice"
+        and other.authority_rank <= auth.authority_rank
+        and not outdated(other)
+    ):
+        return False
+    # A bare yes/no from a neighbouring attribute has nothing to contradict a value with.
+    if via == "neighbour":
+        ta, tb = (auth.value or {}).get("type"), (other.value or {}).get("type")
+        if (ta == "boolean") != (tb == "boolean"):
+            return False
+    return True
 
 
 def _label(sources: dict[str, Source], f: FactRow) -> str:
@@ -381,7 +409,7 @@ def scan(
 
     def compare(auth: FactRow, other: FactRow, via: str, group: list[FactRow] = ()) -> None:
         key = (auth.id, other.source_id or "", _norm(value_text(other)))
-        if key in seen or other.id == auth.id:
+        if key in seen or other.id == auth.id or not comparable(auth, other, via, outdated):
             return
         seen.add(key)
         rep.compared += 1
@@ -401,7 +429,7 @@ def scan(
 
     orphans: list[FactRow] = []
     for _key, group in sorted(groups.items()):
-        auth = _authoritative(group)
+        auth = _authoritative(group, outdated)
         if auth is None:
             orphans += group
             continue
@@ -415,7 +443,7 @@ def scan(
     # for each client ("only APIs need release" for everyone vs a Pharma memo's list).
     client_rules: dict[str, list[FactRow]] = defaultdict(list)
     for (_s, attr, client), group in groups.items():
-        auth = _authoritative(group)
+        auth = _authoritative(group, outdated)
         if client != "all" and auth is not None:
             client_rules[attr].append(auth)
     for f in orphans:
@@ -476,7 +504,12 @@ def scan(
     )
     by_passage: dict[str, list[FactRow]] = defaultdict(list)
     for c in siblings:
-        if c.status in IN_FORCE and c.kind != "practice" and not c.attribute.startswith("other:"):
+        if (
+            c.status in IN_FORCE
+            and c.kind != "practice"
+            and not c.attribute.startswith("other:")
+            and not outdated(c)
+        ):
             by_passage[c.passage_id or ""].append(c)
     for fid, pids in sorted(hit_passages.items()):
         f = by_id[fid]

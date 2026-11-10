@@ -337,3 +337,150 @@ def totals(session: Session) -> dict[str, int]:
         "documents": n(Source),
         "passages": n(Passage, Passage.retired_at.is_(None)),
     }
+
+
+def delete_episodes(session: Session, episode_ids: list[str]) -> dict[str, int]:
+    """Remove episodes and everything derived from them (sources, passages, facts, their
+    conflicts, changes, review items, jobs, escalations, and entities left with no facts).
+
+    For test uploads in a development graph only: the knowledge graph itself never deletes, it
+    retires. Facts that pointed at a removed fact (`supersedes_id`) are unlinked."""
+    from sqlalchemy import or_
+
+    from app.store.models import (
+        Ack,
+        Change,
+        Conflict,
+        Entity,
+        EntityAlias,
+        Escalation,
+        Fact,
+        Job,
+        Notification,
+        PluginBinding,
+        ReviewItem,
+    )
+
+    t = tenant()
+    ids = list(episode_ids)
+    if not ids:
+        return {}
+    src_ids = list(
+        session.scalars(select(Source.id).where(Source.tenant_id == t, Source.episode_id.in_(ids)))
+    )
+    fact_rows = session.execute(
+        select(Fact.id, Fact.subject_id, Fact.object_id).where(
+            Fact.tenant_id == t, or_(Fact.episode_id.in_(ids), Fact.source_id.in_(src_ids))
+        )
+    ).all()
+    fact_ids = [r[0] for r in fact_rows]
+    touched = {r[1] for r in fact_rows} | {r[2] for r in fact_rows if r[2]}
+    out: dict[str, int] = {"episodes": len(ids), "sources": len(src_ids), "facts": len(fact_ids)}
+
+    change_ids = list(
+        session.scalars(
+            select(Change.id).where(
+                Change.tenant_id == t,
+                or_(
+                    Change.new_fact.in_(fact_ids),
+                    Change.old_fact.in_(fact_ids),
+                    Change.source_episode.in_(ids),
+                ),
+            )
+        )
+    )
+    session.execute(delete(Ack).where(Ack.tenant_id == t, Ack.change_id.in_(change_ids)))
+    esc = session.execute(
+        select(Escalation.id, Escalation.answer_id).where(
+            Escalation.tenant_id == t, Escalation.episode_id.in_(ids)
+        )
+    ).all()
+    answer_ids = [a for _, a in esc if a]
+    out["notifications"] = session.execute(
+        delete(Notification).where(
+            Notification.tenant_id == t,
+            or_(
+                Notification.change_id.in_(change_ids),
+                Notification.answer_id.in_(answer_ids),
+            ),
+        )
+    ).rowcount
+    out["escalations"] = session.execute(
+        delete(Escalation).where(Escalation.tenant_id == t, Escalation.id.in_([e for e, _ in esc]))
+    ).rowcount
+    out["changes"] = session.execute(delete(Change).where(Change.id.in_(change_ids))).rowcount
+    out["conflicts"] = session.execute(
+        delete(Conflict).where(
+            Conflict.tenant_id == t,
+            or_(
+                Conflict.fact_a.in_(fact_ids),
+                Conflict.fact_b.in_(fact_ids),
+                Conflict.authoritative_fact.in_(fact_ids),
+            ),
+        )
+    ).rowcount
+    out["review_items"] = session.execute(
+        delete(ReviewItem).where(
+            ReviewItem.tenant_id == t, ReviewItem.payload["source_id"].as_string().in_(src_ids)
+        )
+    ).rowcount
+    out["jobs"] = session.execute(
+        delete(Job).where(
+            Job.tenant_id == t,
+            or_(
+                Job.payload["episode_id"].as_string().in_(ids),
+                Job.payload["source_id"].as_string().in_(src_ids),
+            ),
+        )
+    ).rowcount
+    session.execute(
+        update(Fact)
+        .where(Fact.tenant_id == t, Fact.supersedes_id.in_(fact_ids))
+        .values(supersedes_id=None)
+    )
+    session.execute(delete(Fact).where(Fact.id.in_(fact_ids)))
+    session.execute(
+        delete(EntityAlias).where(EntityAlias.tenant_id == t, EntityAlias.episode_id.in_(ids))
+    )
+    session.execute(
+        update(Source)
+        .where(Source.tenant_id == t, Source.supersedes_source_id.in_(src_ids))
+        .values(supersedes_source_id=None)
+    )
+    session.execute(delete(Passage).where(Passage.tenant_id == t, Passage.episode_id.in_(ids)))
+    session.execute(delete(Source).where(Source.id.in_(src_ids)))
+    session.execute(delete(Episode).where(Episode.tenant_id == t, Episode.id.in_(ids)))
+
+    # Entities only these episodes mentioned: no facts left about or pointing at them.
+    still = (
+        set(
+            session.scalars(
+                select(Fact.subject_id).where(Fact.tenant_id == t, Fact.subject_id.in_(touched))
+            )
+        )
+        | set(
+            session.scalars(
+                select(Fact.object_id).where(Fact.tenant_id == t, Fact.object_id.in_(touched))
+            )
+        )
+        | set(
+            session.scalars(
+                select(PluginBinding.subject_entity_id).where(
+                    PluginBinding.tenant_id == t, PluginBinding.subject_entity_id.in_(touched)
+                )
+            )
+        )
+    )
+    gone = sorted(touched - still)
+    session.execute(
+        update(Entity)
+        .where(Entity.tenant_id == t, Entity.merged_into.in_(gone))
+        .values(merged_into=None)
+    )
+    session.execute(
+        delete(EntityAlias).where(EntityAlias.tenant_id == t, EntityAlias.entity_id.in_(gone))
+    )
+    out["entities"] = session.execute(
+        delete(Entity).where(Entity.tenant_id == t, Entity.id.in_(gone))
+    ).rowcount
+    return out

@@ -1,0 +1,5 @@
+all: {'groups': 57, 'compared': 267, 'judged': 185, 'undecided': 1, 'conflicts': 73, 'by_kind': {'value': 60, 'practice_vs_rule': 8, 'self_contradiction': 5}, 'failures': 1} in 1388s
+without caveat: {'groups': 55, 'compared': 235, 'judged': 167, 'undecided': 0, 'conflicts': 67, 'by_kind': {'value': 54, 'practice_vs_rule': 9, 'self_contradiction': 4}, 'failures': 0} in 20s
+all: recall 14/15 (missed ['C03']); authoritative right 13/14; extra 36
+without caveat: recall 14/15 (missed ['C03']); authoritative right 13/14; extra 28
+report: D:\antigravity\company knowledge engine\reports\conflicts_20261108.md

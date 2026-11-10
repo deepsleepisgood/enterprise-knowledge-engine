@@ -76,6 +76,8 @@ reports/                       evaluation outputs (committed)
 ## Commands
 
 ```
+.\run.ps1                             # everything at once: db, API, worker, web; Ctrl+C stops all
+                                      # (run.cmd from cmd; scripts/run_app.py elsewhere)
 docker compose up -d db
 python -m app.worker                  # background jobs
 python scripts/ingest_all.py          # drop data/raw through the upload connector

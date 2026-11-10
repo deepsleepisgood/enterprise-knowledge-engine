@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from types import SimpleNamespace
 
-from app.graph.conflicts import quick_verdict, reason
+from app.graph.conflicts import _authoritative, comparable, quick_verdict, reason
 from app.store.facts import FactRow
 from evaluation.conflict_key import Detected, match, places, score
 
@@ -152,3 +152,41 @@ def test_unit_only_for_numbers() -> None:
     assert _unit(fact(1, {"type": "percentage", "number": 5, "unit": "%"})) == "%"
     assert _unit(fact(1, {"type": "days", "number": 45, "unit": "days"})) == "day"
     assert _unit(fact(1, {"type": "enum", "text": "Friday"})) is None
+
+
+def test_rule_side_is_never_an_outdated_source() -> None:
+    old = fact(1, {"type": "enum", "text": "Controller"}, source="v3", status="corroborating")
+    new = fact(2, {"type": "enum", "text": "Controller"}, source="v4", status="corroborating")
+    outdated = lambda f: f.source_id == "v3"  # noqa: E731 (v3 is a superseded version)
+    assert _authoritative([old, new], outdated).id == 2
+    assert _authoritative([old], outdated) is None
+    tip = fact(
+        3, {"type": "enum", "text": "Manager"}, source="notes", kind="practice", authority_rank=7
+    )
+    assert not comparable(old, tip, "group", outdated)
+    assert comparable(new, tip, "group", outdated)
+
+
+def test_practice_from_an_equally_ranked_document_is_not_practice_vs_rule() -> None:
+    rule = fact(1, {"type": "enum", "text": "Controller"}, source="sop", authority_rank=1)
+    table = fact(
+        2, {"type": "enum", "text": "Lead"}, source="sop", kind="practice", authority_rank=1
+    )
+    habit = fact(
+        3, {"type": "enum", "text": "Lead"}, source="interview", kind="practice", authority_rank=6
+    )
+    never = lambda f: False  # noqa: E731
+    assert not comparable(rule, table, "group", never)
+    assert comparable(rule, habit, "group", never)
+
+
+def test_bare_yes_no_neighbour_is_not_compared_with_a_value() -> None:
+    rule = fact(1, {"type": "enum", "text": "AP Controller"})
+    flag = fact(2, {"type": "boolean", "text": "true"}, source="s2", attribute="x.approves")
+    never = lambda f: False  # noqa: E731
+    assert not comparable(rule, flag, "neighbour", never)
+    assert comparable(rule, flag, "group", never)  # same attribute: the judge still decides
+    yes = fact(3, {"type": "boolean", "text": "true"})
+    assert comparable(
+        yes, fact(4, {"type": "boolean", "text": "false"}, source="s2"), "neighbour", never
+    )

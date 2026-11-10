@@ -4,8 +4,7 @@ import { ArrowRight, CalendarClock, Check, ChevronDown, Paperclip, X } from "luc
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { searchInvoices } from "@/lib/api";
-import { cx, fmtInr } from "@/lib/format";
-import { fmtDate } from "@/lib/format";
+import { cx, fmtDate, fmtInr, sessionGet, sessionSet } from "@/lib/format";
 import { ALL_SCOPE, type ClientKey, type InvoiceContext, type Scope } from "@/lib/types";
 
 function usePopover() {
@@ -173,6 +172,8 @@ function AsOfPill({ value, onChange }: { value: string | null; onChange: (d: str
   );
 }
 
+const DRAFT_KEY = "ps07.askDraft";
+
 export function Composer({
   onSubmit,
   client,
@@ -197,6 +198,17 @@ export function Composer({
   const [text, setText] = useState("");
   const ta = useRef<HTMLTextAreaElement>(null);
 
+  // The unsent question survives a trip to another page (per tab). Restored after mount so the
+  // server render and the first client render match; saved as it is typed, cleared on send.
+  useEffect(() => {
+    const saved = sessionGet<string>(DRAFT_KEY);
+    if (saved) setText(saved);
+  }, []);
+  const edit = (v: string) => {
+    setText(v);
+    sessionSet(DRAFT_KEY, v);
+  };
+
   useLayoutEffect(() => {
     const el = ta.current;
     if (!el) return;
@@ -208,7 +220,7 @@ export function Composer({
     const q = text.trim();
     if (!q || busy) return;
     onSubmit(q);
-    setText("");
+    edit("");
   };
 
   return (
@@ -242,7 +254,7 @@ export function Composer({
         ref={ta}
         rows={2}
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => edit(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();

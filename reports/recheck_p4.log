@@ -1,0 +1,6 @@
+﻿scan: {'groups': 59, 'compared': 218, 'judged': 156, 'undecided': 0, 'conflicts': 62, 'by_kind': {'value': 54, 'self_contradiction': 2, 'practice_vs_rule': 6}, 'failures': 0} 2375s
+general: 0.0
+INFRA rule: invoice_matching.quantity_tolerance_percentage 5.0 CM-INF-02 PASS
+T3: PASS [{"topic": "payment_runs.payment_block_until_qms_release", "current_value": "Invoices for active pharmaceutical ingredients, excipients and primary packaging material must not be paid until the batch shows status Released in the Quality Management System (QMS).", "older_value": "QA release not requi
+T4: FAIL AP SOP v4.0 §4.6 AP SOP v4.0 §10 CM-INF-02 Part C Expert interview 1 [02:30] | tip: Infra sites batch GRNs on Monday morning, so invoices received Friday to Sunday are held until Tuesday noon.
+T7: PASS Due Sunday 16 August 2026; pay in the Friday 14 August 2026 run

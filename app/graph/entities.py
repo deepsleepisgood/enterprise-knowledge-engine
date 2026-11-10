@@ -103,11 +103,23 @@ class Resolver:
         )
         return out.same
 
-    def resolve(self, name: str, type_: str, episode_id: str | None = None) -> str:
+    def resolve(
+        self, name: str, type_: str, episode_id: str | None = None, exact: bool = False
+    ) -> str:
+        """The entity for `name`. `exact` pins a name the documents declare (a client scope)
+        to its own entity: no fuzzy or model merge, and the name is taken back from any other
+        entity it was wrongly aliased to."""
         name = re.sub(r"\s+", " ", name).strip()
         memo_key = (type_, norm_name(name))
         if memo_key in self._memo:
             return self._memo[memo_key]
+        if exact:
+            eid = store.pin(self.s, type_, name, episode_id)
+            self._memo[memo_key] = eid
+            self.decisions.append(
+                {"name": name, "type": type_, "entity": eid, "decision": "pinned"}
+            )
+            return eid
         eid = store.by_alias(self.s, name, type_)
         decision = "alias"
         if eid is None:

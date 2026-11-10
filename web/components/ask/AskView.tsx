@@ -21,7 +21,7 @@ import {
   getScopes,
   reportWrong,
 } from "@/lib/api";
-import { cx, fmtDate, plural } from "@/lib/format";
+import { cx, fmtDate, plural, sessionGet, sessionSet } from "@/lib/format";
 import {
   ALL_SCOPE,
   type AnswerCard,
@@ -132,6 +132,18 @@ function Welcome({ onAsk }: { onAsk: (q: string) => void }) {
   );
 }
 
+const LAST_KEY = "ps07.askLast";
+
+/** The question on screen, what it was asked against, and its answer (null while pending). */
+interface LastAsk {
+  question: string;
+  asOf: string | null;
+  client: ClientKey;
+  invoice: InvoiceContext | null;
+  card: AnswerCard | null;
+  sentTo: string | null;
+}
+
 export function AskView() {
   const { userId, role } = useRole();
   const { unseen, markSeen } = useSignals();
@@ -156,10 +168,32 @@ export function AskView() {
   const [replies, setReplies] = useState<Notification[]>([]);
   const [shownReply, setShownReply] = useState<Notification | null>(null);
   const started = useRef(false);
+  const last = useRef<LastAsk | null>(null);
+
+  // Keep what is on screen for this tab, so leaving the Ask page and coming back restores it.
+  const remember = (patch: Partial<LastAsk> | null) => {
+    last.current = patch === null || !last.current ? (patch as LastAsk | null) : { ...last.current, ...patch };
+    sessionSet(LAST_KEY, last.current);
+  };
+
+  const restore = (l: LastAsk) => {
+    last.current = l;
+    setQuestion(l.question);
+    setAsOf(l.asOf);
+    setClient(l.client);
+    setInvoice(l.invoice);
+    setSentTo(l.sentTo);
+    setCard(l.card);
+    setActive(l.card?.rule.citations[0]?.n ?? l.card?.draft?.rule.citations[0]?.n ?? null);
+  };
 
   const run = useCallback(
-    async (q: string, opts: { asOf?: string | null } = {}) => {
+    async (q: string, opts: { asOf?: string | null; client?: ClientKey; invoice?: InvoiceContext | null } = {}) => {
       const when = opts.asOf !== undefined ? opts.asOf : asOf;
+      const forClient = opts.client ?? client;
+      const forInvoice = opts.invoice !== undefined ? opts.invoice : invoice;
+      // Saved before the answer arrives: leaving mid-question re-asks it on return.
+      remember({ question: q, asOf: when, client: forClient, invoice: forInvoice, card: null, sentTo: null });
       setQuestion(q);
       setLoading(true);
       setFailure(null);
@@ -173,15 +207,17 @@ export function AskView() {
         const result = await ask({
           question: q,
           userId,
-          client,
-          invoiceId: invoice?.invoice_id ?? null,
+          client: forClient,
+          invoiceId: forInvoice?.invoice_id ?? null,
           asOf: when,
           viewer: role === "owner" ? "owner" : "processor",
         });
         setCard(result);
+        remember({ card: result });
         setActive(result.rule.citations[0]?.n ?? result.draft?.rule.citations[0]?.n ?? null);
       } catch (e) {
         setCard(null);
+        remember(null);
         setFailure(e instanceof DemoMissError ? { kind: "demo" } : { kind: "error", message: (e as Error).message });
       } finally {
         setLoading(false);
@@ -197,10 +233,26 @@ export function AskView() {
     void getScopes().then((s) => setScopes(s.length ? s : [ALL_SCOPE]));
     const q = params.get("q");
     const when = params.get("as_of");
-    if (when) setAsOf(when);
-    if (q) void run(q, { asOf: when });
-    else if (DEMO_MODE) void run(SAMPLES[0]?.question ?? "", { asOf: null });
-  }, [params, run]);
+    const saved = sessionGet<LastAsk>(LAST_KEY);
+    if (q) {
+      // Same question and date as last time in this tab: show it again rather than re-ask.
+      if (saved?.card && saved.question === q && (saved.asOf ?? null) === (when ?? null)) restore(saved);
+      else {
+        if (when) setAsOf(when);
+        void run(q, { asOf: when });
+      }
+    } else if (saved) {
+      // Back from another page (the nav link carries no question): bring the last one back.
+      restore(saved);
+      if (saved.card) {
+        const next = new URLSearchParams({ q: saved.question });
+        if (saved.asOf) next.set("as_of", saved.asOf);
+        router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+      } else {
+        void run(saved.question, { asOf: saved.asOf, client: saved.client, invoice: saved.invoice });
+      }
+    } else if (DEMO_MODE) void run(SAMPLES[0]?.question ?? "", { asOf: null });
+  }, [params, run, router, pathname]); // runs once on arrival (guarded by `started`)
 
   // Expert replies to this user's escalated questions.
   useEffect(() => {
@@ -261,7 +313,9 @@ export function AskView() {
     setSending(true);
     try {
       const out = await escalate(card.answer_id, userId);
-      setSentTo(out.routed_to || card.route_to?.role || "the process owner");
+      const to = out.routed_to || card.route_to?.role || "the process owner";
+      setSentTo(to);
+      remember({ sentTo: to });
     } catch (e) {
       toast((e as Error).message, "error");
     } finally {

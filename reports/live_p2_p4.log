@@ -1,0 +1,1903 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- D:\antigravity\company knowledge engine\.venv\Scripts\python.exe
+rootdir: D:\antigravity\company knowledge engine
+configfile: pyproject.toml
+plugins: anyio-4.16.0, platformdirs-4.14.5
+collecting ... collected 110 items
+
+tests/integration/test_graph_acceptance.py::test_price_tolerance_current_and_as_of FAILED [  0%]
+tests/integration/test_graph_acceptance.py::test_sop_v31_values_are_superseded_on_31_march_2026 PASSED [  1%]
+tests/integration/test_graph_acceptance.py::test_section_14_rows_state_current_values PASSED [  2%]
+tests/integration/test_graph_acceptance.py::test_infra_memo_scoped_and_expires FAILED [  3%]
+tests/integration/test_graph_acceptance.py::test_einvoice_threshold_and_video_2_staleness PASSED [  4%]
+tests/integration/test_graph_acceptance.py::test_faq_excipient_answer_is_not_current_and_pharma_memo_rules PASSED [  5%]
+tests/integration/test_graph_acceptance.py::test_practice_is_never_a_rule PASSED [  6%]
+tests/integration/test_graph_acceptance.py::test_known_at_before_ingestion_returns_nothing PASSED [  7%]
+tests/integration/test_graph_acceptance.py::test_clients_resolve_to_three_entities PASSED [  8%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q066-induced] PASSED   [  9%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q067-induced] FAILED   [ 10%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q068-induced] FAILED   [ 10%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q069-induced] FAILED   [ 11%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q070-induced] PASSED   [ 12%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q071-induced] FAILED   [ 13%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q072-induced] FAILED   [ 14%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q073-induced] FAILED   [ 15%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q074-induced] FAILED   [ 16%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q075-induced] FAILED   [ 17%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q076-induced] FAILED   [ 18%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q077-induced] FAILED   [ 19%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q078-induced] FAILED   [ 20%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q079-induced] FAILED   [ 20%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q080-induced] FAILED   [ 21%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q081-induced] FAILED   [ 22%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q082-induced] PASSED   [ 23%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q083-induced] PASSED   [ 24%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q084-induced] PASSED   [ 25%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q085-induced] FAILED   [ 26%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q086-induced] FAILED   [ 27%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q087-induced] PASSED   [ 28%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q088-induced] PASSED   [ 29%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q089-induced] FAILED   [ 30%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q090-induced] FAILED   [ 30%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q091-induced] FAILED   [ 31%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q092-induced] FAILED   [ 32%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q093-induced] PASSED   [ 33%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q094-induced] PASSED   [ 34%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q095-induced] FAILED   [ 35%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q096-induced] FAILED   [ 36%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q097-induced] FAILED   [ 37%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q098-induced] PASSED   [ 38%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q099-induced] PASSED   [ 39%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q100-induced] FAILED   [ 40%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q101-induced] FAILED   [ 40%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q102-induced] FAILED   [ 41%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q103-induced] FAILED   [ 42%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q104-induced] PASSED   [ 43%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q105-induced] PASSED   [ 44%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q106-induced] FAILED   [ 45%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q107-induced] PASSED   [ 46%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q108-induced] PASSED   [ 47%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q109-induced] FAILED   [ 48%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q110-induced] FAILED   [ 49%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q111-induced] PASSED   [ 50%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q112-induced] PASSED   [ 50%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q113-induced] FAILED   [ 51%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q114-induced] PASSED   [ 52%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q115-induced] FAILED   [ 53%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q116-induced] PASSED   [ 54%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q117-induced] FAILED   [ 55%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q118-induced] FAILED   [ 56%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q119-induced] FAILED   [ 57%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q120-induced] FAILED   [ 58%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q121-induced] PASSED   [ 59%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q122-induced] PASSED   [ 60%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q123-induced] PASSED   [ 60%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q124-induced] PASSED   [ 61%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q125-induced] PASSED   [ 62%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q126-induced] PASSED   [ 63%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q127-induced] PASSED   [ 64%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q128-induced] PASSED   [ 65%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q129-induced] PASSED   [ 66%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q130-induced] PASSED   [ 67%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q131-induced] PASSED   [ 68%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q132-induced] PASSED   [ 69%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q133-induced] PASSED   [ 70%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q134-induced] PASSED   [ 70%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q135-induced] PASSED   [ 71%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q136-induced] PASSED   [ 72%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q137-induced] PASSED   [ 73%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q138-induced] PASSED   [ 74%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q139-induced] FAILED   [ 75%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q140-induced] PASSED   [ 76%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q141-induced] FAILED   [ 77%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q142-induced] PASSED   [ 78%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q143-induced] PASSED   [ 79%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q144-induced] PASSED   [ 80%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q145-induced] PASSED   [ 80%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q146-induced] PASSED   [ 81%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q147-induced] PASSED   [ 82%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q148-induced] PASSED   [ 83%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q149-induced] PASSED   [ 84%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q150-induced] PASSED   [ 85%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q151-induced] PASSED   [ 86%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q152-induced] PASSED   [ 87%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q153-induced] PASSED   [ 88%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q154-induced] PASSED   [ 89%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q155-induced] PASSED   [ 90%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q156-induced] PASSED   [ 90%]
+tests/plugins/test_ap_scenarios.py::test_scenario[Q159-induced] PASSED   [ 91%]
+tests/acceptance/test_answers_live.py::test_t1_price_tolerance FAILED    [ 92%]
+tests/acceptance/test_answers_live.py::test_t1_as_of_1_march_2026_returns_v31 FAILED [ 93%]
+tests/acceptance/test_answers_live.py::test_t2_einvoice_above_threshold FAILED [ 94%]
+tests/acceptance/test_answers_live.py::test_t3_pharma_excipients FAILED  [ 95%]
+tests/acceptance/test_answers_live.py::test_t4_infra_saturday_no_grn FAILED [ 96%]
+tests/acceptance/test_answers_live.py::test_t5_price_calculation FAILED  [ 97%]
+tests/acceptance/test_answers_live.py::test_t6_tds_software_support FAILED [ 98%]
+tests/acceptance/test_answers_live.py::test_t7_msme_due_date FAILED      [ 99%]
+tests/acceptance/test_answers_live.py::test_t8_canteen_subsidy_is_unsupported PASSED [100%]
+
+================================== FAILURES ===================================
+___________________ test_price_tolerance_current_and_as_of ____________________
+
+g = {'onto': Ontology(name='induced', base_currency='INR', units={'%': 0.01, 'bag': 1.0, 'day': 1.0, '₹': 1.0, 'bags': 1.0..._days_with_agreement', ...}, 'started': datetime.datetime(2026, 11, 8, 6, 8, 34, 552093, tzinfo=datetime.timezone.utc)}
+
+    def test_price_tolerance_current_and_as_of(g) -> None:
+        pct, cap = rule(g, "price_tolerance.pct_of_line"), rule(g, "price_tolerance.cap_inr")
+        assert (pct.number, cap.number) == (1, 500)
+>       assert pct.source_label == "AP SOP v4.0" and pct.locator == "4.2"
+E       AssertionError: assert ('AP SOP v4.0' == 'AP SOP v4.0'
+E         
+E           AP SOP v4.0 and '14' == '4.2'
+E         
+E         - 4.2
+E         + 14)
+
+tests\integration\test_graph_acceptance.py:61: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Generic bitemporal schema (BUILD_PLAN v2, Phase 0). Replaces the v1 claims schema.
+_____________________ test_infra_memo_scoped_and_expires ______________________
+
+g = {'onto': Ontology(name='induced', base_currency='INR', units={'%': 0.01, 'bag': 1.0, 'day': 1.0, '₹': 1.0, 'bags': 1.0..._days_with_agreement', ...}, 'started': datetime.datetime(2026, 11, 8, 6, 8, 34, 552093, tzinfo=datetime.timezone.utc)}
+
+    def test_infra_memo_scoped_and_expires(g) -> None:
+        infra = rule(g, "quantity_tolerance.pct", client="Arvana Infra Projects")
+>       assert infra.number == 5 and infra.source_label == "CM-INF-02"
+               ^^^^^^^^^^^^
+
+tests\integration\test_graph_acceptance.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = RuleValue(fact_id=169, attribute='invoice_matching.quantity_tolerance_percentage', client='Arvana Infra Projects', val...='34218ac9fc60f6d63c6c', valid_from=datetime.date(2026, 4, 1), valid_until=None, condition='per Client Memo CM-INF-02')
+
+    @property
+    def number(self) -> float:
+        n = self.value.get("number")
+        if n is None:
+>           raise RuleNotFound(f"{self.attribute} has no numeric value ({self.value.get('text')})")
+E           app.graph.rules.RuleNotFound: invoice_matching.quantity_tolerance_percentage has no numeric value (bulk-material tolerance per Client Memo CM-INF-02)
+
+app\graph\rules.py:53: RuleNotFound
+_________________________ test_scenario[Q067-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q067'
+
+>   ???
+E   AssertionError: induced Q067: mismatch; inputs={'po_unit_price': 1200.0, 'invoice_unit_price': 1222.0, 'quantity': 1000.0, 'client': None} | expected {'passed': False, 'excess': 21600.0, 'limit': 500.0} got {'passed': False, 'excess': 22000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q068-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q068'
+
+>   ???
+E   AssertionError: induced Q068: mismatch; inputs={'po_unit_price': 250.0, 'invoice_unit_price': 250.0, 'quantity': 500.0, 'client': 'Pharma'} | expected {'passed': True, 'excess': 250.0, 'limit': 500.0} got {'passed': True, 'excess': 0.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q069-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q069'
+
+>   ???
+E   AssertionError: induced Q069: mismatch; inputs={'po_unit_price': 250.0, 'invoice_unit_price': 254.0, 'quantity': 20.0, 'client': None} | expected {'passed': False, 'excess': 90.0, 'limit': 50.0} got {'passed': False, 'excess': 80.0, 'limit': 50.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q071-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q071'
+
+>   ???
+E   AssertionError: induced Q071: mismatch; inputs={'po_unit_price': 120.0, 'invoice_unit_price': 122.0, 'quantity': 500.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 1080.0, 'limit': 500.0} got {'passed': False, 'excess': 1000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q072-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q072'
+
+>   ???
+E   AssertionError: induced Q072: mismatch; inputs={'po_unit_price': 640.0, 'invoice_unit_price': 652.0, 'quantity': 10.0, 'client': 'Arvana Infra Projects'} | expected {'passed': False, 'excess': 115.0, 'limit': 64.0} got {'passed': False, 'excess': 120.0, 'limit': 64.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q073-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q073'
+
+>   ???
+E   AssertionError: induced Q073: mismatch; inputs={'po_unit_price': 395.0, 'invoice_unit_price': 397.0, 'quantity': 20.0, 'client': 'Arvana Retail'} | expected {'passed': True, 'excess': 47.4, 'limit': 79.0} got {'passed': True, 'excess': 40.0, 'limit': 79.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q074-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q074'
+
+>   ???
+E   AssertionError: induced Q074: mismatch; inputs={'po_unit_price': 250.0, 'invoice_unit_price': 256.0, 'quantity': 200.0, 'client': None} | expected {'passed': False, 'excess': 1250.0, 'limit': 500.0} got {'passed': False, 'excess': 1200.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q075-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q075'
+
+>   ???
+E   AssertionError: induced Q075: mismatch; inputs={'po_unit_price': 640.0, 'invoice_unit_price': 647.0, 'quantity': 50.0, 'client': 'Arvana Infra Projects'} | expected {'passed': False, 'excess': 352.0, 'limit': 320.0} got {'passed': False, 'excess': 350.0, 'limit': 320.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q076-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q076'
+
+>   ???
+E   AssertionError: induced Q076: mismatch; inputs={'po_unit_price': 640.0, 'invoice_unit_price': 647.0, 'quantity': 100.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 704.0, 'limit': 500.0} got {'passed': False, 'excess': 700.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q077-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q077'
+
+>   ???
+E   AssertionError: induced Q077: mismatch; inputs={'po_unit_price': 8800.0, 'invoice_unit_price': 8958.0, 'quantity': 1000.0, 'client': None} | expected {'passed': False, 'excess': 158400.0, 'limit': 500.0} got {'passed': False, 'excess': 158000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q078-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q078'
+
+>   ???
+E   AssertionError: induced Q078: mismatch; inputs={'po_unit_price': 1200.0, 'invoice_unit_price': 1207.0, 'quantity': 200.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 1440.0, 'limit': 500.0} got {'passed': False, 'excess': 1400.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q079-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q079'
+
+>   ???
+E   AssertionError: induced Q079: mismatch; inputs={'po_unit_price': 640.0, 'invoice_unit_price': 643.0, 'quantity': 1000.0, 'client': None} | expected {'passed': False, 'excess': 2560.0, 'limit': 500.0} got {'passed': False, 'excess': 3000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q080-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q080'
+
+>   ???
+E   AssertionError: induced Q080: mismatch; inputs={'po_unit_price': 120.0, 'invoice_unit_price': 122.0, 'quantity': 500.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 1080.0, 'limit': 500.0} got {'passed': False, 'excess': 1000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q081-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q081'
+
+>   ???
+E   AssertionError: induced Q081: mismatch; inputs={'po_unit_price': 120.0, 'invoice_unit_price': 120.0, 'quantity': 100.0, 'client': None} | expected {'passed': True, 'excess': 24.0, 'limit': 120.0} got {'passed': True, 'excess': 0.0, 'limit': 120.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q085-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q085'
+
+>   ???
+E   AssertionError: induced Q085: mismatch; inputs={'po_unit_price': 395.0, 'invoice_unit_price': 399.0, 'quantity': 100.0, 'client': None} | expected {'passed': False, 'excess': 434.0, 'limit': 395.0} got {'passed': False, 'excess': 400.0, 'limit': 395.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q086-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q086'
+
+>   ???
+E   AssertionError: induced Q086: mismatch; inputs={'po_unit_price': 640.0, 'invoice_unit_price': 645.0, 'quantity': 20.0, 'client': None} | expected {'passed': True, 'excess': 102.0, 'limit': 128.0} got {'passed': True, 'excess': 100.0, 'limit': 128.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q089-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q089'
+
+>   ???
+E   AssertionError: induced Q089: mismatch; inputs={'po_unit_price': 8800.0, 'invoice_unit_price': 8835.0, 'quantity': 200.0, 'client': 'Arvana Infra Projects'} | expected {'passed': False, 'excess': 7040.0, 'limit': 500.0} got {'passed': False, 'excess': 7000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q090-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q090'
+
+>   ???
+E   AssertionError: induced Q090: mismatch; inputs={'po_unit_price': 395.0, 'invoice_unit_price': 398.0, 'quantity': 200.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 632.0, 'limit': 500.0} got {'passed': False, 'excess': 600.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q091-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q091'
+
+>   ???
+E   AssertionError: induced Q091: mismatch; inputs={'po_unit_price': 1200.0, 'invoice_unit_price': 1222.0, 'quantity': 5.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 108.0, 'limit': 60.0} got {'passed': False, 'excess': 110.0, 'limit': 60.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q092-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q092'
+
+>   ???
+E   AssertionError: induced Q092: mismatch; inputs={'po_unit_price': 120.0, 'invoice_unit_price': 121.0, 'quantity': 100.0, 'client': 'Arvana Infra Projects'} | expected {'passed': False, 'excess': 132.0, 'limit': 120.0} got {'passed': True, 'excess': 100.0, 'limit': 120.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q095-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q095'
+
+>   ???
+E   AssertionError: induced Q095: mismatch; inputs={'po_unit_price': 2500.0, 'invoice_unit_price': 2538.0, 'quantity': 500.0, 'client': 'Arvana Retail'} | expected {'passed': False, 'excess': 18750.0, 'limit': 500.0} got {'passed': False, 'excess': 19000.0, 'limit': 500.0}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q096-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q096'
+
+>   ???
+E   AssertionError: induced Q096: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 20.0, 'amount': 3600.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q097-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q097'
+
+>   ???
+E   AssertionError: induced Q097: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 10.0, 'amount': 91000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q100-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q100'
+
+>   ???
+E   AssertionError: induced Q100: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194C', 'rate': 20.0, 'amount': 96000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q101-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q101'
+
+>   ???
+E   AssertionError: induced Q101: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194I', 'rate': 10.0, 'amount': 48000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q102-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q102'
+
+>   ???
+E   AssertionError: induced Q102: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194I', 'rate': 20.0, 'amount': 96000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q103-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q103'
+
+>   ???
+E   AssertionError: induced Q103: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 2.0, 'amount': 2400.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q106-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q106'
+
+>   ???
+E   AssertionError: induced Q106: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 10.0, 'amount': 25000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q109-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q109'
+
+>   ???
+E   AssertionError: induced Q109: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194C', 'rate': 2.0, 'amount': 900.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q110-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q110'
+
+>   ???
+E   AssertionError: induced Q110: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194C', 'rate': 20.0, 'amount': 3600.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q113-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q113'
+
+>   ???
+E   AssertionError: induced Q113: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 2.0, 'amount': 900.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q115-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q115'
+
+>   ???
+E   AssertionError: induced Q115: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 20.0, 'amount': 300000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q117-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q117'
+
+>   ???
+E   AssertionError: induced Q117: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 10.0, 'amount': 91000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q118-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q118'
+
+>   ???
+E   AssertionError: induced Q118: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194J', 'rate': 20.0, 'amount': 300000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q119-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q119'
+
+>   ???
+E   AssertionError: induced Q119: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194C', 'rate': 20.0, 'amount': 50000.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q120-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q120'
+
+>   ???
+E   AssertionError: induced Q120: calculator: RuleNotFound: tds.no_pan_rate has no numeric value (20% or the applicable rate, whichever is higher) | expected {'section': '194C', 'rate': 1.0, 'amount': 9100.0} got None
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q139-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q139'
+
+>   ???
+E   AssertionError: induced Q139: mismatch; inputs={'category': 'small', 'acceptance_date': datetime.date(2026, 4, 1), 'agreed_term_days': 60, 'written_agreement': False, 'client': None} | expected {'due_date': '2026-05-16', 'run_date': '2026-05-15'} got {'due_date': '2026-04-16', 'run_date': '2026-04-14'}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+_________________________ test_scenario[Q141-induced] _________________________
+
+scenario_results = {'induced': {'Q066': {'id': 'Q066', 'question': 'Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice c... a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.', 'expected_family': 'price', ...}, ...}}
+mode = 'induced', qid = 'Q141'
+
+>   ???
+E   AssertionError: induced Q141: mismatch; inputs={'category': 'small', 'acceptance_date': datetime.date(2026, 6, 27), 'agreed_term_days': 30, 'written_agreement': False, 'client': None} | expected {'due_date': '2026-07-27', 'run_date': '2026-07-24'} got {'due_date': '2026-07-12', 'run_date': '2026-07-10'}
+E   assert False
+
+tests\plugins\test_ap_scenarios.py:241: AssertionError
+___________________________ test_t1_price_tolerance ___________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t1_price_tolerance(asker) -> None:
+>       card = asker(
+            "What is the price tolerance for an invoice line where the unit price is higher than "
+            "the PO price?"
+        )
+
+tests\acceptance\test_answers_live.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'What is the price tolerance for an invoice line where the unit price is higher than the PO price?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+___________________ test_t1_as_of_1_march_2026_returns_v31 ____________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t1_as_of_1_march_2026_returns_v31(asker) -> None:
+>       card = asker(
+            "What is the price tolerance for an invoice line where the unit price is higher than "
+            "the PO price?",
+            as_of=date(2026, 3, 1),
+        )
+
+tests\acceptance\test_answers_live.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'What is the price tolerance for an invoice line where the unit price is higher than the PO price?'
+client = None, as_of = datetime.date(2026, 3, 1), known_at = None
+user_id = 'anonymous', viewer = 'eval', today = datetime.date(2026, 11, 7)
+structured_fn = None, embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+______________________ test_t2_einvoice_above_threshold _______________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t2_einvoice_above_threshold(asker) -> None:
+>       card = asker(
+            "A supplier whose highest aggregate annual turnover since 2017-18 is ₹8.9 crore sends "
+            "an invoice without an IRN. Can we accept it?"
+        )
+
+tests\acceptance\test_answers_live.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'A supplier whose highest aggregate annual turnover since 2017-18 is ₹8.9 crore sends an invoice without an IRN. Can we accept it?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+__________________________ test_t3_pharma_excipients __________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t3_pharma_excipients(asker) -> None:
+>       card = asker("Do Arvana Pharma excipient invoices need QA release before payment?")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\acceptance\test_answers_live.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'Do Arvana Pharma excipient invoices need QA release before payment?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+________________________ test_t4_infra_saturday_no_grn ________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t4_infra_saturday_no_grn(asker) -> None:
+>       card = asker(
+            "An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on "
+            "Monday morning?"
+        )
+
+tests\acceptance\test_answers_live.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on Monday morning?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+__________________________ test_t5_price_calculation __________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t5_price_calculation(asker) -> None:
+>       card = asker(
+            "PO unit price ₹395 for 500 units; the invoice charges ₹400 per unit. Can the line "
+            "pass the price match?"
+        )
+
+tests\acceptance\test_answers_live.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'PO unit price ₹395 for 500 units; the invoice charges ₹400 per unit. Can the line pass the price match?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+________________________ test_t6_tds_software_support _________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t6_tds_software_support(asker) -> None:
+>       card = asker(
+            "We received a software support (AMC) invoice from a company for ₹4,80,000 excluding "
+            "GST. How much TDS do we deduct?"
+        )
+
+tests\acceptance\test_answers_live.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'We received a software support (AMC) invoice from a company for ₹4,80,000 excluding GST. How much TDS do we deduct?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+____________________________ test_t7_msme_due_date ____________________________
+
+asker = <function asker.<locals>.run at 0x000001D451C0C720>
+
+    def test_t7_msme_due_date(asker) -> None:
+>       card = asker(
+            "A micro enterprise supplier registered on Udyam; invoice accepted on 01 August 2026; "
+            "no written agreement on payment terms. What is the due date and which payment run "
+            "should pay it?"
+        )
+
+tests\acceptance\test_answers_live.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\acceptance\test_answers_live.py:34: in run
+    return ask(question, today=TODAY, viewer="eval", **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+question = 'A micro enterprise supplier registered on Udyam; invoice accepted on 01 August 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?'
+client = None, as_of = None, known_at = None, user_id = 'anonymous'
+viewer = 'eval', today = datetime.date(2026, 11, 7), structured_fn = None
+embed_fn = None, rerank_fn = None
+
+    def ask(
+        question: str,
+        client: str | None = None,
+        as_of: date | None = None,
+        known_at: datetime | None = None,
+        user_id: str = "anonymous",
+        viewer: str = "processor",
+        today: date | None = None,
+        structured_fn: Any = None,
+        embed_fn: EmbedFn | None = None,
+        rerank_fn: RerankFn | None = None,
+    ) -> dict[str, Any]:
+        started = time.perf_counter()
+        cfg = get_settings()
+        structured = structured_fn or _default_structured()
+        today = today or date.today()
+        roles = registry.roles()
+        calculators = calc_mod.routes()
+        diag: dict[str, Any] = {}
+    
+        with session_scope() as s:
+            onto = active_ontology(s)
+            if onto is None:
+                raise RuntimeError("no frozen schema: build the graph first")
+            kbv = kb.current_kb_version(s)
+            clients = [e.name for e in estore.list_entities(s, "client")]
+    
+            r = route(question, clients, calculators, roles, structured)
+            asked = client if client and client != "all" else r.client
+            client_name = canonical_client(s, asked) if asked else None
+            diag["router"] = r.model_dump()
+            base = cards.blank(
+                kb_version=kbv,
+                as_of=as_of.isoformat() if as_of else None,
+                client=client_name,
+                route=r.route,
+            )
+    
+            def finish(card: dict[str, Any], facts: list[int], passages: list[str]) -> dict[str, Any]:
+                card["latency_ms"] = int((time.perf_counter() - started) * 1000)
+                card["diagnostics"] = diag
+                aid = astore.log_answer(
+                    s,
+                    user_id=user_id,
+                    question=question,
+                    client=client_name,
+                    as_of=as_of,
+                    kb_version=kbv,
+                    route=card["route"],
+                    card=card,
+                    cited_fact_ids=facts,
+                    cited_passage_ids=passages,
+                    latency_ms=card["latency_ms"],
+                )
+                card["answer_id"] = str(aid)
+                astore.update_card(s, aid, card)
+                return cards.view_for(card, viewer)
+    
+            if r.route == "out_of_scope":
+                base["route_to"] = cards.route_to(
+                    r.role, roles, f"Outside what the knowledge base covers ({r.out_of_scope_reason})."
+                )
+                return finish(base, [], [])
+    
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+            base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
+            diag["retrieval"] = {
+                "scorer": got.scorer,
+                "top_score": got.top_score,
+                "passages": [(p.label, p.id, round(p.score, 3)) for p in got.passages],
+                "facts": [f.id for f in got.facts],
+            }
+    
+            calc = None
+            res = None
+            if r.route.startswith("calculator:"):
+                plugin = r.route.split(":", 1)[1].split(".", 1)[0]
+                try:
+                    prep = calc_mod.inputs_for(
+                        plugin, question, clients, onto, _with_model(structured, cfg.router_model)
+                    )
+                    if prep is not None:
+                        family, inputs = prep
+                        stray = grounded_inputs(
+                            inputs, question, onto.units, [onto.base_currency or ""]
+                        )
+                        if stray:
+                            raise ValueError(f"calculator inputs not in the question: {stray}")
+                        if client_name and not inputs.get("client"):
+                            inputs["client"] = client_name
+                        res = calc_mod.calculate(
+                            s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        )
+                        calc = _calc_view(f"calculator:{plugin}.{family}", res)
+                        base["route"] = calc.route
+                        diag["calculator"] = {
+                            "family": family,
+                            "inputs": inputs,
+                            "passed": res.passed,
+                            "decision": res.decision,
+                            "exception_code": res.exception_code,
+                            "result": res.result,
+                        }
+                except (RuleNotFound, ValueError) as exc:
+                    diag["calculator_error"] = f"{type(exc).__name__}: {exc}"
+                if calc is None:
+                    base["route"] = "lookup"
+    
+            threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
+            if calc is None and (got.top_score is None or got.top_score < threshold):
+                base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
+                diag["abstained"] = "retrieval score below threshold"
+                return finish(base, [], [])
+    
+            # Evidence: calculator rule sources first, then reranked passages, then fact sources.
+            calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
+            fact_pids = [f.passage_id for f in got.facts if f.passage_id]
+            order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+            hits = search.hydrate(s, order[:MAX_EVIDENCE])
+            evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
+    
+            failures: list[str] | None = None
+            gen: GenOut | None = None
+            verified = False
+            rule_text, cites, cited = "", [], []
+            problems: list[str] = []
+            attempts: list[list[str]] = []
+            in_force: list = []
+            not_in_force: list = []
+            for _attempt in range(2):
+                gen = generate(
+                    question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                )
+                if gen.status == "unsupported":
+                    break
+                given = [question, _calc_text(calc) or "", as_of.isoformat() if as_of else ""]
+                given.append(str(res.result) if res is not None else "")
+>               if added := cards.attach_number_sources(gen, evidence, given):
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'app.answer.card' has no attribute 'attach_number_sources'
+
+app\answer\pipeline.py:238: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_graph_acceptance.py::test_price_tolerance_current_and_as_of
+FAILED tests/integration/test_graph_acceptance.py::test_infra_memo_scoped_and_expires
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q067-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q068-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q069-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q071-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q072-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q073-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q074-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q075-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q076-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q077-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q078-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q079-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q080-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q081-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q085-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q086-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q089-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q090-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q091-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q092-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q095-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q096-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q097-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q100-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q101-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q102-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q103-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q106-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q109-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q110-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q113-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q115-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q117-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q118-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q119-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q120-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q139-induced] - Asse...
+FAILED tests/plugins/test_ap_scenarios.py::test_scenario[Q141-induced] - Asse...
+FAILED tests/acceptance/test_answers_live.py::test_t1_price_tolerance - Attri...
+FAILED tests/acceptance/test_answers_live.py::test_t1_as_of_1_march_2026_returns_v31
+FAILED tests/acceptance/test_answers_live.py::test_t2_einvoice_above_threshold
+FAILED tests/acceptance/test_answers_live.py::test_t3_pharma_excipients - Att...
+FAILED tests/acceptance/test_answers_live.py::test_t4_infra_saturday_no_grn
+FAILED tests/acceptance/test_answers_live.py::test_t5_price_calculation - Att...
+FAILED tests/acceptance/test_answers_live.py::test_t6_tds_software_support - ...
+FAILED tests/acceptance/test_answers_live.py::test_t7_msme_due_date - Attribu...
+================= 48 failed, 62 passed in 6338.21s (1:45:38) ==================

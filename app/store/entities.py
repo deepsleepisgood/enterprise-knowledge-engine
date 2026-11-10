@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 from typing import Any
 
-from sqlalchemy import func, select, text, update
+from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -71,6 +71,24 @@ def create(
         .on_conflict_do_nothing(index_elements=["id"])
     )
     add_alias(session, eid, name, episode_id)
+    return eid
+
+
+def pin(session: Session, type_: str, name: str, episode_id: str | None = None) -> str:
+    """The entity named exactly `name` (created if needed). The name stops being an alias of
+    any other entity of the type, so an earlier wrong merge (a subsidiary filed under its
+    parent group) is undone for future lookups."""
+    eid = create(session, type_, name, episode_id=episode_id)
+    others = select(Entity.id).where(
+        Entity.tenant_id == tenant(), Entity.type == type_, Entity.id != eid
+    )
+    session.execute(
+        delete(EntityAlias).where(
+            EntityAlias.tenant_id == tenant(),
+            EntityAlias.alias_norm == norm_name(name),
+            EntityAlias.entity_id.in_(others),
+        )
+    )
     return eid
 
 

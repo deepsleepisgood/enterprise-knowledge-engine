@@ -284,6 +284,62 @@ def reresolve_all(compare=None) -> dict[str, Any]:
     return {"groups": len(groups), "revised": rep.revised, "kb_version": rep.kb_version}
 
 
+def rescope_clients(compare=None, dry_run: bool = False) -> dict[str, Any]:
+    """Apply the client-scope rules (app/graph/scope.py) to live facts recorded before them,
+    then re-resolve the groups that moved. A moved fact is a new version (the old row is kept,
+    retracted), so `known_at` still shows what the graph said before."""
+    from app.graph.scope import fact_client, infers_scope
+    from app.graph.write import client_context
+
+    with session_scope() as s:
+        onto = active_ontology(s)
+        if onto is None:
+            return {"skipped": "no frozen schema"}
+        known, client_ranks = client_context(s, onto)
+        sources = {x.id: x for x in estore.list_sources(s)}
+        resolver = Resolver(s, structured_fn=None)
+        moved: list[tuple[int, str | None, str | None]] = []
+        groups: set[tuple[str, str]] = set()
+        for r in fstore.get_facts(s):
+            src = sources.get(r.source_id or "")
+            old = (r.scope or {}).get("client") or None
+            text = " ".join(x for x in (r.statement, r.condition) if x)
+            infer = src is not None and infers_scope(onto.rank_of(src.doc_type).rank, client_ranks)
+            new = fact_client(
+                old, text, src.client_scope if src else None, known, infer, r.condition
+            )
+            if (new or None) == old:
+                continue
+            moved.append((r.id, old, new))
+            groups.add((r.subject_id, r.attribute))
+            if dry_run:
+                continue
+            scope = {k: v for k, v in (r.scope or {}).items() if k not in ("client", "client_id")}
+            if new:
+                cid = resolver.resolve(new, "client", None, exact=new in known)
+                scope["client"], scope["client_id"] = resolver.canonical_name(cid), cid
+            fstore.revise(s, r.id, scope=scope)
+        if dry_run or not moved:
+            return {"moved": moved, "groups": len(groups)}
+        structured = _default_structured()
+        rep = publish(
+            s,
+            [],
+            [],
+            onto,
+            compare or (LLMComparator(structured) if structured else deterministic),
+            resolver,
+            summary=f"client scope corrected on {len(moved)} facts",
+            extra_groups=groups,
+        )
+    return {
+        "moved": moved,
+        "groups": len(groups),
+        "revised": rep.revised,
+        "kb_version": rep.kb_version,
+    }
+
+
 @handler("reresolve_source")
 def reresolve_source_job(payload: dict[str, Any]) -> dict[str, Any]:
     return reresolve_source(payload["source_id"])
