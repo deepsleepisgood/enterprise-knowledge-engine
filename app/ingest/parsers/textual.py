@@ -96,9 +96,7 @@ def parse_text(data: bytes | str, markdown: bool = True) -> tuple[list[Block], d
             blocks.append(Block("heading", clean(m.group(2)), level=len(m.group(1)), style="md"))
         elif (
             # A pipe table with its |---| line is a table in any plain text (an email body).
-            s.startswith("|")
-            and i + 1 < len(lines)
-            and _TABLE_SEP.match(lines[i + 1].strip())
+            s.startswith("|") and i + 1 < len(lines) and _TABLE_SEP.match(lines[i + 1].strip())
         ):
             flush()
             rows = [_split_row(s)]
@@ -108,6 +106,19 @@ def parse_text(data: bytes | str, markdown: bool = True) -> tuple[list[Block], d
                 i += 1
             blocks.append(Block("table", rows=rows))
             continue
+        elif (
+            not markdown
+            and (m := _MD_LIST.match(line))
+            and m.group(2)[0].isdigit()
+            and len(s) < 80
+            and not s.endswith((".", ",", ";", ":"))
+            and (i == 0 or not lines[i - 1].strip())
+            and (i + 1 >= len(lines) or not lines[i + 1].strip())
+        ):
+            # A short numbered line standing alone in plain text ("7. Approvals") is a section
+            # title, not a one-item list: keep its number so heading inference can use it.
+            flush()
+            blocks.append(Block("paragraph", clean(s)))
         elif (m := _MD_LIST.match(line)) and not re.match(r"^\d{1,2}:\d{2}", s):
             flush()
             blocks.append(

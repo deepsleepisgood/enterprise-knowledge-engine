@@ -308,6 +308,12 @@ def split_documents(blocks: list[Block]) -> list[DocPart]:
                 )
             ]
     pre = [b for b in preamble if b is not pre_meta]
+    body = blocks[first_head:]
+    if pre_meta is None and starts and starts[0] == first_head:
+        # The header table right under the first heading (a workbook's first sheet, "Document
+        # control" as section 1) describes the whole file.
+        pre_meta = next((b for b in body[1:2] if is_metadata_table(b)), None)
+        body = [b for b in body if b is not pre_meta]
     return [
         DocPart(
             ordinal=0,
@@ -316,7 +322,7 @@ def split_documents(blocks: list[Block]) -> list[DocPart]:
             title=container_title,
             meta_kv=table_kv(pre_meta) if pre_meta else {},
             preamble=pre,
-            blocks=blocks[first_head:],
+            blocks=body,
         )
     ]
 

@@ -279,3 +279,19 @@ def test_small_sheet_is_one_retrievable_passage_large_sheet_is_not() -> None:
     big_doc = split_documents([big])[0]
     summary = [p for p in segment(big_doc) if p.segment_kind == "table"][0]
     assert summary.leaf is False and "| 39 |" not in summary.text
+
+
+def test_header_table_under_the_first_of_several_headings_describes_the_file() -> None:
+    from app.ingest.blocks import Block as B
+
+    blocks = [
+        B("heading", "Table 1", level=1),
+        B("table", rows=[["Version", "4.0"], ["Owner", "Ops"], ["Applies to", "All"]]),
+        B("heading", "Table 2", level=1),
+        B("table", rows=[["Code", "Owner"], ["X1", "Desk"]]),
+        B("heading", "Table 3", level=1),
+        B("table", rows=[["Rate", "Section"], ["1%", "S1"]]),
+    ]
+    [doc] = split_documents(blocks)
+    assert doc.meta_kv == {"Version": "4.0", "Owner": "Ops", "Applies to": "All"}
+    assert all(b.rows != blocks[1].rows for b in doc.blocks if b.type == "table")

@@ -1,4 +1,4 @@
-"""Tables written as text (PDF "a | b" lines, pipe tables in an email body) become tables."""
+"""Text-layout signals in PDFs and plain text: pipe tables, numbered section titles."""
 
 from __future__ import annotations
 
@@ -55,3 +55,12 @@ def test_pipe_table_in_an_email_body_is_a_table() -> None:
     blocks, _ = parse_eml(raw)
     [table] = [b for b in blocks if b.type == "table"]
     assert table.rows[-1] == ["Rent", "10%"]
+
+
+def test_numbered_title_alone_in_plain_text_keeps_its_number() -> None:
+    from app.ingest.parsers.textual import parse_text
+
+    text = "7. Approvals\n\nInvoices above the limit need sign-off.\n\n1. Check it.\n2. Post it.\n"
+    blocks, _ = parse_text(text, markdown=False)
+    assert blocks[0].type == "paragraph" and blocks[0].text == "7. Approvals"
+    assert [b.type for b in blocks[2:]] == ["list_item", "list_item"]

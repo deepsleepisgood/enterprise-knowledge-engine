@@ -18,3 +18,9 @@
   Q040  D ok         40.2s 
   Q055  D ok        117.8s 
   Q062  D ok         22.2s 
+  Q157  D ok         70.8s 
+  Q158  D ok          7.6s 
+  Q160  D ok          7.5s 
+  Q042  D wrong     468.9s infra error
+config D: accuracy 87.0% (20/23), citations 87.0% (20/23), outdated (conflict) 8.7% (2/23), p50 68.3s
+report: D:\antigravity\company knowledge engine\reports\eval_20261111_all.md

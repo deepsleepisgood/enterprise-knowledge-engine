@@ -4,30 +4,21 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (8 Nov 2026): P0-P1 done; P2-P3 built and offline-tested (live acceptance re-running); P4 answer pipeline built (live smoke T1-T8 mostly correct, p50 ~10 s); P5 evaluation harness and runners built (not yet run in full).** 170 offline + DB tests pass. The spec is BUILD_PLAN v2; v1 is at commit 7add2d0.
+**Status (11 Nov 2026, 14:20): Phase 9 deployed for testing (Vercel + Neon + this laptop via Cloudflare tunnel; demo stopped). Tests paused for the night; code changes since the last commit are NOT committed.**
+
+Results so far (NVIDIA NIM, Neon): eval 157/160 (98.1%; dev 100%, holdout 95.3%; citations 98.1%; p50 36 s); replay 22/22, idempotent; second company 10/10 (after the uploaded-.eml filename fix); UI gate 6/6; intake 11/12; privacy grep 0 hits; format invariance md 0.99, html 0.99, flat docx 0.92, pdf 0.88 (was 0.65), eml 0.77 (was 0.61), xlsx 0.00 (fix since made, not yet rerun). Conflict questions: 0/23 present an old rule as current; 2/23 (Q021, Q062, holdout, examined with the user's consent) name an old value while correcting it.
+
+Uncommitted changes since the last commit: eval runner survives judge errors and has `--ids`; outdated metric fix ("60 days"); answer-v8 prompt; router route-v5 reads dates asked about in words (as_of); support check sees source in-force tags; search runs while the router runs (`early_retrieval`); uploaded .eml keeps its file name; PDF "a | b" text tables; pipe tables in plain text/email; numbered section titles kept in plain text; header table under a leading caption row or under the first of several headings (xlsx).
 
 **Next actions, in order**
-1. Read the live run (`reports/live_p2_p4.log`): P2 graph acceptance, P3 92 scenarios (induced), P4 T1-T8. Fix what fails.
-2. `python scripts/run_replay.py` (re-extracts under the current schema: ~45 min on NIM), `python scripts/run_second_corpus.py` (report in `reports/second_corpus_<date>.md`), `python scripts/run_eval.py --split dev`, then `--config ablation`. Format invariance and the baseline-schema scenarios are slow on NIM: run them after switching to Anthropic.
-3. Hand-grade `eval/judge/hand_graded.csv` (written by the first full run of `run_eval.py`) for judge calibration.
-4. Phase 6 fix loop on dev failures (conflict scan done: 14/15). Phase 7 API done (`uvicorn app.api.main:app`); next Phase 8 wiring (set `NEXT_PUBLIC_API_BASE_URL`) and an API key before the public deploy.
+1. Rerun format invariance for xlsx and eml (`python scripts/run_format_invariance.py --no-scenarios --variants xlsx,eml`), then `python scripts/run_second_corpus.py` (parser changes touch its xlsx/eml/pdf).
+2. Full `pytest -q`, then the full eval on the final code (`run_eval.py --split all --workers 2`, DATABASE_URL=Neon) and the 6 fresh conflict questions (scratchpad script `fresh_conflicts.py`, copy into scripts/ if kept).
+3. Build the Replay button on the Sources page (user approved; after the usage limit resets).
+4. Not yet measured for gate A: entity-resolution F1, induced vs baseline schema, conflict scan on Neon, T2-T4/T6/T7/T9/T11 by hand on the public URL.
+5. Decide the demo LLM: Claude is faster (p50 14 s on 10 Nov) but only about $1.47 credit is left; NIM p50 36 s. Retrieval itself is 4.5-5.5 s on this laptop (reranker on CPU ~3 s).
+6. PROGRESS entry, one-page MVP note, commit (when the user asks), restart `run_public.ps1`.
 
-**v2 migration plan (phases 0–3 redone)**
-- [x] **P0** `app/store/` repository layer (only code touching tables) with `tenant_id` everywhere; new tables (entities, entity_aliases, facts with valid_from/valid_to/recorded_at/retracted_at, schemas, plugin_bindings, escalations, jobs); fresh Alembic baseline; Postgres job queue + `app/worker.py`; `llm.vision`; `tests/test_core_is_generic.py`; bitemporal query test.
-- [x] **P1** connectors (upload incl. folders/zip, api text, eml) → blob store + hash dedupe → type sniffing (signature, not extension) → tier-1 parsers to canonical blocks (docx, pdf text layer, xlsx/csv, pptx, html, md/txt, eml, vtt/srt/`[mm:ss] Speaker:`, json) → generic structure inference (`app/ingest/segment.py`) → metadata inference with provenance (`app/ingest/metadata.py`) → version matching/diff (`app/ingest/versions.py`). No hand-written pack at runtime.
-- [x] **P2** schema induction (live acceptance 9/9 after fixes) (`app/graph/induce.py`, `SCHEMA_MODE=induced|baseline`), extraction to entities + facts, entity resolution (fastembed + LLM confirm), authority resolution on related facts only, `store.facts.get_facts(valid_on, known_at)`, `graph.rules.get_rule` via schema synonyms + plug-in bindings.
-- [x] **P3** `plugins/ap/` (live scenarios 90/92: one eval-set defect, one rate-limit error) (calculators moved from `app/calc`, params extraction, `bindings.yaml`, `roles.yaml`, baseline_schema from the v1 pack, ops loaders) + `app/plugins/` registry and bind step; scenario test under both schema modes.
-- [x] **P4** answer pipeline (`app/answer/`): index, retrieve, router, generate, verify, card, escalate; answers_log. Live T1-T8 + as-of pass after fixes; T11 needs P9 governance.
-- [~] **P5** evaluation harness (`evaluation/`, `scripts/run_eval.py`), ablation A-D, runners for replay, second company and format invariance with their data. Built and smoke-tested; full runs pending.
-
-**Local deviations (documented):** embedded Postgres (pgserver) has `vector` but not `pg_trgm`/`btree_gist`; the migration enables them only when available (Neon has them). Without them: GiST index is on the time range alone, and trigram candidate search falls back to Python string similarity. No LibreOffice on this machine → tier-2 legacy files are stored and flagged `needs_attention`. LLM provider stays NVIDIA NIM until Anthropic keys arrive.
-
-**How to run on this machine (Windows, no Docker)**
-- Python: `.venv\Scripts\python.exe` (3.11). DB: `python scripts/dev_db.py start` (embedded Postgres + pgvector; writes `.pgdata/database_url.txt`), `... stop` when done. Then `alembic upgrade head`, `python scripts/ingest_all.py`.
-- Tests: `pytest -q` (creates and migrates its own `ps07_test` database). Lint: `ruff check app scripts tests plugins`.
-- Web: `cd web && npm run dev` (port 3000); checks: `npx tsc --noEmit`, `npm run lint`, `npm run check:tokens`, `npm run build`. Stop the dev server afterwards (check port 3000: a child `node` process can outlive the task).
-
----
+**Never:** sleep the laptop with tests running (DNS fails, runs hang); look at holdout failures beyond Q021/Q062.
 
 ## 2026-11-07 — Phase 0 (scaffold) and Phase 1 (domain pack + ingestion)
 
