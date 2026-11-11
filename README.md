@@ -1,312 +1,274 @@
 # Enterprise Knowledge Engine
 
-> **A temporal authority-graph knowledge engine that ingests company documents across any format, maintains an always-current bitemporal knowledge graph, and answers business queries with exact, verified citations.**
+> **A knowledge engine that reads a company's documents in any common format, keeps a dated record of every rule and which source says it, and answers questions with cited, verified answers, including what the rule was on a given date.**
 
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black.svg)](https://nextjs.org/)
 [![PostgreSQL 16 + pgvector](https://img.shields.io/badge/Postgres-16%20%2B%20pgvector-336791.svg)](https://github.com/pgvector/pgvector)
-[![Tests Passing](https://img.shields.io/badge/Tests-218%20Passed-brightgreen.svg)]()
+
+**Live demo:** https://ps07-knowledge-engine.vercel.app. The web app is hosted on Vercel, and the API and worker are served from the team's machine (see [Public demo](#public-demo)). When the API is not running, the site loads but cannot answer.
 
 ---
 
-## Overview & The Problem
+## The problem
 
-Organizations keep rules, policies, tolerances, and operational habits scattered across SOPs, spreadsheets, slide decks, client memos, and email threads. As documents update, older versions remain in circulation. In our initial benchmark with **Meridian Shared Services** (an accounts-payable operations environment):
-- **12.7%** of answers given over team chat were outdated.
-- **33 minutes** was the median wait time for manual rule clarifications.
-- Operators and processors repeatedly executed outdated procedures because no single system could definitively resolve which source held active authority.
+Rules, tolerances and habits are spread across SOPs, spreadsheets, client memos, FAQs, email threads and recorded training sessions. Old versions stay in circulation, a stale FAQ can contradict the current SOP, and people answer each other's questions from memory over chat. The test case is **Meridian Shared Services**, a synthetic accounts-payable team. Its corpus has two SOP versions, desk instructions, client memos, an outdated FAQ, training-video transcripts and expert interviews.
 
-**The Solution:** The Enterprise Knowledge Engine transforms heterogeneous business documents into an evolving, bitemporal knowledge graph. It separates a **domain-agnostic core engine** from **domain plug-ins**, guarantees source precedence over recency, verifies all claims closed-book, and routes unanswered queries directly to accountable process owners.
+The engine turns those documents into one dated record of rules and facts. It decides which source has authority, refuses to present an outdated rule as current, and sends questions the documents don't cover to the person who owns the topic.
 
 ---
 
-## 4 Core Architectural Innovations
+## Four core ideas
 
-```
-                                  4 INNOVATION PILLARS
-  ┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐
-  │      1. Two Clocks      │  │  2. Source Authority    │  │ 3. Universal Ingestion  │  │  4. Closed-Book Verifier│
-  │  (Bitemporal Timeline)  │  │   (Best Source Wins)    │  │   (Zero-Setup Tiers)    │  │  & Expert Escalation    │
-  ├─────────────────────────┤  ├─────────────────────────┤  ├─────────────────────────┤  ├─────────────────────────┤
-  │ Valid Time:             │  │ Ranking by doc type,    │  │ 5 parser tiers convert  │  │ 4-point verification    │
-  │   [valid_from, valid_to)│  │ version, status & scope.│  │ any format into one     │  │ blocks hallucinations;  │
-  │ Transaction Time:       │  │ Stale FAQ ingested today│  │ canonical block list.   │  │ unverified questions    │
-  │ [recorded_at, retracted)│  │ never beats current SOP.│  │ Learns schema on fly.   │  │ escalate to experts.    │
-  └─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘
-```
+### 1. Every fact has two dates (bitemporal)
+Facts are never overwritten or deleted. Instead, they are closed off.
+- **Valid time (`valid_from`, `valid_to`):** when the rule applied in the business. *"What was the price tolerance on 1 March 2026?"*
+- **Transaction time (`recorded_at`, `retracted_at`):** when the engine learned or withdrew it. *"What would the engine have answered on 10 November?"*
 
-### 1. Every Fact Has Two Clocks (Bitemporal Knowledge Graph)
-Facts are never overwritten or deleted—they are closed off.
-- **Valid Time (`valid_from`, `valid_to`):** When the fact was true in the real world. Answers: *"What was the price tolerance on 1 March 2026?"*
-- **Transaction Time (`recorded_at`, `retracted_at`):** When our system learned or retracted the belief. Answers: *"What would the engine have told an auditor on 10 November 2026?"*
+You can pick a date in the composer, or write it in the question ("as of 1 March 2026"). The router reads a date written in the question, but ignores the dates of invoices or other events described in the case.
 
-### 2. The Best Source Wins, Not the Newest
-Standard RAG prioritizes recency or vector similarity, allowing newly uploaded old FAQs to overwrite authoritative SOPs. The engine resolves conflicts using **deterministic source hierarchy**:
-- Authority hierarchy: Executive Policy > Standard Operating Procedure (SOP) > Client Addendum / Memo > Desk Instruction > Training Video / FAQ.
-- Scope hierarchy: Specific client memos override general company rules **only** for that specific client scope.
-- Conflicting statements trigger automated conflict scans and open owner-review tasks rather than silently guessing.
+### 2. The best source wins, not the newest
+Every source has a rank (by document type, version, status and client scope). For example, an FAQ uploaded today never outranks the SOP in force. A client memo overrides the general rule for that client only. A conflict scan finds statements that disagree, and opens owner-review items instead of silently picking one.
 
-### 3. Universal Ingestion (Any Format, No Setup)
-Five parser tiers normalize diverse documents into a single canonical block list (`heading`, `paragraph`, `table row`, `speaker turn`, `quote`, `figure`):
-- **Tier 1:** Native parsers for DOCX, XLSX/CSV, PPTX, PDF text layer, HTML, Markdown, EML (with attachments), and VTT/SRT transcripts.
-- **Tier 2:** Legacy format converters (DOC, PPT, XLS, RTF).
-- **Tier 3:** Visual layout analysis via Vision LLMs for scans and image-heavy PDFs.
-- **Tier 4:** Speech-to-text for audio and video.
-- **Tier 5:** Unknown binaries stored and flagged for human review.
-- **Proven generality:** Tested on an entirely unrelated corporate corpus (Kestrel Freight HR) with **10/10 questions answered accurately with citations with zero code changes**.
+### 3. Any format, one block list
+A parser cascade turns each file into one canonical block list (headings, paragraphs, table rows, speaker turns). Metadata (version, owner, effective date, status, client) is inferred from the document itself.
 
-### 4. Closed-Book Verification & Expert Escalation
-Before any answer is shown to a user, a separate **Verifier** enforces 4 strict invariants:
-1. Every cited passage was actually retrieved and contains the exact quote.
-2. Every number appears in a source passage or deterministic calculator output (no LLM arithmetic).
-3. No superseded or expired value is presented as current.
-4. Each generated sentence is directly supported by its citation.
+| Tier | What it handles | Status |
+|---|---|---|
+| 1 | Native parsers: DOCX, XLSX/CSV, PPTX, PDF text layer (including "a \| b" text tables), HTML, Markdown/plain text, EML (with attachments), VTT/SRT transcripts, JSON | Working |
+| 2 | Legacy formats (DOC, PPT, XLS, ODF, RTF) converted with LibreOffice, then parsed by tier 1 | Working when LibreOffice is installed; otherwise the file is stored and flagged |
+| 3 | Scanned PDFs and images: pages rendered and read by a vision model | Only when `MODEL_VISION` is set |
+| 4 | Audio and video speech-to-text | **Not built yet.** These files are detected, stored and flagged (tier 5) |
+| 5 | Anything unparseable: stored as-is and flagged for a person to review | Working |
 
-If evidence is insufficient, the system returns a **"Not Covered"** card with a one-click button to route the question to the designated expert role (e.g. HR Admin, Tax Lead). The expert's response is presented immediately with a provisional label, and enters the graph as an official rule only after process owner review.
+Each parse gets a quality score, and a low score escalates the file to the next tier or holds it.
+
+### 4. Verified before it is shown, escalated when not covered
+A draft answer passes four checks before anyone sees it (`app/answer/verify.py`):
+1. Every cited passage was retrieved, and the quoted text really occurs in it.
+2. Every number appears in a cited passage, the calculator output or the question. The model never does arithmetic.
+3. No value that is not in force on the day asked (superseded, overridden or not yet valid) appears for the topics the answer is about. This check is deterministic and uses the facts table.
+4. A fast-model support check confirms that each sentence is backed by its cited evidence. It sees whether each source is in force.
+
+If a check fails, the answer is regenerated with feedback. If the evidence is too weak, the user gets a **"The documents don't cover this"** card with a button that sends the question to the owning role (for example HR / Admin or the tax lead). The expert's reply reaches the asker straight away, labelled as not yet part of the knowledge base. It becomes a fact only after the process owner approves it. Approval re-asks the open question and notifies the asker.
 
 ---
 
-## System Architecture
+## How an answer is produced
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["Ingestion & Graph Construction"]
-        A["Document Drop / EML / API"] --> B["Intake & SHA256 Dedupe"]
-        B --> C["5-Tier Parser Cascade"]
-        C --> D["Structure & Metadata Inference"]
-        D --> E["Passage Segmentation & Redaction"]
-        E --> F["Entity Resolution & Schema Induction"]
-        F --> G["Authority & Conflict Resolution"]
-        G --> H[("Bitemporal Postgres Store\n(Entities, Facts, Vectors)")]
+    subgraph Ingestion ["Ingestion and graph building (background worker)"]
+        A["Upload / folder watch / email (.eml)"] --> B["Intake: SHA-256 dedupe, format detection"]
+        B --> C["Parser cascade (tiers 1-5)"]
+        C --> D["Metadata inference + passage segmentation + PII redaction"]
+        D --> E["Fact extraction, entity resolution, schema induction"]
+        E --> F["Authority ranking, governance, conflict scan"]
+        F --> G[("Postgres: sources, passages, facts, entities\n(time ranges + pgvector embeddings)")]
     end
 
-    subgraph Query ["Query & Answer Pipeline"]
-        Q["User Query + As-Of Date"] --> R["Query Router"]
-        R -->|"Lookups"| S["Hybrid Search (BM25 + Vector + Graph Walk)"]
-        R -->|"Calculations"| T["Plug-in Calculators (Dynamic Thresholds)"]
-        S --> U["Reciprocal Rank Fusion (RRF) & BGE Reranker"]
-        T --> V["Closed-Book Generation"]
-        U --> V
-        V --> W{"4-Point Verifier"}
-        W -->|"Pass"| X["Cited Answer Card (Now vs Older)"]
-        W -->|"Fail / Low Confidence"| Y["Not Covered Card -> Expert Escalation"]
+    subgraph Query ["Answering a question"]
+        Q["Question + optional date + client"] --> R["Router (lookup / calculation / practice / not covered)"]
+        Q -.->|"in parallel"| S["Passage search: Postgres full-text + pgvector\n(only sources in force on the date, in the client's scope)"]
+        S --> U["Reciprocal rank fusion -> cross-encoder rerank, keep 6"]
+        U --> GC["Graph context: entities linked to the question + one hop, facts on the kept passages"]
+        R -->|"rule values"| L["Direct rule lookup (get_rule: topic, parameter, client, date)"]
+        R -->|"calculations"| T["Plug-in calculators (thresholds read from facts)"]
+        GC --> V["Grounded generation (evidence only)"]
+        L --> V
+        T --> V
+        V --> W{"4 checks"}
+        W -->|"pass"| X["Cited answer card (rule in force, older versions, expert tips)"]
+        W -->|"fail / weak evidence"| Y["Not-covered card -> send to owner"]
     end
 ```
 
----
-
-## Two-Layer Design: Core vs Plug-in
-
-The codebase enforces a strict architectural boundary:
-1. **Generic Core (`app/`):**
-   - Contains zero domain or company-specific terminology (enforced by `tests/test_core_is_generic.py`).
-   - Implements storage repository (`app/store/`), bitemporal facts, schema induction (`app/graph/induce.py`), continuous schema evolution (`app/graph/evolve.py`), conflict detection (`app/graph/conflicts.py`), hybrid retrieval, closed-book generation, and async background workers (`app/worker.py`).
-2. **Domain Plug-ins (`plugins/`):**
-   - **Accounts Payable Plug-in (`plugins/ap/`):**
-     - 6 deterministic calculators: Price Tolerance, Quantity Tolerance, TDS (Tax Deducted at Source), Approval Hierarchies, MSME Payment Dates, and E-Invoice Thresholds.
-     - Role mappings, ERP operational data loaders (650 vendors, 9,000 invoices), and client scope bindings.
-     - All calculation thresholds are queried dynamically from graph facts; **no values are hard-coded**.
-3. **Dual Schema Modes:**
-   - `SCHEMA_MODE=induced`: Autonomous schema learning and evolution from unstructured text.
-   - `SCHEMA_MODE=baseline`: Hand-crafted reference schema for regression benchmarking and ablation studies.
+Retrieval, precisely:
+- **Keyword search** is Postgres full-text search, not BM25. A weighted `tsv` column with a GIN index is queried with an OR of the question's terms and ranked with `ts_rank_cd` (`app/store/search.py`).
+- **Vector search** uses pgvector over embeddings of passages, facts and entities (fastembed BGE-small, built by the `index_embeddings` job).
+- Both searches only see passages that were in force on the date asked: the source is live, not stale or draft, valid on that day, and either general or in the asker's client scope. This is where the bitemporal design comes in.
+- The two lists are merged with **reciprocal rank fusion** (k = 60), then reranked by **`BAAI/bge-reranker-base`** (cross-encoder, CPU), and the top 6 are kept.
+- **Graph context is a one-hop expansion, not a multi-hop walk.** The engine finds the entities linked to the question (by alias and embedding) and goes one hop along their object entities. It then adds the facts in force for those entities and the facts extracted from the kept passages.
+- **Rule values come from a direct lookup, not a search.** `get_rule` (`app/graph/rules.py`) reads the facts table by topic, parameter, client and date (`valid_on`, `known_at`). It can't return an expired rule, and it raises an error instead of guessing.
+- Passage search starts while the router is still deciding, to save a few seconds (`EARLY_RETRIEVAL`).
+- The "graph" is ordinary Postgres tables (facts, entities and links, all with time ranges). There is no separate graph database.
 
 ---
 
-## Tech Stack
+## Two layers: generic core and domain plug-ins
+
+1. **Generic core (`app/`):** no company or domain terms anywhere (enforced by `tests/test_core_is_generic.py`). It contains:
+   - storage behind one repository layer (`app/store/`);
+   - bitemporal facts;
+   - schema induction and evolution (`app/graph/induce.py`, `evolve.py`);
+   - entity resolution;
+   - the conflict scan;
+   - retrieval, generation and verification;
+   - the job worker (`app/worker.py`, `FOR UPDATE SKIP LOCKED`).
+
+   The core never imports `plugins/`.
+2. **Accounts-payable plug-in (`plugins/ap/`):**
+   - six deterministic calculators: price tolerance, quantity tolerance, TDS, approval limits, MSME payment dates and e-invoice threshold;
+   - role and owner mappings, client bindings, and loaders for the operations workbook (vendors and invoices).
+
+   Every threshold a calculator uses is read from the facts, so none are hard-coded.
+3. **Schema modes:** `SCHEMA_MODE=induced` learns the topics and parameters from the documents. `SCHEMA_MODE=baseline` uses the hand-written reference schema (`plugins/ap/baseline_schema/`) for comparison.
+
+---
+
+## Tech stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **API** | Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2 | Typed async endpoints, OpenAPI docs, multi-tenant middleware |
-| **Database** | PostgreSQL 16 (`pgvector`, `pg_trgm`, `btree_gist`) | Bitemporal graph tables, vector search, fuzzy matching, job queue (`FOR UPDATE SKIP LOCKED`) |
-| **Search & Reranking** | `fastembed` (BGE small), `BAAI/bge-reranker-base` | Hybrid search (full-text + vector) merged with Reciprocal Rank Fusion, CPU cross-encoder reranking |
-| **LLM Gateway** | Unified Gateway (`app/core/llm.py`) | PII redaction (PAN, IFSC, bank accounts, phones, emails), SHA256 caching, JSONL logging; supports NVIDIA NIM & Anthropic Claude |
-| **Web Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, Lucide | Rose answer engine UI, interactive citation drawer, timeline visualizer, review queues |
-| **Testing & Evaluation**| `pytest`, `ruff`, `Playwright`, `test_no_leakage.py` | 218+ unit/integration tests, 4-way ablation harness (A-D), E2E UI verification |
+| API | Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic | Typed endpoints and OpenAPI docs. The tenant is chosen with `X-Tenant`, and every response carries `X-KB-Version` |
+| Database | PostgreSQL 16 with `pgvector`, `pg_trgm`, `btree_gist` | Facts and entities with time ranges, full-text and vector search, fuzzy alias matching, job queue |
+| Search | fastembed (BGE-small embeddings), `BAAI/bge-reranker-base` | Full-text + vector, RRF, cross-encoder rerank |
+| LLM gateway | `app/core/llm.py` | One gateway for every call, with PII redaction (PAN, IFSC, bank accounts, phones, emails), an on-disk cache, a JSONL call log with cost, retries and rate limits |
+| LLM providers | Any OpenAI-compatible endpoint (NVIDIA NIM, Isoquant), or Anthropic Claude | The public demo runs on Isoquant `deepseek-v4.1-flash-1017-fast` with zero data retention requested |
+| Web | Next.js 14 (App Router), TypeScript, Tailwind CSS | Ask, Sources, Conflicts, Review, Entities, Changes, Analytics and Setup pages; citation drawer; timeline |
+| Hosting | Vercel (web), Neon (Postgres), Cloudflare quick tunnel (API) | Public demo |
+| Tests | pytest, ruff, Playwright | 258 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
 
 ---
 
-## Repository Layout
+## Repository layout
 
 ```
 .
-├── app/                        # Generic Core Engine
-│   ├── answer/                 # Answer pipeline: retrieval, router, generator, verifier, cards
-│   ├── api/                    # FastAPI routes (/ask, /episodes, /conflicts, /entities, etc.)
-│   ├── core/                   # LLM gateway, redaction, config, database connection, NIM client
-│   ├── graph/                  # Extraction, entity resolution, authority, conflict scan, evolution
-│   ├── ingest/                 # Connectors, format sniffers, 5-tier parsers, segmenters, metadata
-│   ├── store/                  # Repository pattern: bitemporal facts, entities, episodes, jobs
-│   └── worker.py               # Background job processor (FOR UPDATE SKIP LOCKED)
-├── plugins/                    # Domain-Specific Plug-ins
-│   └── ap/                     # Accounts Payable plug-in
-│       ├── baseline_schema/    # Reference schema for baseline mode
-│       ├── calc/               # 6 AP calculators (Price, Quantity, TDS, MSME, Approvals, E-Invoice)
-│       └── ops/                # Vendor and ERP invoice loaders
-├── web/                        # Next.js 14 Frontend Web Application
-│   ├── app/                    # App Router pages (Ask, Sources, Conflicts, Review, Entities, Setup, Analytics)
-│   ├── components/             # UI components (AskView, Composer, Drawer, Timeline, Cards)
-│   ├── lib/                    # API client, types, formatters
-│   └── scripts/                # Design token check scripts
-├── evaluation/                 # Evaluation harness & metrics (ablation A-D, scenario grading)
-├── scripts/                    # CLI utilities
-│   ├── run_app.py              # Unified single-command development launcher
-│   ├── dev_db.py               # Embedded PostgreSQL (pgserver) manager
-│   ├── ingest_all.py           # Bulk corpus ingestion runner
-│   ├── build_graph.py          # Graph extraction, resolution, and evolution
-│   └── conflict_report.py      # Automated conflict detection and precision/recall scoring
-├── tests/                      # Pytest suite (unit, integration, leakage, generic core guard)
-├── reports/                    # Benchmark run logs, evaluation metrics, conflict reports
-├── docker-compose.yml          # Postgres 16 + pgvector container definition
-├── pyproject.toml              # Python dependencies and tool configurations
-└── run.cmd / run.ps1           # Windows launch scripts
+├── app/                    # Generic core engine
+│   ├── answer/             # Router, retrieval, generation, verification, answer cards, escalation
+│   ├── api/                # FastAPI routes (/ask, /ask/jobs, /episodes, /conflicts, /review, ...)
+│   ├── core/               # Config, DB, LLM gateway, OpenAI-compatible client, redaction, reranker
+│   ├── govern/             # Governance: what is applied automatically vs held for owner review
+│   ├── graph/              # Extraction, entity resolution, rules, authority, conflicts, schema induction/evolution
+│   ├── plugins/            # Plug-in loader and calculator registry (loads plugins/ by config, never imports them)
+│   ├── ingest/             # Connectors, format detection, parser cascade, segmentation, metadata
+│   ├── store/              # The only DB access layer: facts, entities, passages, search, jobs
+│   └── worker.py           # Background job worker
+├── plugins/ap/             # Accounts-payable plug-in: calculators, roles, bindings, baseline schema, loaders
+├── web/                    # Next.js app
+├── evaluation/             # Evaluation harness and metrics (configs A-D, judge, outdated-answer checks)
+├── scripts/                # run_app, serve_public, dev_db, ingest_all, build_graph, run_eval,
+│                           # run_replay, run_second_corpus, run_format_invariance, run_intake,
+│                           # conflict_report, delete_episodes
+├── tests/                  # unit, integration (Postgres), plugins, acceptance (live), leakage, generic-core guard
+├── reports/                # Every measured result quoted below
+├── migrations/             # Alembic
+├── run.ps1 / run.cmd       # Local one-command start
+└── run_public.ps1          # Public demo start (API + worker + tunnel, Vercel redeploy)
 ```
 
 ---
 
-## Quick Start: Just Run `.\run.ps1`
-
-The entire application runs with a single command from your terminal:
+## Quick start (local)
 
 ```powershell
 .\run.ps1
 ```
 
-> [!TIP]
-> **What `.\run.ps1` does under the hood:**
-> - Automatically launches the embedded PostgreSQL instance with `pgvector`
-> - Boots the FastAPI backend server on `http://localhost:8000` (docs at `/docs`)
-> - Starts the asynchronous background queue worker
-> - Starts the Next.js development server on `http://localhost:3000`
-> - Streams live, color-coded process logs (`[api]`, `[worker]`, `[web]`) directly to your terminal
-> - Waits for services to become healthy and automatically opens your browser to `http://localhost:3000`
-> - Cleans up and cleanly terminates all background processes, freeing ports 3000 and 8000 upon `Ctrl+C`
+This command:
+- starts an embedded Postgres 16 with pgvector (no Docker needed; `scripts/dev_db.py`);
+- starts the API on http://localhost:8000 (docs at `/docs`), the job worker, and the web app on http://localhost:3000;
+- streams logs tagged `[api]`, `[worker]` and `[web]`, and opens the browser.
 
-### Optional Flags
-```powershell
-.\run.ps1 --no-browser    # Starts the stack without auto-opening the browser
-.\run.ps1 --no-worker     # Starts without spawning the background queue worker
-```
+Ctrl+C stops everything and frees the ports. Optional flags are `--no-browser` and `--no-worker`. On other platforms, use `python scripts/run_app.py`.
 
-*(On Windows Command Prompt you can also run `run.cmd`, or across platforms run `python scripts/run_app.py`)*
+### First-time setup
+Prerequisites: Python 3.11+, Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
 
----
-
-## First-Time Setup & Prerequisites
-
-If setting up on a fresh machine:
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+ (Node 20+ recommended)
-- PostgreSQL 16 with `pgvector` (optional: the embedded DB script `dev_db.py` handles this automatically)
-
-### 1. Setup Python Environment
 ```bash
 python -m venv .venv
-# Windows:
-.\.venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
-
+.\.venv\Scripts\activate          # Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"
+cp .env.example .env              # then fill in one LLM provider
+cd web && npm install && cd ..
 ```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to `.env`:
+Main `.env` settings:
+- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint) or `anthropic`.
+- `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models. For Isoquant, set `NIM_BASE_URL=https://api.isoquant.ai/v1` and `ISOQUANT_API_KEY`; for NVIDIA, set `NVIDIA_API_KEY`.
+- `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`.
+- `SCHEMA_MODE`: `induced` or `baseline`.
+- `DATABASE_URL`: leave empty for the embedded database.
+
+Secrets live only in `.env`, which is git-ignored.
+
+### Running services one at a time
 ```bash
-cp .env.example .env
+python scripts/dev_db.py start && alembic upgrade head
+python scripts/ingest_all.py
+python scripts/build_graph.py --auto-freeze
+uvicorn app.api.main:app --port 8000
+python -m app.worker
+cd web && npm run dev
 ```
-Key configuration values in `.env`:
-- `LLM_PROVIDER`: `nim` (NVIDIA NIM) or `anthropic` (Anthropic Claude).
-- `NVIDIA_API_KEY` / `ANTHROPIC_API_KEY`: API credentials.
-- `SCHEMA_MODE`: `induced` (learns schema automatically) or `baseline`.
-- `DATABASE_URL`: Postgres connection string (if omitted, `scripts/dev_db.py` launches an embedded instance automatically).
-
-### 3. Setup Frontend
-```bash
-cd web
-npm install
-cd ..
-```
-
-Once installed, simply run `.\run.ps1`!
 
 ---
 
-## Manual Service Execution (Optional)
-If you prefer running services individually in separate terminals:
+## Public demo
 
-1. **Start Database & Apply Migrations:**
-   ```bash
-   python scripts/dev_db.py start
-   alembic upgrade head
-   ```
+```powershell
+.\run_public.ps1
+```
 
-2. **Ingest Documents & Build Knowledge Graph:**
-   ```bash
-   python scripts/ingest_all.py
-   python scripts/build_graph.py --auto-freeze
-   ```
+This command starts the API and worker against the Neon database and opens a Cloudflare quick tunnel. If the tunnel address has changed, it rebuilds the Vercel site with the new address (about a minute). It reads `NEON_DATABASE_URL` and `VERCEL_TOKEN` from `.env`, and Ctrl+C stops everything.
 
-3. **Start the API Server:**
-   ```bash
-   uvicorn app.api.main:app --port 8000 --reload
-   # Interactive docs available at http://localhost:8000/docs
-   ```
-
-4. **Start the Background Worker:**
-   ```bash
-   python -m app.worker
-   ```
-
-5. **Start Web Frontend:**
-   ```bash
-   cd web
-   npm run dev
-   # Web interface available at http://localhost:3000
-   ```
+A quick tunnel closes any request after about 100 seconds. For this reason, the web app starts an answer with `POST /ask/jobs` and polls `GET /ask/jobs/{id}`, and `POST /ask` remains for direct callers.
 
 ---
 
-## Verification & Testing
-
-The repository maintains rigorous quality gates across python and web layers:
+## Testing
 
 ```bash
-# Run backend tests (excludes live LLM network calls by default)
-pytest -q
-
-# Run with live LLM integration tests enabled
-pytest -m live_llm
-
-# Run Python linter
+pytest -q                        # unit, integration (embedded Postgres), plug-in, leakage and generic-core tests
+pytest -m live_llm               # live model calls; rebuilds the graph, so it costs real tokens
 ruff check app scripts tests plugins
-
-# Verify frontend TypeScript, linting, and design tokens
-cd web
-npm run lint
-npx tsc --noEmit
-npm run check:tokens
+cd web && npm run lint && npx tsc --noEmit && npm run check:tokens
 ```
+
+`tests/test_no_leakage.py` fails if application code reads the evaluation workbook. `tests/test_core_is_generic.py` fails if domain words appear in `app/`.
 
 ---
 
-## Evaluation Results & Benchmarks
+## Results
 
-The system was evaluated against extensive scenario test benches and multi-company corpora:
+Measured on 11 November 2026 unless stated. The source of each number is in `reports/`. The evaluation set has 160 questions: 96 dev and 64 holdout. Holdout failures are not inspected, apart from two that the team chose to examine.
 
-- **Full Evaluation Benchmark:** **158 / 160 (98.8%)** overall accuracy across 160 questions with **97.5% citation precision** (`answer-v4`).
-- **Conflict Scan Precision & Recall:** **15 / 15 (100% recall)** known conflicts detected both with and without explicit document change tables (`reports/conflicts_20261110.md`).
-- **Scenario Calculation Accuracy:** **90 / 92** correct on induced schema mode (1 evaluation-set defect identified; 1 network rate-limit).
-- **Metadata Extraction Accuracy:** **92.9%** (78/84) match against ground-truth indexes across varied formats.
-- **Cross-Domain Generalization:** **10 / 10** citations and queries answered correctly on the unmodeled Kestrel Freight HR corpus with zero code alterations.
-- **Active Governance & Escalation:** Unvetted uploads and expert replies are held provisionally/pending review; approving an escalated answer re-evaluates and notifies askers with updated citations.
-- **Retrieval & Answer Latency:** Median response time **~9.9 seconds** with closed-book reasoning, full citation matching, and 4-point verification.
+| What | Result | Target | Report |
+|---|---|---|---|
+| Answer accuracy, all 160 questions (NVIDIA NIM, Neon) | **157/160 (98.1%)**: dev 96/96, holdout 61/64 (95.3%) | ≥ 90% | `eval_20261111_all.md`, `eval_20261111_rerun_Q011_Q054.md` |
+| Citation accuracy | **98.1%** | ≥ 95% | same |
+| Conflict questions presenting an old rule as current | **0/23** | 0 | same |
+| Conflict questions that mention an old value while correcting it (strict metric) | 2/23 (Q021, Q062) | 0 | same |
+| Acceptance tests T1–T11 on the public site (Isoquant) | **all pass**, 11–25 s per answer | all pass | `public_acceptance_20261111.md` |
+| Conflict scan | **15/15** known conflicts found; authoritative source right in 14/15 | — | `conflicts_20261111.md` |
+| Replay of the document history | **22/22** checks, idempotent | — | `replay_20261111.md` |
+| Second, unrelated company (Kestrel Freight HR), no code changes | **10/10** cited answers | — | `second_corpus_20261111.md` |
+| Intake of mixed incoming files | 11/12 handled as expected; a spoofed bank-change email held for review | — | `intake_20261111.md` |
+| Metadata inferred vs the hand-made source index | 78/84 (92.9%) | ≥ 90% | `PROGRESS.md` |
+| Same document in another format: fact F1 vs the original .docx | md 0.99, html 0.99, flat docx 0.92, pdf 0.88, eml 0.77; xlsx rerun pending after fixes | ≥ 0.90 | `format_invariance_20261111.md` |
+| Latency | median 36 s on NIM with 2 parallel workers; 11–25 s end to end on Isoquant; retrieval alone 4.5–5.5 s on a laptop CPU | — | eval reports |
+| Cost on Isoquant | about $0.0006 per question | — | LLM call log |
+
+Notes on the two outdated-answer numbers:
+- The metric counts any mention of a superseded value, even in a sentence like "the old 2% limit no longer applies".
+- No answer presented an old rule as the rule in force.
+- The answer prompt now allows an old value to be named only when the question itself quotes it.
+
+### Known gaps
+- **Not measured yet:**
+  - entity-resolution F1;
+  - learned vs hand-written schema comparison;
+  - the 50-document freshness test;
+  - paraphrase, abstention and adversarial question sets.
+- **Formats:** the xlsx and eml format reruns are pending after today's parser fixes. Audio and video transcription (tier 4) is not built.
+- **Extraction failures are not flagged:** an episode whose extraction fails on every passage is still marked published.
+- **Latency:** answers take tens of seconds. Most of the time goes to model calls, and the reranker adds about 3 s on CPU.
+- **Hosting:** the public demo depends on the API running on one machine through a quick tunnel.
 
 ---
 
 ## License
 
-Proprietary / Internal — Meridian & Enterprise Knowledge Engine Team.
-
+Proprietary. Built for the PS-07 case; Meridian Shared Services and Kestrel Freight are synthetic companies.
