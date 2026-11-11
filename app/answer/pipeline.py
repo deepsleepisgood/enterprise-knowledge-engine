@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
+from contextvars import copy_context
 from datetime import date, datetime
 from typing import Any
 
@@ -160,6 +161,20 @@ def ask(
                 _with_model(structured, cfg.router_model),
             )
 
+        # Most questions name no scope and no date: search while the router runs, and use the
+        # result if the router agrees (otherwise search again with what it found).
+        spec_as_of = as_of
+        spec: Future | None = None
+        if cfg.early_retrieval and (not client or client == "all"):
+
+            def _search() -> Any:
+                with session_scope() as s2:
+                    return retrieve(
+                        s2, question, None, spec_as_of, known_at, today, embed_fn, rerank_fn
+                    )
+
+            spec = _EARLY.submit(copy_context().run, _search)
+
         t = time.perf_counter()
         r = route(question, clients, calculators, roles, structured)
         t = mark("route", t)
@@ -208,7 +223,15 @@ def ask(
             )
             return finish(base, [], [])
 
-        got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
+        got = None
+        if spec is not None and client_name is None and as_of == spec_as_of:
+            try:
+                got = spec.result()
+            except Exception:  # noqa: BLE001 - fall back to searching here
+                got = None
+            diag["early_retrieval"] = got is not None
+        if got is None:
+            got = retrieve(s, question, client_name, as_of, known_at, today, embed_fn, rerank_fn)
         t = mark("retrieve", t)
         base["entities"] = [{"id": i, "name": n, "type": t} for i, t, n in got.entities]
         diag["retrieval"] = {
@@ -316,7 +339,18 @@ def ask(
             )
             if not problems:
                 sentences = [
-                    (sent.text, [(evidence[x].label, evidence[x].text) for x in sent.sources])
+                    (
+                        sent.text,
+                        [
+                            # With the in-force tags the answer step saw (e.g. "in force until
+                            # 2026-03-31"): a source's dates are evidence too.
+                            (
+                                f"{evidence[x].label} — {evidence_tags(evidence[x], as_of)}",
+                                evidence[x].text,
+                            )
+                            for x in sent.sources
+                        ],
+                    )
                     for sent in gen.sentences
                 ]
                 problems = verify.support_check(sentences, _calc_text(calc), structured, question)

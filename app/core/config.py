@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     router_min_confidence: float = 0.6  # below this a calculator route falls back to lookup
     router_model: str = "fast"  # fast | smart | a model id
     early_calculator_inputs: bool = True  # read calculator inputs while routing (faster)
+    early_retrieval: bool = True  # search while the router runs (no scope/date asked)
     answer_thinking: bool = False  # let reasoning models think on the answer path (slower)
 
     data_dir: Path = ROOT / "data"
