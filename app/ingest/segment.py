@@ -101,8 +101,8 @@ def norm_key(k: str) -> str:
 def is_metadata_table(b: Block) -> bool:
     if b.type != "table" or not (2 <= len(b.rows) <= 12):
         return False
-    rows = [[c for c in r if c] for r in b.rows]
-    if not all(len(r) == 2 for r in rows):
+    rows = _kv_rows(b)
+    if len(rows) < 2 or not all(len(r) == 2 for r in rows):
         return False
     keys = [r[0] for r in rows]
     if any(len(k.split()) > 4 or re.search(r"\d", k) for k in keys):
@@ -110,8 +110,17 @@ def is_metadata_table(b: Block) -> bool:
     return sum(1 for k in keys if norm_key(k) in META_KEYS) >= 2
 
 
+def _kv_rows(b: Block) -> list[list[str]]:
+    """Non-empty cells per row, without a leading one-cell caption row (a spreadsheet often
+    puts the table's name, e.g. "Document", above its key/value rows)."""
+    rows = [[c for c in r if c] for r in b.rows]
+    if rows and len(rows[0]) <= 1:
+        rows = rows[1:]
+    return rows
+
+
 def table_kv(b: Block) -> dict[str, str]:
-    return {r[0]: r[1] for r in ([c for c in row if c] for row in b.rows) if len(r) == 2}
+    return {r[0]: r[1] for r in _kv_rows(b) if len(r) == 2}
 
 
 def heading_label(text: str) -> tuple[str | None, str]:

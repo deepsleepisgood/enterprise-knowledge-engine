@@ -1,0 +1,13 @@
+F1 closest eval question similarity 0.46
+F2 closest eval question similarity 0.45
+F3 closest eval question similarity 0.47
+F4 closest eval question similarity 0.42
+F5 closest eval question similarity 0.41
+F6 closest eval question similarity 0.42
+F1 FAIL status=answered 29s :: 'No, that is no longer correct — the threshold was lowered in the current SOP v4.0. [1] Under AP SOP v4.0, the AP Controller now approves invoices above ₹10 lakh (up to ₹50 lakh), not above ₹25 lakh. [1][2][3] Invoices above ₹10 lakh automatically park for AP C'
+F2 FAIL status=answered 16s :: 'The payment run now occurs on Tuesday and Friday, not Thursday. [1][2] The cut-off for an invoice to be included is 1 pm on the previous working day. [2]\nPayment runs are on Tuesday and Friday'
+F3 FAIL status=answered 39s :: "The e-invoicing threshold is now an aggregate annual turnover (AATO) above ₹5 crore, not ₹10 crore. [1][2] This change took effect from August 2023, so the training video's reference to ₹10 crore is out of date. [3]\nThreshold is ₹5 crore AATO"
+F4 FAIL status=answered 40s :: 'The current price tolerance limit is the lower of 1% of the PO line value and ₹500 per line. [1][2] The old checklist limit of ₹1,000 per line from AP SOP v3.1 no longer applies. [2] If a line exceeds this tolerance, it is held with exception PRICE_VAR and sen'
+F5 FAIL status=answered 128s :: 'No, the 2% tolerance is no longer the current rule. [1][2] The current SOP v4.0 sets the price tolerance at the lower of 1% of the PO line value and ₹500 per line. [1][2] If the invoice price is lower than the PO price, the line is accepted and paid at the inv'
+F6 FAIL status=unverified 103s :: 'Before SOP 14 changed it, the e-invoice turnover threshold was ₹10 crore. [1] Suppliers with aggregate turnover above ₹10 crore must send e-invoices with an IRN, and their invoices must be returned if the IRN is missing. [1] This rule was in force until 31 Mar'
+0/6 fresh questions passed

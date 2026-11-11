@@ -12,6 +12,7 @@ from app.ingest.segment import (
     is_metadata_table,
     segment,
     split_documents,
+    table_kv,
 )
 
 
@@ -45,6 +46,13 @@ def test_heading_labels() -> None:
 def test_metadata_table_needs_known_keys() -> None:
     assert is_metadata_table(T([["Version", "2.0"], ["Effective", "1 Jan 2026"], ["Owner", "HR"]]))
     assert not is_metadata_table(T([["Role", "Responsibility"], ["Clerk", "Files papers"]]))
+    # A spreadsheet's caption row above the key/value rows does not hide the header table.
+    cap = T([["Document", ""], ["Version", "4.0"], ["Owner", "Ops"], ["Applies to", "A, B"]])
+    assert is_metadata_table(cap) and table_kv(cap) == {
+        "Version": "4.0",
+        "Owner": "Ops",
+        "Applies to": "A, B",
+    }
     assert not is_metadata_table(T([["Up to 10 days", "Manager"], ["Above 10 days", "Director"]]))
 
 

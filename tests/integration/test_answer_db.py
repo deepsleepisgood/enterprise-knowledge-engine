@@ -88,7 +88,8 @@ class FakeLLM:
                     route="out_of_scope", confidence=0.9, out_of_scope_reason="general_knowledge"
                 )
             client = "Northwind Builders" if "Northwind" in prompt else None
-            return RouteOut(route="lookup", client=client, confidence=0.9)
+            as_of = "2025-06-15" if "In June 2025" in prompt else None
+            return RouteOut(route="lookup", client=client, confidence=0.9, as_of=as_of)
         if schema is GenOut:
             ps = passages_in(prompt)
             if self.lie:  # states the superseded value while citing the current passage
@@ -168,6 +169,12 @@ def test_as_of_answer_uses_the_rule_in_force_then(kb_built) -> None:
     assert "20 days" in card["rule"]["text"] and card["as_of"] == "2025-06-01"
     assert card["rule"]["citations"][0]["file"] == "leave_v1.md"
     assert card["superseded_since"] == "2026-01-01"
+
+
+def test_a_date_asked_about_in_words_works_like_the_picker(kb_built) -> None:
+    card = run("In June 2025, how many days of annual leave did staff get?")
+    assert card["status"] == "answered", card.get("diagnostics")
+    assert "20 days" in card["rule"]["text"] and card["as_of"] == "2025-06-15"
 
 
 def test_client_memo_applies_to_its_client(kb_built) -> None:

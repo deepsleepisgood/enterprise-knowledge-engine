@@ -91,7 +91,7 @@ def outdated(card: dict[str, Any], must_not_say: str | None) -> bool:
     text = current_text(card)
     t, m = norm(text), norm(must_not_say)
     squash = lambda s: re.sub(r"[\s,]", "", s)  # noqa: E731
-    if squash(m) and squash(m) in squash(t):
+    if squash(m) and re.search(rf"(?<![\d.]){re.escape(squash(m))}", squash(t)):
         return True
     want = mentions(must_not_say, UNITS, ["₹", "rs", "inr"])
     have = mentions(text, UNITS, ["₹", "rs", "inr"])
@@ -99,6 +99,11 @@ def outdated(card: dict[str, Any], must_not_say: str | None) -> bool:
     if figures and all(v in have[k] for k, v in figures):
         return True
     words = re.findall(r"[a-z]+", m)
+    nums = re.findall(r"\d+(?:\.\d+)?", m)
+    if not figures and nums:
+        # e.g. "60 days": the number with its unit word, never the unit word alone.
+        unit = rf"\s*{words[0]}" if len(words) == 1 else ""
+        return all(re.search(rf"(?<![\d.]){re.escape(n)}{unit}\b", t) for n in nums)
     if not figures and len(words) == 1 and len(words[0]) > 3:  # e.g. "Thursday"
         return re.search(rf"\b{words[0]}\b", t) is not None
     return False

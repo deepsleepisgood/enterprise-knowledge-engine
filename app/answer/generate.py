@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 from app.store.facts import FactRow
 from app.store.search import PassageHit
 
-PROMPT_VERSION = "answer-v5"
+PROMPT_VERSION = "answer-v8"
 PASSAGE_CHARS = 1800
 
 SYSTEM = """You answer a colleague's question using ONLY the evidence below: passages from the
@@ -62,11 +62,14 @@ Rules:
 
 TIME_NOW = (
     "Passages marked [superseded] or [older] are not current. Never state their values as "
-    "the current rule."
+    "the current rule. Lead with the rule in force. If the question quotes an older value, "
+    "you may say once that it no longer applies; never bring up any other older value. The "
+    "card lists older sources, and what replaced them, separately."
 )
 TIME_AS_OF = (
     "Answer as of {day}: use the rules in force on that date. Passages in force on that date "
-    "are listed; say that the answer is the rule in force on {day}."
+    "are listed; say that the answer is the rule in force on {day}. Do not bring up a value "
+    "that was not in force on {day} unless the question quotes it."
 )
 
 
@@ -171,6 +174,12 @@ def build_prompt(
             "Your previous draft failed verification:\n"
             + "\n".join(f"- {x}" for x in failures)
             + "\nWrite a new answer that fixes every problem."
+            + (
+                " For a value that is not in force: leave the figure out; state the rule in "
+                "force. Older sources are listed on the card separately."
+                if any("not the" in x or "not in force" in x for x in failures)
+                else ""
+            )
         )
     return "\n\n".join(parts)
 

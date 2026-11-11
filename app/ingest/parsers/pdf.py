@@ -24,6 +24,15 @@ def _inside(b: tuple[float, ...], boxes: list[tuple[float, ...]]) -> bool:
     return any(bx0 <= cx <= bx1 and by0 <= cy <= by1 for bx0, by0, bx1, by1 in boxes)
 
 
+_PIPE = re.compile(r"\s+\|\s+")
+
+
+def _pipe_cells(text: str) -> list[str] | None:
+    """The cells of a table row written as text ("a | b | c"), or None."""
+    cells = [c.strip() for c in _PIPE.split(text.strip())]
+    return cells if len(cells) >= 2 and all(cells) else None
+
+
 def _assign_columns(lines: list[dict[str, Any]]) -> None:
     """Two-column pages: lines left of the middle read before lines right of it.
 
@@ -117,10 +126,49 @@ def parse_pdf(data: bytes) -> tuple[list[Block], dict[str, Any]]:
             )
             para.clear()
 
+    # Tables drawn as text ("cell | cell | cell" per line, no ruling) that find_tables misses.
+    rows: list[list[str]] = []
+    row_lines: list[dict[str, Any]] = []
+
+    def close_rows() -> None:
+        if len(rows) >= 2:
+            first = row_lines[0]
+            blocks.append(
+                Block(
+                    "table",
+                    rows=[r[:] for r in rows],
+                    page=first["page"],
+                    bbox=first["bbox"],
+                    meta={"col": first["col"]},
+                )
+            )
+        elif rows:
+            para.extend(row_lines)
+            flush()
+        rows.clear()
+        row_lines.clear()
+
     prev = None
     for ln in lines:
         if (ln["top"] or ln["bottom"]) and _norm_hf(ln["text"]) in repeated:
             continue
+        cells = _pipe_cells(ln["text"])
+        gap = prev is not None and (
+            ln["page"] != prev["page"] or ln["bbox"][1] - prev["bbox"][3] > ln["size"] * 0.8
+        )
+        if cells:
+            flush()
+            if rows and (len(cells) != len(rows[-1]) or (gap and ln["page"] == prev["page"])):
+                close_rows()
+            rows.append(cells)
+            row_lines.append(ln)
+            prev = ln
+            continue
+        if rows and not gap and ln["size"] <= prev["size"] + 0.5:
+            rows[-1][-1] = clean(rows[-1][-1] + " " + ln["text"])  # a wrapped last cell
+            prev = ln
+            continue
+        close_rows()
         is_heading = ln["size"] in heading_sizes[:4] and len(ln["text"]) < 120
         is_bold_head = ln["bold"] and len(ln["text"]) < 90 and not ln["text"].endswith((".", ","))
         bullet = re.match(r"^(?:[•▪◦\-–*]|\d{1,2}[.)])\s+(?=\S)", ln["text"])
@@ -166,6 +214,7 @@ def parse_pdf(data: bytes) -> tuple[list[Block], dict[str, Any]]:
             else:
                 para.append(ln)
         prev = ln
+    close_rows()
     flush()
     # Put tables back in reading order by page and vertical position.
     allb = blocks + table_blocks

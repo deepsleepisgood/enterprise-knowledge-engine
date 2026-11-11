@@ -97,6 +97,8 @@ def grade_scenario_text(exp: sc.Expected, card: dict[str, Any]) -> bool:
 
 def cause_of(r: dict[str, Any], card: dict[str, Any]) -> str:
     diag = card.get("diagnostics") or {}
+    if r.get("error"):
+        return "infra error"
     if card.get("status") == "unverified":
         return "verifier"
     if card.get("status") == "unsupported":
@@ -114,6 +116,20 @@ def cause_of(r: dict[str, Any], card: dict[str, Any]) -> str:
     if r["correct"] and not r["cite_strict"]:
         return "citation only"
     return "generation"
+
+
+def _judge_safely(q: Question, card: dict[str, Any]) -> tuple[Any, str | None]:
+    """The judge's verdict, or (None, error) when the LLM call fails twice (e.g. rate limits):
+    one failed grading call must not end the whole run."""
+    last = None
+    for attempt in range(2):
+        try:
+            return judge(q.question, q.gold, q.type, card, _structured()), None
+        except Exception as exc:  # noqa: BLE001 - recorded on the row
+            last = repr(exc)
+            if attempt == 0:
+                time.sleep(30)
+    return None, f"judge failed: {last}"
 
 
 def run_question(q: Question, opt: Options, run_id: str) -> dict[str, Any]:
@@ -161,13 +177,18 @@ def run_question(q: Question, opt: Options, run_id: str) -> dict[str, Any]:
                 ok = grade_scenario_text(exp, card)
                 reason = f"expected {exp.fields}; graded from text"
                 if ok and opt.use_judge and not err:
-                    v = judge(q.question, q.gold, q.type, card, _structured())
-                    ok = v.verdict == "correct"
-                    reason += f"; judge: {v.verdict} {v.reason}"
+                    v, err = _judge_safely(q, card)
+                    ok = v is not None and v.verdict == "correct"
+                    reason += f"; judge: {v.verdict} {v.reason}" if v else f"; {err}"
             verdict = "correct" if ok else "wrong"
         elif opt.use_judge and not err:
-            v = judge(q.question, q.gold, q.type, card, _structured())
-            verdict, reason = v.verdict, v.reason + (f" Missing: {v.missing}" if v.missing else "")
+            v, err = _judge_safely(q, card)
+            if v is None:
+                verdict, reason = "error", err or ""
+            else:
+                verdict = v.verdict
+                reason = v.reason + (f" Missing: {v.missing}" if v.missing else "")
+        r["error"] = err
         r["verdict"] = verdict
         r["correct"] = verdict == "correct"
         r["judge_reason"] = reason

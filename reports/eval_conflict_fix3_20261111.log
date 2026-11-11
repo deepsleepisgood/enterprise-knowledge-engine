@@ -1,0 +1,10 @@
+23 questions (all), configs ['D']
+  Q001  D ok         22.3s 
+  Q002  D wrong     136.0s infra error
+  Q003  D ok        118.1s 
+  Q004  D ok         92.2s 
+  Q005  D ok         66.9s 
+  Q006  D ok         39.4s 
+  Q007  D ok         89.3s 
+  Q008  D ok         30.1s 
+  Q010  D ok         33.4s 

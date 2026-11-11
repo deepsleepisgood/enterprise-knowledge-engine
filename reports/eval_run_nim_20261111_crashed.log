@@ -1,0 +1,99 @@
+160 questions (all), configs ['D']
+  Q002  D ok         32.6s 
+  Q001  D ok         65.0s 
+  Q004  D ok         82.6s 
+  Q003  D ok        260.1s 
+  Q005  D ok        125.9s 
+  Q006  D ok         37.6s 
+  Q009  D ok        121.7s 
+  Q010  D ok         50.4s 
+  Q008  D ok        263.4s 
+  Q012  D ok         84.5s 
+  Q007  D wrong     479.2s generation
+  Q013  D ok        147.4s 
+  Q014  D ok         95.8s 
+  Q016  D ok         69.9s 
+  Q011  D wrong     517.5s generation
+  Q017  D partial    73.9s generation
+  Q019  D ok         38.9s 
+  Q018  D ok        262.4s 
+  Q015  D wrong     467.3s generation
+  Q021  D ok        249.1s 
+  Q020  D wrong     466.6s generation
+  Q023  D ok         76.6s 
+  Q022  D wrong     466.9s generation
+  Q026  D ok         37.7s 
+  Q024  D ok        265.1s 
+  Q027  D ok         75.7s 
+  Q028  D ok        145.4s 
+  Q029  D ok        161.9s 
+  Q031  D ok        129.8s 
+  Q032  D ok        118.6s 
+  Q030  D ok        305.2s 
+  Q025  D wrong     737.2s generation
+  Q034  D ok         50.2s 
+  Q035  D ok        114.9s 
+  Q033  D ok        177.5s 
+  Q037  D ok         82.8s 
+  Q038  D ok        122.2s 
+  Q039  D wrong     171.2s verifier
+  Q041  D ok         19.8s 
+  Q042  D ok         24.0s 
+  Q043  D ok          8.3s 
+  Q044  D ok        147.8s 
+  Q036  D wrong     596.0s generation
+  Q045  D ok        134.3s 
+  Q047  D ok        129.0s 
+  Q049  D ok        111.7s 
+  Q046  D wrong     490.7s generation
+  Q048  D ok        293.5s 
+Traceback (most recent call last):
+  File "D:\antigravity\company knowledge engine\scripts\run_eval.py", line 76, in <module>
+    main()
+  File "D:\antigravity\company knowledge engine\scripts\run_eval.py", line 56, in main
+    results[c] = evaluate(qs, opt)
+                 ^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\evaluation\run.py", line 225, in evaluate
+    results = list(pool.map(one, questions))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\evaluation\run.py", line 215, in one
+    r = run_question(q, opt, run_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\evaluation\run.py", line 169, in run_question
+    v = judge(q.question, q.gold, q.type, card, _structured())
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\evaluation\judge.py", line 65, in judge
+    return structured_fn(
+           ^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\llm.py", line 418, in structured
+    payload, _ = _call(
+                 ^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\llm.py", line 238, in _call
+    payload, resp = invoke(request)
+                    ^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\llm.py", line 410, in invoke
+    return _nim_structured(req, schema)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\llm.py", line 323, in _nim_structured
+    resp = nim.chat(body)
+           ^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\nim.py", line 139, in chat
+    return (_transport or _http_post)(body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\antigravity\company knowledge engine\app\core\nim.py", line 135, in _http_post
+    raise NimError(f"NIM request failed after retries: {last}")
+app.core.nim.NimError: NIM request failed after retries: NIM HTTP 429: {"status":429,"title":"Too Many Requests"}

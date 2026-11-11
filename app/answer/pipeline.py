@@ -163,6 +163,15 @@ def ask(
         t = time.perf_counter()
         r = route(question, clients, calculators, roles, structured)
         t = mark("route", t)
+        if as_of is None and r.as_of and r.route in ("lookup", "practice"):
+            # A date asked about in words ("in March 2026, what was ...") works like the picker.
+            try:
+                as_of = date.fromisoformat(r.as_of)
+            except ValueError:
+                as_of = None
+            if as_of == today:
+                as_of = None
+            diag["as_of_from_question"] = as_of.isoformat() if as_of else None
         asked = client if client and client != "all" else r.client
         client_name = canonical_client(s, asked) if asked else None
         diag["router"] = r.model_dump()
@@ -301,6 +310,8 @@ def ask(
                 onto.units,
                 when=f"in force on {as_of}" if as_of else "current",
                 currencies=[onto.base_currency or ""],
+                # A value the asker quoted ("is it still 2%?") may be named to correct it; an
+                # old value nobody asked about is never stated (fresh-question check, 11 Nov).
                 given=given,
             )
             if not problems:

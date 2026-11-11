@@ -1,0 +1,26 @@
+23 questions (all), configs ['D']
+  Q001  D ok         31.1s 
+  Q002  D ok         43.5s 
+  Q003  D ok         53.3s 
+  Q004  D ok         30.7s 
+  Q005  D ok         29.4s 
+  Q006  D ok         18.6s 
+  Q007  D ok         42.0s 
+  Q008  D ok         25.6s 
+  Q010  D ok         37.3s 
+  Q009  D ok         27.2s 
+  Q012  D ok         54.0s 
+  Q013  D ok        132.7s 
+  Q015  D ok        129.9s 
+  Q017  D partial    97.6s verifier
+  Q021  D ok         21.1s 
+  Q040  D ok         39.4s 
+  Q019  D ok        137.6s 
+  Q055  D ok         72.4s 
+  Q042  D ok         55.6s 
+  Q157  D ok         76.2s 
+  Q158  D ok         10.0s 
+  Q160  D ok          9.4s 
+  Q062  D ok        113.9s 
+config D: accuracy 95.7% (22/23), citations 95.7% (22/23), outdated (conflict) 8.7% (2/23), p50 42.0s
+report: D:\antigravity\company knowledge engine\reports\eval_20261111_all.md

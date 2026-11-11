@@ -1,0 +1,12 @@
+built tenant corpus2: schema v1 (frozen); {'parse_s': 79.43435209989548, 'schema_s': 300.4122481001541, 'build_s': 1074.3243480999954}
+  H01 PASS ok
+  H02 PASS ok
+  H03 PASS ok
+  H04 PASS ok
+  H05 PASS ok
+  H06 PASS ok
+  H07 PASS ok
+  H08 PASS ok
+  H09 PASS abstained and routed
+  H10 PASS ok
+10/10 passed; report D:\antigravity\company knowledge engine\reports\second_corpus_20261111.md

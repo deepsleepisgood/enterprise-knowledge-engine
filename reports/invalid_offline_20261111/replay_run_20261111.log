@@ -1,0 +1,18 @@
+tenant replay: schema and bindings copied from default
+PS-07_AP_SOP_v3.1_2023.docx: 68s, 71 live facts
+  R01 PASS valid time: v3.1 in force on 1 Mar 2026: 2.0 (AP SOP v3.1 current)
+  R02 PASS valid time: v3.1 in force on 1 Mar 2026: 1000.0 (AP SOP v3.1 current)
+PS-07_AP_SOP_v4.0_2026.docx: 228s, 272 live facts
+  R03 PASS valid time: v3.1 still the rule on 1 Mar 2026 after v4.0 arrives: 2.0 (AP SOP v3.1 superseded)
+  R04 PASS valid time: v4.0 from 1 Apr 2026: 1.0 (AP SOP v4.0 current)
+  R05 PASS current rule after v4.0: 500.0 (AP SOP v4.0 current)
+  R06 PASS e-invoice threshold before the SOP 14 date: 100000000.0 (AP SOP v3.1 superseded)
+  R07 PASS e-invoice threshold after the SOP 14 date: 50000000.0 (AP SOP v4.0 current)
+  R08 PASS approvals: AP Controller above 10 lakh: 1000000.0 (AP SOP v4.0 current)
+  R09 PASS approvals before v4.0: 25 lakh: 2500000.0 (AP SOP v3.1 superseded)
+  R10 PASS payment runs Tuesday and Friday: friday, tuesday
+  R11 PASS payment runs before v4.0: Thursday: thursday
+  R12 PASS MSME without agreement 15 days: 15.0 (AP SOP v4.0 current)
+PS-07_training_and_expert_transcripts.docx: 2846s, 386 live facts
+  R13 PASS out of order: older training video (ten crore) arrives after v4.0 and does not override: 50000000.0 (AP SOP v4.0 current)
+  R14 PASS out of order: training material arrives after v4.0 and does not override: 1.0 (AP SOP v4.0 current)

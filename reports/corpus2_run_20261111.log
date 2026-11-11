@@ -1,0 +1,12 @@
+built tenant corpus2: schema v1 (frozen); {'parse_s': 102.72159629990347, 'schema_s': 255.80457270005718, 'build_s': 785.2274197000079}
+  H01 PASS ok
+  H02 PASS ok
+  H03 PASS ok
+  H04 PASS ok
+  H05 PASS ok
+  H06 PASS ok
+  H07 PASS ok
+  H08 PASS ok
+  H09 PASS abstained and routed
+  H10 FAIL cites ['New: quarterly wellness day from January 2027.eml'], expected wellness_announcement.eml
+9/10 passed; report D:\antigravity\company knowledge engine\reports\second_corpus_20261111.md

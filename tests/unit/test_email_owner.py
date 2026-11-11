@@ -21,6 +21,7 @@ def test_an_uploaded_email_is_read_as_an_email_with_its_sender() -> None:
     assert ep.sender == "fc@client-x.example"
     assert ep.sender_role == "Financial Controller, Client X"
     assert ep.received_at.date().isoformat() == "2026-11-02"
+    assert ep.filename == "update.eml"  # an upload keeps its own name, not the subject
 
 
 def test_an_uploader_is_judged_never_the_header_they_carry() -> None:

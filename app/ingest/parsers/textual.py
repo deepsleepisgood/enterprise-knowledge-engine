@@ -95,8 +95,8 @@ def parse_text(data: bytes | str, markdown: bool = True) -> tuple[list[Block], d
             flush()
             blocks.append(Block("heading", clean(m.group(2)), level=len(m.group(1)), style="md"))
         elif (
-            markdown
-            and s.startswith("|")
+            # A pipe table with its |---| line is a table in any plain text (an email body).
+            s.startswith("|")
             and i + 1 < len(lines)
             and _TABLE_SEP.match(lines[i + 1].strip())
         ):

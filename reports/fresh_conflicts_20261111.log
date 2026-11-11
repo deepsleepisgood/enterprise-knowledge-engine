@@ -1,0 +1,13 @@
+F1 closest eval question similarity 0.46
+F2 closest eval question similarity 0.45
+F3 closest eval question similarity 0.47
+F4 closest eval question similarity 0.42
+F5 closest eval question similarity 0.41
+F6 closest eval question similarity 0.42
+F1 FAIL status=unverified 60s :: 'No, the current rule is that invoices above ₹10 lakh go to the AP Controller, not ₹25 lakh. [1][2][3][4] AP SOP v4.0 sets the AP Controller threshold at above ₹10 lakh up to ₹50 lakh, with Client CFO approval required above ₹50 lakh. [1][2][4] Invoices up to ₹'
+F2 PASS status=answered 75s :: 'The payment run now occurs on Tuesday and Friday. [1][2]\nPayment runs are on Tuesday and Friday'
+F3 FAIL status=unverified 64s :: 'The current e-invoicing threshold is an aggregate annual turnover (AATO) above ₹5 crore. [1][2] This lower limit has been in effect since August 2023, replacing the older ₹10 crore figure shown in the training video. [1][3] Any supplier whose AATO has exceeded'
+F4 FAIL status=unverified 144s :: 'The current price tolerance is the lower of 1% of the PO line value and ₹500 per line. [1][2] The older SOP v3.1 allowed the lower of 2% and ₹1,000 per line, but that rule has been superseded. [2] If a different tolerance appears on an old PO template, the pro'
+F5 FAIL status=unverified 59s :: 'No, the current tolerance is not 2%; it is the lower of 1% of the PO line value and ₹500 per line. [1][2] If the invoice price is lower than the PO price, the line is accepted and paid at the invoice price. [1] A line that exceeds this tolerance is held with e'
+F6 FAIL status=unverified 34s :: 'Before the SOP 14 change took effect on 1 April 2026, the e-invoice turnover threshold was AATO above ₹10 crore. [1][2]\nAATO above ₹10 crore'
+1/6 fresh questions passed

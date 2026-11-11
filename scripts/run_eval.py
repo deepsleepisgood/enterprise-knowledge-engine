@@ -34,11 +34,15 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=3, help="questions in parallel")
     ap.add_argument("--today", default="2026-11-07", help="the date questions are asked on")
     ap.add_argument("--tenant", help="tenant id (default: TENANT_ID)")
+    ap.add_argument("--ids", help="only these question ids, comma-separated (reruns)")
     args = ap.parse_args()
 
     qs = dataset.select(dataset.with_split(dataset.load()), args.split)
     if args.type:
         qs = [q for q in qs if q.type == args.type]
+    if args.ids:
+        wanted = {i.strip().upper() for i in args.ids.split(",") if i.strip()}
+        qs = [q for q in qs if q.id.upper() in wanted]
     if args.limit:
         qs = qs[: args.limit]
     configs = ["A", "B", "C", "D"] if args.config == "ablation" else [args.config.upper()]

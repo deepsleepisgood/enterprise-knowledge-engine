@@ -1,0 +1,5 @@
+2 questions (all), configs ['D']
+  Q011  D ok         36.7s 
+  Q054  D ok         33.4s 
+config D: accuracy 100.0% (2/2), citations 100.0% (2/2), outdated (conflict) n/a, p50 35.0s
+report: D:\antigravity\company knowledge engine\reports\eval_20261111_all.md

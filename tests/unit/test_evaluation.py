@@ -69,6 +69,10 @@ def test_outdated_only_counts_the_current_rule_part() -> None:
     assert outdated(card(decision="Threshold ₹10 crore"), "₹10 crore")
     assert outdated(card(working=[{"label": "Cap", "value": "₹50"}]), "₹50")
     assert not outdated(card(text="anything"), None)
+    # A number with a unit word: the number must appear, not just the word "days".
+    assert not outdated(card(text="Pay within 45 days; 15 days without terms."), "60 days")
+    assert outdated(card(text="Pay within 60 days."), "60 days")
+    assert not outdated(card(text="Pay within 160 days."), "60 days")
 
 
 def test_kappa() -> None:

@@ -125,6 +125,11 @@ def test_values_from_the_case_or_calculator_are_not_old_rules() -> None:
     # does not let the retired 2% through.
     stale = "The tolerance is 2% [1]."
     assert verify.check_not_in_force(stale, old, now, UNITS, currencies=["₹"], given=[calc])
+    # An old value the asker quoted may be named to correct it; one nobody asked about may not.
+    corrected = "No, the 2% no longer applies; the tolerance is 1% [1]."
+    asked = "Is the tolerance still 2%?"
+    assert verify.check_not_in_force(corrected, old, now, UNITS, ["₹"], given=[asked]) == []
+    assert verify.check_not_in_force(corrected, old, now, UNITS, currencies=["₹"], given=[""])
 
 
 def test_assemble_numbers_citations_in_order_and_checks_quotes() -> None:

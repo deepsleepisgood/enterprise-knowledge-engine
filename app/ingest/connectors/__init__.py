@@ -59,7 +59,8 @@ def from_upload(name: str, data: bytes, **kw: Any) -> list[EpisodeIn]:
     if name.lower().endswith(".eml"):
         # Read as an email (sender, date, attachments). An uploader given by the caller is
         # who governance judges; the From header counts only when nobody is named.
-        return from_eml(data, channel="upload", **kw)
+        # An uploaded file keeps its own name (citations show what was uploaded).
+        return from_eml(data, channel="upload", filename=name, **kw)
     return [EpisodeIn(channel="upload", data=data, filename=name, **kw)]
 
 
@@ -102,8 +103,11 @@ def _from_header(value: str) -> tuple[str, str]:
     return parseaddr(value)
 
 
-def from_eml(raw: bytes, channel: str = "email", **kw: Any) -> list[EpisodeIn]:
-    """An RFC 822 message: the message itself plus one episode per attachment."""
+def from_eml(
+    raw: bytes, channel: str = "email", filename: str | None = None, **kw: Any
+) -> list[EpisodeIn]:
+    """An RFC 822 message: the message itself plus one episode per attachment. Named after the
+    subject unless a file name is given (an uploaded .eml keeps its own)."""
     msg = email.message_from_bytes(raw, policy=policy.default)
     display, address = _from_header(str(msg.get("From", "")))
     uploader = kw.pop("sender", None)
@@ -121,7 +125,7 @@ def from_eml(raw: bytes, channel: str = "email", **kw: Any) -> list[EpisodeIn]:
     except (TypeError, ValueError):
         received = datetime.now(UTC)
     subject = str(msg.get("Subject", "") or "message")
-    name = f"{subject[:60]}.eml"
+    name = filename or f"{subject[:60]}.eml"
     out = [
         EpisodeIn(
             channel=channel, data=raw, filename=name, sender=sender, received_at=received, **kw
