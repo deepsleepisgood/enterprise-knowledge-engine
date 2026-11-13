@@ -56,38 +56,64 @@ function ticks(d0: number, d1: number): { at: number; label: string }[] {
   return out;
 }
 
-function Bar({ v, d0, d1, now, selected, onPick }: {
+/** Chart zoom: how far back the chart shows (the sliders always cover all time). */
+const SPANS = [
+  { key: "6m", label: "6 months", months: 6 },
+  { key: "1y", label: "1 year", months: 12 },
+  { key: "3y", label: "3 years", months: 36 },
+  { key: "all", label: "All time", months: 0 },
+] as const;
+type Span = (typeof SPANS)[number]["key"];
+
+/** The part of a version's interval inside the window [v0, v1], or null when it is outside. */
+function clip(v: FactVersion, v0: number, v1: number): { from: number; to: number; before: boolean } | null {
+  const s = Number.isNaN(t(v.valid_from)) ? -Infinity : t(v.valid_from);
+  const e = Number.isNaN(t(v.valid_to)) ? Infinity : t(v.valid_to);
+  if (e <= v0 || s >= v1) return null;
+  return { from: Math.max(v0, s), to: Math.min(v1, e), before: s < v0 };
+}
+
+function Bar({ v, v0, v1, now, selected, onPick }: {
   v: FactVersion;
-  d0: number;
-  d1: number;
+  v0: number;
+  v1: number;
   now: number;
   selected: boolean;
   onPick: (v: FactVersion) => void;
 }) {
-  const from = Number.isNaN(t(v.valid_from)) ? d0 : Math.max(d0, t(v.valid_from));
-  const to = Number.isNaN(t(v.valid_to)) ? d1 : Math.min(d1, t(v.valid_to));
-  const left = ((from - d0) / (d1 - d0)) * 100;
-  const width = Math.max(1.2, ((to - from) / (d1 - d0)) * 100);
-  const current = v.status === "current" && (Number.isNaN(t(v.valid_to)) || t(v.valid_to) > now);
-  const superseded = v.status === "superseded" || v.status === "overridden" || (!Number.isNaN(t(v.valid_to)) && t(v.valid_to) <= now);
+  const c = clip(v, v0, v1);
+  if (!c) return null;
+  const left = ((c.from - v0) / (v1 - v0)) * 100;
+  const width = Math.max(1.5, ((c.to - c.from) / (v1 - v0)) * 100);
+  const ongoing = Number.isNaN(t(v.valid_to));
+  const current = v.status === "current" && (ongoing || t(v.valid_to) > now);
+  const superseded = v.status === "superseded" || v.status === "overridden" || (!ongoing && t(v.valid_to) <= now);
   const label = valueText(v.value);
+  const span = `${v.valid_from ? fmtDate(v.valid_from) : "the start"} – ${v.valid_to ? fmtDate(v.valid_to) : "ongoing"}`;
   return (
     <button
       type="button"
       onClick={() => onPick(v)}
-      title={`${label} · ${v.source_label ?? ""} ${v.locator ?? ""} · ${v.status}`}
-      aria-label={`${humanKey(v.attribute)}: ${label}, ${v.status}, from ${v.valid_from ? fmtDate(v.valid_from) : "the start"}${v.valid_to ? ` to ${fmtDate(v.valid_to)}` : ""}`}
+      title={`${label}\n${span}\n${v.source_label ?? ""} ${v.locator ?? ""} · ${v.status}`}
+      aria-label={`${humanKey(v.attribute)}: ${label}, ${v.status}, ${span}`}
       style={{ left: `${left}%`, width: `${width}%` }}
       className={cx(
-        "absolute top-0 flex h-6 items-center overflow-hidden rounded-full px-2 text-left text-[11px] font-medium transition-shadow",
+        "absolute inset-y-0 flex items-center gap-1 overflow-hidden px-2.5 text-left text-[12px] font-medium transition-shadow hover:shadow-card",
+        c.before ? "rounded-r-lg rounded-l-sm" : "rounded-lg",
+        ongoing && "rounded-r-sm",
         current
           ? "bg-rose text-surface"
           : superseded
-            ? "bg-fill text-muted line-through"
+            ? "bg-fill text-muted line-through decoration-muted/60"
             : "border border-hairline bg-surface text-muted",
         selected && "ring-2 ring-ink ring-offset-1",
       )}
     >
+      {c.before && (
+        <span className="inline-block shrink-0 font-mono text-[10px] opacity-70" aria-hidden>
+          ‹
+        </span>
+      )}
       <span className="truncate">{label}</span>
     </button>
   );
@@ -252,13 +278,14 @@ export function EntitiesView() {
   const [knownAt, setKnownAt] = useState<number>(now);
   const [picked, setPicked] = useState<FactVersion | null>(null);
   const [source, setSource] = useState<Citation | null>(null);
+  const [span, setSpan] = useState<Span>("1y");
   // On a narrow screen the chart scrolls sideways: open it at the "now" end, where the current bars are.
   const chartRef = useRef<HTMLDivElement>(null);
   const chartReady = Boolean(tl.data);
   useEffect(() => {
     const el = chartRef.current;
     if (chartReady && el && el.scrollWidth > el.clientWidth) el.scrollLeft = el.scrollWidth;
-  }, [chartReady, id]);
+  }, [chartReady, id, span]);
   const [attrFilter, setAttrFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -336,7 +363,16 @@ export function EntitiesView() {
     [rows, asOf],
   );
 
-  const pct = (ms: number) => ((ms - d0) / (d1 - d0)) * 100;
+  // The chart's window: the chosen span back from now, plus room after now so ongoing rules
+  // read as long bars rather than slivers at the edge.
+  const [v0, v1] = useMemo(() => {
+    const months = SPANS.find((s) => s.key === span)?.months ?? 0;
+    if (!months) return [d0, d1];
+    const back = months * 30.4 * DAY;
+    return [Math.max(d0, now - back), now + back * 0.25];
+  }, [span, d0, d1, now]);
+  const pct = (ms: number) => ((ms - v0) / (v1 - v0)) * 100;
+  const asOfShown = asOf >= v0 && asOf <= v1;
   const entity = tl.data?.entity;
   const facts = visible.filter(
     (v) => (attrFilter === "all" || v.attribute === attrFilter) && (statusFilter === "all" || v.status === statusFilter),
@@ -435,14 +471,44 @@ export function EntitiesView() {
                 </div>
               </Card>
 
-              <div ref={chartRef} className="mt-4 overflow-x-auto rounded-2xl border border-hairline bg-surface p-4 shadow-card">
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <div role="group" aria-label="Chart range" className="flex rounded-full border border-hairline bg-surface p-0.5">
+                  {SPANS.map((s) => (
+                    <button
+                      key={s.key}
+                      type="button"
+                      onClick={() => setSpan(s.key)}
+                      aria-pressed={span === s.key}
+                      className={cx(
+                        "rounded-full px-3 py-1 text-[12px] font-medium transition-colors",
+                        span === s.key ? "bg-ink text-surface" : "text-muted hover:text-ink",
+                      )}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                {!asOfShown && (
+                  <button
+                    type="button"
+                    onClick={() => setSpan("all")}
+                    className="font-mono text-[11px] text-muted underline decoration-hairline underline-offset-2 hover:text-ink"
+                  >
+                    As of {fmtDate(isoDay(asOf))} is outside this range · show all time
+                  </button>
+                )}
+              </div>
+              <div ref={chartRef} className="mt-3 overflow-x-auto rounded-2xl border border-hairline bg-surface p-4 shadow-card">
                 <div className="min-w-[560px]">
                   {/* axis */}
-                  <div className="relative ml-0 h-6 sm:ml-[200px]">
-                    {ticks(d0, d1).map((tk) => (
+                  <div className="relative ml-0 h-7 border-b border-hairline sm:ml-[220px]">
+                    {ticks(v0, v1).map((tk) => (
+                      <span key={tk.at} className="absolute bottom-0 h-1.5 w-px bg-hairline" style={{ left: `${pct(tk.at)}%` }} aria-hidden />
+                    ))}
+                    {ticks(v0, v1).map((tk) => (
                       <span
-                        key={tk.at}
-                        className="absolute -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-muted"
+                        key={`l${tk.at}`}
+                        className="absolute top-0 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-muted"
                         style={{ left: `${pct(tk.at)}%` }}
                       >
                         {tk.label}
@@ -450,25 +516,30 @@ export function EntitiesView() {
                     ))}
                   </div>
                   <div className="relative">
-                    {/* now and as-of lines over the tracks */}
-                    <div className="pointer-events-none absolute inset-y-0 left-0 right-0 sm:left-[200px]">
-                      <span className="absolute inset-y-0 w-px bg-rose" style={{ left: `${pct(now)}%` }} aria-hidden />
+                    {/* gridlines, then the now and as-of lines, over the tracks */}
+                    <div className="pointer-events-none absolute inset-y-0 left-0 right-0 sm:left-[220px]">
+                      {ticks(v0, v1).map((tk) => (
+                        <span key={tk.at} className="absolute inset-y-0 w-px bg-hairline/60" style={{ left: `${pct(tk.at)}%` }} aria-hidden />
+                      ))}
+                      <span className="absolute inset-y-0 right-0 bg-fill/40" style={{ left: `${pct(now)}%` }} aria-hidden />
+                      {/* behind the bars (they paint later), so it never cuts through a label */}
+                      <span className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-rose/70" style={{ left: `${pct(now)}%` }} aria-hidden />
                       <span
-                        className="absolute -top-1 -translate-x-1/2 rounded-full bg-rose px-1.5 font-mono text-[9px] leading-4 text-surface"
+                        className="absolute -top-2 z-20 -translate-x-1/2 rounded-full bg-rose px-2 font-mono text-[10px] leading-5 text-surface"
                         style={{ left: `${pct(now)}%` }}
                         aria-hidden
                       >
                         now
                       </span>
-                      {Math.abs(asOf - now) > DAY && (
-                        <span className="absolute inset-y-0 border-l border-dashed border-ink" style={{ left: `${pct(asOf)}%` }} aria-hidden />
+                      {Math.abs(asOf - now) > DAY && asOfShown && (
+                        <span className="absolute inset-y-0 z-20 border-l-2 border-dashed border-ink" style={{ left: `${pct(asOf)}%` }} aria-hidden />
                       )}
                     </div>
                     <ul className="divide-y divide-hairline">
                       {rows.map((r) => (
-                        <li key={r.key} className="py-2.5 sm:flex sm:items-start">
-                          <div className="sticky left-0 z-10 mb-1.5 w-fit max-w-[280px] rounded-md bg-surface/90 pr-3 sm:static sm:mb-0 sm:w-[200px] sm:max-w-none sm:shrink-0 sm:bg-transparent">
-                            <p className="truncate text-[13px] font-medium text-ink" title={r.attribute}>
+                        <li key={r.key} className="py-3 sm:flex sm:items-start">
+                          <div className="sticky left-0 z-10 mb-1.5 w-fit max-w-[280px] rounded-md bg-surface/90 pr-3 sm:static sm:mb-0 sm:w-[220px] sm:max-w-none sm:shrink-0 sm:bg-transparent sm:pt-1">
+                            <p className="line-clamp-2 text-[13px] font-medium leading-snug text-ink" title={r.attribute}>
                               {humanKey(r.attribute)}
                             </p>
                             {r.topic ? (
@@ -477,14 +548,25 @@ export function EntitiesView() {
                               r.scope !== "all" && <p className="truncate font-mono text-[10px] text-muted">{r.scope}</p>
                             )}
                           </div>
-                          <div className="relative flex-1 space-y-1">
-                            {r.lanes.map((lane, i) => (
-                              <div key={i} className="relative h-6">
-                                {lane.map((v) => (
-                                  <Bar key={v.id} v={v} d0={d0} d1={d1} now={now} selected={picked?.id === v.id} onPick={setPicked} />
-                                ))}
-                              </div>
-                            ))}
+                          <div className="relative flex-1 space-y-1.5">
+                            {(() => {
+                              const lanes = r.lanes.filter((lane) => lane.some((v) => clip(v, v0, v1)));
+                              if (lanes.length === 0) {
+                                const last = Math.max(...r.lanes.flat().map((v) => t(v.valid_to)).filter((x) => !Number.isNaN(x)));
+                                return (
+                                  <p className="flex h-8 items-center font-mono text-[11px] text-muted">
+                                    {Number.isFinite(last) && last < v0 ? `No change in this range · ended ${fmtDate(isoDay(last))}` : "Outside this range"}
+                                  </p>
+                                );
+                              }
+                              return lanes.map((lane, i) => (
+                                <div key={i} className="relative h-8">
+                                  {lane.map((v) => (
+                                    <Bar key={v.id} v={v} v0={v0} v1={v1} now={now} selected={picked?.id === v.id} onPick={setPicked} />
+                                  ))}
+                                </div>
+                              ));
+                            })()}
                           </div>
                         </li>
                       ))}
@@ -494,13 +576,16 @@ export function EntitiesView() {
               </div>
               <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-5 rounded-full bg-rose" aria-hidden /> current
+                  <span className="h-2.5 w-5 rounded bg-rose" aria-hidden /> current
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-5 rounded-full border border-hairline bg-surface" aria-hidden /> also stated / pending
+                  <span className="h-2.5 w-5 rounded border border-hairline bg-surface" aria-hidden /> also stated / pending
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-5 rounded-full bg-fill" aria-hidden /> superseded
+                  <span className="h-2.5 w-5 rounded bg-fill" aria-hidden /> superseded
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span aria-hidden>‹</span> began before this range
                 </span>
               </div>
 

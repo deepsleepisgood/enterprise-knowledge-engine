@@ -184,6 +184,28 @@ def live_by_origin(session: Session, origin_keys: list[str]) -> dict[str, FactRo
     return {f.origin_key: _row(f) for f in session.scalars(q)}
 
 
+def lineage_ids(session: Session, fact_ids: list[int]) -> dict[int, set[int]]:
+    """Every version of each fact: the rows sharing its origin key. A revision (a closed
+    interval, a new status) gets a new id, so an answer cites the version live when it was given."""
+    if not fact_ids:
+        return {}
+    keys = dict(
+        session.execute(
+            select(Fact.id, Fact.origin_key).where(
+                Fact.tenant_id == tenant(), Fact.id.in_(fact_ids)
+            )
+        ).all()
+    )
+    by_key: dict[str, set[int]] = {}
+    for fid, key in session.execute(
+        select(Fact.id, Fact.origin_key).where(
+            Fact.tenant_id == tenant(), Fact.origin_key.in_(set(keys.values()))
+        )
+    ):
+        by_key.setdefault(key, set()).add(fid)
+    return {fid: by_key.get(key, {fid}) for fid, key in keys.items()}
+
+
 def live_with_origin_prefix(session: Session, prefix: str) -> list[FactRow]:
     """Live facts whose origin key starts with `prefix` (e.g. every fact one source's data rows
     produced), so a re-load can retire the ones whose row no longer says it."""

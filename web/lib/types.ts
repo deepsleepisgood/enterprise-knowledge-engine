@@ -102,7 +102,7 @@ export interface ChangeItem {
   old_value: string;
   new_value: string;
   effective_at: string;
-  status: "provisional" | "confirmed" | "rejected";
+  status: "provisional" | "confirmed" | "rejected" | "retired";
   source_label: string;
 }
 
@@ -137,6 +137,42 @@ export const ALL_SCOPE: Scope = { key: "all", label: "All clients" };
 export interface ChangeFeedItem extends ChangeItem {
   attribute: string | null;
   acknowledged: number;
+  /** Set when a document still in force states the old rule and should be edited. */
+  document_edit?: { document: string; locator: string } | null;
+  /** True when the requesting user (`?user_id=`) has acknowledged this change. */
+  seen?: boolean;
+}
+
+/** One day's changes in one summary (GET /digest). */
+export interface Digest {
+  day: string;
+  rules: ChangeFeedItem[];
+  withdrawn: ChangeFeedItem[];
+  updates: number;
+  update_summaries: string[];
+  to_acknowledge: number[];
+  document_edits: number[];
+  waiting_review: number;
+  users: number;
+  empty: boolean;
+  text: string;
+}
+
+/** A drafted edit to the document that still states an old rule. */
+export interface DocumentEdit {
+  change_id: number;
+  document: string;
+  document_title: string;
+  locator: string;
+  current_text: string;
+  suggested_text: string;
+  summary: string;
+  diff: { op: "equal" | "delete" | "insert"; text: string }[];
+  old_rule: string;
+  new_rule: string;
+  new_source: string;
+  verified: boolean;
+  problems: string[];
 }
 
 export interface UnsureField {
@@ -402,8 +438,18 @@ export interface Notification {
   body: string;
   answer_id: number | null;
   change_id: number | null;
+  /** The question of the answer it is about, when there is one. */
+  question?: string | null;
   at: string;
   read: boolean;
+}
+
+/** What `/stream` sends: pages refetch when any of it moves. */
+export interface SignalState {
+  kb_version: number;
+  last_change: number;
+  unread: number;
+  episodes: Record<string, number>;
 }
 
 export interface PassageDetail {

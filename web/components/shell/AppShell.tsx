@@ -127,8 +127,8 @@ function NavLinks({ items, pathname, layout, onNavigate }: {
   layout: "rail" | "list";
   onNavigate?: () => void;
 }) {
-  const { unseen, attention } = useSignals();
-  const counts = { changes: unseen.length, sources: attention };
+  const { unseen, notes, attention } = useSignals();
+  const counts = { changes: unseen.length + notes.length, sources: attention };
   return (
     <>
       {items.map((item) => {

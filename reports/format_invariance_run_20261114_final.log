@@ -1,0 +1,10 @@
+baseline: 170 facts, 76 passages
+pdf: F1 0.94 (P 0.96 R 0.92), rule F1 0.94, passages 47%, scenarios 100%
+md: F1 1.00 (P 1.00 R 1.00), rule F1 1.00, passages 50%, scenarios 100%
+html: F1 1.00 (P 1.00 R 1.00), rule F1 1.00, passages 50%, scenarios 100%
+xlsx: F1 0.86 (P 0.87 R 0.85), rule F1 0.90, passages 5%, scenarios 89%
+eml: F1 0.93 (P 0.92 R 0.94), rule F1 0.93, passages 50%, scenarios 97%
+flat_docx: F1 0.80 (P 0.79 R 0.80), rule F1 0.84, passages 50%, scenarios 100%
+pptx: F1 0.87 (P 0.87 R 0.86), rule F1 0.87, passages 50%, scenarios 100%
+report: D:\antigravity\company knowledge engine\reports\format_invariance_20261114.md
+exit 0

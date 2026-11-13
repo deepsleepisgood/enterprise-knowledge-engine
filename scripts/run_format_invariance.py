@@ -6,6 +6,9 @@ into fresh tenants that share the default tenant's schema and bindings. Per vari
 - Fact F1 against the docx tenant: a fact matches if subject, attribute, scope and value match
   after normalisation. The XLSX variant has tables only, so only facts it can contain count
   (recall over baseline facts whose passage is a table).
+- Rule F1 (reported, not the pass mark): the same with the subject left out (attribute, scope,
+  value). The extractor may file one rule under different subject entities ("194X" or "TDS
+  rules") in different layouts; answers and calculators look rules up by attribute and scope.
 - Passage recovery: share of baseline passages whose sentences (80%+) appear in the variant.
 - Scenario stability: the 92 scenario questions' calculator decisions and numbers equal the
   docx tenant's (parameters are extracted once per question and reused).
@@ -50,6 +53,10 @@ GATE_A = {
 }
 GATE_B = {"pptx": f"{STEM}.pptx", "scanned": f"{STEM}_scanned.pdf"}
 TARGET = {"scanned": 0.8}
+# The XLSX variant holds the tables only. Calculators also need rules the SOP states in prose
+# (for example the rate without a PAN, default payment terms), which it cannot contain, so its
+# scenario stability is reported but is not part of its pass mark.
+SCENARIOS_NOT_JUDGED = {"xlsx"}
 TODAY = date(2026, 11, 7)
 REPORTS = ROOT / "reports"
 
@@ -78,6 +85,10 @@ def graph(tenant: str) -> tuple[set[tuple], list[str], set[tuple]]:
     keys = {fact_key(f) for f in rows}
     table_keys = {fact_key(f) for f in rows if f.passage_id in table_ids}
     return keys, texts, table_keys
+
+
+def rule_keys(keys: set[tuple]) -> set[tuple]:
+    return {k[1:] for k in keys}
 
 
 def recovery(base_texts: list[str], variant_texts: list[str]) -> float:
@@ -156,6 +167,7 @@ def main() -> None:
         keys, texts, _ = graph(tenant)
         reference = base_tables if name == "xlsx" else base_keys
         p, r, f = f1(reference, keys)
+        rule_f = f1(rule_keys(reference), rule_keys(keys))[2]
         rec = recovery(base_texts, texts)
         stable = None
         if params:
@@ -170,15 +182,18 @@ def main() -> None:
                 "precision": p,
                 "recall": r,
                 "f1": f,
+                "rule_f1": rule_f,
                 "passage_recovery": rec,
                 "scenario_stability": stable,
-                "pass": f >= target and (stable is None or stable >= 0.95),
+                "pass": f >= target
+                and (stable is None or name in SCENARIOS_NOT_JUDGED or stable >= 0.95),
                 "lost": sorted(reference - keys)[:15],
                 "target": target,
             }
         )
         print(
-            f"{name}: F1 {f:.2f} (P {p:.2f} R {r:.2f}), passages {rec:.0%}, scenarios "
+            f"{name}: F1 {f:.2f} (P {p:.2f} R {r:.2f}), rule F1 {rule_f:.2f}, passages {rec:.0%}, "
+            "scenarios "
             f"{'n/a' if stable is None else f'{stable:.0%}'}"
         )
     REPORTS.mkdir(exist_ok=True)
@@ -187,14 +202,16 @@ def main() -> None:
         "",
         f"Baseline: original .docx, {len(base_keys)} facts, {len(base_texts)} passages.",
         "",
-        "| variant | F1 | precision | recall | passages | scenarios | target | pass |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| variant | F1 | precision | recall | rule F1 | passages | scenarios | target | pass |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for r in rows:
         sc = "n/a" if r["scenario_stability"] is None else f"{r['scenario_stability']:.0%}"
+        if r["variant"] in SCENARIOS_NOT_JUDGED and r["scenario_stability"] is not None:
+            sc += " (not judged: tables only)"
         lines.append(
             f"| {r['variant']} | {r['f1']:.2f} | {r['precision']:.2f} | {r['recall']:.2f}"
-            f" | {r['passage_recovery']:.0%} | {sc} | F1 >= {r['target']} | "
+            f" | {r['rule_f1']:.2f} | {r['passage_recovery']:.0%} | {sc} | F1 >= {r['target']} | "
             f"{'PASS' if r['pass'] else 'FAIL'} |"
         )
     for r in rows:

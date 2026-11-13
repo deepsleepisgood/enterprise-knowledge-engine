@@ -23,6 +23,23 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
 5. Decide the demo LLM: Claude is faster (p50 14 s on 10 Nov) but only about $1.47 credit is left; NIM p50 36 s. Retrieval itself is 4.5-5.5 s on this laptop (reranker on CPU ~3 s).
 6. PROGRESS entry, one-page MVP note, commit (when the user asks), restart `run_public.ps1`.
 
+**Remaining features (listed 13 Nov evening; see BUILD_PLAN "After the MVP")**
+- Gate B (16 Nov):
+  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). Still to build: sending the digest by email or chat (no mail sending yet).
+  - ~~The full format-invariance matrix~~: run 14 Nov (`reports/format_invariance_20261114.md`). Passing: pdf, md, html, eml and scanned. Below 0.9 fact F1: pptx 0.87, xlsx 0.86, flat docx 0.80; their calculations still match (100%; xlsx not judged). Open: a semantic comparison for free-text values. Done 14 Nov: `scripts/renormalise_money.py --apply` on Neon (4 facts revised, a second dry run finds 0), and `MODEL_VISION` set in `.env`.
+- Gate C (18 Nov):
+  - Tacit capture, T10 (Phase 12): the 5-question interview chat, the structured habit fields, the check against current rules, and a named reviewer. The 21 vendor habits are already in the graph.
+  - Teams chat export (JSON) connector. `synthetic/` has no teams_export.json yet.
+  - Audio/video transcription (parser tier 4).
+  - Business case model + Teams replay (TEST_PLAN level 12); usability tests with 5 people (level 13).
+  - Analytics page exists: add knowledge latency and acknowledgement rates.
+  - Optional: v3.1 → v4.0 redline; a Graphiti baseline comparison.
+- Measurements owed: entity-resolution F1, induced vs baseline schema, abstention set (20), support-removal set, the 50-document freshness test, a second-corpus rerun.
+- Housekeeping:
+  - Merge duplicate entities (194J / Section 194J), clean up the 104 entities with no facts, clear the 5 old stopped jobs.
+  - Add a flag for an extraction that fails on every passage.
+  - README results to 13 Nov; MVP note; demo rehearsal; maybe host on Render.
+
 **Never:** sleep the laptop with tests running (DNS fails, runs hang); look at holdout failures beyond Q021/Q062.
 
 ## 2026-11-07 — Phase 0 (scaffold) and Phase 1 (domain pack + ingestion)
@@ -538,3 +555,151 @@ The Gantt-style timeline page already existed: one bar per fact version across i
   - An export dated older than one already loaded (source date, then arrival): changes nothing (`stale`).
   - A held (unapproved) export: the old facts stay in force. The review item carries `retire_fact_ids`, and `_approve` in app/govern/apply.py retires them only on approval.
   - Tests: 3 new in tests/integration/test_rows_db.py. pytest: 270 passed; ruff clean.
+
+## 2026-11-13 — Entity timeline: readable current rules
+
+- **Problem:** the chart drew all history (2023 onwards) on one linear axis, so rules in force since Apr 2026 were thin slivers at the right edge with cut-off labels.
+- **Change** (`web/components/pages/EntitiesView.tsx` only):
+  - Range buttons: 6 months / 1 year (default) / 3 years / All time. The window runs from the span before now to a quarter-span after now, so ongoing rules read as long bars. The sliders still cover all time.
+  - A bar that began before the window has a squared left edge and a ‹ mark. A row with nothing in the window says "No change in this range · ended <date>". An as-of date outside the window offers "show all time".
+  - Bars are 32 px tall with 12 px text and hover details (value, dates, source). Monthly gridlines; a light shade after now. The now line is drawn behind the bars, so it no longer cuts labels.
+  - Row labels are 220 px wide and wrap to two lines. On a phone the chart opens at the now end after every range change.
+- **Checked:** Playwright on Neon data at 1440 px and 390 px, no console errors (screenshots `reports/screenshots/entity_timeline_1y.png`, `_all.png`, `_mobile_1y.png`). tsc and eslint clean.
+
+## 2026-11-13 — Phase 11 (distribution), step 1: answer recall and live updates
+
+Already there before today: `POST /changes/{id}/ack` and the owner's "N of M have seen this" meter on each change (Changes page); the `answers_log`, `acks` and `notifications` tables. Missing were recall, any UI for notifications, and a live stream.
+
+- **Answer recall** (`app/distribute/recall.py`, worker job `answer_recall`):
+  - `kb.record_change` queues the job (`enqueue_once`) in the publishing transaction whenever a change names an `old_fact`.
+  - For each change from the last 7 days with an `old_fact`, the job finds every version of that fact (`facts.lineage_ids`: rows sharing the origin key). This is needed because resolution revises the closed fact into a new id, while the answer cited the earlier id.
+  - It then finds answers from the 7 days before the change that cited any of those ids (`answers.answers_citing`). Left out: answers with `as_of` (they asked about the past), `eval*` users, and `anonymous` (nobody to tell).
+  - **One notification per person per change** (kind `recall`), linking their latest affected answer. Re-running notifies nobody twice.
+  - Found on real local data: the first version sent one notification per answer, so `demo-user` got 15 for one change and 8 went to "anonymous". Fixed as above.
+  - Rejecting a provisional change now also records one "Withdrawn: …" change per fact (`old_fact` set), so answers that relied on it are recalled.
+  - Registered in `worker.HANDLER_MODULES`. A script calling `worker.run_one` must call `worker.load_handlers()` first.
+- **Change feed:** a change whose fact is gone with no replacement is labelled `retired` (or `rejected` if the fact was provisional or pending). The card reads "old → no longer in force" / "withdrawn". The status filter has a Retired option.
+- **Notifications API:** `GET /notifications` items now include the `question` of the answer they are about. `answers.unread_count`, `already_notified`.
+- **Live updates:** `GET /stream?user_id=` (server-sent events) in `app/api/changes.py`.
+  - Sends a `state` event (kb_version, last change id, the user's unread count, episode counts) whenever one of them moves. It checks every 3 s and sends an `: idle` comment line in between.
+  - It ends after 90 s (the tunnel cuts at 100 s); browsers reconnect on their own (`retry: 3000`).
+  - Each check runs in a thread with the tenant passed in explicitly.
+- **Web:**
+  - `Signals.tsx` opens an EventSource and refetches on each event. It polls every 60 s while live (10 s without), and loads the user's unread notifications.
+  - The Changes nav badge counts unseen changes plus notifications.
+  - The Changes page has a **For you** section: "An answer you got has changed" with the question, what changed, **Ask again** (`/?q=…`), **See the change** (anchors to the change card) and **Dismiss** (marks it read on the server). Expert replies and re-answers show there too.
+  - The Changes list refetches on each live event; the footer says "live".
+- **Tests:** `tests/integration/test_recall_db.py` (4: recall of a replaced rule with the exclusions and idempotence; recall of a rejected provisional change; the retired label in the feed; the stream's first event). `pytest -q` 274 passed; ruff, tsc and eslint clean.
+- **Checked end to end** (local database, Playwright):
+  - The Changes page showed "live".
+  - A test answer for the browser user, a change retiring its cited fact, and the queued job run by the worker code made the card and the bell dot appear without a reload.
+  - Dismiss cleared it on the server.
+  - Screenshot `reports/screenshots/answer_recall_live.png`. The test rows (tagged [e2e]) were removed afterwards.
+- **Not done yet in Phase 11:** the daily digest; draft SOP edit text per approved change; showing "Seen" on a change after a reload (the page forgets local acks); trying the stream through the Cloudflare tunnel on the public URL.
+
+## 2026-11-14 — Format invariance, full matrix (gate B)
+
+Ran on the local database with `deepseek-v4.1-flash-1017-fast` (Isoquant) for extraction and vision. The baseline .docx was re-extracted: 170 facts, 76 passages. Full report: `reports/format_invariance_20261114.md`. Per-run reports: `_first_run.md`, `_second_run.md`, `_text_variants.md`, `_scanned.md`. Logs: `format_invariance_run_20261113.log`, `_20261114*.log`.
+
+| variant | F1 | rule F1 | scenarios (92) | result |
+| --- | --- | --- | --- | --- |
+| pdf | 0.94 (was 0.88) | 0.94 | 100% | PASS |
+| md | 1.00 | 1.00 | 100% | PASS |
+| html | 1.00 | 1.00 | 100% | PASS |
+| eml | 0.93 (was 0.77) | 0.93 | 97% | PASS |
+| scanned pdf (vision, target 0.8) | 0.90 (first run) | 0.94 | 100% | PASS |
+| pptx | 0.87 | 0.87 | 100% | FAIL on F1 |
+| xlsx (tables only) | 0.86 (was 0.00) | 0.90 | 89%, not judged | FAIL on F1 |
+| flat docx | 0.80 (was 0.92 on 11 Nov) | 0.84 | 100% | FAIL on F1 |
+
+- **New column, rule F1** (attribute, scope and value, without the subject). Reported only; the pass mark is unchanged. It shows how much of a gap is the extractor filing a rule under a different subject ("194C" or "TDS deduction rules").
+- **xlsx scenarios not judged** (`SCENARIOS_NOT_JUDGED` in the script). The calculators also need prose rules (no-PAN rate, default payment terms) that a tables-only file cannot hold. 7 + 3 of the differences were exactly those missing rules.
+- **Bugs found and fixed (all general):**
+  1. **Metadata read only from the preamble** (`app/ingest/metadata.py`).
+     - When the rebuilt outline made the "PS-07 · DATA PACK" banner (or a slide title) a heading, the header table and "effective 1 April 2026" fell outside the preamble.
+     - The flat docx was then dated 23 Dec 2013 and the pptx 27 Jan 2013: python-docx and python-pptx template timestamps.
+     - The classifier, without the "Applies to" row, scoped every fact to "Meridian Shared Services Hyderabad AP centre", so F1 was 0.00.
+     - Now the opening blocks up to the first section heading feed the date line, the key/value table and the classifier's header text.
+     - Test: `tests/unit/test_metadata_opening.py`.
+  2. **The pptx variant wrote tables as one bullet** (`scripts/render_variants.py`).
+     - It used "a / b / c | …", which is not how a deck holds a table.
+     - It now writes real table shapes. Only the pptx was regenerated; the other variant files are unchanged.
+     - The flattened file scored 0.71.
+  3. **Money units naming the multiple and the currency together** (`app/graph/extract.py`, `money_multiplier`).
+     - "lakh INR" and "crore INR" were not converted (₹10 lakh stored as 10).
+     - Now the base currency code is dropped, plurals are singularised, and every remaining word must be a known unit word.
+     - **The same bug is live on Neon:**
+       - 4 facts: default fact 299, "five crore" stored as 5; replay facts 1243, 1245 and 1366.
+       - The calculators are not affected (they read the SOP v4.0 fact, stored correctly), and no conflict came from it.
+       - Repair: `scripts/renormalise_money.py`. A dry run lists the facts; `--apply` revises them, keeping the old rows.
+       - **Not applied:** it waits for the user's OK.
+  4. **List values split into conflicting facts** (`app/graph/extract.py`, `merge_list_values`).
+     - "Payment runs are held on Tuesday and Friday" came back as two facts. Resolution kept "Tuesday" and overrode "Friday", which changed 9 MSME payment-date calculations in pptx and flat docx.
+     - Enum and list values of one attribute from one passage (same subject, scope, condition and kind) now become one fact with all items.
+     - Numbers are never merged.
+- **Vision needs `MODEL_VISION` set.** The parser checks the setting itself; the LLM gateway's fallback to the smart model is not used for this. A probe confirmed the DeepSeek model reads page images ($0.0001 per page). `.env.example` now documents `MODEL_VISION`; `.env` is unchanged, so it was set for the run only.
+- **Why the flat docx fell from 0.92 to 0.80:** the 11 Nov baseline was extracted with NIM. With the new model the metadata bug above appeared (0.00), and after the fix the remaining gap is wording on free-text facts. Calculations match 100%.
+- **Tests:** 289 passed (new: `test_money_units.py` 13, `test_metadata_opening.py` 1). ruff clean.
+- **Open:** pptx, xlsx and flat docx F1 are below 0.9 while their calculations match. A semantic comparison of free-text values (an LLM or embedding judge, as for conflicts) would be the fairer metric; not built.
+
+## 2026-11-14 — Phase 11, step 2: daily digest and drafted document (SOP) edits
+
+Also done first, with the user's OK:
+- `scripts/renormalise_money.py --apply` on Neon (default, replay, corpus2). Revised default fact 299 (5 → 5e7 INR) and replay facts 1243, 1245 and 1366. The old rows are kept; a second dry run finds 0.
+- `MODEL_VISION=deepseek-v4.1-flash-1017-fast` set in `.env`, so scanned PDFs and images go to the vision tier on live upload.
+- `tests/conftest.py` now forces `MODEL_VISION=""`, so no test run calls the real vision model. With `.env` set, two unit tests had started calling it.
+
+**Shared change feed:** `app/distribute/feed.py`.
+- `change_items()` (moved out of `api/changes.py`) builds the cards for `/changes` and for the digest.
+- Values are shown as written (`as_written`: "₹10 crore", "2%") rather than normalised ("1e+08 INR", "2 %").
+- Each item has `document_edit: {document, locator}` when `needs_document_edit` holds: a confirmed (not provisional) new fact replaced an old one from another source, and the old fact's source is still `current`. In other words, a document in force still states the old rule. A rule replaced by a new version of the same document needs no edit.
+
+**Daily digest:** `app/distribute/digest.py`, `GET /digest?day=&utc_offset_minutes=&user_id=`.
+- One local day of changes: rule changes (old → new, from when, source, "seen by N of M", provisional marked), facts withdrawn or retired, a count of other knowledge updates, document edits to make, items waiting for review, and which changes this user has not acknowledged.
+- Plus `text`, a plain-text version for an email or chat message.
+- Deterministic: no model call.
+- `kb.changes_between` and `kb.acked_by` added.
+
+**Drafted document edit:** `app/distribute/document_edit.py`, `POST /changes/{id}/document-edit` (409 when not applicable).
+- One model call (`document-edit-v1`, through the gateway, cached) rewrites the old fact's passage. It changes only what the new rule needs; a client-scoped rule is added as an exception and the general rule is kept.
+- Then checks without the model:
+  - The new value appears. Short values are matched as whole words; long free-text values only need their standalone figures to appear, not "4.0" inside "v4.0".
+  - The old value is gone, unless the edit adds a scoped exception.
+  - The text changed.
+- Problems are returned and shown, never hidden. A word diff (equal / delete / insert) is returned for display.
+- Nothing is written: the owner copies the text into the real document.
+
+**Web (Changes page):**
+- **Daily digest** card under For you: day arrows, the first 6 changes with "Show all N", footer counts, and **Copy as text**. It refreshes on live events.
+- On an owner's rule-change card with `document_edit`: "<document> §<locator> still states the old rule" and **Draft document edit**. This opens the suggested edit as a diff (deletions struck, insertions tinted rose), a checked / check-this pill, any problems, and **Copy suggested text**.
+
+**Tests:** `tests/integration/test_digest_db.py` (6).
+- The digest lists the day's changes, values as written, the document-edit flag and the user's unacknowledged changes; acknowledging updates it; another day is empty.
+- An edit drafted by a fake model is verified, with only an insertion in the diff.
+- A draft missing the new value is flagged.
+- No edit for a provisional change (409), plus the feed's `document_edit` and `/digest` through the API.
+- Value terms for long text, and version tags.
+- `pytest -q` 295 passed; ruff, tsc and eslint clean.
+
+**Checked live** (local database, replay tenant, Isoquant, Playwright at 1440 px and 390 px):
+- The 11 Nov digest: 27 rule changes, 1 withdrawn, 10 other updates, 1 document edit, 19 waiting for review. Values like "₹10 crore → ₹5 crore".
+- Change 116 (AP SOP v4.0 §4.3 still states the general bulk-material exception that client memo CM-INF-02 narrowed):
+  - The model changed only the exception clause, and the result shows as checked.
+  - The first version of the figure check flagged it wrongly, picking up "4.0" from "v4.0" and a trailing full stop. Fixed and tested.
+- A numeric, client-scoped edit drafted from the real SOP §4.2 passage (a script, nothing stored): the model kept "1% … ₹500" for everyone and added "except for Arvana Infra Projects … no more than 2% of the PO line value".
+- No page overflow at 390 px; no console errors apart from those during an API restart.
+- Screenshots: `reports/screenshots/digest_card.png`, `document_edit.png`, `document_edit_mobile.png`.
+
+**Open:**
+- The digest is shown and copied, not sent: there is no email or Teams sending.
+- Drafted edits are not stored (re-drafting hits the LLM cache).
+- "Seen" is still not remembered after a reload.
+
+## 2026-11-14 — "Got it" stays done after a reload
+
+- **Before:** the Changes page remembered a processor's "Got it" only in page state. The ack was saved on the server (`acks`), but the feed never said who had acknowledged what.
+- **Fix:**
+  - `GET /changes?user_id=` marks each item `seen` when that user has acknowledged it (`kb.acked_by` in `feed.change_items`).
+  - The page requests the feed with its user id and treats `seen` as done.
+- **Test:** `test_the_feed_remembers_what_this_user_acknowledged`, with acks by one user not leaking to another or to anonymous requests. `pytest -q` 296 passed; tsc and eslint clean.
+- **Checked in the browser** (local database, replay tenant): "Got it" on change 116, then a reload, still shows "Seen"; an unacknowledged change still shows "Got it". The test ack was removed afterwards.

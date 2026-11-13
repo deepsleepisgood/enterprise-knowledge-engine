@@ -9,6 +9,8 @@ import pytest
 
 # Inputs in tests are the owner's own seeding unless a test turns governance on itself.
 os.environ.setdefault("GOVERNANCE", "false")
+# No real vision model from a test run, whatever .env says (a test that wants one sets it).
+os.environ["MODEL_VISION"] = ""
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))

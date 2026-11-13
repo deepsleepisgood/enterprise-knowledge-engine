@@ -183,7 +183,7 @@ def to_flat_docx(blocks, path: Path) -> None:
 
 def to_pptx(blocks, path: Path) -> None:
     from pptx import Presentation
-    from pptx.util import Pt
+    from pptx.util import Inches, Pt
 
     prs = Presentation()
     slide, body = None, None
@@ -195,9 +195,21 @@ def to_pptx(blocks, path: Path) -> None:
             body.clear()
             if kind.startswith("h"):
                 continue
-        text = " | ".join(" / ".join(r) for r in v) if kind == "table" else v
+        if kind == "table":
+            # A real table shape, as a deck would have it (not text with separators).
+            rows, cols = len(v), max(len(r) for r in v)
+            shape = slide.shapes.add_table(
+                rows, cols, Inches(0.5), Inches(4.0), Inches(9.0), Inches(0.3) * rows
+            )
+            for i, r in enumerate(v):
+                for j in range(cols):
+                    cell = shape.table.cell(i, j)
+                    cell.text = r[j] if j < len(r) else ""
+                    for p in cell.text_frame.paragraphs:
+                        p.font.size = Pt(9)
+            continue
         para = body.add_paragraph()
-        para.text = text
+        para.text = v
         para.font.size = Pt(10)
     prs.save(path)
 

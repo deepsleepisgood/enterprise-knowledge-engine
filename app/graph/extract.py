@@ -112,14 +112,40 @@ def quote_in(quote: str, text: str) -> bool:
     return bool(q) and q in _norm(text)
 
 
+def money_multiplier(unit: str, onto: Ontology) -> float | None:
+    """The multiplier from a money amount's unit to the base currency, or None when unknown.
+
+    The unit may name the multiple and the currency together ("thousand USD", "USD million",
+    "thousand dollars"): the base currency code is dropped, plurals are singularised, and every
+    remaining word must be a known unit word (multipliers multiply). A unit with
+    any word the ontology does not know gives None (the amount is kept as written, never guessed).
+    """
+    unit = unit.strip().lower().rstrip(".")
+    if not unit:
+        return None
+    base = (onto.base_currency or "").lower()
+    if unit in onto.units:
+        return onto.units[unit]
+    if base and unit == base:
+        return 1.0
+    words = [w for w in re.split(r"[\s_\-]+", unit) if w]
+    mult, rest = 1.0, []
+    for w in words:
+        if w == base:
+            continue
+        key = w if w in onto.units else (w[:-1] if w.endswith("s") and w[:-1] in onto.units else "")
+        if not key:
+            rest.append(w)
+            continue
+        mult *= onto.units[key]
+    return mult if words and not rest else None
+
+
 def normalise_value(v: XValue, onto: Ontology, value_type: str | None) -> dict[str, Any]:
     out = v.model_dump()
     out["type"] = value_type or v.type
-    unit = (v.unit or "").strip().lower().rstrip(".")
     if out["type"] == "money" and v.number is not None:
-        mult = onto.units.get(unit)
-        if mult is None and unit and onto.base_currency and unit == onto.base_currency.lower():
-            mult = 1.0
+        mult = money_multiplier(v.unit or "", onto)
         if mult is not None:
             out["number"] = v.number * mult
             out["unit"] = onto.base_currency or v.unit
@@ -235,4 +261,57 @@ def postprocess(result: XResult, p: Any, src: Any, onto: Ontology) -> list[Draft
                 meta={"proposed": f.attribute} if attr is None else {},
             )
         )
+    return merge_list_values(out)
+
+
+LIST_TYPES = ("enum", "list")
+
+
+def _items(v: dict[str, Any]) -> list[str]:
+    return [str(x) for x in (v.get("items") or [])] or [str(v.get("text") or "")]
+
+
+def merge_list_values(drafts: list[Draft]) -> list[Draft]:
+    """One passage stating several values of one list-type attribute together ("runs on Tuesday
+    and Friday") is one fact with all of them. Extractors sometimes return one fact per value;
+    left apart, resolution would treat them as conflicting values and keep only one. Numbers are
+    never merged (two numbers for one attribute in one passage is a real conflict)."""
+    groups: dict[tuple, list[Draft]] = {}
+    order: list[tuple] = []
+    for d in drafts:
+        if str(d.value.get("type")) not in LIST_TYPES:
+            key: tuple = ("single", id(d))
+        else:
+            key = (
+                d.attribute,
+                (d.about or "").lower(),
+                tuple(sorted((k, str(v)) for k, v in d.scope.items())),
+                d.condition or "",
+                d.kind,
+            )
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(d)
+    out = []
+    for key in order:
+        ds = groups[key]
+        if len(ds) == 1:
+            out.append(ds[0])
+            continue
+        items: list[str] = []
+        for d in ds:
+            for it in _items(d.value):
+                if it and it.lower() not in {x.lower() for x in items}:
+                    items.append(it)
+        first = ds[0]
+        text = items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+        statements = list(dict.fromkeys(d.statement for d in ds if d.statement))
+        quotes = list(dict.fromkeys(d.quote for d in ds if d.quote))
+        first.value = {**first.value, "text": text, "items": items}
+        first.statement = " ".join(statements)
+        first.quote = " … ".join(quotes)
+        first.quote_verified = all(d.quote_verified for d in ds)
+        first.meta = {**first.meta, "merged_values": len(ds)}
+        out.append(first)
     return out

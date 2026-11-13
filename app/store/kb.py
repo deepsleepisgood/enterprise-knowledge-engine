@@ -120,7 +120,40 @@ def record_change(
     )
     session.add(c)
     session.flush()
+    if old_fact is not None:  # a fact someone may have relied on closed: recall their answers
+        from app.store import jobs
+
+        jobs.enqueue_once(session, "answer_recall", {})
     return c.id
+
+
+def changes_retiring(session: Session, since: datetime) -> list[Change]:
+    """Changes since `since` that retired or replaced a fact (they name `old_fact`)."""
+    q = select(Change).where(
+        Change.tenant_id == tenant(), Change.old_fact.is_not(None), Change.created_at >= since
+    )
+    return list(session.scalars(q.order_by(Change.id)))
+
+
+def changes_between(session: Session, start: datetime, end: datetime) -> list[Change]:
+    """Changes recorded in [start, end), oldest first."""
+    q = select(Change).where(
+        Change.tenant_id == tenant(), Change.created_at >= start, Change.created_at < end
+    )
+    return list(session.scalars(q.order_by(Change.id)))
+
+
+def acked_by(session: Session, user_id: str, change_ids: list[int]) -> set[int]:
+    if not change_ids:
+        return set()
+    q = select(Ack.change_id).where(
+        Ack.tenant_id == tenant(), Ack.user_id == user_id, Ack.change_id.in_(change_ids)
+    )
+    return set(session.scalars(q))
+
+
+def last_change_id(session: Session) -> int:
+    return session.scalar(select(func.max(Change.id)).where(Change.tenant_id == tenant())) or 0
 
 
 def changes_since(session: Session, kb_version: int = 0, limit: int = 100) -> list[Change]:

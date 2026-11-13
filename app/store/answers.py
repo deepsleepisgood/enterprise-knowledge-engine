@@ -235,6 +235,19 @@ def notifications_for(session: Session, user_id: str, unread_only: bool = False)
     )
     if unread_only:
         q = q.where(Notification.read_at.is_(None))
+    rows = list(session.scalars(q.order_by(Notification.at.desc(), Notification.id.desc())))
+    aids = sorted({n.answer_id for n in rows if n.answer_id})
+    asked = (
+        dict(
+            session.execute(
+                select(AnswerLog.id, AnswerLog.question).where(
+                    AnswerLog.tenant_id == tenant(), AnswerLog.id.in_(aids)
+                )
+            ).all()
+        )
+        if aids
+        else {}
+    )
     return [
         {
             "id": n.id,
@@ -242,10 +255,73 @@ def notifications_for(session: Session, user_id: str, unread_only: bool = False)
             "body": n.body,
             "answer_id": n.answer_id,
             "change_id": n.change_id,
+            "question": asked.get(n.answer_id) if n.answer_id else None,
             "at": n.at.isoformat(),
             "read": n.read_at is not None,
         }
-        for n in session.scalars(q.order_by(Notification.at.desc(), Notification.id.desc()))
+        for n in rows
+    ]
+
+
+def unread_count(session: Session, user_id: str) -> int:
+    from sqlalchemy import func
+
+    return (
+        session.scalar(
+            select(func.count(Notification.id)).where(
+                Notification.tenant_id == tenant(),
+                Notification.user_id == user_id,
+                Notification.read_at.is_(None),
+            )
+        )
+        or 0
+    )
+
+
+def already_notified(session: Session, user_id: str, kind: str, change_id: int) -> bool:
+    return (
+        session.scalar(
+            select(Notification.id)
+            .where(
+                Notification.tenant_id == tenant(),
+                Notification.user_id == user_id,
+                Notification.kind == kind,
+                Notification.change_id == change_id,
+            )
+            .limit(1)
+        )
+        is not None
+    )
+
+
+@dataclass
+class CitingAnswer:
+    id: int
+    user_id: str
+    question: str
+    created_at: datetime
+
+
+def answers_citing(
+    session: Session, fact_ids: list[int], since: datetime, until: datetime
+) -> list[CitingAnswer]:
+    """Answers given between `since` and `until` that cited any of `fact_ids` and claimed to be
+    current: answers about a past date (`as_of`) and evaluation runs are left out."""
+    if not fact_ids:
+        return []
+    from sqlalchemy import or_
+
+    q = select(AnswerLog).where(
+        AnswerLog.tenant_id == tenant(),
+        AnswerLog.created_at >= since,
+        AnswerLog.created_at <= until,
+        AnswerLog.as_of.is_(None),
+        ~AnswerLog.user_id.startswith("eval"),
+        or_(*[AnswerLog.cited_fact_ids.contains([i]) for i in fact_ids]),
+    )
+    return [
+        CitingAnswer(a.id, a.user_id, a.question, a.created_at)
+        for a in session.scalars(q.order_by(AnswerLog.id))
     ]
 
 

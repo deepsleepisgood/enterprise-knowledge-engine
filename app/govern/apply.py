@@ -129,6 +129,14 @@ def _reject(s: Session, p: dict[str, Any], by: str) -> dict[str, Any]:
     out: dict[str, Any] = {"retracted": len(live)}
     if live and p.get("status") != PENDING:  # provisional facts were answerable: record it
         v = kb.bump_kb_version(s, f"provisional change rejected by {by}")
+        for f in live:  # one change per fact people could have relied on (answer recall)
+            kb.record_change(
+                s,
+                v,
+                f"Withdrawn: {f.statement or f.attribute} (rejected by {by})",
+                old_fact=f.id,
+                source_episode=p.get("episode_id"),
+            )
         kb.record_change(
             s,
             v,

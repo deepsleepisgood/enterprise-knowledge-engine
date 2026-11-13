@@ -18,7 +18,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from app.ingest.segment import DocPart, norm_key
+from app.ingest.segment import DocPart, is_metadata_table, norm_key, table_kv
 
 PROMPT_VERSION = "docmeta-v2"
 LOW_CONFIDENCE = 0.7
@@ -210,7 +210,13 @@ SYSTEM = """You classify one document from an organisation's knowledge base usin
 Answer from the text given. Do not invent dates, versions or owners that are not stated."""
 
 
-def _header_text(doc: DocPart, file_meta: dict[str, Any], filename: str, today: date) -> str:
+def _header_text(
+    doc: DocPart,
+    file_meta: dict[str, Any],
+    filename: str,
+    today: date,
+    header: dict[str, str] | None = None,
+) -> str:
     lines = [f"Today: {today.isoformat()}"]
     if doc.container_title:
         lines.append(f"File title: {doc.container_title}")
@@ -219,7 +225,7 @@ def _header_text(doc: DocPart, file_meta: dict[str, Any], filename: str, today: 
         lines.append(f"Section heading: {doc.heading.text}")
     elif doc.title:
         lines.append(f"Title: {doc.title}")
-    for k, v in doc.meta_kv.items():
+    for k, v in (header or doc.meta_kv).items():
         lines.append(f"{k}: {v}")
     if file_meta.get("subject") and file_meta.get("from"):
         lines.append(
@@ -334,13 +340,21 @@ def infer(
         )
     )
     lines = _kv_lines(b.text for b in lead if b.type == "paragraph")
+    # A header table in those opening blocks counts too: when the outline puts a banner line
+    # above the title (a heading inferred from plain text, a slide title), the table and the
+    # "effective ..." line fall under it instead of in the preamble.
+    if not doc.meta_kv:
+        table = next((b for b in lead if is_metadata_table(b)), None)
+        if table is not None:
+            lines = {**table_kv(table), **lines}
     if lines:
         _from_table(m, {k: v for k, v in lines.items() if k not in doc.meta_kv})
         m.raw["header"] = {**lines, **doc.meta_kv}
     heading = doc.heading.text if doc.heading is not None else (doc.title or "")
     if heading:
         _from_text(m, heading, "heading", 0.85, refs=True)
-    for b in doc.preamble[:6]:
+    opening = [*doc.preamble[:6], *(b for b in lead if b not in doc.preamble)][:8]
+    for b in opening:
         if b.type == "paragraph":
             _from_text(m, b.text, "first-page text", 0.8)
     _from_text(m, filename, "file name", 0.6)
@@ -373,7 +387,7 @@ def infer(
 
     if llm_fn is not None:
         out: _LLMDocMeta = llm_fn(
-            _header_text(doc, file_meta, filename, received_at.date()),
+            _header_text(doc, file_meta, filename, received_at.date(), m.raw.get("header")),
             _LLMDocMeta,
             system=SYSTEM,
             model="fast",

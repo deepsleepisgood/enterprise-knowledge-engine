@@ -11,7 +11,9 @@ import type {
   ChangeFeedItem,
   ChangeItem,
   ClientKey,
+  DocumentEdit,
   InvoiceContext,
+  Notification,
   PassageDetail,
   Scope,
 } from "@/lib/types";
@@ -91,6 +93,7 @@ const FIXTURES: [RegExp, () => Promise<{ default: unknown }>][] = [
   [/^\/analytics$/, () => import("@/fixtures/analytics.json")],
   [/^\/notifications/, async () => ({ default: [] })],
   [/^\/changes/, () => import("@/fixtures/changes.json")],
+  [/^\/digest/, () => import("@/fixtures/digest.json")],
   [/^\/replay$/, () => import("@/fixtures/replay.json")],
 ];
 
@@ -235,6 +238,30 @@ export async function getChanges(sinceVersion: number): Promise<ChangeFeedItem[]
 export async function ackChange(id: number, userId: string): Promise<void> {
   if (DEMO_MODE) return;
   await apiSend("POST", `/changes/${id}/ack`, { user_id: userId });
+}
+
+/** A user's unread notifications (answer recall, expert replies). */
+export async function getNotifications(userId: string): Promise<Notification[]> {
+  try {
+    return await apiGet<Notification[]>(`/notifications?user_id=${encodeURIComponent(userId)}&unread=true`);
+  } catch {
+    return [];
+  }
+}
+
+export async function markNotificationRead(id: number, userId: string): Promise<void> {
+  if (DEMO_MODE) return;
+  await apiSend("POST", `/notifications/${id}/read`, { user_id: userId });
+}
+
+/** Draft the edit to the document that still states a changed rule (one model call). */
+export async function draftDocumentEdit(changeId: number): Promise<DocumentEdit> {
+  return apiSend<DocumentEdit>("POST", `/changes/${changeId}/document-edit`);
+}
+
+/** The live update stream (server-sent events), or null in demo mode. */
+export function streamUrl(userId: string): string | null {
+  return DEMO_MODE ? null : `${API_BASE}/stream?user_id=${encodeURIComponent(userId)}`;
 }
 
 export async function searchInvoices(q: string): Promise<InvoiceContext[]> {

@@ -37,6 +37,7 @@ HANDLER_MODULES = (
     "app.answer.escalate",
     "app.graph.conflicts",
     "app.govern.apply",
+    "app.distribute.recall",
 )
 
 

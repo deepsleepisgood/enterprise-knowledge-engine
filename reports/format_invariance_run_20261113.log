@@ -1,0 +1,6 @@
+baseline: 170 facts, 76 passages
+xlsx: F1 0.83 (P 0.82 R 0.83), passages 5%, scenarios n/a
+eml: F1 0.93 (P 0.92 R 0.94), passages 50%, scenarios n/a
+pptx: F1 0.71 (P 0.73 R 0.69), passages 50%, scenarios n/a
+report: D:\antigravity\company knowledge engine\reports\format_invariance_20261114.md
+exit 0
