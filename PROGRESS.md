@@ -10,10 +10,13 @@ Results so far (NVIDIA NIM, Neon): eval 157/160 (98.1%; dev 100%, holdout 95.3%;
 
 Uncommitted changes since the last commit: eval runner survives judge errors and has `--ids`; outdated metric fix ("60 days"); answer-v8 prompt; router route-v5 reads dates asked about in words (as_of); support check sees source in-force tags; search runs while the router runs (`early_retrieval`); uploaded .eml keeps its file name; PDF "a | b" text tables; pipe tables in plain text/email; numbered section titles kept in plain text; header table under a leading caption row or under the first of several headings (xlsx).
 
+**Update 11 Nov evening:** T1-T11 all pass on the public URL (`reports/public_acceptance_20261111.md`). LLM moved to Isoquant (`deepseek-v4.1-flash-1017-fast`, ~$0.0006/question; NVIDIA lines commented in `.env`). New: `POST /ask/jobs` + `GET /ask/jobs/{id}` (web app polls; tunnel 100 s limit), garbled-reply retry, router fallback to lookup. Uncommitted. Open: an extraction that fails on every passage still marks the episode published. Public demo stopped (`.\run_public.ps1` to restart).
+
 **Next actions, in order**
+0. Commit today's evening work when the user asks; run the full `pytest -q`.
 1. Rerun format invariance for xlsx and eml (`python scripts/run_format_invariance.py --no-scenarios --variants xlsx,eml`), then `python scripts/run_second_corpus.py` (parser changes touch its xlsx/eml/pdf).
 2. Full `pytest -q`, then the full eval on the final code (`run_eval.py --split all --workers 2`, DATABASE_URL=Neon) and the 6 fresh conflict questions (scratchpad script `fresh_conflicts.py`, copy into scripts/ if kept).
-3. Build the Replay button on the Sources page (user approved; after the usage limit resets).
+3. ~~Build the Replay button~~ Done 13 Nov: Sources → Replay history (`/sources/replay`); see the 13 Nov entry. Not committed yet.
 4. Not yet measured for gate A: entity-resolution F1, induced vs baseline schema, conflict scan on Neon, T2-T4/T6/T7/T9/T11 by hand on the public URL.
 5. Decide the demo LLM: Claude is faster (p50 14 s on 10 Nov) but only about $1.47 credit is left; NIM p50 36 s. Retrieval itself is 4.5-5.5 s on this laptop (reranker on CPU ~3 s).
 6. PROGRESS entry, one-page MVP note, commit (when the user asks), restart `run_public.ps1`.
@@ -425,3 +428,41 @@ Spend on the Claude key so far: about $3.53 of $5.
 - **Web:** Vercel project `ps07-knowledge-engine`, production at https://ps07-knowledge-engine.vercel.app, built with `NEXT_PUBLIC_API_BASE_URL` = the tunnel address (deployed with `VERCEL_TOKEN` from `.env`; the GitHub link failed because the Vercel account has no GitHub login connection, so deploys are from the CLI).
 - **One command:** `.\run_public.ps1` (`scripts/serve_public.py`) starts API, worker and tunnel; a quick tunnel's address changes on every start, so when it differs from `logs/tunnel_url.txt` the web app is rebuilt on Vercel with it (about a minute). Ctrl+C stops all three; the site cannot answer while they are down.
 - **Checked:** the public site answered "What is the quantity tolerance for cement at Arvana Infra?" correctly with the CM-INF-02 citation (46 s on the NVIDIA endpoint); no console errors; CORS preflight 200; the rebuilt bundle calls the current tunnel. No access code (user's decision): anyone with the URL can ask, upload and approve.
+
+## 2026-11-13 — Replay button (Sources → Replay history)
+
+### Built
+
+- **Where:** a **Replay history** button at the top right of the Sources page (owner view) opens `/sources/replay`.
+- **The page:**
+  - one step per file, in the order the files arrived in a separate replay copy (tenant `replay`);
+  - Previous / Play / Next, plus numbered step buttons;
+  - each step shows the rules it replaced (old → new, with both sources and the start date; number changes first), the change notices it published, statements it brought that a better source still outranks, and statements held for review;
+  - an **Ask** box answers as the engine knew it right after that step (`known_at` = the step's end, header `X-Tenant: replay`);
+  - **Run again from empty** (with a confirmation) rebuilds the copy from all 16 files through the real pipeline; the rail shows progress and the arrival order.
+  - The live knowledge base is never touched. In demo mode (no API) the page shows a recorded snapshot (`web/fixtures/replay.json`).
+- **API:** `GET /replay` (steps + run state) and `POST /replay` (start). `app/store/history.py` reads each step from the bitemporal tables as it stood when the step finished, so nothing is recomputed. `app/ingest/replay.py` runs the replay on a background thread of the API: one long worker job would be requeued by the 15-minute stale-job check. It feeds a file, then drains that tenant's jobs (`jobs.claim(..., tenant_id=)` / `worker.drain(tenant_id=)`) before the next file. The file list is the AP plug-in's `replay:` list in `plugin.yaml`, so the core names no files. `governed()` turns owner approval off for the replay tenant only (it is the owner's own seeding), and `evaluation/tenants.clone_config` now uses the shared `copy_config`.
+
+### Fixed: questions "as known at" a past moment (`known_at`) were only partly time-aware
+
+`/ask` took `known_at`, but four things still used today's state. A question about the moment right after SOP v3.1 came back "not covered":
+
+- **Passage search** now only sees sources received by then. It ignores today's source end date and status, which a later version may have set; the facts decide.
+- **Passage tags:** a source whose newer version arrived later is shown as it was then (current, no end date), so the model no longer refuses it as "superseded".
+- **In-force split, cited-passage facts and calculators** now read the facts at `known_at`. Before, the 2% was flagged as "not the current rule", and the "older sources" line listed the FAQ before it had arrived.
+- **The conflict-scan line** is left off past-moment answers (the scan is today's view).
+
+Normal answers (no `known_at`) take exactly the same path as before.
+
+### Verified
+
+- On Neon, recorded replay (5 steps, 10 Nov), price-tolerance question asked at two moments:
+  - **after SOP v3.1:** "lower of 2% of the line value and ₹1,000", cites SOP v3.1;
+  - **after SOP v4.0:** "lower of 1% and ₹500", cites §4.2, older line SOP v3.1 2% / ₹1,000 only.
+- **Steps on the page:**
+  - SOP v4.0 replaced 19 rules (price tolerance, approval limits 25→10 lakh, IRN threshold 10→5 crore, payment cut-off 5 pm→1 pm, GSTR-2A→2B);
+  - the memos step held the FAQ's "Infra 10% price tolerance" for review;
+  - the Infra email announced 7% from 16 Nov.
+- **Browser** (local API on Neon + `npm run dev`): button → page → step 1 → Ask shows the 2% / ₹1,000 answer; no console errors; no horizontal scroll at 390 px. Screenshots: `reports/screenshots/replay_step2.png`, `replay_ask_step1.png`, `replay_mobile.png`.
+- **Tests:** `tests/integration/test_replay_db.py` (4 tests: steps as they stood then, search at a past moment, source shown as then, tenant-only job claim). `tsc --noEmit`, `npm run lint`, `check:tokens` and `ruff` are clean.
+- **Not run yet:** a fresh replay through the button. It would re-extract all 16 files on Isoquant (cache keys include the model; the recorded run was on NVIDIA), about 20–30 min and roughly $0.10–0.30.

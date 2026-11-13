@@ -8,7 +8,7 @@ parent passages are not retrieved; their leaf passages carry the text.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import PurePath
 from typing import Any
 
@@ -55,17 +55,31 @@ class PassageHit:
         return f"{self.source_label} {loc}"
 
 
-def _filters(client: str | None, as_of: date | None, today: date) -> list[Any]:
+def _filters(
+    client: str | None, as_of: date | None, today: date, known_at: datetime | None = None
+) -> list[Any]:
     day = as_of or today
     out: list[Any] = [
         Passage.tenant_id == tenant(),
-        Passage.retired_at.is_(None),
         Passage.segment_kind != "record",
         Passage.meta["leaf"].astext == "true",
-        Source.status.in_(THEN_SOURCES if as_of else CURRENT_SOURCES),
         or_(Source.dated.is_(None), Source.dated <= day),
-        or_(Source.valid_until.is_(None), Source.valid_until >= day),
     ]
+    if known_at is None:
+        out += [
+            or_(Source.valid_until.is_(None), Source.valid_until >= day),
+            Passage.retired_at.is_(None),
+            Source.status.in_(THEN_SOURCES if as_of else CURRENT_SOURCES),
+        ]
+    else:
+        # What the engine had at that moment: sources received by then. A source's status and
+        # end date are today's (a later version may have closed it since), so the facts, which
+        # keep both clocks, decide what was in force then; here any once-valid source passes.
+        out += [
+            Source.created_at <= known_at,
+            or_(Passage.retired_at.is_(None), Passage.retired_at > known_at),
+            Source.status.in_(THEN_SOURCES),
+        ]
     if client:
         out.append(Passage.client_scope.in_(["all", client]))
     return out
@@ -92,6 +106,7 @@ def fulltext(
     client: str | None = None,
     as_of: date | None = None,
     today: date | None = None,
+    known_at: datetime | None = None,
 ) -> list[tuple[str, float]]:
     qs = _tsquery_text(session, question)
     if not qs:
@@ -101,7 +116,7 @@ def fulltext(
     q = (
         select(Passage.id, rank)
         .join(Source, Source.id == Passage.source_id)
-        .where(*_filters(client, as_of, today or date.today()), Passage.tsv.op("@@")(tsq))
+        .where(*_filters(client, as_of, today or date.today(), known_at), Passage.tsv.op("@@")(tsq))
         .order_by(rank.desc(), Passage.id)
         .limit(k)
     )
@@ -115,20 +130,28 @@ def vector(
     client: str | None = None,
     as_of: date | None = None,
     today: date | None = None,
+    known_at: datetime | None = None,
 ) -> list[tuple[str, float]]:
     dist = Passage.embedding.cosine_distance(vec)
     q = (
         select(Passage.id, 1 - dist)
         .join(Source, Source.id == Passage.source_id)
-        .where(*_filters(client, as_of, today or date.today()), Passage.embedding.is_not(None))
+        .where(
+            *_filters(client, as_of, today or date.today(), known_at),
+            Passage.embedding.is_not(None),
+        )
         .order_by(dist, Passage.id)
         .limit(k)
     )
     return [(pid, float(s)) for pid, s in session.execute(q)]
 
 
-def hydrate(session: Session, ids: list[str]) -> dict[str, PassageHit]:
-    """Passages with their source details (file, label, type, status, validity)."""
+def hydrate(
+    session: Session, ids: list[str], known_at: datetime | None = None
+) -> dict[str, PassageHit]:
+    """Passages with their source details (file, label, type, status, validity). With `known_at`,
+    a source whose newer version arrived after that moment is shown as it was then: current, with
+    no end date set by the newer version."""
     if not ids:
         return {}
     q = (
@@ -157,7 +180,30 @@ def hydrate(session: Session, ids: list[str]) -> dict[str, PassageHit]:
             valid_until=s.valid_until,
             file=PurePath(uri).name if uri else s.title,
         )
+    if known_at is not None and out:
+        _as_known(session, out, known_at)
     return out
+
+
+def _as_known(session: Session, hits: dict[str, PassageHit], known_at: datetime) -> None:
+    olds = {h.source_id for h in hits.values() if h.source_status == "superseded"}
+    if not olds:
+        return
+    later = {
+        old_id: dated
+        for old_id, created, dated in session.execute(
+            select(Source.supersedes_source_id, Source.created_at, Source.dated).where(
+                Source.tenant_id == tenant(), Source.supersedes_source_id.in_(olds)
+            )
+        )
+        if created > known_at
+    }
+    for h in hits.values():
+        if h.source_id in later:
+            dated = later[h.source_id]
+            h.source_status = "current"
+            if dated is not None and h.valid_until == dated - timedelta(days=1):
+                h.valid_until = None
 
 
 # ---------------------------------------------------------------- entity linking

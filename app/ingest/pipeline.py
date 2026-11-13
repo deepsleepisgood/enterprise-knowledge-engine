@@ -23,8 +23,15 @@ from app.ingest.parsers import QUALITY_FLOOR, parse
 from app.ingest.segment import DocPart, PassageDraft, infer_headings, segment, split_documents
 from app.store import episodes as store
 from app.store import jobs, kb
-from app.store.base import stable_id
+from app.store.base import stable_id, tenant
 from app.worker import handler
+
+
+def governed() -> bool:
+    """Owner approval applies to new input, except in the replay tenant (the owner's seeding)."""
+    cfg = get_settings()
+    return cfg.governance and tenant() != cfg.replay_tenant
+
 
 REPAIR_PROMPT_VERSION = "structure-repair-v1"
 
@@ -298,7 +305,7 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
                     },
                 )
         links = []
-        govern = get_settings().governance
+        govern = governed()
         for src, _, _ in sources:
             if govern:
                 break  # a governed new version replaces the old one only once approved

@@ -41,6 +41,9 @@ PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-haiku-5-5": (0.10, 0.50),
     "claude-sonnet-5-5": (2.00, 10.00),
     "claude-opus-5-5": (4.00, 20.00),
+    # Isoquant list prices (USD per million tokens, 11 Nov 2026)
+    "deepseek-v4.1-flash-1017-fast": (0.035, 0.37),
+    "glm-5.3-flash": (0.07, 0.15),
 }
 
 
@@ -290,8 +293,7 @@ def _nim_complete(req: dict[str, Any]) -> tuple[Any, Any]:
         max_tokens=req["max_tokens"],
         json_mode=False,
     )
-    if req.get("thinking_off"):
-        body["chat_template_kwargs"] = {"enable_thinking": False}
+    body.update(nim.thinking_options(bool(req.get("thinking_off"))))
     resp = nim.chat(body)
     text, finish = nim.message_text(resp)
     if finish == "length":
@@ -318,8 +320,7 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             max_tokens=budget,
             json_mode=True,
         )
-        if req.get("thinking_off"):
-            body["chat_template_kwargs"] = {"enable_thinking": False}
+        body.update(nim.thinking_options(bool(req.get("thinking_off"))))
         resp = nim.chat(body)
         i, o = nim.usage(resp)
         in_tok, out_tok = in_tok + i, out_tok + o
@@ -335,8 +336,13 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             return obj.model_dump(mode="json"), _NimResp(in_tok, out_tok)
         except (ValueError, ValidationError) as exc:
             attempt += 1
-            if attempt == 2:
+            if attempt == 3:
                 raise LLMError(f"model output did not match {schema.__name__}: {exc}") from exc
+            if not isinstance(exc, ValidationError):
+                # No JSON at all (a garbled reply): ask again from scratch, without feeding
+                # the garbage back to the model.
+                messages = list(req["messages"])
+                continue
             messages += [
                 {"role": "assistant", "content": text},
                 {

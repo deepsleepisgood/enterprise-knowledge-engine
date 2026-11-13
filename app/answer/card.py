@@ -7,7 +7,7 @@ names stable.
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -117,8 +117,10 @@ def force_split(
     client: str | None,
     as_of: date | None,
     today: date,
+    known_at: datetime | None = None,
 ) -> tuple[list[FactRow], list[FactRow]]:
-    """(in force on the day asked, not in force) for these attributes, rules only.
+    """(in force on the day asked, not in force) for these attributes, rules only, as the engine
+    knew them at `known_at` (default: now).
 
     "Not in force" is anchored: only versions of something that is in force now (same subject
     and attribute), so list-like attributes (one fact per code) never look like replacements.
@@ -131,7 +133,9 @@ def force_split(
     statuses = IN_FORCE_THEN if as_of else CURRENT
     now = [
         f
-        for f in fstore.get_facts(session, attribute=attributes, valid_on=day, statuses=statuses)
+        for f in fstore.get_facts(
+            session, attribute=attributes, valid_on=day, known_at=known_at, statuses=statuses
+        )
         if f.kind != "practice"
     ]
     everything = [
@@ -139,6 +143,7 @@ def force_split(
         for f in fstore.get_facts(
             session,
             attribute=attributes,
+            known_at=known_at,
             statuses=["current", "superseded", "overridden", "provisional", "pending"],
         )
         if f.kind != "practice"

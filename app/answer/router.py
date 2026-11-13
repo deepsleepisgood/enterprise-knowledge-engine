@@ -8,12 +8,16 @@ generation.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
+from app.core.llm import LLMError
+
+log = logging.getLogger(__name__)
 
 PROMPT_VERSION = "route-v5"
 
@@ -94,14 +98,20 @@ def route(
         clients=", ".join(clients) or "none",
         roles=_role_lines(roles),
     )
-    out: RouteOut = structured_fn(
-        f"Question:\n{question}",
-        RouteOut,
-        system=system,
-        model=get_settings().router_model,
-        prompt_version=PROMPT_VERSION,
-        max_tokens=1024,
-    )
+    try:
+        out: RouteOut = structured_fn(
+            f"Question:\n{question}",
+            RouteOut,
+            system=system,
+            model=get_settings().router_model,
+            prompt_version=PROMPT_VERSION,
+            max_tokens=1024,
+        )
+    except LLMError as exc:
+        # An unusable routing reply must not fail the question: lookup is the safe default
+        # (retrieval, the gate and the verifier still decide what is answered).
+        log.warning("router failed, answering as lookup: %s", str(exc)[:200])
+        out = RouteOut(route="lookup", confidence=0.0)
     valid = {*calculators, "lookup", "practice", "out_of_scope"}
     if out.route not in valid:
         out.route = "lookup"

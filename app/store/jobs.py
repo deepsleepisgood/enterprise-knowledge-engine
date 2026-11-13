@@ -48,6 +48,7 @@ _CLAIM = text(
         SELECT id FROM jobs
         WHERE status = 'queued' AND run_after <= now()
           AND (CAST(:kinds AS text[]) IS NULL OR kind = ANY(CAST(:kinds AS text[])))
+          AND (CAST(:tenant AS text) IS NULL OR tenant_id = CAST(:tenant AS text))
         ORDER BY id
         FOR UPDATE SKIP LOCKED
         LIMIT 1
@@ -57,8 +58,11 @@ _CLAIM = text(
 )
 
 
-def claim(session: Session, worker: str, kinds: list[str] | None = None) -> ClaimedJob | None:
-    row = session.execute(_CLAIM, {"worker": worker, "kinds": kinds}).first()
+def claim(
+    session: Session, worker: str, kinds: list[str] | None = None, tenant_id: str | None = None
+) -> ClaimedJob | None:
+    """The oldest runnable job (of `kinds`, for `tenant_id` when given), now marked running."""
+    row = session.execute(_CLAIM, {"worker": worker, "kinds": kinds, "tenant": tenant_id}).first()
     return ClaimedJob(*row) if row else None
 
 

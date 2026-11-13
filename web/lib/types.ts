@@ -436,3 +436,52 @@ export interface Analytics {
   latency_ms: { p50: number | null; p90: number | null };
   acknowledgements: { changes: number; acks: number; rate: number | null };
 }
+
+/** One rule a replay step changed: old -> new (or what a step said vs what still stands). */
+export interface ReplaySwap {
+  subject: string;
+  attribute: string;
+  old: string;
+  old_source: string | null;
+  new: string;
+  new_source: string | null;
+  valid_from: string | null;
+}
+
+/** GET /replay: one step per file, in the order it arrived in the replay copy. */
+export interface ReplayStep {
+  episode_id: string;
+  file: string;
+  status: EpisodeStatus;
+  sources: { label: string; doc_type: string; dated: string | null; status: string }[];
+  arrived_at: string;
+  /** The instant to ask "what did the engine know right after this file"; null while running. */
+  done_at: string | null;
+  facts: number;
+  rules_in_force: number;
+  replaced: ReplaySwap[];
+  replaced_total: number;
+  outranked: ReplaySwap[];
+  outranked_total: number;
+  held: string[];
+  held_total: number;
+  announced: string[];
+}
+
+export interface ReplayRun {
+  running: boolean;
+  started_at?: string;
+  started_by?: string;
+  finished_at?: string;
+  step?: number;
+  total?: number;
+  file?: string | null;
+  error?: string | null;
+}
+
+export interface ReplayState {
+  tenant: string;
+  files: string[];
+  run: ReplayRun;
+  steps: ReplayStep[];
+}

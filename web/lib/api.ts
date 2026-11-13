@@ -91,6 +91,7 @@ const FIXTURES: [RegExp, () => Promise<{ default: unknown }>][] = [
   [/^\/analytics$/, () => import("@/fixtures/analytics.json")],
   [/^\/notifications/, async () => ({ default: [] })],
   [/^\/changes/, () => import("@/fixtures/changes.json")],
+  [/^\/replay$/, () => import("@/fixtures/replay.json")],
 ];
 
 async function errorFrom(res: Response): Promise<ApiError> {
@@ -104,14 +105,14 @@ async function errorFrom(res: Response): Promise<ApiError> {
   return new ApiError(res.status, text);
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+export async function apiGet<T>(path: string, headers?: Record<string, string>): Promise<T> {
   if (DEMO_MODE) {
     const hit = FIXTURES.find(([re]) => re.test(path));
     if (!hit) throw new ApiError(404, "Not available in demo mode.");
     const mod = await hit[1]();
     return structuredClone(mod.default) as T;
   }
-  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store", headers });
   if (!res.ok) throw await errorFrom(res);
   return (await res.json()) as T;
 }
@@ -120,11 +121,12 @@ export async function apiSend<T>(
   method: "POST" | "PUT" | "PATCH",
   path: string,
   body?: unknown,
+  headers?: Record<string, string>,
 ): Promise<T> {
   if (DEMO_MODE) throw new DemoReadOnlyError();
   const res = await fetch(`${API_BASE}${path}`, {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!res.ok) throw await errorFrom(res);
@@ -159,6 +161,10 @@ export async function ask(params: {
   invoiceId: string | null;
   asOf: string | null;
   viewer: "processor" | "owner";
+  /** What the engine knew at this instant (ISO date-time); null means now. */
+  knownAt?: string | null;
+  /** Another tenant's knowledge base, such as the replay copy. */
+  tenant?: string;
 }): Promise<AnswerCard> {
   if (DEMO_MODE) {
     await delay(700);
@@ -170,15 +176,48 @@ export async function ask(params: {
     }
     return { ...hit.card, as_of: params.asOf };
   }
-  return apiSend<AnswerCard>("POST", "/ask", {
+  const body = {
     question: params.question,
     user_id: params.userId,
     client: params.client === "all" ? null : params.client,
     invoice_id: params.invoiceId,
     as_of: params.asOf,
+    known_at: params.knownAt ?? null,
     viewer: params.viewer,
-  });
+  };
+  const headers = params.tenant ? { "X-Tenant": params.tenant } : undefined;
+  // Start the answer and poll for it, so a slow model never hits a proxy's request timeout.
+  let job: AskJob;
+  try {
+    job = await apiSend<AskJob>("POST", "/ask/jobs", body, headers);
+  } catch (e) {
+    if (e instanceof ApiError && (e.status === 404 || e.status === 405)) {
+      return apiSend<AnswerCard>("POST", "/ask", body, headers); // an API without jobs
+    }
+    throw e;
+  }
+  const deadline = Date.now() + ASK_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await delay(ASK_POLL_MS);
+    const got = await apiGet<AskJob>(`/ask/jobs/${job.job_id}`, headers);
+    if (got.status === "done" && got.card) return got.card;
+    if (got.status === "error") {
+      throw new ApiError(got.status_code ?? 500, got.error ?? "The answer failed.");
+    }
+  }
+  throw new ApiError(504, "The answer is taking too long. Try again in a minute.");
 }
+
+interface AskJob {
+  job_id: string;
+  status: "pending" | "done" | "error";
+  card?: AnswerCard;
+  status_code?: number;
+  error?: string;
+}
+
+const ASK_POLL_MS = 2_000;
+const ASK_TIMEOUT_MS = 10 * 60_000;
 
 export async function getChanges(sinceVersion: number): Promise<ChangeFeedItem[]> {
   if (DEMO_MODE) {

@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -149,9 +149,10 @@ class BoundRules:
         plugin: str,
         today: date | None = None,
         as_of: date | None = None,
+        known_at: datetime | None = None,
     ) -> None:
         self.session, self.onto, self.plugin, self.today = session, onto, plugin, today
-        self.as_of = as_of
+        self.as_of, self.known_at = as_of, known_at
         self.used: list[RuleValue] = []
         self.bindings = {b.param: b.attribute_key for b in kb.get_bindings(session, plugin)}
 
@@ -172,6 +173,7 @@ class BoundRules:
             parameter,
             client=client,
             as_of=as_of or self.as_of,
+            known_at=self.known_at,
             today=self.today,
             attribute=attr,
         )

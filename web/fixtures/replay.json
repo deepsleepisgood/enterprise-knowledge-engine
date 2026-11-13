@@ -1,0 +1,398 @@
+{
+  "tenant": "replay",
+  "files": [
+    "PS-07_AP_SOP_v3.1_2023.docx",
+    "PS-07_AP_SOP_v4.0_2026.docx",
+    "PS-07_training_and_expert_transcripts.docx",
+    "PS-07_desk_instructions_and_client_memos.docx",
+    "01_infra_bulk_tolerance.eml",
+    "02_price_tolerance_still_2pct.eml",
+    "03_spoofed_bank_change.eml",
+    "04_fwd_infra_bulk_tolerance.eml",
+    "05_fwd_fwd_infra_bulk_tolerance.eml",
+    "06_noise_out_of_office.eml",
+    "07_noise_team_lunch.eml",
+    "08_noise_newsletter.eml",
+    "09_question_30_lakh.eml",
+    "10_tacit_tip_supplier_habit.eml",
+    "11_client_past_effective_date.eml",
+    "12_pharma_owner_change.eml"
+  ],
+  "run": {
+    "running": false
+  },
+  "steps": [
+    {
+      "episode_id": "af29630c945d317a7fc7",
+      "file": "PS-07_AP_SOP_v3.1_2023.docx",
+      "status": "published",
+      "sources": [
+        {
+          "label": "AP SOP v3.1",
+          "doc_type": "sop",
+          "dated": "2023-07-01",
+          "status": "superseded"
+        }
+      ],
+      "arrived_at": "2026-11-10T07:22:09.724179Z",
+      "done_at": "2026-11-10T07:29:09.927882Z",
+      "facts": 71,
+      "rules_in_force": 63,
+      "replaced": [],
+      "replaced_total": 0,
+      "outranked": [],
+      "outranked_total": 0,
+      "held": [],
+      "held_total": 0,
+      "announced": []
+    },
+    {
+      "episode_id": "ad8d13932b4a84f29318",
+      "file": "PS-07_AP_SOP_v4.0_2026.docx",
+      "status": "published",
+      "sources": [
+        {
+          "label": "AP SOP v4.0",
+          "doc_type": "sop",
+          "dated": "2026-04-01",
+          "status": "current"
+        }
+      ],
+      "arrived_at": "2026-11-10T07:29:09.927883Z",
+      "done_at": "2026-11-10T08:07:33.253215Z",
+      "facts": 194,
+      "rules_in_force": 169,
+      "replaced": [
+        {
+          "subject": "GST compliance checks",
+          "attribute": "gst_compliance.itc_form",
+          "old": "GSTR-2A",
+          "old_source": "AP SOP v3.1",
+          "new": "GSTR-2B",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Invoice approval authority",
+          "attribute": "invoice_approval_authority.ap_controller_max_approval_amount",
+          "old": "10,000,000 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "5,000,000 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Invoice approval authority",
+          "attribute": "invoice_approval_authority.cfo_threshold_amount",
+          "old": "10,000,000 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "5,000,000 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Invoice approval authority",
+          "attribute": "invoice_approval_authority.threshold_amount",
+          "old": "2,500,000 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "1,000,000 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "IRN requirement",
+          "attribute": "irn_requirement.threshold_turnover",
+          "old": "100,000,000 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "50,000,000 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Payment run schedule",
+          "attribute": "payment_run_schedule.cutoff_time",
+          "old": "5 pm",
+          "old_source": "AP SOP v3.1",
+          "new": "1 pm",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Price tolerance",
+          "attribute": "price_tolerance.general_cap_amount",
+          "old": "1,000 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "500 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Price tolerance",
+          "attribute": "price_tolerance.general_percentage",
+          "old": "2%",
+          "old_source": "AP SOP v3.1",
+          "new": "1%",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Rounding difference tolerance",
+          "attribute": "rounding_tolerance.max_accepted_difference",
+          "old": "50 INR",
+          "old_source": "AP SOP v3.1",
+          "new": "10 INR",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "GST compliance checks",
+          "attribute": "gst_compliance.missing_itc_action",
+          "old": "Hold the GST portion if the invoice is not reflected in GSTR-2A",
+          "old_source": "AP SOP v3.1",
+          "new": "Pay the base value on the due date and hold the GST amount until the invoice appears in GSTR-2B.",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Invoice intake channels",
+          "attribute": "invoice_intake.channels",
+          "old": "supplier portal, AP e-mail inbox, mail room",
+          "old_source": "AP SOP v3.1",
+          "new": "supplier portal, email, paper invoices",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Invoice retention period",
+          "attribute": "invoice_retention.supplier_bank_details_sharing_restricted",
+          "old": "Do not share supplier bank details outside the AP team.",
+          "old_source": "AP SOP v3.1",
+          "new": "true",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        }
+      ],
+      "replaced_total": 19,
+      "outranked": [],
+      "outranked_total": 0,
+      "held": [],
+      "held_total": 0,
+      "announced": []
+    },
+    {
+      "episode_id": "062bb073d20071f0ce1c",
+      "file": "PS-07_training_and_expert_transcripts.docx",
+      "status": "published",
+      "sources": [
+        {
+          "label": "Video 1",
+          "doc_type": "training",
+          "dated": "2026-02-01",
+          "status": "current"
+        },
+        {
+          "label": "Video 2",
+          "doc_type": "training",
+          "dated": "2022-11-01",
+          "status": "current"
+        },
+        {
+          "label": "Video 3",
+          "doc_type": "training",
+          "dated": "2026-04-01",
+          "status": "current"
+        },
+        {
+          "label": "Shadowing notes",
+          "doc_type": "observation",
+          "dated": "2026-06-17",
+          "status": "record"
+        },
+        {
+          "label": "Expert interview 1",
+          "doc_type": "interview",
+          "dated": "2026-09-08",
+          "status": "record"
+        },
+        {
+          "label": "Expert interview 2",
+          "doc_type": "interview",
+          "dated": "2026-09-15",
+          "status": "record"
+        }
+      ],
+      "arrived_at": "2026-11-10T08:07:33.253216Z",
+      "done_at": "2026-11-10T08:37:10.642143Z",
+      "facts": 125,
+      "rules_in_force": 256,
+      "replaced": [
+        {
+          "subject": "TDS deduction rules",
+          "attribute": "tds_deduction.unclear_section_action",
+          "old": "ask the Team Lead",
+          "old_source": "AP SOP v3.1",
+          "new": "refer_to_tax_desk",
+          "new_source": "Video 2",
+          "valid_from": "2022-11-01T00:00:00Z"
+        }
+      ],
+      "replaced_total": 1,
+      "outranked": [
+        {
+          "subject": "GRN posting timeline",
+          "attribute": "grn_posting_timeline.missing_grn_escalation_days",
+          "old": "2 working days",
+          "old_source": "Video 3",
+          "new": "2 working days reminder, 5 working days escalation to manager",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Month-end procedures",
+          "attribute": "month_end_procedures.posting_cutoff_rule",
+          "old": "At month-end, anything received after the third-last working day is accrued, not posted.",
+          "old_source": "Video 3",
+          "new": "Invoices received after the third-last working day of the month are not posted in that month",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        }
+      ],
+      "outranked_total": 2,
+      "held": [],
+      "held_total": 0,
+      "announced": []
+    },
+    {
+      "episode_id": "495efd40fad2f6062ca1",
+      "file": "PS-07_desk_instructions_and_client_memos.docx",
+      "status": "published",
+      "sources": [
+        {
+          "label": "DI-03",
+          "doc_type": "work_instruction",
+          "dated": "2026-04-12",
+          "status": "current"
+        },
+        {
+          "label": "DI-07",
+          "doc_type": "work_instruction",
+          "dated": "2026-04-01",
+          "status": "current"
+        },
+        {
+          "label": "CM-INF-02",
+          "doc_type": "memo",
+          "dated": "2026-04-15",
+          "status": "current"
+        },
+        {
+          "label": "CM-PHA-01",
+          "doc_type": "memo",
+          "dated": "2026-01-02",
+          "status": "current"
+        },
+        {
+          "label": "CM-RET-03",
+          "doc_type": "memo",
+          "dated": "2026-05-20",
+          "status": "current"
+        },
+        {
+          "label": "Part F",
+          "doc_type": "faq",
+          "dated": "2023-10-09",
+          "status": "stale"
+        }
+      ],
+      "arrived_at": "2026-11-10T08:37:10.642144Z",
+      "done_at": "2026-11-10T08:56:21.138738Z",
+      "facts": 68,
+      "rules_in_force": 296,
+      "replaced": [
+        {
+          "subject": "Quantity tolerance",
+          "attribute": "quantity_tolerance.applicability_per_memo",
+          "old": "There is no quantity tolerance for any client, except the bulk-material tolerance agreed with Arvana Infra Projects in Client Memo CM-INF…",
+          "old_source": "AP SOP v4.0",
+          "new": "Quantity tolerance only applies to cement, reinforcement steel, sand, and aggregates per client memo CM-INF-02; all other materials follo…",
+          "new_source": "CM-INF-02",
+          "valid_from": "2026-04-15T00:00:00Z"
+        }
+      ],
+      "replaced_total": 1,
+      "outranked": [
+        {
+          "subject": "Duplicate invoice check",
+          "attribute": "duplicate_check.flag_action",
+          "old": "Must stop and raise DUP_SUSPECT; do not override.",
+          "old_source": "DI-03",
+          "new": "go to the exception queue as DUP_SUSPECT and are never posted until a Senior Processor clears them",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject": "Vendor bank account change process",
+          "attribute": "vendor_bank_account_change.required_documents",
+          "old": "letterhead, signed, cancelled cheque for the new account",
+          "old_source": "DI-07",
+          "new": "letterhead signed by authorised signatory, cancelled cheque for new account",
+          "new_source": "AP SOP v4.0",
+          "valid_from": "2026-04-01T00:00:00Z"
+        }
+      ],
+      "outranked_total": 2,
+      "held": [
+        "Only APIs require QA release; excipients and packaging can be paid on normal terms.",
+        "Infra projects have a 10% price tolerance for cement and steel."
+      ],
+      "held_total": 2,
+      "announced": []
+    },
+    {
+      "episode_id": "25522b016d41efda17e2",
+      "file": "01_infra_bulk_tolerance.eml",
+      "status": "published",
+      "sources": [
+        {
+          "label": "Bulk tol update",
+          "doc_type": "email",
+          "dated": "2026-11-02",
+          "status": "current"
+        }
+      ],
+      "arrived_at": "2026-11-10T08:56:21.138739Z",
+      "done_at": "2026-11-10T17:30:15.515044Z",
+      "facts": 6,
+      "rules_in_force": 298,
+      "replaced": [
+        {
+          "subject": "Quantity tolerance",
+          "attribute": "quantity_tolerance.infra_material_percentage",
+          "old": "5%",
+          "old_source": "Bulk tol update",
+          "new": "7%",
+          "new_source": "Bulk tol update",
+          "valid_from": "2026-11-16T00:00:00Z"
+        }
+      ],
+      "replaced_total": 1,
+      "outranked": [
+        {
+          "subject": "Quantity tolerance",
+          "attribute": "quantity_tolerance.infra_material_value_cap",
+          "old": "unchanged from CM-INF-02",
+          "old_source": "Bulk tol update",
+          "new": "25,000 INR",
+          "new_source": "CM-INF-02",
+          "valid_from": "2026-04-15T00:00:00Z"
+        }
+      ],
+      "outranked_total": 1,
+      "held": [],
+      "held_total": 0,
+      "announced": [
+        "From 16 November 2026, the quantity tolerance for cement, reinforcement steel, sand, and aggregates is 7% above GRN quantity."
+      ]
+    }
+  ]
+}

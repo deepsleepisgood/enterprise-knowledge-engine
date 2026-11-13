@@ -43,6 +43,7 @@ def setup(tmp_path, monkeypatch):
     monkeypatch.setattr(s, "cache_dir", tmp_path / "cache")
     monkeypatch.setattr(s, "log_dir", tmp_path / "logs")
     monkeypatch.setattr(s, "llm_provider", "nim")
+    monkeypatch.setattr(s, "nim_base_url", "https://integrate.api.nvidia.com/v1")
     monkeypatch.setattr(s, "model_smart", "vendor/smart-model")
     monkeypatch.setattr(s, "model_fast", "vendor/fast-model")
     yield
@@ -85,9 +86,17 @@ def test_invalid_output_gets_one_corrective_retry(setup) -> None:
 
 
 def test_still_invalid_after_retry_raises(setup) -> None:
-    _use(FakeTransport(["not json", "still not json"]))
+    _use(FakeTransport(["not json", "still not json", "nor this"]))
     with pytest.raises(llm.LLMError):
         llm.structured("x", Tolerance, prompt_version="t-fail")
+
+
+def test_a_garbled_reply_is_asked_again_from_scratch(setup) -> None:
+    fake = _use(FakeTransport(["ing 2--F to", '{"pct_of_line": 1, "cap_inr": 500}']))
+    out = llm.structured("x", Tolerance, prompt_version="t-garbled")
+    assert out.cap_inr == 500
+    # The retry repeats the original request; the garbage is not fed back to the model.
+    assert fake.bodies[1]["messages"] == fake.bodies[0]["messages"]
 
 
 def test_truncated_output_retries_with_double_budget(setup) -> None:
@@ -202,3 +211,13 @@ def test_thinking_off_reaches_the_body_and_has_its_own_cache_entry(setup) -> Non
     assert fake.bodies[0]["chat_template_kwargs"] == {"enable_thinking": False}
     llm.structured("Extract.", Tolerance, model="fast")  # default: separate cache entry
     assert len(fake.bodies) == 2 and "chat_template_kwargs" not in fake.bodies[1]
+
+
+def test_isoquant_gets_its_own_thinking_switch(setup, monkeypatch) -> None:
+    monkeypatch.setattr(get_settings(), "nim_base_url", "https://api.isoquant.ai/v1")
+    fake = _use(FakeTransport(['{"pct_of_line": 1, "cap_inr": 500}', "plain"]))
+    llm.structured("x", Tolerance, prompt_version="t-iq-off", thinking=False)
+    llm.complete("y", prompt_version="t-iq-on")
+    off, on = fake.bodies
+    assert off["reasoning_effort"] == "none" and "chat_template_kwargs" not in off
+    assert on["reasoning_effort"] == "low"

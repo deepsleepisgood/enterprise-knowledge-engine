@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     llm_provider: str = "anthropic"  # anthropic | nim
     anthropic_api_key: str = ""
     nvidia_api_key: str = ""
+    # Any OpenAI-compatible endpoint runs through the NIM transport: set NIM_BASE_URL to it.
+    # Isoquant (api.isoquant.ai) uses ISOQUANT_API_KEY; everything else uses NVIDIA_API_KEY.
+    isoquant_api_key: str = ""
     nim_base_url: str = "https://integrate.api.nvidia.com/v1"
     nim_timeout_s: float = 300
     nim_max_rpm: int = 35  # NIM free tier allows ~40 requests/minute; keep headroom
@@ -36,6 +39,9 @@ class Settings(BaseSettings):
     # Owner approval of inputs that arrive after setup (BUILD_PLAN Phase 9). Bulk seeding and
     # evaluation scripts turn it off for their own runs.
     governance: bool = True
+    # Replay (Sources page): a separate tenant rebuilt from empty by feeding the plug-ins'
+    # `replay` file lists in order. The owner is seeding it, so governance is off there only.
+    replay_tenant: str = "replay"
     # Watched folder (SCOPE 4.1): polled by the worker; empty WATCH_DIR means data/inbox.
     watch_enabled: bool = True
     watch_dir: str = ""
@@ -64,8 +70,17 @@ class Settings(BaseSettings):
     def llm_configured(self) -> bool:
         """True when the selected provider has a key."""
         if self.llm_provider == "nim":
-            return bool(self.nvidia_api_key)
+            return bool(self.chat_api_key)
         return bool(self.anthropic_api_key)
+
+    @property
+    def is_isoquant(self) -> bool:
+        return "isoquant.ai" in self.nim_base_url
+
+    @property
+    def chat_api_key(self) -> str:
+        """The key for NIM_BASE_URL."""
+        return self.isoquant_api_key if self.is_isoquant else self.nvidia_api_key
 
     @property
     def enabled_plugins(self) -> list[str]:

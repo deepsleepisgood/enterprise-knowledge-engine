@@ -8,3 +8,11 @@ hooks:
   on_spreadsheet: loaders.ops.on_spreadsheet
   invoice_search: loaders.ops.invoice_search   # GET /invoices
   context: loaders.ops.context                 # GET /context, POST /ask with invoice_id
+# Replay (Sources page): rebuild the knowledge base from empty in the order these arrived.
+# Paths are relative to the project folder; a folder means its files in name order.
+replay:
+  - data/raw/PS-07_AP_SOP_v3.1_2023.docx
+  - data/raw/PS-07_AP_SOP_v4.0_2026.docx
+  - data/raw/PS-07_training_and_expert_transcripts.docx
+  - data/raw/PS-07_desk_instructions_and_client_memos.docx
+  - synthetic/emails

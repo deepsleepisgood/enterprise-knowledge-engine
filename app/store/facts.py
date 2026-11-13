@@ -184,9 +184,14 @@ def live_by_origin(session: Session, origin_keys: list[str]) -> dict[str, FactRo
     return {f.origin_key: _row(f) for f in session.scalars(q)}
 
 
-def live_for_passages(session: Session, passage_ids: list[str]) -> list[FactRow]:
+def live_for_passages(
+    session: Session, passage_ids: list[str], known_at: datetime | None = None
+) -> list[FactRow]:
+    """Facts drawn from these passages, as held now (or at `known_at`)."""
     q = select(Fact).where(
-        Fact.tenant_id == tenant(), Fact.retracted_at.is_(None), Fact.passage_id.in_(passage_ids)
+        Fact.tenant_id == tenant(),
+        *_time_filters(None, known_at),
+        Fact.passage_id.in_(passage_ids),
     )
     return [_row(f) for f in session.scalars(q)]
 

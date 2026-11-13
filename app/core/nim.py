@@ -89,16 +89,19 @@ def set_transport(fn: Transport | None) -> None:
 
 def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     s = get_settings()
-    if not s.nvidia_api_key:
-        raise NimError("NVIDIA_API_KEY is not set")
+    if not s.chat_api_key:
+        raise NimError("no API key for NIM_BASE_URL (NVIDIA_API_KEY or ISOQUANT_API_KEY)")
+    headers = {
+        "Authorization": f"Bearer {s.chat_api_key}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    if s.is_isoquant:
+        headers["Isoquant-ZDR"] = "required"  # zero data retention: prompts are not stored
     req = urllib.request.Request(
         s.nim_base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {s.nvidia_api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
+        headers=headers,
         method="POST",
     )
     last: Exception | None = None
@@ -137,6 +140,13 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
 
 def chat(body: dict[str, Any]) -> dict[str, Any]:
     return (_transport or _http_post)(body)
+
+
+def thinking_options(off: bool) -> dict[str, Any]:
+    """Request fields that turn a reasoning model's thinking off (or keep it brief)."""
+    if get_settings().is_isoquant:
+        return {"reasoning_effort": "none" if off else "low"}
+    return {"chat_template_kwargs": {"enable_thinking": False}} if off else {}
 
 
 def build_body(

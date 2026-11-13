@@ -7,6 +7,7 @@ import {
   FileWarning,
   FolderOpen,
   Globe,
+  History,
   Mail,
   MailX,
   MessageSquare,
@@ -16,6 +17,7 @@ import {
   Upload,
   UploadCloud,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DocGlyph } from "@/components/ask/DocGlyph";
@@ -410,7 +412,20 @@ export function SourcesView() {
       railLabel="Knowledge base totals"
       main={
         <>
-          <PageHeader eyebrow="Sources" title="Feed the engine" meta={stats && <span>kb v{stats.kb_version}</span>}>
+          <PageHeader
+            eyebrow="Sources"
+            title="Feed the engine"
+            meta={stats && <span>kb v{stats.kb_version}</span>}
+            actions={
+              <Link
+                href="/sources/replay"
+                className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-hairline bg-surface px-4 text-[13px] font-medium text-ink transition-colors hover:border-muted"
+              >
+                <History className="h-4 w-4" aria-hidden />
+                Replay history
+              </Link>
+            }
+          >
             Everything the engine knows comes from here. Nothing is overwritten: a newer version retires the old rule and keeps it on record.
           </PageHeader>
           <DropZone onUploaded={changed} />

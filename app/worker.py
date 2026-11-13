@@ -59,10 +59,10 @@ def load_handlers() -> None:
                 raise
 
 
-def run_one(worker_id: str, kinds: list[str] | None = None) -> bool:
+def run_one(worker_id: str, kinds: list[str] | None = None, tenant_id: str | None = None) -> bool:
     """Claim and run one job. Returns False when nothing was claimable."""
     with session_scope() as s:
-        job = jobs.claim(s, worker_id, kinds)
+        job = jobs.claim(s, worker_id, kinds, tenant_id)
     if job is None:
         return False
     fn = HANDLERS.get(job.kind)
@@ -81,8 +81,13 @@ def run_one(worker_id: str, kinds: list[str] | None = None) -> bool:
     return True
 
 
-def drain(kinds: list[str] | None = None, threads: int = 1, worker_id: str | None = None) -> int:
-    """Run jobs until none are claimable right now. Returns how many ran."""
+def drain(
+    kinds: list[str] | None = None,
+    threads: int = 1,
+    worker_id: str | None = None,
+    tenant_id: str | None = None,
+) -> int:
+    """Run jobs (of one tenant, when given) until none are claimable now. Returns how many ran."""
     load_handlers()
     base = worker_id or f"{socket.gethostname()}:{os.getpid()}"
     count = 0
@@ -90,7 +95,7 @@ def drain(kinds: list[str] | None = None, threads: int = 1, worker_id: str | Non
 
     def loop(i: int) -> None:
         nonlocal count
-        while run_one(f"{base}:{i}", kinds):
+        while run_one(f"{base}:{i}", kinds, tenant_id):
             with lock:
                 count += 1
 

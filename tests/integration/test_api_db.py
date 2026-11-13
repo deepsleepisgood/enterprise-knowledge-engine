@@ -80,6 +80,29 @@ def test_ask_returns_a_cited_card_with_kb_version(api: TestClient) -> None:
     assert api.post("/ask", json={"question": ""}).status_code == 422
 
 
+def test_ask_job_returns_the_same_card_by_polling(api: TestClient) -> None:
+    import time
+
+    r = api.post("/ask/jobs", json={"question": QUESTION, "user_id": "u1"})
+    assert r.status_code == 202, r.text
+    job = r.json()["job_id"]
+    for _ in range(100):
+        got = api.get(f"/ask/jobs/{job}").json()
+        if got["status"] != "pending":
+            break
+        time.sleep(0.1)
+    assert got["status"] == "done", got
+    assert "24 days" in got["card"]["rule"]["text"]
+    bad = api.post("/ask/jobs", json={"question": QUESTION, "invoice_id": "NOPE"}).json()
+    for _ in range(100):
+        out = api.get(f"/ask/jobs/{bad['job_id']}").json()
+        if out["status"] != "pending":
+            break
+        time.sleep(0.1)
+    assert out["status"] == "error" and out["status_code"] == 404
+    assert api.get("/ask/jobs/nope").status_code == 404
+
+
 def test_episodes_text_eml_upload_status_and_original(api: TestClient) -> None:
     r = api.post("/episodes", json={"text": "Night shifts end at 6 am.", "sender": "ops"})
     assert r.status_code == 202, r.text

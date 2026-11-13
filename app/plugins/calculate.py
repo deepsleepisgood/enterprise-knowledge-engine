@@ -7,7 +7,7 @@ is a current fact reached through the plug-in's bindings.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -36,8 +36,9 @@ def calculate(
     params: dict[str, Any],
     today: date | None = None,
     as_of: date | None = None,
+    known_at: datetime | None = None,
 ) -> Any:
-    rules = BoundRules(session, onto, plugin, today=today, as_of=as_of)
+    rules = BoundRules(session, onto, plugin, today=today, as_of=as_of, known_at=known_at)
     return entry(plugin).run(family, params, rules)
 
 

@@ -263,7 +263,7 @@ def ask(
                     if client_name and not inputs.get("client"):
                         inputs["client"] = client_name
                     res = calc_mod.calculate(
-                        s, onto, plugin, family, inputs, today=today, as_of=as_of
+                        s, onto, plugin, family, inputs, today=today, as_of=as_of, known_at=known_at
                     )
                     calc = _calc_view(f"calculator:{plugin}.{family}", res)
                     base["route"] = calc.route
@@ -290,7 +290,7 @@ def ask(
         calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
         fact_pids = [f.passage_id for f in got.facts if f.passage_id]
         order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
-        hits = search.hydrate(s, order[:MAX_EVIDENCE])
+        hits = search.hydrate(s, order[:MAX_EVIDENCE], known_at)
         evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
 
         failures: list[str] | None = None
@@ -322,10 +322,12 @@ def ask(
                 allowed.append(str(res.result))
             problems += verify.check_numbers(rule_text, allowed, onto.units)
             attrs = sorted(
-                {f.attribute for f in fstore.live_for_passages(s, cited)}
+                {f.attribute for f in fstore.live_for_passages(s, cited, known_at)}
                 | {c.attribute for c in (res.citations if res else [])}
             )
-            in_force, not_in_force = cards.force_split(s, attrs, client_name, as_of, today)
+            in_force, not_in_force = cards.force_split(
+                s, attrs, client_name, as_of, today, known_at
+            )
             problems += verify.check_not_in_force(
                 rule_text,
                 not_in_force,
@@ -372,7 +374,7 @@ def ask(
 
         cited_set = set(cited)
         cited_keys: dict[tuple[str, str], int] = {}
-        for f in fstore.live_for_passages(s, cited):
+        for f in fstore.live_for_passages(s, cited, known_at):
             pos = cited.index(f.passage_id) if f.passage_id in cited else 99
             key = (f.subject_id, f.attribute)
             cited_keys[key] = min(pos, cited_keys.get(key, 99))
@@ -393,7 +395,7 @@ def ask(
                 cards.older_sources(
                     s, onto, in_force, not_in_force, as_of, today, cited_keys=cited_keys
                 ),
-                [] if as_of else cards.conflicting_sources(s, sorted(set(cited_facts))),
+                [] if as_of or known_at else cards.conflicting_sources(s, sorted(set(cited_facts))),
             ),
             expert_tip=cards.expert_tip(
                 s,

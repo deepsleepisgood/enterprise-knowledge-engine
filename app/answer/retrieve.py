@@ -142,11 +142,11 @@ def retrieve(
 
         rerank_fn = rr.rerank if rr.enabled() else None
     vec = embed_fn([question])[0]
-    ft = search.fulltext(session, question, cfg.retrieve_k, client, as_of, today)
-    vv = search.vector(session, vec, cfg.retrieve_k, client, as_of, today)
+    ft = search.fulltext(session, question, cfg.retrieve_k, client, as_of, today, known_at)
+    vv = search.vector(session, vec, cfg.retrieve_k, client, as_of, today, known_at)
     vsim = dict(vv)
     fused = rrf([[i for i, _ in ft], [i for i, _ in vv]])[: cfg.retrieve_k]
-    hits = search.hydrate(session, [i for i, _ in fused])
+    hits = search.hydrate(session, [i for i, _ in fused], known_at)
     cands = [hits[i] for i, _ in fused if i in hits]
     if rerank_fn is not None and cands:
         scores = rerank_fn(question, [f"{h.context_header}\n{h.text}"[:2000] for h in cands])

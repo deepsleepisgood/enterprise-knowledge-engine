@@ -371,3 +371,13 @@ def test_a_date_from_the_passage_tags_is_a_cited_number() -> None:
     text = "Up to 5% is accepted until 31 March 2027 [1]."
     assert verify.check_numbers(text, [h.text])  # the body alone does not carry the date
     assert verify.check_numbers(text, [h.text, evidence_tags(h, None)]) == []
+
+
+def test_an_unusable_routing_reply_falls_back_to_lookup() -> None:
+    from app.core.llm import LLMError
+
+    def broken(*a, **kw):
+        raise LLMError("model output did not match RouteOut")
+
+    r = route("What is the price tolerance?", [], {"calculator:x.price": "price"}, {}, broken)
+    assert r.route == "lookup" and r.confidence == 0.0
