@@ -205,6 +205,29 @@ def test_http_429_honours_retry_after_and_backs_off(monkeypatch) -> None:
     assert sleeps == [15, 30, 60, 120]  # at least Retry-After (7 s), growing
 
 
+def test_openai_uses_its_own_key_and_endpoint(monkeypatch) -> None:
+    import io
+
+    requests = []
+
+    def fake_urlopen(req, timeout):
+        requests.append(req)
+        return io.BytesIO(b'{"choices": []}')
+
+    s = get_settings()
+    monkeypatch.setattr(s, "llm_provider", "openai")
+    monkeypatch.setattr(s, "openai_api_key", "test-openai-key")
+    monkeypatch.setattr(s, "nvidia_api_key", "")
+    monkeypatch.setattr(nim.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(nim, "_limiter", nim.RateLimiter(1000))
+
+    assert s.llm_configured
+    assert nim._http_post({"model": "gpt-4o"}) == {"choices": []}
+    assert requests[0].full_url == "https://api.openai.com/v1/chat/completions"
+    assert requests[0].get_header("Authorization") == "Bearer test-openai-key"
+    assert requests[0].get_header("Isoquant-ZDR") is None
+
+
 def test_thinking_off_reaches_the_body_and_has_its_own_cache_entry(setup) -> None:
     fake = _use(FakeTransport(['{"pct_of_line": 1, "cap_inr": 500}'] * 2))
     llm.structured("Extract.", Tolerance, model="fast", thinking=False)

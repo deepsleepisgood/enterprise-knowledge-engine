@@ -128,7 +128,7 @@ Retrieval, precisely:
 | LLM providers | Any OpenAI-compatible endpoint (NVIDIA NIM, Isoquant), or Anthropic Claude | The public demo runs on Isoquant `deepseek-v4.1-flash-1017-fast` with zero data retention requested |
 | Web | Next.js 14 (App Router), TypeScript, Tailwind CSS | Ask, Sources, Conflicts, Review, Entities, Changes, Analytics and Setup pages; citation drawer; timeline |
 | Hosting | Vercel (web), Neon (Postgres), Cloudflare quick tunnel (API) | Public demo |
-| Tests | pytest, ruff, Playwright | 258 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
+| Tests | pytest, ruff, Playwright | Default pytest suite; live-LLM and acceptance tests are opt-in |
 
 ---
 
@@ -163,43 +163,67 @@ Retrieval, precisely:
 
 ## Quick start (local)
 
+Run these commands from the repository root (the directory containing this README). The launcher starts services, but it does not install dependencies, migrate the database, or load the sample corpus.
+
+### First-time setup on Windows
+
+Prerequisites: [uv](https://docs.astral.sh/uv/), Node.js 20+, and internet access for package installation and the first local model downloads. The commands below install Python 3.11 in this project; Python 3.14 has not been validated with this dependency set. The embedded Postgres instance needs no Docker.
+
 ```powershell
-.\run.ps1
+uv python install 3.11
+uv venv --python 3.11 .venv
+uv pip install --python .venv\Scripts\python.exe -e ".[dev]"
+npm --prefix web ci
+Copy-Item .env.example .env
+Copy-Item web\.env.example web\.env.local
+# Edit .env later and put your OpenAI key in OPENAI_API_KEY.
+# In web\.env.local, set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000.
+.\.venv\Scripts\python.exe scripts\dev_db.py start
+.\.venv\Scripts\python.exe -m alembic upgrade head
 ```
 
-This command:
+Keep the key in `.env`; both it and `web/.env.local` are git-ignored. The sample config selects `LLM_PROVIDER=openai`, `MODEL_SMART=gpt-4.1`, and `MODEL_FAST=gpt-4o-mini`. The schema-induction step can request up to 32,768 output tokens, so the smart model needs that capacity; `gpt-4o` is limited to 16,384 and fails here. You can change model IDs to other chat-completions models that support JSON mode and the required output limit. `MODEL_VISION` can be set separately for scanned PDFs. The `NIM_*` rate and timeout settings also govern OpenAI requests through the shared transport. The code does not have OpenAI pricing entries, so OpenAI calls record tokens but `cost_usd` is null.
+
+After adding the key, load the sample knowledge base once:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\ingest_all.py
+.\.venv\Scripts\python.exe scripts\build_graph.py --auto-freeze
+```
+
+These steps make paid model calls. Graph building may take a while and downloads local embedding and reranker models on first use. Wait for both commands to finish before trying a live question.
+
+If the `BAAI/bge-reranker-base` download cannot complete, set `RERANK_MODEL=none` in `.env` to use vector ranking. This bypass keeps the app usable but can select an older source; treat its answer accuracy as a separate, degraded configuration. Remove the setting to retry the normal reranker path.
+
+### Start the app
+
+```powershell
+.\run.cmd
+```
+
+After first-time setup and corpus loading, this command:
 - starts an embedded Postgres 16 with pgvector (no Docker needed; `scripts/dev_db.py`);
 - starts the API on http://localhost:8000 (docs at `/docs`), the job worker, and the web app on http://localhost:3000;
 - streams logs tagged `[api]`, `[worker]` and `[web]`, and opens the browser.
 
-Ctrl+C stops everything and frees the ports. Optional flags are `--no-browser` and `--no-worker`. On other platforms, use `python scripts/run_app.py`.
-
-### First-time setup
-Prerequisites: Python 3.11+, Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
-
-```bash
-python -m venv .venv
-.\.venv\Scripts\activate          # Linux/macOS: source .venv/bin/activate
-pip install -e ".[dev]"
-cp .env.example .env              # then fill in one LLM provider
-cd web && npm install && cd ..
-```
+Ctrl+C stops everything and frees the ports. Optional flags are `--no-browser` and `--no-worker`. You can also run `run.ps1` if PowerShell permits local scripts; `run.cmd` works when script signing is enforced. On other platforms, use `python scripts/run_app.py`.
 
 Main `.env` settings:
-- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint) or `anthropic`.
-- `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models. For Isoquant, set `NIM_BASE_URL=https://api.isoquant.ai/v1` and `ISOQUANT_API_KEY`; for NVIDIA, set `NVIDIA_API_KEY`.
+- `LLM_PROVIDER`: `openai`, `nim` (another OpenAI-compatible endpoint), or `anthropic`.
+- `OPENAI_API_KEY`: used with `LLM_PROVIDER=openai`; never put it in the web environment file.
+- `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models for `nim`. The `nim` transport reads `ISOQUANT_API_KEY` for Isoquant and `NVIDIA_API_KEY` for other compatible endpoints.
 - `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`.
 - `SCHEMA_MODE`: `induced` or `baseline`.
 - `DATABASE_URL`: leave empty for the embedded database.
 
-Secrets live only in `.env`, which is git-ignored.
+Secrets live only in `.env`, which is git-ignored. `web/.env.local` needs `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` to call the live API; an empty value shows fixtures instead.
 
 ### Running services one at a time
 ```bash
-python scripts/dev_db.py start && alembic upgrade head
+python scripts/dev_db.py start && python -m alembic upgrade head
 python scripts/ingest_all.py
 python scripts/build_graph.py --auto-freeze
-uvicorn app.api.main:app --port 8000
+python -m uvicorn app.api.main:app --port 8000
 python -m app.worker
 cd web && npm run dev
 ```
@@ -220,11 +244,14 @@ A quick tunnel closes any request after about 100 seconds. For this reason, the 
 
 ## Testing
 
+Run the offline checks before spending tokens, then run the live checks after the key is present and the corpus is loaded. The default pytest selection excludes `live_llm` tests. Database integration tests still need the embedded database running and migrated.
+
 ```bash
-pytest -q                        # unit, integration (embedded Postgres), plug-in, leakage and generic-core tests
-pytest -m live_llm               # live model calls; rebuilds the graph, so it costs real tokens
-ruff check app scripts tests plugins
-cd web && npm run lint && npx tsc --noEmit && npm run check:tokens
+python -m pytest -q             # offline default suite, including DB integration tests
+python -m ruff check app scripts tests plugins
+cd web && npm run lint && npm run typecheck && npm run check:tokens
+python -m pytest -m live_llm    # after key + corpus setup; makes paid calls
+cd web && npm run test:e2e      # with API, worker and web running
 ```
 
 `tests/test_no_leakage.py` fails if application code reads the evaluation workbook. `tests/test_core_is_generic.py` fails if domain words appear in `app/`.
@@ -232,6 +259,14 @@ cd web && npm run lint && npx tsc --noEmit && npm run check:tokens
 ---
 
 ## Results
+
+### Local OpenAI validation (13 November 2026)
+
+The local OpenAI setup was ingested and evaluated on the 96-question development split. With `MODEL_SMART=gpt-4.1`, `MODEL_FAST=gpt-4o-mini`, and `RERANK_MODEL=none`, it reached **67/96 accuracy (69.8%)** and **86/96 strict citation accuracy (89.6%)**. The default suite passed **256 tests**. This is below the project's 90% answer-accuracy target. The configured reranker did not finish downloading, so these scores apply only to vector ranking. TDS rate bindings and an older-source selection are the main remaining correctness problems. See the [local validation report](reports/local_openai_validation_20261113.md) for configuration, checks, failures, and next gates.
+
+The historical results below used different providers and configurations; they are not measurements of this OpenAI setup.
+
+### Historical runs
 
 Measured on 11 November 2026 unless stated. The source of each number is in `reports/`. The evaluation set has 160 questions: 96 dev and 64 holdout. Holdout failures are not inspected, apart from two that the team chose to examine.
 

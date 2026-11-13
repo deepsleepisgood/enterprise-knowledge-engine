@@ -14,9 +14,10 @@ DEV_DB_URL_FILE = ROOT / ".pgdata" / "database_url.txt"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
 
-    llm_provider: str = "anthropic"  # anthropic | nim
+    llm_provider: str = "anthropic"  # anthropic | nim | openai
     anthropic_api_key: str = ""
     nvidia_api_key: str = ""
+    openai_api_key: str = ""
     # Any OpenAI-compatible endpoint runs through the NIM transport: set NIM_BASE_URL to it.
     # Isoquant (api.isoquant.ai) uses ISOQUANT_API_KEY; everything else uses NVIDIA_API_KEY.
     isoquant_api_key: str = ""
@@ -71,6 +72,8 @@ class Settings(BaseSettings):
         """True when the selected provider has a key."""
         if self.llm_provider == "nim":
             return bool(self.chat_api_key)
+        if self.llm_provider == "openai":
+            return bool(self.openai_api_key)
         return bool(self.anthropic_api_key)
 
     @property
