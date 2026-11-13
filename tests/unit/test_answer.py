@@ -132,6 +132,19 @@ def test_values_from_the_case_or_calculator_are_not_old_rules() -> None:
     assert verify.check_not_in_force(corrected, old, now, UNITS, currencies=["₹"], given=[""])
 
 
+def test_retired_text_still_current_for_another_attribute() -> None:
+    now = [
+        fact(1, "payment_run.cutoff_day", {"type": "text", "text": "previous working day"}),
+        fact(2, "payment_run.run_days", {"type": "text", "text": "Tuesday and Friday"}),
+    ]
+    old = [fact(3, "payment_run.cutoff_day", {"type": "text", "text": "Tuesday"}, "superseded")]
+    assert (
+        verify.check_not_in_force("Payment runs are held on Tuesday and Friday.", old, now, UNITS)
+        == []
+    )
+    assert verify.check_not_in_force("The cut-off day is Tuesday.", old, now, UNITS)
+
+
 def test_assemble_numbers_citations_in_order_and_checks_quotes() -> None:
     ev = {"P1": hit("a", "Rule one says pay in 45 days."), "P2": hit("b", "Rule two is here.")}
     gen = GenOut(

@@ -245,11 +245,30 @@ def check_not_in_force(
                 )
         elif old.status == "superseded":
             txt = norm(str(old.value.get("text") or ""))
+            # A short retired value can still be current for a different attribute of the
+            # same subject (for example, a weekday that is now a run day rather than a
+            # cut-off day). In that case require the old attribute's context in the same
+            # sentence before treating the mention as an outdated rule.
+            current_elsewhere = any(
+                f.subject_id == old.subject_id
+                and f.attribute != old.attribute
+                and txt in norm(str(f.value.get("text") or ""))
+                for f in in_force
+            )
+            context = [
+                w for w in re.findall(r"[a-z]+", old.attribute.rsplit(".", 1)[-1]) if len(w) >= 4
+            ]
+            contextual_mention = any(
+                txt in norm(sent)
+                and any(w in re.sub(r"[^a-z0-9]", "", norm(sent)) for w in context)
+                for sent in _sentences(rule_text)
+            )
             if (
                 len(txt) >= 6
                 and txt in t
                 and txt not in given_text
                 and not any(txt in norm(str(f.value.get("text") or "")) for f in attr_now)
+                and (not current_elsewhere or not context or contextual_mention)
             ):
                 problems.append(f"'{old.value.get('text')}' ({old.attribute}) is not in force")
     return problems

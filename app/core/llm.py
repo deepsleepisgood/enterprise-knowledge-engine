@@ -11,6 +11,7 @@ Providers (LLM_PROVIDER):
   reject `temperature`, so none is sent; reproducibility comes from the disk cache.
 - nim: NVIDIA NIM (OpenAI-compatible), app/core/nim.py. Temperature 0, JSON mode, the
   JSON Schema in the system prompt, Pydantic validation and one corrective retry.
+- openai: OpenAI chat completions through the same JSON-mode transport.
 The cache key includes the model id, so switching provider never reuses another's output.
 """
 
@@ -229,7 +230,7 @@ def _call(
     }
     if safe_system:
         request["system"] = safe_system
-    if effort and _provider() != "nim":
+    if effort and _provider() == "anthropic":
         request["output_config"] = {"effort": effort}
     if thinking is False and _provider() == "nim":
         request["thinking_off"] = True  # read by the NIM adapters, never sent to Anthropic
@@ -376,7 +377,7 @@ def complete(
     None leaves the provider's default."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _provider() == "nim":
+        if _provider() in ("nim", "openai"):
             return _nim_complete(req)
         resp = _get_client().messages.create(**req)
         _check_stop(resp)
@@ -412,7 +413,7 @@ def structured(
     """Return a validated `schema` instance using the API's structured outputs."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _provider() == "nim":
+        if _provider() in ("nim", "openai"):
             return _nim_structured(req, schema)
         resp = _get_client().messages.parse(**req, output_format=schema)
         _check_stop(resp)
@@ -456,7 +457,7 @@ def vision(
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         text = req["messages"][0]["content"]
-        if _provider() == "nim":
+        if _provider() in ("nim", "openai"):
             from app.core import nim
 
             parts: list[dict[str, Any]] = [

@@ -1,9 +1,9 @@
 """NVIDIA NIM transport (OpenAI-compatible /chat/completions), standard library only.
 
-Used by app/core/llm.py when LLM_PROVIDER=nim. Two limits apply to every request: a sliding
-window of NIM_MAX_RPM per minute and at most NIM_MAX_CONCURRENT in flight (the free endpoints
-answer 429 to bursts of parallel requests well below the per-minute limit). Rate limits, server
-errors and timeouts are retried with backoff; a 429 honours Retry-After and backs off longer.
+Used by app/core/llm.py when LLM_PROVIDER=nim or openai. Two limits apply to every request:
+a sliding window of NIM_MAX_RPM per minute and at most NIM_MAX_CONCURRENT in flight.
+Free endpoints answer 429 to bursts of parallel requests below the per-minute limit.
+Rate limits, server errors and timeouts are retried with backoff; a 429 honours Retry-After.
 Tests replace the transport with `set_transport`.
 """
 
@@ -89,17 +89,22 @@ def set_transport(fn: Transport | None) -> None:
 
 def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     s = get_settings()
-    if not s.chat_api_key:
+    is_openai = s.llm_provider.strip().lower() == "openai"
+    api_key = s.openai_api_key if is_openai else s.chat_api_key
+    if not api_key:
+        if is_openai:
+            raise NimError("OPENAI_API_KEY is not set")
         raise NimError("no API key for NIM_BASE_URL (NVIDIA_API_KEY or ISOQUANT_API_KEY)")
     headers = {
-        "Authorization": f"Bearer {s.chat_api_key}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
-    if s.is_isoquant:
+    if not is_openai and s.is_isoquant:
         headers["Isoquant-ZDR"] = "required"  # zero data retention: prompts are not stored
     req = urllib.request.Request(
-        s.nim_base_url.rstrip("/") + "/chat/completions",
+        ("https://api.openai.com/v1" if is_openai else s.nim_base_url.rstrip("/"))
+        + "/chat/completions",
         data=json.dumps(body).encode("utf-8"),
         headers=headers,
         method="POST",
@@ -144,6 +149,8 @@ def chat(body: dict[str, Any]) -> dict[str, Any]:
 
 def thinking_options(off: bool) -> dict[str, Any]:
     """Request fields that turn a reasoning model's thinking off (or keep it brief)."""
+    if get_settings().llm_provider.strip().lower() == "openai":
+        return {}
     if get_settings().is_isoquant:
         return {"reasoning_effort": "none" if off else "low"}
     return {"chat_template_kwargs": {"enable_thinking": False}} if off else {}

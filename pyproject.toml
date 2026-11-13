@@ -30,6 +30,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6", "pgserver>=0.1.4", "httpx>=0.27"]
 
+[tool.setuptools.packages.find]
+include = ["app*", "plugins*", "evaluation*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
