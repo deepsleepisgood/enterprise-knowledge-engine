@@ -118,7 +118,8 @@ def evidence_ids(passages: list[PassageHit]) -> dict[str, PassageHit]:
 
 def _tags(p: PassageHit, as_of: date | None) -> str:
     tags = [p.doc_type]
-    if p.doc_type in ("interview", "observation") or p.segment_kind == "turn":
+    # A data row is an observation of how things are done, like an interview: never a rule.
+    if p.doc_type in ("interview", "observation") or p.segment_kind in ("turn", "record"):
         tags.append("practice")
     if p.source_status == "superseded" and not as_of:
         tags.append("superseded")
@@ -162,7 +163,8 @@ def build_prompt(
             src = pid_of.get(f.passage_id or "", "")
             scope = (f.scope or {}).get("client")
             extra = f" (applies only to {scope})" if scope and scope != "all" else ""
-            lines.append(f"- {f.statement}{extra}" + (f" (from {src})" if src else ""))
+            tag = " [practice]" if f.kind == "practice" else ""
+            lines.append(f"- {f.statement}{extra}{tag}" + (f" (from {src})" if src else ""))
         parts.append("Facts from the knowledge graph:\n" + "\n".join(lines))
     blocks = []
     for k, p in evidence.items():

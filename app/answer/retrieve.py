@@ -16,6 +16,7 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.graph.rows import ORIGIN as ROW_ORIGIN
 from app.graph.rules import CURRENT, IN_FORCE_THEN
 from app.store import facts as fstore
 from app.store import search
@@ -29,6 +30,7 @@ RRF_K = 60
 EVIDENCE_KINDS = ["rule", "attribute", "definition", "procedure"]
 ENTITY_MIN_SIM = 0.78
 TIP_MIN_SIM = 0.62
+NAMED_PRACTICE_MAX = 4
 
 
 @dataclass
@@ -40,6 +42,10 @@ class Retrieved:
     tips: list[tuple[FactRow, float]] = field(default_factory=list)
     entities: list[tuple[str, str, str]] = field(default_factory=list)
     vec: list[float] = field(default_factory=list)
+    # Notes read from data rows about an entity the question names outright (by alias). Search
+    # never returns data rows, so without this they could not be cited; they are evidence tagged
+    # as practice. Practice from documents is found by search as before and is not added here.
+    named_practice: list[FactRow] = field(default_factory=list)
 
 
 def rrf(rankings: list[list[str]], k: int = RRF_K) -> list[tuple[str, float]]:
@@ -51,9 +57,15 @@ def rrf(rankings: list[list[str]], k: int = RRF_K) -> list[tuple[str, float]]:
     return sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))
 
 
-def link_entities(session: Session, question: str, vec: list[float]) -> list[tuple[str, str, str]]:
+def link_entities(
+    session: Session,
+    question: str,
+    vec: list[float],
+    named: list[tuple[str, str, str]] | None = None,
+) -> list[tuple[str, str, str]]:
     """Entities named in the question (alias match), then the closest by embedding."""
-    out = {e[0]: e for e in search.entities_named_in(session, question)}
+    named = search.entities_named_in(session, question) if named is None else named
+    out = {e[0]: e for e in named}
     for eid, typ, name, _ in search.similar_entities(session, vec, k=5, min_sim=ENTITY_MIN_SIM):
         out.setdefault(eid, (eid, typ, name))
     return list(out.values())[:8]
@@ -164,7 +176,8 @@ def retrieve(
         if scorer == "rerank"
         else (max(vsim.values(), default=None))
     )
-    entities = link_entities(session, question, vec)
+    named = search.entities_named_in(session, question)
+    entities = link_entities(session, question, vec, named)
     facts, tips = graph_context(
         session,
         vec,
@@ -176,4 +189,20 @@ def retrieve(
         today,
         cfg.graph_facts,
     )
-    return Retrieved(kept, top, scorer, facts, tips, entities, vec)
+    named_ids = {e[0] for e in named}
+    day = as_of or today
+    named_practice = [
+        f
+        for f in fstore.facts_touching(
+            session,
+            sorted(named_ids),
+            valid_on=day,
+            known_at=known_at,
+            statuses=IN_FORCE_THEN if as_of else CURRENT,
+            kinds=["practice"],
+        )
+        if f.subject_id in named_ids
+        and f.origin_key.startswith(ROW_ORIGIN)
+        and _in_scope(f, client)
+    ][:NAMED_PRACTICE_MAX]
+    return Retrieved(kept, top, scorer, facts, tips, entities, vec, named_practice)

@@ -345,7 +345,11 @@ def expert_tip(
         (f, hits[f.passage_id])
         for f in useful
         if f.passage_id in hits
-        and (not practice_types or hits[f.passage_id].doc_type in practice_types)
+        and (
+            not practice_types
+            or hits[f.passage_id].doc_type in practice_types
+            or hits[f.passage_id].segment_kind == "record"  # a note in a data row
+        )
     ]
     order = {f.id: i for i, f in enumerate(cands)}
     pick.sort(key=lambda fp: (-rank.get(fp[0].passage_id or "", float("-inf")), order[fp[0].id]))

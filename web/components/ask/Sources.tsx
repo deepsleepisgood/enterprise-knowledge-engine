@@ -272,7 +272,16 @@ function Highlighted({ text, quote }: { text: string; quote: string }) {
 }
 
 /** Side drawer with the full passage, its version, date and status, and the original. */
-export function SourceDrawer({ citation, onClose }: { citation: Citation | null; onClose: () => void }) {
+export function SourceDrawer({
+  citation,
+  onClose,
+  eyebrow,
+}: {
+  citation: Citation | null;
+  onClose: () => void;
+  /** Heading above the title; default "Source {n}". */
+  eyebrow?: string;
+}) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [detail, setDetail] = useState<PassageDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -300,9 +309,9 @@ export function SourceDrawer({ citation, onClose }: { citation: Citation | null;
       <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-hairline bg-surface p-6 shadow-card">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="eyebrow">Source {citation.n}</p>
+            <p className="eyebrow">{eyebrow ?? `Source ${citation.n}`}</p>
             <h2 id="drawer-title" className="mt-1 font-display text-xl font-bold leading-tight text-ink">
-              {citation.section_title}
+              {citation.section_title || detail?.section_title || src?.title || citation.short_label}
             </h2>
           </div>
           <button
@@ -318,13 +327,13 @@ export function SourceDrawer({ citation, onClose }: { citation: Citation | null;
         <dl className="mt-4 space-y-1 font-mono text-xs text-muted">
           <div>
             <dt className="sr-only">File</dt>
-            <dd>{citation.file}</dd>
+            <dd>{citation.file || src?.title}</dd>
           </div>
           <div className="flex items-center gap-2">
             <dt className="sr-only">Locator</dt>
-            <DocGlyph type={citation.doc_type} />
+            <DocGlyph type={src?.doc_type ?? citation.doc_type} />
             <dd>
-              {citation.short_label} · {STATUS_LABEL[citation.status]}
+              {citation.short_label} · {src ? (STATUS_LABEL[src.status as SourceStatus] ?? src.status) : STATUS_LABEL[citation.status]}
             </dd>
           </div>
         </dl>

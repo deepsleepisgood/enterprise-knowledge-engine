@@ -184,6 +184,17 @@ def live_by_origin(session: Session, origin_keys: list[str]) -> dict[str, FactRo
     return {f.origin_key: _row(f) for f in session.scalars(q)}
 
 
+def live_with_origin_prefix(session: Session, prefix: str) -> list[FactRow]:
+    """Live facts whose origin key starts with `prefix` (e.g. every fact one source's data rows
+    produced), so a re-load can retire the ones whose row no longer says it."""
+    q = select(Fact).where(
+        Fact.tenant_id == tenant(),
+        Fact.retracted_at.is_(None),
+        Fact.origin_key.startswith(prefix, autoescape=True),
+    )
+    return [_row(f) for f in session.scalars(q)]
+
+
 def live_for_passages(
     session: Session, passage_ids: list[str], known_at: datetime | None = None
 ) -> list[FactRow]:
@@ -376,6 +387,17 @@ def timeline(session: Session, subject_id: str, attribute: str | None = None) ->
     q = _joined().where(Fact.tenant_id == tenant(), Fact.subject_id == subject_id)
     if attribute is not None:
         q = q.where(Fact.attribute == attribute)
+    q = q.order_by(Fact.attribute, Fact.valid_from.asc().nulls_first(), Fact.recorded_at, Fact.id)
+    return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
+
+
+def timeline_in_scope(session: Session, names: list[str], key: str = "client") -> list[FactRow]:
+    """Every version of every fact scoped to one of `names` (an entity's name and aliases, any
+    case), retracted rows included: a client's own rules are facts about a topic, scoped to it."""
+    wanted = sorted({n.strip().lower() for n in names if n and n.strip()})
+    if not wanted:
+        return []
+    q = _joined().where(Fact.tenant_id == tenant(), func.lower(Fact.scope[key].astext).in_(wanted))
     q = q.order_by(Fact.attribute, Fact.valid_from.asc().nulls_first(), Fact.recorded_at, Fact.id)
     return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
 

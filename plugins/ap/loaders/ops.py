@@ -95,7 +95,41 @@ def load(session: Any, data: bytes, tenant_id: str) -> dict[str, Any]:
     for table, rows in ((VENDORS, v_rows), (INVOICES, i_rows)):
         for k in range(0, len(rows), 1000):
             session.execute(pg_insert(table), rows[k : k + 1000])
-    return {"vendors": len(v_rows), "invoices": len(i_rows), "dropped": v_drop + i_drop}
+    return {
+        "vendors": len(v_rows),
+        "invoices": len(i_rows),
+        "dropped": v_drop + i_drop,
+        "row_facts": habit_facts(_records(vendors)),
+    }
+
+
+def habit_facts(vendors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Each vendor's habit note as a practice statement about that supplier, citing its row of
+    the vendors sheet. Vendor names repeat across ids, so the entity is named with the id and the
+    statement says which supplier and client it is about."""
+    out = []
+    for i, r in enumerate(vendors):
+        note = str(r.get("habit_note") or "").strip()
+        if not note:
+            continue
+        vid, name = str(r["vendor_id"]), str(r.get("vendor_name") or r["vendor_id"]).strip()
+        client = str(r.get("primary_client") or "").strip()
+        who = f"{name} ({vid}{', ' + client if client else ''})"
+        # "Adds /A ..." reads as "Balaji Logistics (V20000, ...): adds /A ..."; acronyms stay.
+        said = note[0].lower() + note[1:] if note[1:2].islower() else note
+        out.append(
+            {
+                "subject": f"{name} ({vid})",
+                "subject_type": "supplier",
+                "aliases": [name, vid],
+                "attrs": {"vendor_id": vid, "primary_client": client},
+                "attribute": "supplier_habits.habit_note",
+                "statement": f"{who}: {said}",
+                "locator": f"vendors row {i + 1}",
+                "kind": "practice",
+            }
+        )
+    return out
 
 
 def on_spreadsheet(session: Any, data: bytes, tenant_id: str) -> dict[str, Any]:

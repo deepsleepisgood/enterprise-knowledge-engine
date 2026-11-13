@@ -288,6 +288,8 @@ export interface EntitySummary {
   name: string;
   aliases: string[];
   facts: number;
+  /** Facts scoped to this entity (a client's own rules), included in `facts`. */
+  scoped_facts?: number;
 }
 
 export interface FactValue {
@@ -314,13 +316,20 @@ export interface FactVersion {
   authority_rank: number;
   quote: string | null;
   passage_id: string | null;
+  /** The episode (uploaded file or message) the fact came from: GET /episodes/{id}/original. */
+  episode_id: string | null;
+  source_id: string | null;
   source_label: string | null;
   locator: string | null;
   subject_name: string | null;
+  /** "scope": a fact about a topic that applies only to this entity (e.g. a client's rule). */
+  via?: "subject" | "scope";
 }
 
 export interface Timeline {
   entity: { id: string; type: string; name: string; aliases: string[] };
+  /** How many versions are included because they are scoped to the entity. */
+  scoped_facts?: number;
   attributes: { attribute: string; versions: FactVersion[] }[];
 }
 

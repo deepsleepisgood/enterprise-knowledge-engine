@@ -180,16 +180,35 @@ def refresh_context_headers(session: Any, source_id: str) -> None:
 
 @handler("plugin_hooks")
 def plugin_hooks(payload: dict[str, Any]) -> dict[str, Any]:
-    """Let enabled plug-ins load their own data from an episode (e.g. ERP exports)."""
+    """Let enabled plug-ins load their own data from an episode (e.g. ERP exports).
+
+    A hook may also return `row_facts`: statements it read from data rows, each about an entity
+    (see app/graph/rows.py). They become facts citing their row, published directly when
+    governance is off for this input (or the payload says `approve_row_facts`), held for the
+    owner otherwise."""
+    from app.graph.pipeline import active_ontology
+    from app.graph.rows import RowFact, publish_row_facts
     from app.plugins import registry
     from app.store.base import tenant
 
     with session_scope() as s:
         ep = store.get_episode(s, payload["episode_id"])
         data = Path(ep.blob_path).read_bytes()
-        out = {}
+        out: dict[str, Any] = {}
         for plugin, fn in registry.hooks(payload["event"]):
-            out[plugin.name] = fn(s, data, tenant())
+            res = fn(s, data, tenant())
+            row_facts = res.pop("row_facts", None) if isinstance(res, dict) else None
+            if row_facts:
+                approved = bool(payload.get("approve_row_facts")) or not governed()
+                res["row_facts"] = publish_row_facts(
+                    s,
+                    active_ontology(s),
+                    ep.id,
+                    [RowFact.from_dict(d) for d in row_facts],
+                    approved=approved,
+                    by=str(payload.get("by") or ep.sender or "owner"),
+                )
+            out[plugin.name] = res
     return out
 
 

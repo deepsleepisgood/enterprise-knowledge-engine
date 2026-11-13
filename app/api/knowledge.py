@@ -107,10 +107,30 @@ def freeze(body: Freeze) -> dict[str, Any]:
 @router.get("/entities")
 def list_entities(type: str | None = None, s: Session = Depends(read_session)) -> list[dict]:
     counts = fstore.counts_by_subject(s)
-    return [
-        {**row(e, drop={"score"}), "facts": counts.get(e.id, 0)}
-        for e in ents.list_entities(s, type_=type)
-    ]
+    scoped = _scoped_counts(s)
+    out = []
+    for e in ents.list_entities(s, type_=type):
+        n_scoped = sum(scoped.get(x, 0) for x in _names(e))
+        out.append(
+            {
+                **row(e, drop={"score"}),
+                "facts": counts.get(e.id, 0) + n_scoped,
+                "scoped_facts": n_scoped,
+            }
+        )
+    return out
+
+
+def _names(e: Any) -> set[str]:
+    """An entity's name and aliases, lower-cased: how a fact's scope can name it."""
+    return {x.strip().lower() for x in [e.name, *getattr(e, "aliases", [])] if x and x.strip()}
+
+
+def _scoped_counts(s: Session) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for k, n in fstore.scope_values(s).items():
+        out[k.strip().lower()] = out.get(k.strip().lower(), 0) + n
+    return out
 
 
 @router.get("/entities/{entity_id}")
@@ -127,16 +147,27 @@ def timeline(
     entity_id: str, attribute: str | None = None, s: Session = Depends(read_session)
 ) -> dict[str, Any]:
     """Every version of every fact about the entity, retired ones included, grouped by
-    attribute: when each was true (valid time) and when the engine knew it (transaction time)."""
+    attribute: when each was true (valid time) and when the engine knew it (transaction time).
+    Facts scoped to the entity (a client's own rules, stated about a topic) are included and
+    marked `via: "scope"`."""
     e = ents.get(s, entity_id)
     if e is None:
         raise not_found("entity")
     by_attr: dict[str, list[dict[str, Any]]] = {}
+    seen: set[int] = set()
     for f in fstore.timeline(s, entity_id, attribute):
-        by_attr.setdefault(f.attribute, []).append(row(f))
+        seen.add(f.id)
+        by_attr.setdefault(f.attribute, []).append({**row(f), "via": "subject"})
+    scoped = 0
+    for f in fstore.timeline_in_scope(s, sorted(_names(e))):
+        if f.id in seen or (attribute is not None and f.attribute != attribute):
+            continue
+        scoped += 1
+        by_attr.setdefault(f.attribute, []).append({**row(f), "via": "scope"})
     return {
         "entity": row(e, drop={"score"}),
-        "attributes": [{"attribute": a, "versions": v} for a, v in by_attr.items()],
+        "scoped_facts": scoped,
+        "attributes": [{"attribute": a, "versions": v} for a, v in sorted(by_attr.items())],
     }
 
 

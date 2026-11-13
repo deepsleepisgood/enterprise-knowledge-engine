@@ -281,7 +281,8 @@ def ask(
                 base["route"] = "lookup"
 
         threshold = cfg.abstain_rerank_score if got.scorer == "rerank" else cfg.abstain_vector_score
-        if calc is None and (got.top_score is None or got.top_score < threshold):
+        weak = got.top_score is None or got.top_score < threshold
+        if calc is None and weak and not got.named_practice:
             base["route_to"] = cards.route_to(r.role, roles, UNSUPPORTED)
             diag["abstained"] = "retrieval score below threshold"
             return finish(base, [], [])
@@ -289,7 +290,10 @@ def ask(
         # Evidence: calculator rule sources first, then reranked passages, then fact sources.
         calc_pids = [c.passage_id for c in (res.citations if res else []) if c.passage_id]
         fact_pids = [f.passage_id for f in got.facts if f.passage_id]
-        order = list(dict.fromkeys([*calc_pids, *[p.id for p in got.passages], *fact_pids]))
+        named_pids = [f.passage_id for f in got.named_practice if f.passage_id]
+        order = list(
+            dict.fromkeys([*calc_pids, *named_pids, *[p.id for p in got.passages], *fact_pids])
+        )
         hits = search.hydrate(s, order[:MAX_EVIDENCE], known_at)
         evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
 
@@ -303,7 +307,14 @@ def ask(
         not_in_force: list = []
         for _attempt in range(2):
             gen = generate(
-                question, client_name, as_of, evidence, got.facts, calc, structured, failures
+                question,
+                client_name,
+                as_of,
+                evidence,
+                [*got.named_practice, *got.facts],  # what the question names comes first
+                calc,
+                structured,
+                failures,
             )
             if gen.status == "unsupported":
                 break
@@ -397,7 +408,12 @@ def ask(
                 ),
                 [] if as_of or known_at else cards.conflicting_sources(s, sorted(set(cited_facts))),
             ),
-            expert_tip=cards.expert_tip(
+            # A practice note about the entity the question names beats a merely similar tip.
+            expert_tip=(
+                got.named_practice
+                and cards.expert_tip(s, [(f, 1.0) for f in got.named_practice], as_of or today)
+            )
+            or cards.expert_tip(
                 s,
                 got.tips,
                 as_of or today,

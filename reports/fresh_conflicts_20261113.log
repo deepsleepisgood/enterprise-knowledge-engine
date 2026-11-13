@@ -1,0 +1,13 @@
+F1 closest eval question similarity 0.46
+F2 closest eval question similarity 0.45
+F3 closest eval question similarity 0.47
+F4 closest eval question similarity 0.42
+F5 closest eval question similarity 0.41
+F6 closest eval question similarity 0.42
+F1 FAIL status=answered 15s :: 'No — the current rule is that invoices above ₹10 lakh up to ₹50 lakh go to the AP Controller, not above ₹25 lakh. [1][2][3] Invoices above ₹10 lakh park automatically for AP Controller approval after posting checks. [4] Invoices above ₹50 lakh go to the Client'
+F2 FAIL status=answered 9s :: 'Payment runs now happen on Tuesday and Friday, not Thursday. [1][2] The Thursday weekly run was the Version 3.1 rule and no longer applies. [1] For an invoice to be included, it must be submitted by the cut-off of 1 pm on the previous working day. [2]\nTuesday '
+F3 FAIL status=answered 10s :: 'The current e-invoice threshold is aggregate annual turnover above ₹5 crore, not ₹10 crore. [1][2] The ₹10 crore figure in your training video is the older Version 3.1 value and no longer applies. [1][3] A supplier whose AATO in any financial year since 2017-1'
+F4 FAIL status=answered 9s :: 'The limit today is the lower of 1% of the PO line value and ₹500 per line, so the old ₹1,000 figure no longer applies. [1][2] A line passes only if the total excess on that line is no more than that lower amount, and a line that fails is held with exception PR'
+F5 FAIL status=answered 9s :: 'No — the 2% figure no longer applies; the tolerance in force is the lower of 1% of the PO line value and ₹500 per line. [1][2] Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than '
+F6 PASS status=answered 12s :: 'The answer is the rule in force on 2026-03-15: the e-invoice turnover threshold was ₹10 crore, since suppliers with aggregate turnover above ₹10 crore must send e-invoices with an IRN. [1][2] This comes from AP SOP v3.1, which was effective 1 July 2023 and in '
+1/6 fresh questions passed

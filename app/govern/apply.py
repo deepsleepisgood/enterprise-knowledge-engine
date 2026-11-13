@@ -25,8 +25,15 @@ from app.store import jobs, kb
 from app.worker import handler
 
 
-def hold(s: Session, episode_id: str, verdict: Verdict, fact_ids: list[int]) -> int | None:
-    """Mark a governed episode's sources and open the review item. Returns its id."""
+def hold(
+    s: Session,
+    episode_id: str,
+    verdict: Verdict,
+    fact_ids: list[int],
+    retire: list[int] | None = None,
+) -> int | None:
+    """Mark a governed episode's sources and open the review item. Returns its id.
+    `retire`: facts the change replaces (retired when it is approved, kept if rejected)."""
     ep = estore.get_episode(s, episode_id)
     if ep is None or not fact_ids:
         return None
@@ -40,6 +47,8 @@ def hold(s: Session, episode_id: str, verdict: Verdict, fact_ids: list[int]) -> 
     )
     payload["source_status"] = was
     payload["defer_versions"] = bool((ep.meta or {}).get("defer_versions"))
+    if retire:
+        payload["retire_fact_ids"] = list(retire)
     item = kb.add_review_item(
         s, "change", payload, risk_tier="high" if verdict.high_risk else "normal"
     )
@@ -58,6 +67,8 @@ def _approve(s: Session, p: dict[str, Any], by: str) -> dict[str, Any]:
     if onto is None:
         return {"skipped": "no frozen schema"}
     live = [f for f in fstore.by_ids(s, p.get("fact_ids") or []).values() if f.retracted_at is None]
+    for fid in p.get("retire_fact_ids") or []:  # what the approved change replaces
+        fstore.retract(s, fid)
     groups: set[tuple[str, str]] = set()
     for f in live:
         if not governed(f.meta):

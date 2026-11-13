@@ -157,6 +157,25 @@ def test_entities_timeline_facts_and_passages(api: TestClient) -> None:
     assert api.post("/entities/nope/split", json=body).status_code == 404
 
 
+def test_a_clients_timeline_includes_rules_scoped_to_it(api: TestClient) -> None:
+    """A client's own rules are facts about a topic, scoped to the client: its timeline and its
+    fact count include them (marked via scope), so the client is not an empty entity."""
+    from app.store import entities as ents
+
+    with session_scope() as s:
+        scoped = next(f for f in fstore.get_facts(s) if (f.scope or {}).get("client"))
+        name = scoped.scope["client"]
+        hit = next((e for e in ents.list_entities(s) if e.name.lower() == name.lower()), None)
+        eid = hit.id if hit else ents.create(s, "client", name)
+    row = next(e for e in api.get("/entities").json() if e["id"] == eid)
+    assert row["scoped_facts"] >= 1 and row["facts"] >= row["scoped_facts"]
+    tl = api.get(f"/entities/{eid}/timeline").json()
+    via_scope = [v for a in tl["attributes"] for v in a["versions"] if v["via"] == "scope"]
+    assert tl["scoped_facts"] == len(via_scope) >= 1
+    assert scoped.id in {v["id"] for v in via_scope}
+    assert all(v["subject_name"] and v["episode_id"] for v in via_scope)  # topic + source link
+
+
 def test_entity_merge(api: TestClient) -> None:
     clients = api.get("/entities").json()
     a, b = clients[0]["id"], clients[1]["id"]

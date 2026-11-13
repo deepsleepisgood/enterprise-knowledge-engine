@@ -12,6 +12,8 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
 
 **Update 11 Nov evening:** T1-T11 all pass on the public URL (`reports/public_acceptance_20261111.md`). LLM moved to Isoquant (`deepseek-v4.1-flash-1017-fast`, ~$0.0006/question; NVIDIA lines commented in `.env`). New: `POST /ask/jobs` + `GET /ask/jobs/{id}` (web app polls; tunnel 100 s limit), garbled-reply retry, router fallback to lookup. Uncommitted. Open: an extraction that fails on every passage still marks the episode published. Public demo stopped (`.\run_public.ps1` to restart).
 
+**Update 13 Nov:** full eval on Isoquant, final code: 157/160 (98.1%; dev 96/96, holdout 61/64), citations 98.8%, outdated (conflict, strict) 1/23, p50 22 s, $0.06 (`reports/eval_20261113_all.md`). Replay button built. Next action 2 done.
+
 **Next actions, in order**
 0. Commit today's evening work when the user asks; run the full `pytest -q`.
 1. Rerun format invariance for xlsx and eml (`python scripts/run_format_invariance.py --no-scenarios --variants xlsx,eml`), then `python scripts/run_second_corpus.py` (parser changes touch its xlsx/eml/pdf).
@@ -466,3 +468,73 @@ Normal answers (no `known_at`) take exactly the same path as before.
 - **Browser** (local API on Neon + `npm run dev`): button → page → step 1 → Ask shows the 2% / ₹1,000 answer; no console errors; no horizontal scroll at 390 px. Screenshots: `reports/screenshots/replay_step2.png`, `replay_ask_step1.png`, `replay_mobile.png`.
 - **Tests:** `tests/integration/test_replay_db.py` (4 tests: steps as they stood then, search at a past moment, source shown as then, tenant-only job claim). `tsc --noEmit`, `npm run lint`, `check:tokens` and `ruff` are clean.
 - **Not run yet:** a fresh replay through the button. It would re-extract all 16 files on Isoquant (cache keys include the model; the recorded run was on NVIDIA), about 20–30 min and roughly $0.10–0.30.
+
+## 2026-11-13 — Full evaluation on Isoquant (final code)
+
+- **Run:** `run_eval.py --split all --workers 4` on Neon, Isoquant `deepseek-v4.1-flash-1017-fast` for answering and judging. Report: `reports/eval_20261113_all.md` (+ `_D.csv`, cards), log `reports/eval_run_isoquant_20261113.log`.
+- **Result:**
+  - accuracy **157/160 (98.1%)**: dev 96/96, holdout 61/64 (95.3%);
+  - citations strict **98.8%** (lenient 99.4%);
+  - 0 unverified, 0 errors;
+  - p50 **22.2 s**, p95 43.8 s (NIM on 11 Nov: p50 36 s, p95 129 s);
+  - 548 LLM calls, logged cost **$0.059**.
+- **Outdated answers:**
+  - conflict questions 1/23 under the strict metric (11 Nov: 2/23), a holdout question, not examined;
+  - must-not-say 2/71: the dev one is Q032 (judge: correct), which names 194J as the section for software-type contracts and as the vendor master's wrong suggestion while answering 194C. The strict metric fails any mention, so this is not an outdated rule.
+- **Misses (holdout, scores only):** Q017 (generation), Q044 (generation), Q092 (calculator).
+- **Fresh conflict questions** (`reports/fresh_conflicts_20261113.log`, scratchpad `fresh_conflicts.py`): all 6 answered and verified in 9–15 s, each giving the current rule; the as-of control F6 passes. The script's strict check counts 1/6 because F1–F5 quote an old value and the answer says once that it no longer applies (answer-v8 allows this). 11 Nov: 1/6 with 5 unverified, then 0/6.
+
+## 2026-11-13 — Entity timeline page (/entities): source links, client timelines
+
+The Gantt-style timeline page already existed: one bar per fact version across its valid dates, overlapping versions in lanes, an as-of slider, a Known-at replay of what the engine believed, an in-force table and a fact panel. What was missing or wrong:
+
+- **Links to source documents** (the requirement):
+  - the fact panel now has **Read <source>**, which opens the Ask page's source drawer (full passage, cited words marked, version, date, status, place in the document), and **Open original** (the file as received, `GET /episodes/{id}/original`);
+  - the source label in the "In force on" table opens the drawer too;
+  - `SourceDrawer` takes an optional heading and prefers the loaded source's type and status.
+- **Client entities were empty.** A client's own rules are facts about a topic, scoped to the client, so "Arvana Infra Projects" showed 0 facts and no timeline. Now:
+  - `GET /entities/{id}/timeline` also returns versions scoped to the entity's name or aliases (`facts.timeline_in_scope`), marked `via: "scope"`, with `scoped_facts`;
+  - `GET /entities` counts them (`scoped_facts`), so clients appear in the picker;
+  - each such row shows its topic under the attribute;
+  - Arvana Infra Projects: 22 versions (5% bulk tolerance, ₹25,000 cap, materials, GRN timing, NO_GRN, supplier habits, the FAQ's held 10%).
+- **In force table showed a held statement as the rule:** with nothing current, it fell back to any version, so the FAQ's pending "Infra 10% price tolerance" read as in force. It now says "not in force · held for review: 10% (Part F)". Expert habits show as "practice", not "not in force".
+- **Layout:**
+  - the as-of date box overlapped "Known at" (controls now on two rows);
+  - on a phone the chart opens scrolled to the "now" end, and row names stay pinned on the left.
+- **Checked** in the browser on Neon (Price tolerance; Arvana Infra Projects):
+  - drawer shows SOP v4.0 §4.2 with "the lower of 1% of the PO line value and ₹500" marked;
+  - Open original returns the .docx (200);
+  - no console errors; no page overflow at 390 px.
+  - Screenshots: `reports/screenshots/entity_timeline_*.png`.
+- **Tests:** new `test_a_clients_timeline_includes_rules_scoped_to_it`; `pytest -q` 263 passed; `tsc`, lint, token check and ruff clean.
+
+## 2026-11-13 — Supplier habit notes in the graph (facts from data rows)
+
+**Gap (found by a read-only audit of the Neon knowledge base):** the operations workbook's 21 `habit_note` cells were only shown as tips when an invoice was attached. Spreadsheet rows are records, which search skips, so "What does Balaji Logistics do when it re-sends an invoice?" had nothing to cite.
+
+**Design (generic core, plug-in mapping):**
+- `app/graph/rows.py` `publish_row_facts`: a plug-in hook may return `row_facts`, statements it read from data rows. The core writes each as a fact citing its row passage, with a stable origin `row:<passage>:<attribute>`.
+  - A reload changes nothing.
+  - A changed note retires the old fact and records the change.
+  - A note no longer there is retired.
+  - Facts are published when the owner approves the load (`approve_row_facts`, or governance off), otherwise held through the usual review item.
+  - Attributes outside the schema are stored as `other:<name>`.
+- AP plug-in `loaders/ops.habit_facts`:
+  - Vendor names repeat (three "Balaji Logistics"), so each supplier entity is "Name (Vxxxxx)" with the name and id as aliases.
+  - The statement names the supplier and client, e.g. "Balaji Logistics (V20000, Arvana Pharma Ltd): adds /A or -REV when re-sending the same invoice".
+- **Answering:** when a question names an entity, its row facts come with the retrieval (`Retrieved.named_practice`).
+  - Their rows are evidence, tagged [practice]; a row is never a rule.
+  - They are listed for the model and become the expert tip.
+  - Only data-row facts get this, because search can never return their rows. Practice from documents works as before, and no eval question names these suppliers.
+- **Loaded on Neon** on the user's instruction (no approval for these 21): `scripts/run_plugin_hooks.py --file PS-07_ap_operations.xlsx --approve`. Result: 21 facts and 21 supplier entities, embedded; vendor and invoice tables reloaded unchanged (650 / 9,000).
+- **Checked** (Isoquant, Neon):
+  - **Balaji Logistics:** the answer gives the /A or -REV habit for V20000 and cites "AP operations vendors row 1"; the tip is the same habit.
+  - **Ganga Electricals:** the answer includes "invoices before dispatch and the GRN lags 2–3 days", citing vendors row 36.
+  - Before the fix, both tips showed an unrelated Infra GRN tip.
+- **Tests:** `tests/integration/test_rows_db.py` (4: cited facts and idempotent reload; changed and removed notes; held for review; a named counterparty gets its note, document practice is not promoted). `pytest -q` 267 passed.
+- **Fixed (same day): a newer export in a separate file replaces the older one automatically.** The upload or watched folder runs the plug-in hook as usual. publish_row_facts treats an export as the full picture of the columns (attributes) it carries.
+  - A supplier still in the new file: its fact moves to cite the new row, supersedes the old one, and a change notice is recorded if the note changed.
+  - A supplier missing from the new file: its fact is retired, with a change notice.
+  - An export dated older than one already loaded (source date, then arrival): changes nothing (`stale`).
+  - A held (unapproved) export: the old facts stay in force. The review item carries `retire_fact_ids`, and `_approve` in app/govern/apply.py retires them only on approval.
+  - Tests: 3 new in tests/integration/test_rows_db.py. pytest: 270 passed; ruff clean.

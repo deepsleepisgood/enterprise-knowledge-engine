@@ -1,13 +1,15 @@
 "use client";
 
-import { CalendarClock, History, Network, Search, X } from "lucide-react";
+import { CalendarClock, ExternalLink, FileText, History, Network, Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { SourceDrawer } from "@/components/ask/Sources";
 import { PageColumns } from "@/components/shell/PageColumns";
 import { Card, Empty, ErrorNote, PageHeader, Pill, SectionLabel, SkeletonRows } from "@/components/ui/Primitives";
+import { DEMO_MODE, originalUrl } from "@/lib/api";
 import { cx, fmtDate, fmtDateTime, humanKey, plural, valueText } from "@/lib/format";
-import type { EntitySummary, FactVersion, Timeline } from "@/lib/types";
+import type { Citation, EntitySummary, FactVersion, Timeline } from "@/lib/types";
 import { useApi } from "@/lib/useApi";
 
 const DAY = 86_400_000;
@@ -20,6 +22,8 @@ interface Row {
   key: string;
   attribute: string;
   scope: string;
+  /** The topic, when the row comes from facts scoped to this entity (a client rule). */
+  topic: string | null;
   lanes: FactVersion[][];
 }
 
@@ -89,7 +93,56 @@ function Bar({ v, d0, d1, now, selected, onPick }: {
   );
 }
 
-function FactDetail({ v, onClose }: { v: FactVersion; onClose: () => void }) {
+const sourceText = (v: FactVersion) =>
+  `${v.source_label ?? "Source"}${v.locator && v.locator !== v.source_label ? ` · ${v.locator}` : ""}`;
+
+/** A fact's passage as a citation, for the source drawer (which loads the rest). */
+function factCitation(v: FactVersion): Citation | null {
+  if (!v.passage_id) return null;
+  return {
+    n: 0,
+    passage_id: v.passage_id,
+    file: "",
+    short_label: sourceText(v),
+    locator: v.locator ?? "",
+    section_title: "",
+    doc_type: "other",
+    status: "current",
+    quote: v.quote ?? "",
+  };
+}
+
+/** "Read the passage" (drawer) and "Open original" (the file as received). */
+function SourceLinks({ v, onSource }: { v: FactVersion; onSource: (c: Citation) => void }) {
+  const cite = factCitation(v);
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      {cite && (
+        <button
+          type="button"
+          onClick={() => onSource(cite)}
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-rose hover:text-rose-hover"
+        >
+          <FileText className="h-3.5 w-3.5" aria-hidden />
+          Read {sourceText(v)}
+        </button>
+      )}
+      {v.episode_id && !DEMO_MODE && (
+        <a
+          href={originalUrl(v.episode_id)}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-rose hover:text-rose-hover"
+        >
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          Open original
+        </a>
+      )}
+    </div>
+  );
+}
+
+function FactDetail({ v, onClose, onSource }: { v: FactVersion; onClose: () => void; onSource: (c: Citation) => void }) {
   const rows: [string, string][] = [
     ["Value", valueText(v.value)],
     ["Status", v.status],
@@ -113,12 +166,7 @@ function FactDetail({ v, onClose }: { v: FactVersion; onClose: () => void }) {
         </button>
       </div>
       <p className="mt-2 text-[13px] leading-relaxed text-ink">{v.statement}</p>
-      {v.source_label && (
-        <span className="mt-2 inline-flex rounded-full border border-hairline px-2.5 py-0.5 font-mono text-[11px] text-muted">
-          {v.source_label}
-          {v.locator && v.locator !== v.source_label ? ` · ${v.locator}` : ""}
-        </span>
-      )}
+      <SourceLinks v={v} onSource={onSource} />
       <dl className="mt-3 divide-y divide-hairline text-[13px]">
         {rows.map(([k, val]) => (
           <div key={k} className="flex justify-between gap-3 py-1.5">
@@ -203,6 +251,14 @@ export function EntitiesView() {
   const [knownMode, setKnownMode] = useState(false);
   const [knownAt, setKnownAt] = useState<number>(now);
   const [picked, setPicked] = useState<FactVersion | null>(null);
+  const [source, setSource] = useState<Citation | null>(null);
+  // On a narrow screen the chart scrolls sideways: open it at the "now" end, where the current bars are.
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartReady = Boolean(tl.data);
+  useEffect(() => {
+    const el = chartRef.current;
+    if (chartReady && el && el.scrollWidth > el.clientWidth) el.scrollLeft = el.scrollWidth;
+  }, [chartReady, id]);
   const [attrFilter, setAttrFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -251,7 +307,8 @@ export function EntitiesView() {
           else lanes.push([v]);
         }
         const [attribute = "", scope = "all"] = key.split("|");
-        return { key, attribute, scope, lanes: lanes.slice(0, 4) };
+        const viaScope = vs.every((v) => v.via === "scope");
+        return { key, attribute, scope, topic: viaScope ? (vs[0]?.subject_name ?? null) : null, lanes: lanes.slice(0, 4) };
       })
       .filter((r) => attrFilter === "all" || r.attribute === attrFilter)
       .sort((a, b) => a.attribute.localeCompare(b.attribute));
@@ -264,8 +321,17 @@ export function EntitiesView() {
           .flat()
           .filter((v) => IN_FORCE.has(v.status) && v.kind !== "practice" && inInterval(v, asOf))
           .sort((a, b) => a.authority_rank - b.authority_rank || Number(b.status === "current") - Number(a.status === "current"))[0];
-        const before = r.lanes.flat().filter((v) => inInterval(v, asOf) && v.kind !== "practice").sort((a, b) => a.authority_rank - b.authority_rank)[0];
-        return { r, v: hit ?? before ?? null };
+        // Nothing in force: a pending or provisional statement is shown as such, never as the rule.
+        const held = r.lanes
+          .flat()
+          .filter((v) => (v.status === "pending" || v.status === "provisional") && v.kind !== "practice" && inInterval(v, asOf))
+          .sort((a, b) => a.authority_rank - b.authority_rank)[0];
+        // An expert habit is shown as practice: it is not a rule, so it is never "in force".
+        const practice = r.lanes
+          .flat()
+          .filter((v) => v.kind === "practice" && IN_FORCE.has(v.status) && inInterval(v, asOf))
+          .sort((a, b) => a.authority_rank - b.authority_rank)[0];
+        return { r, v: hit ?? null, held: hit ? null : (held ?? null), practice: hit || held ? null : (practice ?? null) };
       }),
     [rows, asOf],
   );
@@ -287,6 +353,11 @@ export function EntitiesView() {
             Each bar is a fact across the dates it was true. Drag the as-of marker to see what was in force on a day; switch on Known at to replay what the engine believed then.
           </PageHeader>
           {entities.data && <EntityPicker entities={entities.data} value={id} onPick={pick} />}
+          {entity && (tl.data?.scoped_facts ?? 0) > 0 && (
+            <p className="mt-3 text-[13px] text-muted">
+              Includes {plural(tl.data?.scoped_facts ?? 0, "fact version")} that apply only to {entity.name}, stated under their topics (shown under each row).
+            </p>
+          )}
           {entity && entity.aliases.filter((a) => a !== entity.name).length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {entity.aliases
@@ -316,8 +387,8 @@ export function EntitiesView() {
           ) : (
             <>
               <Card className="mt-6 p-4">
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <label className="flex min-w-[240px] flex-1 items-center gap-3 text-[13px] text-ink">
+                <div className="grid gap-3">
+                  <label className="flex min-w-0 items-center gap-3 text-[13px] text-ink">
                     <CalendarClock className="h-4 w-4 shrink-0 text-muted" aria-hidden />
                     <span className="shrink-0 font-medium">As of</span>
                     <input
@@ -329,7 +400,7 @@ export function EntitiesView() {
                       onChange={(e) => setAsOf(Number(e.target.value))}
                       aria-label="As-of date"
                       aria-valuetext={fmtDate(isoDay(asOf))}
-                      className="flex-1 accent-ink"
+                      className="min-w-0 flex-1 accent-ink"
                     />
                     <input
                       type="date"
@@ -339,7 +410,7 @@ export function EntitiesView() {
                       className="rounded-lg border border-hairline bg-surface px-2 py-1 font-mono text-[12px] text-ink focus:border-muted focus:outline-none"
                     />
                   </label>
-                  <div className="flex min-w-[240px] flex-1 items-center gap-3 text-[13px] text-ink">
+                  <div className="flex min-w-0 items-center gap-3 text-[13px] text-ink">
                     <label className="flex shrink-0 cursor-pointer items-center gap-2 font-medium">
                       <input type="checkbox" checked={knownMode} onChange={(e) => setKnownMode(e.target.checked)} className="accent-ink" />
                       <History className="h-4 w-4 text-muted" aria-hidden />
@@ -355,7 +426,7 @@ export function EntitiesView() {
                       onChange={(e) => setKnownAt(Number(e.target.value))}
                       aria-label="Known-at time"
                       aria-valuetext={fmtDateTime(new Date(knownAt).toISOString())}
-                      className="flex-1 accent-ink disabled:opacity-40"
+                      className="min-w-0 flex-1 accent-ink disabled:opacity-40"
                     />
                     <span className="w-28 shrink-0 text-right font-mono text-[11px] text-muted">
                       {knownMode ? fmtDateTime(new Date(knownAt).toISOString()) : "now"}
@@ -364,7 +435,7 @@ export function EntitiesView() {
                 </div>
               </Card>
 
-              <Card className="mt-4 overflow-x-auto p-4">
+              <div ref={chartRef} className="mt-4 overflow-x-auto rounded-2xl border border-hairline bg-surface p-4 shadow-card">
                 <div className="min-w-[560px]">
                   {/* axis */}
                   <div className="relative ml-0 h-6 sm:ml-[200px]">
@@ -396,11 +467,15 @@ export function EntitiesView() {
                     <ul className="divide-y divide-hairline">
                       {rows.map((r) => (
                         <li key={r.key} className="py-2.5 sm:flex sm:items-start">
-                          <div className="mb-1.5 pr-3 sm:mb-0 sm:w-[200px] sm:shrink-0">
+                          <div className="sticky left-0 z-10 mb-1.5 w-fit max-w-[280px] rounded-md bg-surface/90 pr-3 sm:static sm:mb-0 sm:w-[200px] sm:max-w-none sm:shrink-0 sm:bg-transparent">
                             <p className="truncate text-[13px] font-medium text-ink" title={r.attribute}>
                               {humanKey(r.attribute)}
                             </p>
-                            {r.scope !== "all" && <p className="truncate font-mono text-[10px] text-muted">{r.scope}</p>}
+                            {r.topic ? (
+                              <p className="truncate font-mono text-[10px] text-muted">{r.topic}</p>
+                            ) : (
+                              r.scope !== "all" && <p className="truncate font-mono text-[10px] text-muted">{r.scope}</p>
+                            )}
                           </div>
                           <div className="relative flex-1 space-y-1">
                             {r.lanes.map((lane, i) => (
@@ -416,7 +491,7 @@ export function EntitiesView() {
                     </ul>
                   </div>
                 </div>
-              </Card>
+              </div>
               <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2.5 w-5 rounded-full bg-rose" aria-hidden /> current
@@ -433,16 +508,41 @@ export function EntitiesView() {
                 <SectionLabel icon={CalendarClock}>In force on {fmtDate(isoDay(asOf))}</SectionLabel>
                 <Card className="overflow-hidden">
                   <ul className="divide-y divide-hairline">
-                    {inForce.map(({ r, v }) => (
+                    {inForce.map(({ r, v, held, practice }) => (
                       <li key={r.key} className="flex items-baseline justify-between gap-4 px-4 py-2.5 text-sm">
                         <span className="text-muted">
                           {humanKey(r.attribute)}
                           {r.scope !== "all" && <span className="font-mono text-[11px]"> · {r.scope}</span>}
                         </span>
                         {v ? (
-                          <button type="button" onClick={() => setPicked(v)} className="text-right font-medium text-ink hover:underline">
-                            {valueText(v.value)}
-                            <span className="ml-2 font-mono text-[11px] font-normal text-muted">{v.source_label}</span>
+                          <span className="text-right">
+                            <button type="button" onClick={() => setPicked(v)} className="font-medium text-ink hover:underline">
+                              {valueText(v.value)}
+                            </button>
+                            {factCitation(v) ? (
+                              <button
+                                type="button"
+                                onClick={() => setSource(factCitation(v))}
+                                title="Read the source passage"
+                                className="ml-2 font-mono text-[11px] text-rose hover:text-rose-hover hover:underline"
+                              >
+                                {sourceText(v)}
+                              </button>
+                            ) : (
+                              <span className="ml-2 font-mono text-[11px] text-muted">{v.source_label}</span>
+                            )}
+                          </span>
+                        ) : held ? (
+                          <button type="button" onClick={() => setPicked(held)} className="text-right text-muted hover:underline">
+                            not in force
+                            <span className="ml-2 font-mono text-[11px]">
+                              {held.status === "pending" ? "held for review" : "provisional"}: {valueText(held.value)} ({held.source_label})
+                            </span>
+                          </button>
+                        ) : practice ? (
+                          <button type="button" onClick={() => setPicked(practice)} className="text-right text-ink hover:underline">
+                            {valueText(practice.value)}
+                            <span className="ml-2 font-mono text-[11px] text-muted">practice · {practice.source_label}</span>
                           </button>
                         ) : (
                           <span className="text-muted">not in force</span>
@@ -458,7 +558,8 @@ export function EntitiesView() {
       }
       rail={
         <div className="space-y-5">
-          {picked && <FactDetail v={picked} onClose={() => setPicked(null)} />}
+          {picked && <FactDetail v={picked} onClose={() => setPicked(null)} onSource={setSource} />}
+          <SourceDrawer citation={source} onClose={() => setSource(null)} eyebrow="Source of this fact" />
           <div>
             <SectionLabel count={facts.length}>Facts</SectionLabel>
             <div className="grid grid-cols-2 gap-2">
