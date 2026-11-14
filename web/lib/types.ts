@@ -158,6 +158,19 @@ export interface Digest {
   text: string;
 }
 
+/** Which digest delivery channels are set up (GET /digest/channels). No secrets. */
+export interface DigestChannels {
+  email: { configured: boolean; recipients: number };
+  teams: { configured: boolean };
+  schedule: { send_at: string; utc_offset_minutes: number; skip_empty: boolean } | null;
+}
+
+/** The result of sending a digest (POST /digest/send): one entry per channel. */
+export interface DigestSendResult {
+  day: string;
+  results: { channel: "email" | "teams"; ok: boolean; detail: string }[];
+}
+
 /** A drafted edit to the document that still states an old rule. */
 export interface DocumentEdit {
   change_id: number;

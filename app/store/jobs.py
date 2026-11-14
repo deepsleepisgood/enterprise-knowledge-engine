@@ -32,6 +32,18 @@ def enqueue(session: Session, kind: str, payload: dict[str, Any], max_attempts: 
     return job.id
 
 
+def exists_with(session: Session, kind: str, key: str, value: str) -> bool:
+    """True when this tenant has a job of `kind` (any status) whose payload[key] == value."""
+    return (
+        session.scalar(
+            select(Job.id)
+            .where(Job.tenant_id == tenant(), Job.kind == kind, Job.payload[key].astext == value)
+            .limit(1)
+        )
+        is not None
+    )
+
+
 def enqueue_once(session: Session, kind: str, payload: dict[str, Any]) -> int | None:
     """Queue a job unless one of the same kind is already waiting (for idempotent work)."""
     waiting = session.scalar(

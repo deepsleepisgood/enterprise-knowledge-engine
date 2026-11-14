@@ -47,6 +47,22 @@ class Settings(BaseSettings):
     watch_dir: str = ""
     watch_interval_s: int = 30
 
+    # Digest delivery (Phase 11). Each channel works once its settings are filled in; empty means
+    # the app offers "Copy as text" only. Email: any SMTP server (Microsoft 365, Gmail, SendGrid…).
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_security: str = "starttls"  # starttls | ssl | none
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""  # empty: smtp_user
+    digest_email_to: str = ""  # comma-separated recipients (a team list works best)
+    # Teams: the URL of a "When a Teams webhook request is received" workflow (Workflows app).
+    teams_webhook_url: str = ""
+    digest_send_at: str = ""  # "HH:MM" local time for an automatic daily send; empty: manual only
+    digest_utc_offset_minutes: int = 0  # the team's time zone, minutes east of UTC
+    digest_skip_empty: bool = True  # no automatic send on a day without changes
+    web_base_url: str = ""  # link back to the app in sent digests (e.g. https://app.example.com)
+
     # Answer pipeline (BUILD_PLAN Phase 4)
     rerank_model: str = "BAAI/bge-reranker-base"  # fastembed cross-encoder; "none" disables
     retrieve_k: int = 20  # full-text and vector candidates each

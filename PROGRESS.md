@@ -25,7 +25,7 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
 
 **Remaining features (listed 13 Nov evening; see BUILD_PLAN "After the MVP")**
 - Gate B (16 Nov):
-  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). Still to build: sending the digest by email or chat (no mail sending yet).
+  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). ~~Sending the digest by email or Teams~~: done 14 Nov (works once a client adds SMTP or a Teams workflow URL).
   - ~~The full format-invariance matrix~~: run 14 Nov (`reports/format_invariance_20261114.md`). Passing: pdf, md, html, eml and scanned. Below 0.9 fact F1: pptx 0.87, xlsx 0.86, flat docx 0.80; their calculations still match (100%; xlsx not judged). Open: a semantic comparison for free-text values. Done 14 Nov: `scripts/renormalise_money.py --apply` on Neon (4 facts revised, a second dry run finds 0), and `MODEL_VISION` set in `.env`.
 - Gate C (18 Nov):
   - Tacit capture, T10 (Phase 12): the 5-question interview chat, the structured habit fields, the check against current rules, and a named reviewer. The 21 vendor habits are already in the graph.
@@ -34,7 +34,7 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
   - Business case model + Teams replay (TEST_PLAN level 12); usability tests with 5 people (level 13).
   - Analytics page exists: add knowledge latency and acknowledgement rates.
   - Optional: v3.1 → v4.0 redline; a Graphiti baseline comparison.
-- Measurements owed: entity-resolution F1, induced vs baseline schema, abstention set (20), support-removal set, the 50-document freshness test, a second-corpus rerun.
+- Measurements owed: entity-resolution F1, induced vs baseline schema, ~~abstention set (20)~~ (14 Nov: 20/20 refused, 15/20 routed right), support-removal set, the 50-document freshness test, a second-corpus rerun.
 - Housekeeping:
   - Merge duplicate entities (194J / Section 194J), clean up the 104 entities with no facts, clear the 5 old stopped jobs.
   - Add a flag for an extraction that fails on every passage.
@@ -703,3 +703,28 @@ Also done first, with the user's OK:
   - The page requests the feed with its user id and treats `seen` as done.
 - **Test:** `test_the_feed_remembers_what_this_user_acknowledged`, with acks by one user not leaking to another or to anonymous requests. `pytest -q` 296 passed; tsc and eslint clean.
 - **Checked in the browser** (local database, replay tenant): "Got it" on change 116, then a reload, still shows "Seen"; an unacknowledged change still shows "Got it". The test ack was removed afterwards.
+
+## 2026-11-14 — Abstention set (TEST_PLAN level 8)
+
+- **Written:** `eval/abstain.csv`, 20 realistic questions the corpus does not cover (HR policy, product GST rates, tax advice, supplier contact or bank data, a foreign-currency invoice, IT, ERP plans, general knowledge, spend data), each with its acceptable routes. Written by hand, not from the eval workbook.
+- **Runner:** `scripts/run_abstention.py`. It asks through the normal pipeline as `eval-abstain` and writes `reports/abstention_20261114.md` and `.csv`.
+- **Result** (Neon, Isoquant): **20/20 not answered** (target ≥ 90%; no false answers). **15/20 routed to an acceptable role.**
+- **The 5 mis-routes:**
+  - A05, A06, A11 and A12: the router gives out-of-scope questions an empty role, so they fall back to Team Lead. `roles.yaml` `default_for` (supplier_data → Vendor Master team, tax_question → Tax Desk, hr_policy → HR / Admin) is never used.
+  - A14: routed to AP Processor, the asker's own role.
+- **Proposed fix, not applied:** router prompt v6 (choose a role for out-of-scope questions too, show `default_for`, never route to the asker's own role), then re-run the 160-question eval (about $0.06).
+
+## 2026-11-14 — Digest delivery: email (SMTP) and Microsoft Teams
+
+- **Approach:** the send code ships; each client adds its own settings (`.env` or the host environment). Until a channel is set up, the card says so and offers "Copy as text" only. No new dependency (standard-library `smtplib` and `urllib`), nothing company-specific in the core.
+- **Email:** any SMTP server (`SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` starttls/ssl/none, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`) to `DIGEST_EMAIL_TO` (comma-separated). Plain-text and HTML parts; HTML escaped; at most 15 changes listed, then "and N more".
+- **Teams:** `TEAMS_WEBHOOK_URL` is the URL of a Teams Workflows "Post to a channel when a webhook request is received" flow (the old Office 365 connector webhooks are retired). The digest is posted as an Adaptive Card (v1.4), with an "Open the Changes page" button when `WEB_BASE_URL` is set.
+- **Automatic daily send:** `DIGEST_SEND_AT=HH:MM` in the team's time zone (`DIGEST_UTC_OFFSET_MINUTES`). The worker checks every minute and queues one `digest_send` job per local day (`jobs.exists_with` on the payload day). One attempt only, so a partial failure never emails twice. `DIGEST_SKIP_EMPTY` (default true) skips days without changes. The job row is the send log.
+- **Code:**
+  - `app/distribute/channels.py`: status, message bodies, transports, and `deliver` (one result per channel; secrets redacted from errors).
+  - `app/distribute/delivery.py`: the team digest, `due_day`, `schedule_tick`, the `digest_send` handler and the worker clock.
+  - API: `GET /digest/channels` (configured flags, recipient count, schedule; never addresses, passwords or URLs) and `POST /digest/send` (409 when nothing is set up, 422 for an unknown channel).
+  - Web: an owner-only "Send now" on the digest card, a result line per channel, and a setup hint when nothing is configured.
+- **Tests:** `tests/unit/test_digest_channels.py` (9) and `tests/integration/test_digest_send_db.py` (4). `tests/conftest.py` blanks the SMTP, Teams and schedule settings so a test never sends for real. pytest: 309 passed. ruff, tsc and eslint clean.
+- **Verified live:** local API and web with a local debugging SMTP server. "Send now" on the owner's digest card delivered a multipart email to 2 recipients (`reports/screenshots/digest_send_email.png`). The replay tenant's 11 Nov digest (28 rule changes) sent correctly with ₹ values. Fixed: the HTML said "No changes" on a day with only non-rule updates (now "No rule changes.").
+- **Not tested against a real Teams channel** (no workflow URL here): the card format is unit-tested only. The first real client setup should send one test digest.

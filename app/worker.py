@@ -38,6 +38,7 @@ HANDLER_MODULES = (
     "app.graph.conflicts",
     "app.govern.apply",
     "app.distribute.recall",
+    "app.distribute.delivery",
 )
 
 
@@ -132,6 +133,11 @@ def serve(threads: int, poll_s: float = 1.0) -> None:  # pragma: no cover - long
 
         threading.Thread(target=watch.loop, daemon=True).start()
         log.info("watching %s every %ds", watch.folder(), get_settings().watch_interval_s)
+    if get_settings().digest_send_at:
+        from app.distribute import delivery
+
+        threading.Thread(target=delivery.loop, daemon=True).start()
+        log.info("daily digest send at %s", get_settings().digest_send_at)
     while True:
         time.sleep(60)
         with session_scope() as s:

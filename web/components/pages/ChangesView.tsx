@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertTriangle,
   Archive,
   Bell,
   CalendarDays,
@@ -11,8 +12,10 @@ import {
   Copy,
   FilePen,
   FileText,
+  Mail,
   MessageSquareReply,
   RotateCcw,
+  Send,
   ShieldAlert,
   X,
 } from "lucide-react";
@@ -23,9 +26,17 @@ import { PageColumns } from "@/components/shell/PageColumns";
 import { useRole } from "@/components/shell/RoleContext";
 import { useSignals } from "@/components/shell/Signals";
 import { Button, Card, Empty, ErrorNote, PageHeader, Pill, SectionLabel, SkeletonRows } from "@/components/ui/Primitives";
-import { ackChange, draftDocumentEdit } from "@/lib/api";
+import { ackChange, draftDocumentEdit, sendDigest } from "@/lib/api";
 import { cx, fmtDate, humanKey } from "@/lib/format";
-import type { ChangeFeedItem, Digest, DocumentEdit, Episode, Notification } from "@/lib/types";
+import type {
+  ChangeFeedItem,
+  Digest,
+  DigestChannels,
+  DigestSendResult,
+  DocumentEdit,
+  Episode,
+  Notification,
+} from "@/lib/types";
 import { useApi } from "@/lib/useApi";
 
 const STATUS_ICON = { provisional: Clock, confirmed: Check, rejected: ShieldAlert, retired: Archive } as const;
@@ -144,13 +155,98 @@ async function copyText(text: string): Promise<boolean> {
 
 const DIGEST_SHOWN = 6;
 
+const CHANNEL_LABEL: Record<string, string> = { email: "Email", teams: "Teams" };
+
+/** "Send now" to the channels the server has set up (email, Teams). Hidden when none is. */
+function DigestSendButton({
+  day,
+  offset,
+  onResult,
+}: {
+  day: string;
+  offset: number;
+  onResult: (r: DigestSendResult | string) => void;
+}) {
+  const { data } = useApi<DigestChannels>("/digest/channels");
+  const [busy, setBusy] = useState(false);
+  if (!data || !(data.email.configured || data.teams.configured)) return null;
+  const to = [data.email.configured && "email", data.teams.configured && "Teams"].filter(Boolean).join(" and ");
+  const send = async () => {
+    setBusy(true);
+    try {
+      onResult(await sendDigest(day, offset));
+    } catch (e) {
+      onResult(e instanceof Error ? e.message : "The digest could not be sent.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Button icon={Send} busy={busy} onClick={() => void send()} title={`Send this digest by ${to}`}>
+      Send now
+    </Button>
+  );
+}
+
+/** Where the digest goes: the last send's result, the daily send time, or how to set it up. */
+function DigestDelivery({ sent }: { sent: DigestSendResult | string | null }) {
+  const { data } = useApi<DigestChannels>("/digest/channels");
+  if (!data) return null;
+  const on = data.email.configured || data.teams.configured;
+  return (
+    <div className="mt-3 space-y-1 text-[12px] leading-snug text-muted" aria-live="polite">
+      {typeof sent === "string" ? (
+        <p className="flex items-start gap-1.5 text-ink">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden /> {sent}
+        </p>
+      ) : (
+        sent?.results.map((r) => (
+          <p key={r.channel} className="flex items-start gap-1.5 break-words text-ink">
+            {r.ok ? (
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            ) : (
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            )}
+            <span>
+              {CHANNEL_LABEL[r.channel] ?? r.channel}: {r.ok ? r.detail : `not sent (${r.detail})`}
+            </span>
+          </p>
+        ))
+      )}
+      {on ? (
+        <p className="flex items-center gap-1.5">
+          <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {[
+            data.email.configured &&
+              `Email to ${data.email.recipients} recipient${data.email.recipients === 1 ? "" : "s"}`,
+            data.teams.configured && "Teams channel",
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+          {data.schedule
+            ? ` · sent automatically every day at ${data.schedule.send_at}${data.schedule.skip_empty ? " (days with changes)" : ""}`
+            : " · sent when you press Send now"}
+        </p>
+      ) : (
+        <p className="flex items-start gap-1.5">
+          <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          Sending by email or Teams is not set up yet. Add the mail server (SMTP) or a Teams workflow
+          link in the server settings and a Send button appears here.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** One day's changes in one summary, with a plain-text copy for email or chat. */
 function DigestCard({ userId, owner, tick }: { userId: string; owner: boolean; tick: number }) {
   const today = useMemo(() => isoDay(new Date()), []);
   const [day, setDay] = useState(today);
   const [copied, setCopied] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [sent, setSent] = useState<DigestSendResult | string | null>(null);
   const offset = -new Date().getTimezoneOffset();
+  useEffect(() => setSent(null), [day]);
   const { data, error, reload } = useApi<Digest>(
     `/digest?day=${day}&utc_offset_minutes=${offset}&user_id=${encodeURIComponent(userId)}`,
   );
@@ -245,10 +341,14 @@ function DigestCard({ userId, owner, tick }: { userId: string; owner: boolean; t
                   .filter(Boolean)
                   .join(" · ") || " "}
               </p>
-              <Button icon={copied ? Check : Copy} onClick={() => void copy()}>
-                {copied ? "Copied" : "Copy as text"}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {owner && <DigestSendButton day={day} offset={offset} onResult={setSent} />}
+                <Button icon={copied ? Check : Copy} onClick={() => void copy()}>
+                  {copied ? "Copied" : "Copy as text"}
+                </Button>
+              </div>
             </div>
+            {owner && <DigestDelivery sent={sent} />}
           </>
         )}
       </Card>
