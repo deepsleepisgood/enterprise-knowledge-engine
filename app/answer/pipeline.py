@@ -20,7 +20,7 @@ from app.answer.generate import CalcView, GenOut, evidence_ids, evidence_tags, g
 from app.answer.retrieve import EmbedFn, RerankFn, retrieve
 from app.answer.router import route
 from app.core.config import get_settings
-from app.core.db import session_scope
+from app.core.db import export_snapshot, session_scope, snapshot_scope
 from app.graph.pipeline import active_ontology
 from app.graph.rows import ORIGIN as ROW_ORIGIN
 from app.graph.rules import RuleNotFound, canonical_client
@@ -145,6 +145,56 @@ def ask(
     embed_fn: EmbedFn | None = None,
     rerank_fn: RerankFn | None = None,
 ) -> dict[str, Any]:
+    """Answer `question` from one snapshot of the knowledge base (`_answer`), then, once the
+    answer is saved, make sure a change published while it was being written reaches the asker."""
+    built: dict[str, Any] = {}
+    card = _answer(
+        question,
+        client,
+        as_of,
+        known_at,
+        user_id,
+        viewer,
+        today,
+        structured_fn,
+        embed_fn,
+        rerank_fn,
+        built,
+    )
+    recall_if_published_meanwhile(built)
+    return card
+
+
+def recall_if_published_meanwhile(built: dict[str, Any]) -> bool:
+    """Queue answer recall again when something was published while the answer was being
+    written (more kb versions now than its snapshot saw: a count, because concurrent publishes
+    can commit out of id order). The recall queued by that change may already have run before
+    this answer was saved, and so missed it; recall is idempotent, so queueing it again is safe.
+    Only answers that cited facts and claim to be current can be recalled."""
+    if not built.get("cited_facts") or built.get("as_of"):
+        return False
+    from app.store import jobs
+
+    with session_scope() as s:
+        if kb.kb_version_count(s) <= built["kb_count"]:
+            return False
+        jobs.enqueue_once(s, "answer_recall", {})
+    return True
+
+
+def _answer(
+    question: str,
+    client: str | None,
+    as_of: date | None,
+    known_at: datetime | None,
+    user_id: str,
+    viewer: str,
+    today: date | None,
+    structured_fn: Any,
+    embed_fn: EmbedFn | None,
+    rerank_fn: RerankFn | None,
+    built: dict[str, Any],
+) -> dict[str, Any]:
     started = time.perf_counter()
     cfg = get_settings()
     structured = structured_fn or _default_structured()
@@ -153,11 +203,15 @@ def ask(
     calculators = calc_mod.routes()
     diag: dict[str, Any] = {}
 
-    with session_scope() as s:
+    # One snapshot for the whole answer: a change published while it is being written (about
+    # 12 s) cannot mix old and new rules in one card, and the card's kb_version is exactly what
+    # it read. Writable only for the answer log row.
+    with snapshot_scope(writable=True) as s:
         onto = active_ontology(s)
         if onto is None:
             raise RuntimeError("no frozen schema: build the graph first")
         kbv = kb.current_kb_version(s)
+        built["kb_count"] = kb.kb_version_count(s)
         clients = known_clients(s)
         timings: dict[str, float] = {}
         diag["timings_s"] = timings
@@ -185,9 +239,12 @@ def ask(
         spec_as_of = as_of
         spec: Future | None = None
         if cfg.early_retrieval and (not client or client == "all"):
+            snap = export_snapshot(s)
 
             def _search() -> Any:
-                with session_scope() as s2:
+                # Same snapshot as the answer. If the answer finished first (the router chose a
+                # different search) this fails, and its result was not wanted anyway.
+                with snapshot_scope(snapshot=snap) as s2:
                     return retrieve(
                         s2, question, None, spec_as_of, known_at, today, embed_fn, rerank_fn
                     )
@@ -234,6 +291,7 @@ def ask(
             )
             card["answer_id"] = str(aid)
             astore.update_card(s, aid, card)
+            built.update(cited_facts=bool(facts), as_of=as_of)
             return cards.view_for(card, viewer)
 
         if r.route == "out_of_scope":

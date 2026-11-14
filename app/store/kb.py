@@ -93,7 +93,18 @@ def current_kb_version(session: Session) -> int:
     )
 
 
+def kb_version_count(session: Session) -> int:
+    """How many versions this tenant has. Unlike the highest id, it grows with every publish a
+    snapshot did not see, even when concurrent publishes commit out of id order."""
+    return (
+        session.scalar(select(func.count(KbVersion.id)).where(KbVersion.tenant_id == tenant())) or 0
+    )
+
+
 def bump_kb_version(session: Session, summary: str) -> int:
+    """A new version. No lock: concurrent publishes may commit out of id order, so nothing may
+    assume a reader that sees version N also sees N-1 (answer recall does not; see
+    `distribute.recall`)."""
     v = KbVersion(tenant_id=tenant(), summary=summary)
     session.add(v)
     session.flush()

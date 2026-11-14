@@ -50,7 +50,7 @@ def _answer(s, user: str, cited: list[int], as_of: date | None = None, q: str = 
         question=q or f"What is the price tolerance? ({user})",
         client=None,
         as_of=as_of,
-        kb_version=1,
+        kb_version=kb.current_kb_version(s),
         route="lookup",
         card={},
         cited_fact_ids=cited,
@@ -93,6 +93,75 @@ def test_a_replaced_rule_recalls_the_answers_that_cited_it(db) -> None:
         assert all(not astore.notifications_for(s, u) for u in others)
         assert astore.unread_count(s, "alice") == 1
         assert recall(s)["notified"] == 0  # idempotent
+
+
+def test_an_answer_saved_after_the_change_but_built_before_it_is_recalled(db) -> None:
+    """The 12 s race: an answer read the old rule, the change was published and its recall ran,
+    then the answer was saved. It is recalled because it cited a row the change replaced, not
+    by when it was saved; an answer citing a later revision in the same lineage is not."""
+    with session_scope() as s:
+        old = _fact(s, "doc:sop:1", "1%")
+    with session_scope() as s:
+        closed = fstore.revise(s, old, valid_to=datetime(2026, 11, 1, tzinfo=UTC))
+        new = _fact(s, "email:fc:1", "2%")
+        v = kb.bump_kb_version(s, "SOP v4")
+        kb.record_change(s, v, "Price tolerance: 1% -> 2%", new_fact=new, old_fact=closed)
+    with session_scope() as s:
+        later = fstore.revise(s, closed, confidence=0.9)  # same lineage, a later version
+        kb.bump_kb_version(s, "confidence recalibrated")
+    with session_scope() as s:
+        assert recall(s)["notified"] == 0  # the worker ran before the answer was saved
+        _answer(s, "fay", [old], q="Asked at 12:02:55")  # saved 12:03:08, after the change
+        _answer(s, "gil", [later], q="Asked after the change")
+    with session_scope() as s:
+        assert recall(s)["notified"] == 1
+        (note,) = astore.notifications_for(s, "fay")
+        assert note["question"] == "Asked at 12:02:55"
+        assert not astore.notifications_for(s, "gil")
+
+
+def test_publishes_committing_out_of_version_order_are_recalled(db) -> None:
+    """Publishes take no lock, so two of them can commit out of id order: A takes version N,
+    B takes N+1 and commits first. An answer then sees N+1 but not N, and relies on the rule A
+    is about to replace. It is still recalled for A (and nothing waited on anything)."""
+    with session_scope() as s:
+        x = _fact(s, "doc:sop:x", "1%")
+        y = _fact(s, "doc:sop:y", "₹500 cap")
+    with session_scope() as a:  # publish A: open while B commits and the answer is given
+        closed_x = fstore.revise(a, x, valid_to=datetime(2026, 11, 1, tzinfo=UTC))
+        va = kb.bump_kb_version(a, "A")
+        kb.record_change(a, va, "Tolerance: 1% -> 2%", old_fact=closed_x)
+        with session_scope() as b:
+            closed_y = fstore.revise(b, y, valid_to=datetime(2026, 11, 1, tzinfo=UTC))
+            vb = kb.bump_kb_version(b, "B")
+            kb.record_change(b, vb, "Cap: ₹500 -> ₹1,000", old_fact=closed_y)
+        assert vb > va
+        with session_scope() as s:
+            assert kb.current_kb_version(s) == vb  # sees N+1 without N
+            _answer(s, "hal", [x])  # x is still in force for this reader
+    with session_scope() as s:
+        recall(s)
+        (note,) = astore.notifications_for(s, "hal")
+        assert "1% -> 2%" in note["body"]
+
+
+def test_a_shared_snapshot_does_not_see_a_change_published_meanwhile(db) -> None:
+    from app.core.db import export_snapshot, snapshot_scope
+
+    with session_scope() as s:
+        kb.bump_kb_version(s, "v1")
+    with snapshot_scope(writable=True) as answer:
+        seen = kb.current_kb_version(answer)
+        snap = export_snapshot(answer)
+        with session_scope() as owner:
+            kb.bump_kb_version(owner, "approved meanwhile")
+        with snapshot_scope(snapshot=snap) as search:  # the parallel search joins it
+            assert kb.current_kb_version(search) == seen
+        assert kb.current_kb_version(answer) == seen
+    with session_scope() as s:
+        assert kb.current_kb_version(s) > seen
+    with pytest.raises(Exception, match="snapshot"), snapshot_scope(snapshot=snap) as late:
+        kb.current_kb_version(late)  # the answer's transaction has ended
 
 
 def test_a_rejected_provisional_change_recalls_answers_that_relied_on_it(db) -> None:

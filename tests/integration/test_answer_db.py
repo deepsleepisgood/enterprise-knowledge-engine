@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import math
 import re
-from datetime import date
+from datetime import UTC, date, datetime
 
 import pytest
 
@@ -227,6 +227,71 @@ def test_escalation_reply_is_labelled_and_enters_as_an_episode(kb_built) -> None
         assert astore.get_escalation(s, sent["escalation_id"]).status == "answered"
     # Nothing from the reply is published yet, so nothing is re-asked.
     assert escalate.reask_if_published(out["episode_id"]) == []
+
+
+class PublishWhileAnswering(FakeLLM):
+    """While the router runs, the owner approves a change that retires the 24-day rule and the
+    worker's recall runs at once: all before the answer is saved."""
+
+    published = False
+
+    def __call__(self, prompt, schema, **kw):
+        if schema is RouteOut and not self.published:
+            self.published = True
+            from sqlalchemy import select
+
+            from app.store import facts as fstore
+            from app.store import kb
+            from app.store.models import Fact
+            from app.worker import run_one
+
+            with session_scope() as s:
+                ids = s.scalars(
+                    select(Fact.id).where(
+                        Fact.statement.ilike("%24 days%"),
+                        Fact.status == "current",
+                        Fact.retracted_at.is_(None),
+                    )
+                ).all()
+                assert ids
+                v = kb.bump_kb_version(s, "leave policy v3 approved")
+                for fid in ids:
+                    closed = fstore.revise(s, fid, valid_to=datetime(2026, 5, 31, tzinfo=UTC))
+                    kb.record_change(s, v, "Annual leave: 24 -> 26 days", old_fact=closed)
+            assert run_one("test-worker", ["answer_recall"])  # finds nothing: not saved yet
+        return super().__call__(prompt, schema, **kw)
+
+
+def test_a_change_published_while_answering_still_reaches_the_asker(kb_built) -> None:
+    import app.distribute.recall  # noqa: F401 - registers the answer_recall handler
+    from app.store import kb
+    from app.worker import run_one
+
+    with session_scope() as s:
+        before = kb.current_kb_version(s)
+    card = run(
+        "How many days of annual leave do staff get?", PublishWhileAnswering(), user_id="pat"
+    )
+    # One snapshot: the whole card is the rule as it stood when the question was asked.
+    assert card["status"] == "answered" and "24 days" in card["rule"]["text"], card
+    assert card["kb_version"] == before
+    with session_scope() as s:
+        assert not astore.notifications_for(s, "pat")
+    assert run_one("test-worker", ["answer_recall"])  # queued again when the answer was saved
+    with session_scope() as s:
+        (note,) = astore.notifications_for(s, "pat")
+        assert note["answer_id"] == int(card["answer_id"]) and "24 -> 26" in note["body"]
+
+
+def test_an_answer_on_the_latest_version_queues_no_recall(kb_built) -> None:
+    from app.answer.pipeline import recall_if_published_meanwhile
+    from app.store import kb
+
+    with session_scope() as s:
+        now = kb.kb_version_count(s)
+    assert not recall_if_published_meanwhile({"kb_count": now, "cited_facts": True})
+    assert not recall_if_published_meanwhile({"kb_count": now - 1, "cited_facts": False})
+    assert recall_if_published_meanwhile({"kb_count": now - 1, "cited_facts": True})
 
 
 def test_report_wrong_answer_creates_an_owner_item(kb_built) -> None:

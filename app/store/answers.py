@@ -302,11 +302,9 @@ class CitingAnswer:
     created_at: datetime
 
 
-def answers_citing(
-    session: Session, fact_ids: list[int], since: datetime, until: datetime
-) -> list[CitingAnswer]:
-    """Answers given between `since` and `until` that cited any of `fact_ids` and claimed to be
-    current: answers about a past date (`as_of`) and evaluation runs are left out."""
+def answers_citing(session: Session, fact_ids: list[int], since: datetime) -> list[CitingAnswer]:
+    """Answers given since `since` that cited any of `fact_ids` and claimed to be current:
+    answers about a past date (`as_of`) and evaluation runs are left out."""
     if not fact_ids:
         return []
     from sqlalchemy import or_
@@ -314,7 +312,6 @@ def answers_citing(
     q = select(AnswerLog).where(
         AnswerLog.tenant_id == tenant(),
         AnswerLog.created_at >= since,
-        AnswerLog.created_at <= until,
         AnswerLog.as_of.is_(None),
         ~AnswerLog.user_id.startswith("eval"),
         or_(*[AnswerLog.cited_fact_ids.contains([i]) for i in fact_ids]),

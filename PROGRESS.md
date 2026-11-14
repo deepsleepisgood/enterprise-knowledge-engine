@@ -793,3 +793,32 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
   - Median latency 12.4 s; cost $0.06.
   - Report: `reports/eval_20261114_all.md`. The run before the scope fix (156/160) is kept as `*_before_scopes`.
 - **Tests:** 326 passed (14 new: calculators, notes, anchors, steps, bindings, client scopes).
+
+## 2026-11-14 — Concurrency: answers in flight during a publish, and a first load test
+
+**Fix: a change published while an answer is being written now reaches the asker.**
+- An answer takes about 12 s. Before this fix, if a change was approved during that time:
+  - The worker's recall could run before the answer was saved, and was never queued again, so the asker was never told.
+  - The answer read with Postgres's default isolation, so one card could mix old and new rules while showing the starting `kb_version`.
+- What changed:
+  - **One snapshot per answer.** `pipeline.ask` reads in a REPEATABLE READ transaction (`db.snapshot_scope(writable=True)`); it is writable only for the answer-log row. The early parallel search joins the same snapshot (`db.export_snapshot` / `snapshot_scope(snapshot=...)`). Checked on Neon through the pooler.
+  - **Recall after save.** After the answer is saved, if anything was published meanwhile (`kb.kb_version_count` grew; a count, because version ids need not commit in order), `answer_recall` is queued again (`recall_if_published_meanwhile`). Recall was already idempotent.
+  - **Recall by what was cited, not by timestamp.** An answer is recalled for a change when it cited a row the change replaced: a version of the fact that is retracted and no newer than `old_fact`. Only an answer that read the knowledge base before the change can cite such a row, whenever it was saved and in whatever order concurrent publishes committed. Previously it was "saved before the change's timestamp".
+  - **No publish lock.** A first version of this fix numbered versions in commit order with a per-tenant advisory lock. A guard run over the whole test suite showed publishes still update facts, sources and aliases after taking that lock (several documents in one transaction, version links), so two publishes on the same rule group could deadlock. Recall no longer depends on version order, so the lock was removed.
+- Tests: 5 new (answer saved after the change, publishes committing out of version order, shared snapshot, end-to-end publish during an answer, no needless re-queue). The end-to-end test fails with the fix switched off. **331 passed**; ruff clean.
+- Still open: a brand-new rule that retires nothing triggers no recall, and answers that cited only passages are not tracked.
+
+**Load test** (`scripts/run_load_test.py`, report `reports/load_20261114.md`):
+- Setup: the laptop API (one process, 16 logical cores) on Neon. 5, 10 and 25 users start at once, 2 questions each, using real Teams questions. 198 of 324 model calls came from the cache; new calls cost $0.01 in total.
+- 80/80 answers, 0 errors. Database connections peaked at 15.
+
+| Users | Median wait | Slowest | Answering itself (median) | Answers/min |
+|---|---|---|---|---|
+| 5 | 26.5 s | 31.9 s | 19.4 s | 10.5 |
+| 10 | 58.2 s | 71.3 s | 22.8 s | 9.0 |
+| 25 | 181.7 s | 209.6 s | 28.6 s | 8.0 |
+
+- **Reading:** throughput is flat at about 8–10 answers a minute. Above 5 users the extra time is queueing for the 4 answer threads; at 25 users, people wait about 3 minutes.
+- **CPU is the limit, not threads.** The API used 12–13 of 16 cores at every level, and answering itself slowed from 19 s to 29 s. The likely cause is the local embedding and reranker models (ONNX, which uses every core), but this was not profiled. More threads on this machine would not help.
+- A small cloud instance (1–2 vCPU) would do worse; hosting needs a bigger CPU, a hosted reranker, or fewer rerank candidates.
+- **Next:** profile one answer's CPU (reranker vs embeddings); cap ONNX threads per answer; test a hosted reranker; then rerun this test.
