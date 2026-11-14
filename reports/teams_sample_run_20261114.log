@@ -1,0 +1,16 @@
+M51441 answered     lookup                    30.9s Pharma QA release
+M50114 answered     lookup                    16.3s Pharma QA release
+M51884 answered     lookup                    16.6s Pharma QA release
+M51049 answered     lookup                    17.8s Infra quantity
+M50037 answered     lookup                    20.4s Infra quantity
+M51134 answered     lookup                    20.6s Infra quantity
+M51247 answered     lookup                    18.7s Infra quantity
+M50040 answered     lookup                    17.6s Infra quantity
+M50996 answered     lookup                    18.8s Infra quantity
+M50434 answered     lookup                    18.3s Infra quantity
+M50609 answered     lookup                    18.8s Infra GRN timing
+M50926 answered     lookup                    17.9s Infra GRN timing
+M51846 answered     lookup                    20.2s Infra GRN timing
+M51234 unsupported  lookup                     7.4s Duplicate
+M50241 answered     lookup                    13.2s Duplicate
+M51410 unsupported  lookup                     7.2s Duplicate
