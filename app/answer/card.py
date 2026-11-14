@@ -321,28 +321,51 @@ def _restates_rule(session: Session, tip: FactRow, day: date) -> bool:
     return any(r.kind != "practice" and r.value.get("number") == n for r in rules)
 
 
+TIP_MIN_SIM = 0.62  # an unused note on the answer's topic must be this close to the question
+TIP_OFF_TOPIC_SIM = 0.72  # ... and one on no topic the answer cites, this close
+TIP_USED_MIN_SIM = 0.55  # a note from a cited passage must match what the answer said from it
+
+
+def _topic(attribute: str) -> str | None:
+    return None if attribute.startswith("other:") else attribute.split(".", 1)[0]
+
+
 def expert_tip(
     session: Session,
-    tips: list[tuple[FactRow, float]],
     day: date,
+    *,
+    cited: list[str],
+    named: list[FactRow],
+    tips: list[tuple[FactRow, float]],
+    ranked_passages: list[str],
+    question_vec: list[float] | None,
     practice_types: set[str] | None = None,
-    ranked_passages: list[tuple[str, float]] | None = None,
+    row_origin: str = "",
+    used_vecs: dict[str, list[float]] | None = None,
+    answer_topics: set[str] | None = None,
 ) -> dict[str, Any] | None:
-    """The most relevant practice fact that says something the rule does not, from a source
-    type the schema marks as practice (interviews, observations...). Candidates are the tips
-    found by fact similarity plus the practice facts of the retrieved passages; the one whose
-    passage the reranker scored highest wins (fact similarity breaks ties)."""
-    rank = dict(ranked_passages or [])
-    cands = [t[0] for t in tips]
-    have = {f.id for f in cands}
-    for f in fstore.live_for_passages(session, list(rank)):
-        if f.kind == "practice" and f.id not in have:
-            cands.append(f)
-            have.add(f.id)
-    useful = [f for f in cands if not _restates_rule(session, f, day)]
+    """The practice note shown beside the answer: know-how that says something the rule does
+    not, from a source type the schema marks as practice (interviews, observations, data rows).
+
+    A note the answer itself used comes first: from a cited practice passage, the note closest
+    to what the answer's sentences said from that passage (`used_vecs`, passage id -> their
+    embedding), since one interview answer often covers several topics. A note about one named
+    party read from a data row is shown only then. Any other note must be about the question:
+    on a topic the answer's rules are about (`answer_topics`) and at least TIP_MIN_SIM similar,
+    or at least TIP_OFF_TOPIC_SIM similar. Without `used_vecs`, a cited note is judged by its
+    similarity to the question like the rest."""
+    used_vecs = used_vecs or {}
+    topics = answer_topics or set()
+    cands: dict[int, FactRow] = {f.id: f for f in named}
+    for f, _ in tips:
+        cands.setdefault(f.id, f)
+    for f in fstore.live_for_passages(session, list(dict.fromkeys([*cited, *ranked_passages]))):
+        if f.kind == "practice":
+            cands.setdefault(f.id, f)
+    useful = [f for f in cands.values() if f.passage_id and not _restates_rule(session, f, day)]
     hits = search.hydrate(session, [f.passage_id for f in useful if f.passage_id])
-    pick = [
-        (f, hits[f.passage_id])
+    useful = [
+        f
         for f in useful
         if f.passage_id in hits
         and (
@@ -351,11 +374,37 @@ def expert_tip(
             or hits[f.passage_id].segment_kind == "record"  # a note in a data row
         )
     ]
-    order = {f.id: i for i, f in enumerate(cands)}
-    pick.sort(key=lambda fp: (-rank.get(fp[0].passage_id or "", float("-inf")), order[fp[0].id]))
+    sims = fstore.similarity(session, [f.id for f in useful], question_vec) if question_vec else {}
+    used: dict[int, float] = {}
+    for pid, vec in used_vecs.items():
+        ids = [f.id for f in useful if f.passage_id == pid]
+        used.update(fstore.similarity(session, ids, vec) if ids and vec else {})
+    pos = {pid: i for i, pid in enumerate(cited)}
+    named_ids = {f.id for f in named}
+
+    def entity_note(f: FactRow) -> bool:
+        return f.id in named_ids or bool(row_origin and f.origin_key.startswith(row_origin))
+
+    def on_point(f: FactRow) -> bool:
+        sim = sims.get(f.id, 0.0)
+        return sim >= TIP_OFF_TOPIC_SIM or (_topic(f.attribute) in topics and sim >= TIP_MIN_SIM)
+
+    def score(f: FactRow) -> float:
+        return used.get(f.id, sims.get(f.id, 0.0))
+
+    def shown(f: FactRow) -> bool:
+        if f.passage_id in pos and entity_note(f):
+            return True  # gated as on point before it became evidence (retrieve)
+        if f.passage_id in pos and f.id in used:
+            return used[f.id] >= TIP_USED_MIN_SIM
+        return not entity_note(f) and on_point(f)
+
+    pick = [f for f in useful if shown(f)]
+    pick.sort(key=lambda f: (pos.get(f.passage_id or "", len(pos)), -score(f)))
     if not pick:
         return None
-    f, p = pick[0]
+    f = pick[0]
+    p = hits[f.passage_id or ""]
     author = p.speaker or (f.meta or {}).get("author") or p.source_label
     when = p.dated.isoformat() if p.dated else ""
     quote = best_sentence(p.text, f.statement)

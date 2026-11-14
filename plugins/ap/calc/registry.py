@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from . import approvals, einvoice, msme, price, quantity, tds
+from . import approvals, duplicate, einvoice, msme, price, quantity, tds
 from .base import CalcResult, Rules
 
 CALCULATORS: dict[str, tuple[type[BaseModel], Callable[[Any, Rules], CalcResult]]] = {
@@ -17,16 +17,21 @@ CALCULATORS: dict[str, tuple[type[BaseModel], Callable[[Any, Rules], CalcResult]
     "einvoice": (einvoice.EinvoiceInput, einvoice.calculate),
     "msme": (msme.MsmeInput, msme.calculate),
     "tds": (tds.TdsInput, tds.calculate),
+    "duplicate": (duplicate.DuplicateInput, duplicate.calculate),
 }
 
 
 DESCRIPTIONS = {
-    "price": "invoice unit price vs PO unit price on a line: within price tolerance?",
+    "price": (
+        "invoice price vs PO price on a line (unit prices, or the line value and the excess): "
+        "within price tolerance?"
+    ),
     "quantity": "invoice quantity vs goods-receipt (GRN) quantity: within quantity tolerance?",
     "approvals": "who must approve an invoice of a given total value",
     "einvoice": "is an invoice without an IRN / e-invoice acceptable, given supplier turnover",
     "msme": "due date and payment run for an MSME supplier's invoice",
     "tds": "TDS section, rate and amount to deduct on a specific invoice",
+    "duplicate": "are two given invoice numbers the same invoice under the duplicate check?",
 }
 
 

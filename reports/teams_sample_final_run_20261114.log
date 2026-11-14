@@ -1,0 +1,65 @@
+M51441 answered     lookup                    11.4s Pharma QA release
+M50114 answered     lookup                     6.0s Pharma QA release
+M51884 answered     lookup                     9.1s Pharma QA release
+M51049 answered     lookup                     7.0s Infra quantity
+M50037 answered     lookup                     9.8s Infra quantity
+M51134 answered     lookup                     7.3s Infra quantity
+M51247 answered     lookup                    10.0s Infra quantity
+M50040 answered     lookup                     9.8s Infra quantity
+M50996 answered     lookup                     9.6s Infra quantity
+M50434 answered     lookup                     7.4s Infra quantity
+M50609 answered     lookup                    10.8s Infra GRN timing
+M50926 answered     lookup                     9.0s Infra GRN timing
+M51846 answered     lookup                    10.0s Infra GRN timing
+M51234 answered     calculator:ap.duplicate    6.9s Duplicate
+M50241 answered     calculator:ap.duplicate    7.0s Duplicate
+M51410 answered     calculator:ap.duplicate    7.8s Duplicate
+M51308 answered     lookup                     6.6s GSTR-2B
+M51240 answered     lookup                     6.4s GSTR-2B
+M50078 answered     lookup                     6.9s GSTR-2B
+M50531 answered     calculator:ap.price        7.2s Price tolerance
+M51011 answered     calculator:ap.price        7.9s Price tolerance
+M50297 answered     calculator:ap.price        7.1s Price tolerance
+M51269 answered     calculator:ap.approvals    7.5s Approvals
+M51840 answered     calculator:ap.approvals    6.8s Approvals
+M51296 answered     calculator:ap.approvals    6.8s Approvals
+M50461 answered     calculator:ap.einvoice     6.8s E-invoice / IRN
+M51426 answered     calculator:ap.einvoice     7.4s E-invoice / IRN
+M51196 answered     lookup                     6.4s RCM
+M51776 answered     lookup                     7.7s TDS section
+M50750 answered     lookup                     9.8s Bank change
+M50226 answered     lookup                     6.7s Non-PO
+M50266 answered     lookup                     6.9s MSME payment
+cards: D:\antigravity\company knowledge engine\reports\teams_sample_20261114_final32.jsonl
+M50101 answered     calculator:ap.approvals   11.8s Approvals
+M50056 answered     calculator:ap.approvals    6.7s Approvals
+M51783 answered     lookup                     9.4s Bank change
+M51686 answered     lookup                    10.6s Bank change
+M51814 answered     lookup                     8.2s Credit note
+M50157 answered     lookup                     7.9s Credit note
+M50676 answered     calculator:ap.duplicate    6.7s Duplicate
+M50644 answered     calculator:ap.duplicate    6.8s Duplicate
+M50759 answered     calculator:ap.einvoice     7.6s E-invoice / IRN
+M51715 answered     calculator:ap.einvoice     7.5s E-invoice / IRN
+M50279 answered     lookup                     7.9s GSTR-2B
+M51005 answered     lookup                     7.9s GSTR-2B
+M50097 answered     lookup                     8.4s Infra GRN timing
+M50110 answered     lookup                     9.8s Infra GRN timing
+M50366 answered     lookup                     8.5s Infra quantity
+M50205 answered     lookup                     9.5s Infra quantity
+M50815 answered     lookup                     7.2s MSME payment
+M51287 answered     lookup                     7.3s MSME payment
+M50775 unsupported  lookup                     4.7s Month-end
+M51241 answered     lookup                     9.3s Month-end
+M50924 answered     lookup                     6.4s Non-PO
+M51591 answered     lookup                     6.4s Non-PO
+M50788 answered     lookup                     6.7s Payment run
+M50690 answered     lookup                     8.5s Pharma QA release
+M50831 answered     lookup                     7.9s Pharma QA release
+M50784 answered     calculator:ap.price        7.6s Price tolerance
+M50106 answered     calculator:ap.price        7.6s Price tolerance
+M50990 answered     lookup                     6.6s RCM
+M50875 answered     lookup                     6.1s RCM
+M51231 answered     lookup                     7.6s TDS section
+M50555 needs_specialist lookup                     7.2s TDS section
+cards: D:\antigravity\company knowledge engine\reports\teams_sample_20261114_final_fresh.jsonl

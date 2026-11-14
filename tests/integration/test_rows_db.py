@@ -160,7 +160,15 @@ def test_a_question_naming_the_counterparty_gets_its_note_as_evidence(export) ->
     with use_tenant(T), session_scope() as s:
         got = retrieve(
             s,
-            "What does Zephyr Freight do when it re-sends an invoice?",
+            "Does Zephyr Freight re-send invoices with a suffix?",
+            today=date(2026, 11, 13),
+            embed_fn=fake_embed,
+            rerank_fn=None,
+        )
+        # Same party, another subject: its note is not on point and stays out of the evidence.
+        off = retrieve(
+            s,
+            "Who approves the Zephyr Freight bill of 18 lakh?",
             today=date(2026, 11, 13),
             embed_fn=fake_embed,
             rerank_fn=None,
@@ -169,6 +177,7 @@ def test_a_question_naming_the_counterparty_gets_its_note_as_evidence(export) ->
             s, "What does Orbit Metals do?", today=date(2026, 11, 13), embed_fn=fake_embed
         )
     assert [f.passage_id for f in got.named_practice] == ["row-1"]
+    assert off.named_practice == []
     assert other.named_practice == []  # no note was published for it
 
 

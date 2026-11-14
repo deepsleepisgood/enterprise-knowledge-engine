@@ -22,6 +22,7 @@ from app.answer.router import route
 from app.core.config import get_settings
 from app.core.db import session_scope
 from app.graph.pipeline import active_ontology
+from app.graph.rows import ORIGIN as ROW_ORIGIN
 from app.graph.rules import RuleNotFound, canonical_client
 from app.plugins import calculate as calc_mod
 from app.plugins import registry
@@ -52,28 +53,46 @@ def grounded_inputs(
     units: dict[str, float],
     currencies: list[str] | None = None,
 ) -> list[str]:
-    """Numeric calculator inputs that do not come from the question: a number as written, or an
-    amount converted with the unit written next to it ("8.9 million" may become 8,900,000, never
-    890,000). A calculator never runs on figures the asker did not give."""
+    """Calculator inputs that do not come from the question: a number as written, or an amount
+    converted with the unit written next to it ("8.9 million" may become 8,900,000, never
+    890,000), and any identifier (a text input containing a digit, such as an invoice number)
+    exactly as written. A calculator never runs on figures the asker did not give."""
     from app.answer.verify import mentions, numbers
 
     given = numbers(question) | mentions(question, units, currencies)["money"]
+    asked = "".join(question.split()).lower()
 
-    def leaves(x: Any) -> list[float]:
+    def leaves(x: Any) -> list[float | str]:
         if isinstance(x, bool) or x is None:
             return []
         if isinstance(x, (int, float)):
             return [float(x)]
+        if isinstance(x, str):
+            return [x] if any(ch.isdigit() for ch in x) else []
         if isinstance(x, dict):
             return [v for item in x.values() for v in leaves(item)]
         if isinstance(x, (list, tuple)):
             return [v for item in x for v in leaves(item)]
         return []
 
-    def ok(v: float) -> bool:
+    def ok(v: float | str) -> bool:
+        if isinstance(v, str):
+            return "".join(v.split()).lower() in asked
         return any(abs(v - g) < 1e-6 * max(1.0, abs(v)) for g in given)
 
-    return [f"{v:g}" for v in leaves(inputs) if not ok(v)]
+    return [v if isinstance(v, str) else f"{v:g}" for v in leaves(inputs) if not ok(v)]
+
+
+def known_clients(session: Any) -> list[str]:
+    """Client names the router may pick from: client entities plus every scope a source is
+    written for. A scope with rules but no entity of its own (a memo for one client) must be
+    in the list, or the router maps a question about it to the nearest other client and the
+    search then filters that client's memo out."""
+    from app.store import episodes
+
+    names = [e.name for e in estore.list_entities(session, "client")]
+    known = {n.lower() for n in names}
+    return names + [c for c in episodes.client_scopes(session) if c.lower() not in known]
 
 
 def _with_model(structured: Any, model: str) -> Any:
@@ -139,7 +158,7 @@ def ask(
         if onto is None:
             raise RuntimeError("no frozen schema: build the graph first")
         kbv = kb.current_kb_version(s)
-        clients = [e.name for e in estore.list_entities(s, "client")]
+        clients = known_clients(s)
         timings: dict[str, float] = {}
         diag["timings_s"] = timings
 
@@ -292,7 +311,9 @@ def ask(
         fact_pids = [f.passage_id for f in got.facts if f.passage_id]
         named_pids = [f.passage_id for f in got.named_practice if f.passage_id]
         order = list(
-            dict.fromkeys([*calc_pids, *named_pids, *[p.id for p in got.passages], *fact_pids])
+            dict.fromkeys(
+                [*calc_pids, *named_pids, *[p.id for p in got.passages], *got.anchors, *fact_pids]
+            )
         )
         hits = search.hydrate(s, order[:MAX_EVIDENCE], known_at)
         evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
@@ -305,6 +326,7 @@ def ask(
         attempts: list[list[str]] = []
         in_force: list = []
         not_in_force: list = []
+        attrs: list[str] = []
         for _attempt in range(2):
             gen = generate(
                 question,
@@ -395,6 +417,21 @@ def ask(
                     cited_keys.setdefault((f.subject_id, f.attribute), 0)
         cited_facts = [f.id for f in in_force if f.passage_id in cited_set]
         cited_facts += [c.fact_id for c in (res.citations if res else [])]
+        # What the answer said from each cited passage, to pick the note it actually used.
+        said: dict[str, list[str]] = {}
+        for sent in gen.sentences:
+            for key in sent.sources:
+                if key in evidence:
+                    said.setdefault(evidence[key].id, []).append(sent.text)
+        embedder = embed_fn
+        if embedder is None:
+            from app.core.embed import embed as embedder
+        used_vecs = (
+            dict(zip(said, embedder([" ".join(v) for v in said.values()]), strict=True))
+            if said
+            else {}
+        )
+        answer_topics = {a.split(".", 1)[0] for a in attrs if not a.startswith("other:")}
         card = dict(base)
         card.update(
             rule={"text": rule_text, "citations": cites},
@@ -408,17 +445,19 @@ def ask(
                 ),
                 [] if as_of or known_at else cards.conflicting_sources(s, sorted(set(cited_facts))),
             ),
-            # A practice note about the entity the question names beats a merely similar tip.
-            expert_tip=(
-                got.named_practice
-                and cards.expert_tip(s, [(f, 1.0) for f in got.named_practice], as_of or today)
-            )
-            or cards.expert_tip(
+            # The note the answer relied on first; otherwise one about the question's topic.
+            expert_tip=cards.expert_tip(
                 s,
-                got.tips,
                 as_of or today,
-                {r.doc_type for r in onto.source_ranking if r.practice},
-                [(p.id, p.score) for p in got.passages],
+                cited=cited,
+                named=got.named_practice,
+                tips=got.tips,
+                ranked_passages=[p.id for p in got.passages],
+                question_vec=got.vec,
+                practice_types={r.doc_type for r in onto.source_ranking if r.practice},
+                row_origin=ROW_ORIGIN,
+                used_vecs=used_vecs,
+                answer_topics=answer_topics,
             ),
             related=[q for q in gen.related if q.strip()][:4],
         )

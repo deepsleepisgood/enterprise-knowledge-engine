@@ -742,3 +742,54 @@ Also done first, with the user's OK:
   - Those 10 through the full pipeline: **10/10 correct** (`reports/eval_20261114_router_v6_changed.md`). The 13 Nov score (157/160) stands.
 - **Abstention set:** 20/20 not answered; **routed right 18/20** (was 15/20; target 90%). The 5 earlier mis-routes are fixed. The new misses, both arguable: A09 (employee income-tax regime) goes to HR / Admin; A17 (SAP password) goes to HR / Admin, and the plug-in has no IT role. Reports: `reports/abstention_20261114.md` (v6) and `abstention_20261114_router_v5.md` (before).
 - **Tests:** a new unit test (first-contact lines, the asker never routed to). pytest: 310 passed.
+
+## 2026-11-14 — Real Teams questions (32 from the operations workbook)
+
+- `scripts/run_teams_sample.py` asks chosen `teams_questions` messages (operations workbook) through the normal pipeline as `eval-teams` and saves the cards. 32 questions, weighted to client memos, expert habits and supplier habits, including all 7 that colleagues answered wrongly in Teams. Local knowledge base, Isoquant. Judged by hand against the documents (the sheet has no gold answers).
+- **Result:** 24/32 correct and cited, 5 partly right, 3 no answer, **0 wrong or outdated rules**. 7/7 questions colleagues got wrong were answered correctly. Pharma QA release 3/3, Infra cement quantity 7/7, GSTR-2B 3/3, approvals 3/3, IRN 2/2.
+- **Weak spots:**
+  - Infra GRN timing (0/3 fully right): the decision says "raise NO_GRN" and the expert's "wait until Tuesday noon" is only an aside.
+  - Duplicate -REV numbers (0/3): SOP 3.3's normalisation is never applied.
+  - Legal fee: misses RCM_REVIEW (SOP 5.6).
+  - One price question unverified (₹340 on ₹12,000).
+  - Supplier habit notes from the vendor master are not used.
+  - 4 cards show an unrelated expert tip.
+- Report: `reports/teams_sample_20261114.md`, with fixes in order of value.
+
+## 2026-11-14 — Fixes from the real Teams questions (generic, not tuned to the eval)
+
+Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root cause and fixed in the core or the AP plug-in:
+
+- **Habits about WHEN or HOW to apply a rule shape the decision** (answer prompt `answer-v9`, rule 6). A habit still never changes a rule's value or limit.
+  - Example: Infra GRN timing now says "Not yet: hold, raise NO_GRN only if no GRN by Tuesday noon".
+  - New rule 14: a note about one named party applies only to that party, and facts the question states win over a record.
+  - New rule 15: cite the rule passage for the rule, and the practice passage only for the know-how.
+- **Rule anchors** (`retrieve.rule_anchors`): when a kept practice passage's topic has no rule passage in the evidence, the closest in-force rules on that topic are added (at most 2). Example: SOP §5.6 RCM_REVIEW for legal fees.
+- **Procedures completed** (`retrieve.missing_steps`, `search.procedure_steps`): when two or more steps of one procedure are kept, the missing steps are added. Example: the bank-change call-back, SOP §8.2 step 2.
+- **Supplier notes gated** (`retrieve.notes_on_point`): a data-row note about a named party is used only if what it says is at least 0.70 cosine-similar to what the question asks, with the party's names removed from both sides. Calibrated: on-point 0.72–0.83, off-point 0.54–0.67.
+- **Expert tip** (`card.expert_tip`):
+  - A note from a cited passage, picked by similarity to what the answer said from that passage.
+  - Otherwise, one on an answer topic at 0.62 or more, or any note at 0.72 or more.
+  - A named-party note only when the answer relied on it.
+- **AP plug-in calculators:**
+  - New `duplicate` calculator. It reads the normalisation rule text and the match criteria from the graph (`duplicate_check.normalisation_rules`, `.match_criteria`), and strips leading zeros per segment.
+  - `price` accepts "PO line value + excess".
+  - Extractor `params-v3`.
+  - `grounded_inputs` also checks identifier inputs (text containing a digit) against the question.
+- **Bindings:** a parameter with no binding row binds to a schema attribute with exactly its key (what `bind()` would choose); a parameter the bind step left unresolved stays unresolved. No Neon write was needed.
+- **Router client list** (`pipeline.known_clients`): client entities plus every source `client_scope`. "Arvana Retail" has a memo but no client entity, so router v6 mapped it to "Arvana Group" and the search dropped CM-RET-03 (Q045). Found by the full eval below.
+
+**Results (Neon, Isoquant):**
+- Teams sample, the original 32: 32/32 correct.
+- Teams sample, 31 fresh questions (2 random per topic, seed 2026): 28/31 correct. Not fixed, on purpose:
+  - "Invoice came in on 28th": retrieval just below the abstain threshold.
+  - One courier answer used INV_INCOMPLETE where the SOP code is NON_PO_NOT_ALLOWED.
+  - An ERP maintenance-contract answer hedged instead of giving 194J.
+- No wrong or outdated rule in either set.
+- **Full eval: 158/160 (98.8%)**, up from 157 on 13 Nov.
+  - Dev 96/96, holdout 62/64.
+  - Citations strict 99.4%, lenient 100%.
+  - 0 abstained, 0 unverified.
+  - Median latency 12.4 s; cost $0.06.
+  - Report: `reports/eval_20261114_all.md`. The run before the scope fix (156/160) is kept as `*_before_scopes`.
+- **Tests:** 326 passed (14 new: calculators, notes, anchors, steps, bindings, client scopes).

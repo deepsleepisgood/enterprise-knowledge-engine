@@ -175,6 +175,31 @@ def get_facts(
     return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
 
 
+def on_topics(
+    session: Session,
+    topics: list[str],
+    valid_on: date | datetime | None = None,
+    known_at: datetime | None = None,
+    statuses: list[str] | None = None,
+    kinds: list[str] | None = None,
+) -> list[FactRow]:
+    """Facts whose attribute belongs to one of `topics` (`<topic>.<parameter>`), most
+    authoritative first."""
+    if not topics:
+        return []
+    q = (
+        _joined()
+        .where(Fact.tenant_id == tenant(), *_time_filters(valid_on, known_at))
+        .where(or_(*[Fact.attribute.startswith(f"{t}.", autoescape=True) for t in topics]))
+    )
+    if statuses:
+        q = q.where(Fact.status.in_(statuses))
+    if kinds:
+        q = q.where(Fact.kind.in_(kinds))
+    q = q.order_by(Fact.authority_rank, Fact.valid_from.desc().nulls_last(), Fact.id)
+    return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q)]
+
+
 def live_by_origin(session: Session, origin_keys: list[str]) -> dict[str, FactRow]:
     if not origin_keys:
         return {}

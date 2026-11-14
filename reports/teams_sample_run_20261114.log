@@ -14,3 +14,20 @@ M51846 answered     lookup                    20.2s Infra GRN timing
 M51234 unsupported  lookup                     7.4s Duplicate
 M50241 answered     lookup                    13.2s Duplicate
 M51410 unsupported  lookup                     7.2s Duplicate
+M51308 answered     lookup                     8.9s GSTR-2B
+M51240 answered     lookup                     9.5s GSTR-2B
+M50078 answered     lookup                     9.5s GSTR-2B
+M50531 answered     lookup                    11.0s Price tolerance
+M51011 answered     lookup                    12.8s Price tolerance
+M50297 unverified   lookup                    10.9s Price tolerance
+M51269 answered     calculator:ap.approvals   10.5s Approvals
+M51840 answered     calculator:ap.approvals   11.6s Approvals
+M51296 answered     calculator:ap.approvals    9.1s Approvals
+M50461 answered     calculator:ap.einvoice    10.8s E-invoice / IRN
+M51426 answered     calculator:ap.einvoice    12.2s E-invoice / IRN
+M51196 needs_specialist lookup                    10.7s RCM
+M51776 answered     lookup                    13.7s TDS section
+M50750 answered     lookup                    10.1s Bank change
+M50226 answered     lookup                     9.9s Non-PO
+M50266 answered     lookup                    11.7s MSME payment
+cards: D:\antigravity\company knowledge engine\reports\teams_sample_20261114.jsonl

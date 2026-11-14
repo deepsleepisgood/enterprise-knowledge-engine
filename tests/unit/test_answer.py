@@ -403,3 +403,13 @@ def test_router_shows_first_contact_roles_and_never_routes_to_the_asker() -> Non
     assert out.role is None  # the asker's own role falls back on the card
     assert "Never send a question back to them" in seen["system"]
     assert "including out_of_scope" in seen["system"]
+
+
+def test_identifier_inputs_must_be_written_in_the_question() -> None:
+    from app.answer.pipeline import grounded_inputs
+
+    q = "Is INV/0605 the same as INV715-REV from Kaveri Foods?"
+    ok = {"invoice_number": "INV/0605", "other_invoice_number": "INV715-REV", "material": "x"}
+    assert grounded_inputs(ok, q, UNITS) == []
+    bad = {"invoice_number": "INV605", "other_invoice_number": "INV715-REV"}
+    assert grounded_inputs(bad, q, UNITS) == ["INV605"]

@@ -161,6 +161,11 @@ class BoundRules:
     ) -> RuleValue:
         param = f"{topic}.{parameter}"
         attr = self.bindings.get(param)
+        if param not in self.bindings and self.onto.attribute(param):
+            # Not bound yet (a parameter added after the bind step ran): an attribute with exactly
+            # this key is what bind() would choose ("exact key"), so use it. A parameter the bind
+            # step looked at and left unresolved stays unresolved.
+            attr = param
         if not attr:
             raise RuleNotFound(
                 f"plug-in {self.plugin}: parameter {param} is not bound to the "

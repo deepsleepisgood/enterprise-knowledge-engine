@@ -102,6 +102,8 @@ Retrieval, precisely:
 - The two lists are merged with **reciprocal rank fusion** (k = 60), then reranked by **`BAAI/bge-reranker-base`** (cross-encoder, CPU), and the top 6 are kept.
 - **Graph context is a one-hop expansion, not a multi-hop walk.** The engine finds the entities linked to the question (by alias and embedding) and goes one hop along their object entities. It then adds the facts in force for those entities and the facts extracted from the kept passages.
 - **Rule values come from a direct lookup, not a search.** `get_rule` (`app/graph/rules.py`) reads the facts table by topic, parameter, client and date (`valid_on`, `known_at`). It can't return an expired rule, and it raises an error instead of guessing.
+- **Rules come with the habits about them, and procedures come whole.** When a kept passage is an expert's practice note and no kept passage states the rule on that topic, the closest rules in force on the topic are added. When two or more steps of one procedure are kept, its missing steps are added, so an answer never skips the step in between (`rule_anchors`, `missing_steps` in `app/answer/retrieve.py`).
+- **Notes about a named party must be on point.** A note read from a data row about a supplier the question names (for example "files GST returns quarterly") is used only if what it says matches what the question asks, compared with the party's names removed. The expert tip shown beside an answer is the note the answer actually used, or one on the same topic.
 - Passage search starts while the router is still deciding, to save a few seconds (`EARLY_RETRIEVAL`).
 - The "graph" is ordinary Postgres tables (facts, entities and links, all with time ranges). There is no separate graph database.
 
@@ -120,7 +122,7 @@ Retrieval, precisely:
 
    The core never imports `plugins/`.
 2. **Accounts-payable plug-in (`plugins/ap/`):**
-   - six deterministic calculators: price tolerance, quantity tolerance, TDS, approval limits, MSME payment dates and e-invoice threshold;
+   - seven deterministic calculators: price tolerance (unit prices, or line value and excess), quantity tolerance, TDS, approval limits, MSME payment dates, e-invoice threshold, and the duplicate check (invoice-number normalisation read from the rule text in the graph);
    - role and owner mappings, client bindings, and loaders for the operations workbook (vendors and invoices).
 
    Every threshold a calculator uses is read from the facts, so none are hard-coded.
@@ -139,7 +141,7 @@ Retrieval, precisely:
 | LLM providers | Any OpenAI-compatible endpoint (NVIDIA NIM, Isoquant), or Anthropic Claude | The public demo runs on Isoquant `deepseek-v4.1-flash-1017-fast` with zero data retention requested |
 | Web | Next.js 14 (App Router), TypeScript, Tailwind CSS | Ask, Sources, Conflicts, Review, Entities, Changes, Analytics and Setup pages; citation drawer; timeline |
 | Hosting | Vercel (web), Neon (Postgres), Cloudflare quick tunnel (API) | Public demo |
-| Tests | pytest, ruff, Playwright | 310 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
+| Tests | pytest, ruff, Playwright | 326 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
 
 ---
 
@@ -162,7 +164,8 @@ Retrieval, precisely:
 ├── evaluation/             # Evaluation harness and metrics (configs A-D, judge, outdated-answer checks)
 ├── scripts/                # run_app, serve_public, dev_db, ingest_all, build_graph, run_eval,
 │                           # run_replay, run_second_corpus, run_format_invariance, run_intake,
-│                           # run_abstention, check_router, conflict_report, delete_episodes
+│                           # run_abstention, run_teams_sample, check_router, conflict_report,
+│                           # delete_episodes
 ├── tests/                  # unit, integration (Postgres), plugins, acceptance (live), leakage, generic-core guard
 ├── reports/                # Every measured result quoted below
 ├── migrations/             # Alembic
@@ -250,13 +253,13 @@ Last updated 14 November 2026. The source of each number is in `reports/`. The e
 
 | What | Result | Target | Report |
 |---|---|---|---|
-| Answer accuracy, all 160 questions (Isoquant, Neon; 13 Nov) | **157/160 (98.1%)**: dev 96/96, holdout 61/64 (95.3%) | ≥ 90% | `eval_20261113_all.md` |
-| Citation accuracy (strict) | **98.8%** (158/160) | ≥ 95% | same |
+| Answer accuracy, all 160 questions (Isoquant, Neon; 14 Nov) | **158/160 (98.8%)**: dev 96/96, holdout 62/64 (96.9%) | ≥ 90% | `eval_20261114_all.md` |
+| Citation accuracy | **99.4%** strict (159/160), 100% lenient | ≥ 95% | same |
 | Conflict questions presenting an old rule as current | **0/23** | 0 | same |
 | Conflict questions that mention an old value while correcting it (strict metric) | 1/23 (Q062) | 0 | same |
 | Unverified or "not covered" answers on the 160 | 0/160 | — | same |
+| Real questions processors asked in Teams (operations workbook; 14 Nov) | **32/32** on a hand-picked sample (client memos, expert and supplier habits); **28/31** on a fresh random sample (2 per topic); no wrong or outdated rule in either | — | `teams_sample_20261114.md`, `teams_sample_20261114_final*.jsonl` |
 | Questions outside the documents (abstention set, 20; 14 Nov) | **20/20 not answered**; **18/20** sent to a sensible role | ≥ 90% | `abstention_20261114.md` |
-| Router change check (router v6, 14 Nov) | router run alone on all 160: 150 unchanged; the 10 that changed re-answered **10/10 correct**, so 157/160 stands | no regression | `eval_20261114_router_v6_changed.md` |
 | Same document in 8 other formats: fact F1 vs the original .docx (14 Nov) | md 1.00, html 1.00, pdf 0.94, eml 0.93, scanned pdf (vision) 0.90 pass; pptx 0.87, xlsx 0.86, flat docx 0.80 below target | ≥ 0.90 (scanned ≥ 0.80) | `format_invariance_20261114.md` |
 | Same calculations from each format (92 scenarios) | 97–100% for every format except the tables-only xlsx (not judged) | ≥ 95% | same |
 | Acceptance tests T1–T11 on the public site (Isoquant; 11 Nov) | **all pass**, 11–25 s per answer | all pass | `public_acceptance_20261111.md` |
@@ -265,13 +268,14 @@ Last updated 14 November 2026. The source of each number is in `reports/`. The e
 | Second, unrelated company (Kestrel Freight HR), no code changes (11 Nov) | **10/10** cited answers | — | `second_corpus_20261111.md` |
 | Intake of mixed incoming files (11 Nov) | 11/12 handled as expected; a spoofed bank-change email held for review | — | `intake_20261111.md` |
 | Metadata inferred vs the hand-made source index | 78/84 (92.9%) | ≥ 90% | `PROGRESS.md` |
-| Latency | median 22 s, p95 44 s in the full evaluation run (Isoquant, several questions in parallel; 13 Nov); retrieval alone 4.5–5.5 s on a laptop CPU | — | eval reports |
-| Cost on Isoquant | $0.059 for all 160 questions (about $0.0004 per question) | — | `eval_20261113_all.md` |
+| Latency | median 12.4 s, p95 24 s in the full evaluation run (Isoquant, several questions in parallel; 14 Nov); retrieval alone 4.5–5.5 s on a laptop CPU | — | eval reports |
+| Cost on Isoquant | $0.06 for all 160 questions (about $0.0004 per question) | — | `eval_20261114_all.md` |
 
 Notes:
 - The outdated-value metric counts any mention of a superseded value, even in a sentence like "the old 2% limit no longer applies". No answer presented an old rule as the rule in force.
 - The two abstention misses are arguable: an employee income-tax question went to HR / Admin instead of the Tax Desk, and an SAP password reset went to HR / Admin (the plug-in has no IT role).
 - In the format test, pptx and flat docx miss F1 mostly on free-text values worded differently; their calculations match 100%.
+- The Teams sample has no gold answers in the workbook, so each answer was judged by hand against the documents. The three misses on the fresh sample: one short question retrieved just below the "not covered" threshold, one courier answer used INV_INCOMPLETE where the SOP code is NON_PO_NOT_ALLOWED, and one ERP maintenance-contract answer hedged instead of giving 194J.
 
 ### Known gaps
 - **Not measured yet:**
@@ -282,7 +286,7 @@ Notes:
 - **Formats:** pptx, xlsx and flat docx are below the F1 target (see above). Audio and video transcription (tier 4) is not built.
 - **Digest delivery:** email was tested against a local mail server; Teams has not been tested against a real channel.
 - **Extraction failures are not flagged:** an episode whose extraction fails on every passage is still marked published.
-- **Latency:** answers take tens of seconds. Most of the time goes to model calls, and the reranker adds about 3 s on CPU.
+- **Latency:** answers take 10–25 seconds. Most of the time goes to model calls, and the reranker adds about 3 s on CPU.
 - **Hosting:** the public demo depends on the API running on one machine through a quick tunnel.
 
 ---

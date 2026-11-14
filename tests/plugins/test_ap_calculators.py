@@ -68,6 +68,20 @@ GENERAL: dict[tuple[str, str], RuleValue] = {
     ("tds", "rate_rent_plant_machinery"): _rv("tds", "rate_rent_plant_machinery", 2, "194I"),
     ("tds", "rate_rent_land_building"): _rv("tds", "rate_rent_land_building", 10, "194I"),
     ("tds", "rate_goods_purchase"): _rv("tds", "rate_goods_purchase", 0.1, "194Q"),
+    ("duplicate_check", "normalisation_rules"): _rv(
+        "duplicate_check",
+        "normalisation_rules",
+        text="remove spaces, slashes, hyphens and leading zeros, and drop a trailing suffix of "
+        "/A, /R or -REV",
+        vtype="text",
+    ),
+    ("duplicate_check", "match_criteria"): _rv(
+        "duplicate_check",
+        "match_criteria",
+        text="supplier GSTIN and normalised number match, or supplier, invoice date and total "
+        "amount (within ₹1) match",
+        vtype="text",
+    ),
 }
 INFRA: dict[tuple[str, str], RuleValue] = {
     ("quantity_tolerance", "pct"): _rv(
@@ -323,3 +337,67 @@ def test_missing_rule_raises_never_defaults() -> None:
 
     with pytest.raises(RuleNotFound):
         run("price", {"po_unit_price": 1, "invoice_unit_price": 2, "quantity": 1}, Empty())
+
+
+# --- price given as line value + excess ---------------------------------------------------
+
+
+def test_price_from_line_value_and_excess() -> None:
+    r = calc("price", po_line_value=12_000, excess=340)  # 1% of 12,000 = 120 < 500
+    assert not r.passed and r.exception_code == "PRICE_VAR"
+    assert r.result["limit"] == 120
+    r = calc("price", po_line_value=140_000, excess=460)  # cap 500 applies
+    assert r.passed and r.result["limit"] == 500
+
+
+def test_price_needs_one_complete_form() -> None:
+    with pytest.raises(ValueError):
+        calc("price", po_line_value=12_000)
+
+
+# --- duplicate check ----------------------------------------------------------------------
+
+
+def test_duplicate_normalisation_comes_from_the_rule_text() -> None:
+    from plugins.ap.calc.duplicate import read_normalisation
+
+    n = read_normalisation(GENERAL[("duplicate_check", "normalisation_rules")].value["text"])
+    assert set(n.separators) == {" ", "/", "-"} and n.leading_zeros
+    assert n.suffixes == ["/A", "/R", "-REV"]
+    # Leading zeros go per segment, so separators keep their boundary.
+    assert n.apply("TR/2026/0881/A") == n.apply("TR/2026/881") == "TR2026881"
+    assert n.apply("INV/0605") == "INV605" and n.apply("INV715-REV") == "INV715"
+
+
+def test_duplicate_different_numbers_are_not_a_number_match() -> None:
+    r = calc("duplicate", invoice_number="INV/0605", other_invoice_number="INV715-REV")
+    assert r.passed and r.exception_code is None and r.result["match"] is False
+    assert any("invoice date and total amount" in n for n in r.notes)
+
+
+def test_duplicate_resent_with_suffix_is_suspected() -> None:
+    r = calc("duplicate", invoice_number="INV148-REV", other_invoice_number="INV/0148")
+    assert not r.passed and r.exception_code == "DUP_SUSPECT"
+    assert r.next_owner.startswith("Senior Processor")
+
+
+def test_duplicate_rule_change_changes_the_result() -> None:
+    class Changed(FakeRules):
+        def get(self, topic, parameter, client=None, as_of=None):
+            if parameter == "normalisation_rules":
+                return _rv(topic, parameter, text="remove slashes only", vtype="text")
+            return super().get(topic, parameter, client, as_of)
+
+    r = run("duplicate", {"invoice_number": "A/01", "other_invoice_number": "A1"}, Changed())
+    assert r.result["match"] is False  # leading zeros are no longer dropped
+
+
+def test_duplicate_unreadable_rule_raises() -> None:
+    class Vague(FakeRules):
+        def get(self, topic, parameter, client=None, as_of=None):
+            if parameter == "normalisation_rules":
+                return _rv(topic, parameter, text="numbers are compared carefully", vtype="text")
+            return super().get(topic, parameter, client, as_of)
+
+    with pytest.raises(RuleNotFound):
+        run("duplicate", {"invoice_number": "A1", "other_invoice_number": "A1"}, Vague())

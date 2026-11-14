@@ -492,6 +492,20 @@ attributes:
   value_type: text
   unit: null
   synonyms: []
+- key: duplicate_check.normalisation_rules
+  topic: duplicate_check
+  label: normalisation rules
+  description: How invoice numbers are normalised before the comparison
+  value_type: text
+  unit: null
+  synonyms: []
+- key: duplicate_check.match_criteria
+  topic: duplicate_check
+  label: match criteria
+  description: When two invoices count as suspected duplicates
+  value_type: text
+  unit: null
+  synonyms: []
 - key: duplicate_check.lookback_months
   topic: duplicate_check
   label: lookback months

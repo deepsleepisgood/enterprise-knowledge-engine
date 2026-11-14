@@ -2,16 +2,19 @@
 
 Reads `teams_questions` from the operations workbook (data/ops/PS-07_ap_operations.xlsx), asks
 the chosen messages through the normal answer pipeline as user `eval-teams` (left out of
-analytics and recall), and writes every answer card to reports/teams_sample_<date>.jsonl for
-review. The sheet has no gold answers, only where a correct colleague answer came from, so the
-cards are judged by hand against the documents.
+analytics and recall), and writes every answer card (owner view: with the diagnostics and any
+unverified draft) to reports/teams_sample_<date><TEAMS_SAMPLE_TAG>.jsonl for review. The sheet
+has no gold answers, only where a correct colleague answer came from, so the cards are judged by
+hand against the documents.
 
     python scripts/run_teams_sample.py M51441 M50114 ...
+    TEAMS_SAMPLE_TAG=_after python scripts/run_teams_sample.py ...   # keep an earlier run
 """
 
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from datetime import date
@@ -25,6 +28,7 @@ sys.path.insert(0, str(ROOT))
 from app.answer.pipeline import ask  # noqa: E402
 
 WORKBOOK = ROOT / "data" / "ops" / "PS-07_ap_operations.xlsx"
+TAG = os.environ.get("TEAMS_SAMPLE_TAG", "")  # e.g. "_after" to keep an earlier run
 
 
 def load(ids: list[str]) -> list[dict]:
@@ -37,12 +41,12 @@ def load(ids: list[str]) -> list[dict]:
 
 def main() -> None:
     ids = sys.argv[1:]
-    out = ROOT / "reports" / f"teams_sample_{date.today():%Y%m%d}.jsonl"
+    out = ROOT / "reports" / f"teams_sample_{date.today():%Y%m%d}{TAG}.jsonl"
     with out.open("w", encoding="utf-8") as f:
         for q in load(ids):
             t0 = time.perf_counter()
             try:
-                card, err = ask(q["question_text"], user_id="eval-teams"), ""
+                card, err = ask(q["question_text"], user_id="eval-teams", viewer="owner"), ""
             except Exception as exc:  # report, keep going
                 card, err = {}, f"{type(exc).__name__}: {exc}"[:300]
             row = {

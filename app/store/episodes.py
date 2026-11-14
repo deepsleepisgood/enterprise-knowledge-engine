@@ -133,6 +133,14 @@ def list_sources(session: Session, episode_id: str | None = None) -> list[Source
     return list(session.scalars(q.order_by(Source.episode_id, Source.ordinal)))
 
 
+def client_scopes(session: Session) -> list[str]:
+    """The client scopes the sources are written for (not "all"), sorted."""
+    q = select(Source.client_scope).where(
+        Source.tenant_id == tenant(), Source.client_scope != "all"
+    )
+    return sorted({s for s in session.scalars(q.distinct()) if s and s.strip()})
+
+
 # ---------------------------------------------------------------- passages
 
 
