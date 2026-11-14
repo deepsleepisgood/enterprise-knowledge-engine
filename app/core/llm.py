@@ -244,9 +244,9 @@ def _call(
     }
     if safe_system:
         request["system"] = safe_system
-    if effort and not _openai_compatible():
+    if effort and not _openai_compatible(model_id):
         request["output_config"] = {"effort": effort}
-    if thinking is False and _openai_compatible():
+    if thinking is False and _openai_compatible(model_id):
         request["thinking_off"] = True  # read by the NIM adapters, never sent to Anthropic
     elif thinking is False and model_id in NO_THINKING:
         request["thinking"] = NO_THINKING[model_id]
@@ -370,13 +370,19 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             ]
 
 
-def _provider() -> str:
+def _provider(model_id: str | None = None) -> str:
+    """LLM_PROVIDER, except that a Claude model id always goes to Anthropic (no other provider
+    serves it). One run can then mix providers per call, e.g. answers on an OpenAI-compatible
+    endpoint and the evaluation judge (JUDGE_MODEL=claude-...) on Anthropic, in parallel
+    threads, without switching any global setting."""
+    if model_id and model_id.strip().lower().startswith("claude-"):
+        return "anthropic"
     return get_settings().llm_provider.strip().lower()
 
 
-def _openai_compatible() -> bool:
+def _openai_compatible(model_id: str | None = None) -> bool:
     """NIM and OpenAI share the /chat/completions transport and adapters."""
-    return _provider() in ("nim", "openai")
+    return _provider(model_id) in ("nim", "openai")
 
 
 # --- public API ------------------------------------------------------------------------
@@ -398,7 +404,7 @@ def complete(
     None leaves the provider's default."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _openai_compatible():
+        if _openai_compatible(req["model"]):
             return _nim_complete(req)
         resp = _get_client().messages.create(**req)
         _check_stop(resp)
@@ -434,7 +440,7 @@ def structured(
     """Return a validated `schema` instance using the API's structured outputs."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _openai_compatible():
+        if _openai_compatible(req["model"]):
             return _nim_structured(req, schema)
         resp = _get_client().messages.parse(**req, output_format=schema)
         _check_stop(resp)
@@ -478,7 +484,7 @@ def vision(
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         text = req["messages"][0]["content"]
-        if _openai_compatible():
+        if _openai_compatible(req["model"]):
             from app.core import nim
 
             parts: list[dict[str, Any]] = [

@@ -221,3 +221,32 @@ def test_isoquant_gets_its_own_thinking_switch(setup, monkeypatch) -> None:
     off, on = fake.bodies
     assert off["reasoning_effort"] == "none" and "chat_template_kwargs" not in off
     assert on["reasoning_effort"] == "low"
+
+
+def test_a_claude_model_goes_to_anthropic_whatever_the_provider(setup) -> None:
+    """Answers stay on the NIM endpoint; a call naming a Claude model (the evaluation judge,
+    JUDGE_MODEL=claude-...) goes to Anthropic in the same run."""
+    from types import SimpleNamespace
+
+    sent: list[dict[str, Any]] = []
+
+    def parse(**kw: Any) -> SimpleNamespace:
+        sent.append(kw)
+        return SimpleNamespace(
+            stop_reason="end_turn",
+            stop_details=None,
+            usage=SimpleNamespace(input_tokens=10, output_tokens=5),
+            parsed_output=kw["output_format"](pct_of_line=1, cap_inr=500),
+        )
+
+    fake = _use(FakeTransport(['{"pct_of_line": 2, "cap_inr": 900}']))
+    llm.set_client(SimpleNamespace(messages=SimpleNamespace(parse=parse)))
+    try:
+        judged = llm.structured("grade", Tolerance, model="claude-sonnet-5-5", thinking=False)
+        answered = llm.structured("answer", Tolerance, model="smart")
+    finally:
+        llm.set_client(None)
+    assert judged.cap_inr == 500 and sent[0]["model"] == "claude-sonnet-5-5"
+    assert "thinking_off" not in sent[0]  # an NIM-only field never reaches Anthropic
+    assert sent[0]["thinking"] == {"type": "between_tools"}
+    assert answered.cap_inr == 900 and [b["model"] for b in fake.bodies] == ["vendor/smart-model"]

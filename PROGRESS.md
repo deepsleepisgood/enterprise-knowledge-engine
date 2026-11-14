@@ -822,3 +822,24 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 - **CPU is the limit, not threads.** The API used 12–13 of 16 cores at every level, and answering itself slowed from 19 s to 29 s. The likely cause is the local embedding and reranker models (ONNX, which uses every core), but this was not profiled. More threads on this machine would not help.
 - A small cloud instance (1–2 vCPU) would do worse; hosting needs a bigger CPU, a hosted reranker, or fewer rerank candidates.
 - **Next:** profile one answer's CPU (reranker vs embeddings); cap ONNX threads per answer; test a hosted reranker; then rerun this test.
+
+## 2026-11-15 — Teammate's OpenAI branch merged; independent judge; outdated-value check fixed
+
+**Merged PR #2** (`akshat`, 7 commits). It adds OpenAI as a third provider (`LLM_PROVIDER=openai`, GPT-5 handling, `MODEL_PRICES`), `JUDGE_MODEL`, empty path settings meaning the default, migrations on `run_app` start, a Python < 3.13 cap, and his GPT-5 evaluation reports. The Isoquant path is unchanged. Our changes on top:
+- **Question exclusion is opt-in.** `run_eval.py` runs all 160 questions; `--exclude-listed` leaves out `eval/excluded_questions.csv` (Q017, Q062, which have no recorded reason yet). Headline numbers stay comparable.
+- His `test_empty_path_settings_mean_default` compared paths as text and failed on Windows; it now compares `Path` objects.
+- **A Claude model id always goes to Anthropic** (`llm._provider(model_id)`), whatever `LLM_PROVIDER` says. Answers stay on Isoquant while the judge runs on Anthropic in the same run, per call and safe in parallel threads. 1 new test.
+
+**Independent judge** (`JUDGE_MODEL=claude-sonnet-5-5`; answers still DeepSeek v4.1, the only DeepSeek model on Isoquant):
+- **158/160 (98.8%)**, the same as with the DeepSeek judge. The two judges agree on all 68 judge-graded questions.
+- Misses: Q017 (holdout, partial) and Q092 (known wrong answer key).
+- Answers came from the cache, so the run re-graded the 14 Nov answers. Judge cost $0.20 (60 calls). Report: `reports/eval_20261115_all.md`.
+- Still to do: hand-grade the 30 answers in `eval/judge/hand_graded.csv` to calibrate the judge.
+
+**Outdated-value check** (`evaluation/metrics.rejected_removed`):
+- A superseded value is no longer counted where the answer explicitly rejects it ("the 2% tolerance does not apply", "not 2%", "2% was replaced", "the old 2% rule", "the 2% setting on some old PO templates"). Any other mention still counts: "Use 2%, not 1%" is flagged, and so is "For old POs the tolerance is still 2%".
+- Re-scored offline: conflict 1/23 → **0/23** (Q062 cleared); must-not-say 2/71 → 1/71.
+- The remaining one is Q032, which names 194J for a different kind of contract. It is left counted on purpose: it is a conditional mention, not a rejection.
+- The GPT-5 cards were unchanged by the re-score (0/21, Q032).
+
+**Tests:** 353 passed; ruff clean. README results updated: judge, load test, GPT-5 comparison, the outdated rule, and known gaps for load and judge calibration.

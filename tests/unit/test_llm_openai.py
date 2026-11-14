@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -172,7 +173,7 @@ def test_empty_path_settings_mean_default(monkeypatch) -> None:
     assert s.blob_dir == ROOT / "data" / "blobs"
     assert s.cache_dir == ROOT / ".cache" / "llm"
     monkeypatch.setenv("BLOB_DIR", "/data/blobs")
-    assert str(Settings().blob_dir) == "/data/blobs"
+    assert Settings().blob_dir == Path("/data/blobs")  # a Path: "\data\blobs" on Windows
 
 
 def test_judge_model_setting(setup, monkeypatch) -> None:

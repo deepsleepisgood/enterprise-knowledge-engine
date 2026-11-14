@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKBOOK = ROOT / "eval" / "PS-07_qa_evaluation_set.xlsx"
 SPLIT_FILE = ROOT / "eval" / "split.csv"
-# Questions left out of evaluation runs by default; each row says why.
+# Questions left out only when a run asks for it (run_eval.py --exclude-listed); each row says why.
 EXCLUDE_FILE = ROOT / "eval" / "excluded_questions.csv"
 SEED = 7
 DEV_SHARE = 0.6

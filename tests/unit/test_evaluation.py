@@ -75,6 +75,35 @@ def test_outdated_only_counts_the_current_rule_part() -> None:
     assert not outdated(card(text="Pay within 160 days."), "60 days")
 
 
+def test_an_explicitly_rejected_old_value_is_not_outdated() -> None:
+    rejected = [
+        "The 2% tolerance does not apply; the tolerance in force is the lower of 1% and ₹500. "
+        "If you see a different number such as the 2% setting on some old PO templates, "
+        "report it to your Team Lead.",
+        "It is 1% of the line value, not 2%.",
+        "The 2% limit was replaced by 1% in SOP v4.0.",
+        "Ignore the old 2% rule; use 1%.",
+        "Use the lower of 1% and ₹500 instead of the 2% figure.",
+    ]
+    for text in rejected:
+        assert not outdated(card(text=text), "2%"), text
+    stated = [
+        "The tolerance is 2% of the line value.",
+        "Use 2%, not 1%.",
+        "For old POs the tolerance is still 2%.",
+        "The 2% tolerance does not apply to Retail, but Infra uses 2%.",  # one mention stated
+        "Section 194J applies at 2%.",
+    ]
+    for text in stated:
+        assert outdated(card(text=text), "194J" if "194J" in text else "2%"), text
+    # A compound value: each rejected figure is removed, so nothing old is left stated.
+    assert not outdated(
+        card(text="Not 2% or ₹1,000 any more: the lower of 1% and ₹500."), "2% or ₹1,000"
+    )
+    # Rejecting something else ("not the old rule") does not excuse the stated figures.
+    assert outdated(card(text="The limit is 2% or ₹1,000, not the old rule."), "2% or ₹1,000")
+
+
 def test_kappa() -> None:
     a = ["correct", "wrong", "correct", "partial"]
     assert cohen_kappa(a, a) == 1.0

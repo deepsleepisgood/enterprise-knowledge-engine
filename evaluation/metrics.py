@@ -80,15 +80,51 @@ def current_text(card: dict[str, Any]) -> str:
     return "\n".join(parts)
 
 
+# Ways an answer explicitly rejects an old value ("{V}" is the value). Only the value inside such
+# a phrase is ignored: "It is 1%, not 2%" rejects 2%, while "Use 2%, not 1%" still states 2%.
+_REJECTED = [
+    r"\b(?:not|never|instead of|rather than|no longer)\s+(?:the\s+|a\s+|an\s+)?{V}",
+    r"{V}(?:\s+[\w-]+){{0,3}}?\s+(?:does not|doesn't|do not|don't|no longer|is not|isn't|"
+    r"is no longer|are not|aren't)\s+(?:apply|applies|valid|in force|current|used)\b",
+    r"{V}(?:\s+[\w-]+){{0,3}}?\s+(?:was|were|has been|have been|is|are)\s+"
+    r"(?:replaced|superseded|withdrawn|retired|removed|outdated|obsolete)\b",
+    r"\b(?:old|older|outdated|superseded|previous|former|legacy|withdrawn)\s+(?:[\w-]+\s+){{0,2}}?{V}",
+    r"{V}(?:\s+[\w-]+){{0,2}}\s+(?:on|in|from|of)\s+(?:some\s+|the\s+|an?\s+)?"
+    r"(?:old|older|outdated|legacy|previous|superseded)\b",
+]
+_FIGURE = re.compile(r"₹\s*[\d,.]+(?:\s*(?:lakh|crore))?|\d[\d,.]*\s*%|\w*\d\w*")
+
+
+def _value_pattern(value: str) -> str:
+    """The value with optional spaces or commas between its characters ('₹1,000' ~ '₹ 1000')."""
+    chars = re.sub(r"[\s,]", "", value)
+    return r"[\s,]*".join(re.escape(c) for c in chars)
+
+
+def rejected_removed(text: str, must_not_say: str) -> str:
+    """`text` with every mention of the must-not-say value (or of a figure in it) that the answer
+    explicitly rejects replaced by a marker, so only mentions that state the value remain."""
+    values = sorted({must_not_say, *_FIGURE.findall(must_not_say)}, key=len, reverse=True)
+    for v in values:
+        if not re.sub(r"[\s,]", "", v):
+            continue
+        val = rf"(?<![\w.]){_value_pattern(v)}(?![\w])" if v[-1].isalnum() else _value_pattern(v)
+        for pat in _REJECTED:
+            text = re.sub(pat.format(V=val), " [rejected value] ", text, flags=re.I)
+    return text
+
+
 def outdated(card: dict[str, Any], must_not_say: str | None) -> bool:
     """True if the must-not-say value appears in the current-rule part of the card.
 
     String match after normalisation, or every amount / percentage in the must-not-say value
     appearing as the same kind of figure (so '₹1,000' matches 'Rs 1000' and '₹1 thousand' does
-    not slip through as text)."""
+    not slip through as text). A mention the answer explicitly rejects ("the 2% tolerance does
+    not apply", "not 2%", "the old 2% setting") is not a statement of the value and is ignored
+    (`rejected_removed`); any other mention still counts."""
     if not must_not_say:
         return False
-    text = current_text(card)
+    text = rejected_removed(current_text(card), must_not_say)
     t, m = norm(text), norm(must_not_say)
     squash = lambda s: re.sub(r"[\s,]", "", s)  # noqa: E731
     if squash(m) and re.search(rf"(?<![\d.]){re.escape(squash(m))}", squash(t)):

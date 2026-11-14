@@ -141,7 +141,7 @@ Retrieval, precisely:
 | LLM providers | Any OpenAI-compatible endpoint (NVIDIA NIM, Isoquant), or Anthropic Claude | The public demo runs on Isoquant `deepseek-v4.1-flash-1017-fast` with zero data retention requested |
 | Web | Next.js 14 (App Router), TypeScript, Tailwind CSS | Ask, Sources, Conflicts, Review, Entities, Changes, Analytics and Setup pages; citation drawer; timeline |
 | Hosting | Vercel (web), Neon (Postgres), Cloudflare quick tunnel (API) | Public demo |
-| Tests | pytest, ruff, Playwright | 326 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
+| Tests | pytest, ruff, Playwright | 353 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
 
 ---
 
@@ -203,7 +203,8 @@ Main `.env` settings:
 - `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint), `openai` or `anthropic`.
 - `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models. For Isoquant, set `NIM_BASE_URL=https://api.isoquant.ai/v1` and `ISOQUANT_API_KEY`; for NVIDIA, set `NVIDIA_API_KEY`.
 - `OPENAI_API_KEY`: when `LLM_PROVIDER=openai`; set `MODEL_FAST` and `MODEL_SMART` to OpenAI model ids. `MODEL_PRICES` (`model=in/out,…`, USD per million tokens) makes the call log record cost.
-- `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`.
+- `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`, or for any call that names a Claude model (those always go to Anthropic, whatever `LLM_PROVIDER` says).
+- `JUDGE_MODEL`: the model that grades evaluation answers (empty means `MODEL_SMART`). Use a different model family from the answer model, e.g. `claude-sonnet-5-5` with DeepSeek answers, and keep it fixed across runs you compare.
 - `SCHEMA_MODE`: `induced` or `baseline`.
 - `DATABASE_URL`: leave empty for the embedded database.
 - `MODEL_VISION`: the model that reads scanned PDFs and images (tier 3); empty turns tier 3 off.
@@ -250,15 +251,18 @@ cd web && npm run lint && npx tsc --noEmit && npm run check:tokens
 
 ## Results
 
-Last updated 14 November 2026. The source of each number is in `reports/`. The evaluation set has 160 questions: 96 dev and 64 holdout. Holdout failures are not inspected, apart from two that the team chose to examine (Q021, Q062).
+Last updated 15 November 2026. The source of each number is in `reports/`. The evaluation set has 160 questions: 96 dev and 64 holdout. Holdout failures are not inspected, apart from two that the team chose to examine (Q021, Q062). Every run uses all 160 questions (`--exclude-listed` can leave some out, but then the number is not comparable).
 
 | What | Result | Target | Report |
 |---|---|---|---|
-| Answer accuracy, all 160 questions (Isoquant, Neon; 14 Nov) | **158/160 (98.8%)**: dev 96/96, holdout 62/64 (96.9%) | ≥ 90% | `eval_20261114_all.md` |
-| Citation accuracy | **99.4%** strict (159/160), 100% lenient | ≥ 95% | same |
+| Answer accuracy, all 160 questions (answers: DeepSeek v4.1 on Isoquant; judge: Claude Sonnet 5.5; Neon; 15 Nov) | **158/160 (98.8%)**: dev 96/96, holdout 62/64 (96.9%) | ≥ 90% | `eval_20261115_all.md` |
+| Same answers graded by DeepSeek itself (14 Nov) | 158/160; the two judges agree on all 68 judge-graded questions | — | `eval_20261114_all.md` |
+| Citation accuracy | **99.4%** strict (159/160), 100% lenient | ≥ 95% | `eval_20261115_all.md` |
 | Conflict questions presenting an old rule as current | **0/23** | 0 | same |
-| Conflict questions that mention an old value while correcting it (strict metric) | 1/23 (Q062) | 0 | same |
+| Questions whose "must not say" value appears in the answer | 1/71 (Q032: names 194J for a different kind of contract while giving 194C for this one) | — | same |
 | Unverified or "not covered" answers on the 160 | 0/160 | — | same |
+| Several people asking at once (laptop API on Neon; 5, 10, 25 users × 2 questions; 14 Nov) | **80/80 answered, 0 errors**; median wait 26 s / 58 s / 182 s; 8–10 answers a minute at every level | — | `load_20261114.md` |
+| GPT-5 as the answer model instead (OpenAI; teammate's run, 14 Nov) | 151/158 (95.6%) by hand review, 88.0% by its GPT-5 judge; Q017 and Q062 left out; $1.50 a run | — | `eval_20261114_all_openai_gpt5_v2.md` |
 | Real questions processors asked in Teams (operations workbook; 14 Nov) | **32/32** on a hand-picked sample (client memos, expert and supplier habits); **28/31** on a fresh random sample (2 per topic); no wrong or outdated rule in either | — | `teams_sample_20261114.md`, `teams_sample_20261114_final*.jsonl` |
 | Questions outside the documents (abstention set, 20; 14 Nov) | **20/20 not answered**; **18/20** sent to a sensible role | ≥ 90% | `abstention_20261114.md` |
 | Same document in 8 other formats: fact F1 vs the original .docx (14 Nov) | md 1.00, html 1.00, pdf 0.94, eml 0.93, scanned pdf (vision) 0.90 pass; pptx 0.87, xlsx 0.86, flat docx 0.80 below target | ≥ 0.90 (scanned ≥ 0.80) | `format_invariance_20261114.md` |
@@ -273,7 +277,10 @@ Last updated 14 November 2026. The source of each number is in `reports/`. The e
 | Cost on Isoquant | $0.06 for all 160 questions (about $0.0004 per question) | — | `eval_20261114_all.md` |
 
 Notes:
-- The outdated-value metric counts any mention of a superseded value, even in a sentence like "the old 2% limit no longer applies". No answer presented an old rule as the rule in force.
+- The outdated-value check ignores a superseded value only where the answer explicitly rejects it ("the 2% tolerance does not apply", "not 2%", "the old 2% setting"); any other mention counts. Before 15 Nov it counted every mention, which flagged Q062 ("The 2% tolerance does not apply…") as 1/23.
+- The judge is a different model family from the answer model, so it does not grade its own answers. It has not yet been checked against hand grades (`eval/judge/hand_graded.csv`).
+- The 15 Nov run reused the cached answers of 14 Nov (same prompts, same outputs), so its latency is not a measurement; the latency row is from 14 Nov.
+- The load test is limited by CPU, not by threads: the API used 12–13 of 16 cores at every level and each answer slowed from 19 s to 29 s. Above 5 users the extra wait is queueing for the 4 answer threads.
 - The two abstention misses are arguable: an employee income-tax question went to HR / Admin instead of the Tax Desk, and an SAP password reset went to HR / Admin (the plug-in has no IT role).
 - In the format test, pptx and flat docx miss F1 mostly on free-text values worded differently; their calculations match 100%.
 - The Teams sample has no gold answers in the workbook, so each answer was judged by hand against the documents. The three misses on the fresh sample: one short question retrieved just below the "not covered" threshold, one courier answer used INV_INCOMPLETE where the SOP code is NON_PO_NOT_ALLOWED, and one ERP maintenance-contract answer hedged instead of giving 194J.
@@ -288,6 +295,8 @@ Notes:
 - **Digest delivery:** email was tested against a local mail server; Teams has not been tested against a real channel.
 - **Extraction failures are not flagged:** an episode whose extraction fails on every passage is still marked published.
 - **Latency:** answers take 10–25 seconds. Most of the time goes to model calls, and the reranker adds about 3 s on CPU.
+- **Many users at once:** one API process answers about 8–10 questions a minute, and the CPU is the limit. Serving bursts needs a larger machine plus more answer threads, releasing the database connection during model calls, and moving pending answers out of process memory before running several API processes.
+- **Judge calibration:** the 30 hand grades in `eval/judge/hand_graded.csv` are not filled in.
 - **Hosting:** the public demo depends on the API running on one machine through a quick tunnel.
 
 ---
