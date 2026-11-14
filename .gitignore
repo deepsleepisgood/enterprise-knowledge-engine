@@ -24,3 +24,5 @@ node_modules/
 tools/
 web/.vercel
 *.egg-info/
+.vscode/
+/default/
