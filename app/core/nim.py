@@ -1,7 +1,9 @@
-"""NVIDIA NIM transport (OpenAI-compatible /chat/completions), standard library only.
+"""OpenAI-compatible /chat/completions transport, standard library only.
 
-Used by app/core/llm.py when LLM_PROVIDER=nim. Two limits apply to every request: a sliding
-window of NIM_MAX_RPM per minute and at most NIM_MAX_CONCURRENT in flight (the free endpoints
+Used by app/core/llm.py when LLM_PROVIDER=nim (NVIDIA NIM, Isoquant or any compatible endpoint)
+or LLM_PROVIDER=openai (api.openai.com, with its parameter differences handled below). Two
+limits apply to every request: a sliding window of NIM_MAX_RPM (OPENAI_MAX_RPM) per minute
+and at most NIM_MAX_CONCURRENT (OPENAI_MAX_CONCURRENT) in flight (the free endpoints
 answer 429 to bursts of parallel requests well below the per-minute limit). Rate limits, server
 errors and timeouts are retried with backoff; a 429 honours Retry-After and backs off longer.
 Tests replace the transport with `set_transport`.
@@ -66,7 +68,7 @@ def inflight() -> threading.BoundedSemaphore:
     global _inflight
     with _limiter_lock:
         if _inflight is None:
-            _inflight = threading.BoundedSemaphore(max(1, get_settings().nim_max_concurrent))
+            _inflight = threading.BoundedSemaphore(max(1, get_settings().chat_max_concurrent))
         return _inflight
 
 
@@ -74,7 +76,7 @@ def limiter() -> RateLimiter:
     global _limiter
     with _limiter_lock:
         if _limiter is None:
-            _limiter = RateLimiter(get_settings().nim_max_rpm)
+            _limiter = RateLimiter(get_settings().chat_max_rpm)
         return _limiter
 
 
@@ -90,7 +92,9 @@ def set_transport(fn: Transport | None) -> None:
 def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     s = get_settings()
     if not s.chat_api_key:
-        raise NimError("no API key for NIM_BASE_URL (NVIDIA_API_KEY or ISOQUANT_API_KEY)")
+        raise NimError(
+            "no API key for the chat endpoint (OPENAI_API_KEY, NVIDIA_API_KEY or ISOQUANT_API_KEY)"
+        )
     headers = {
         "Authorization": f"Bearer {s.chat_api_key}",
         "Content-Type": "application/json",
@@ -99,7 +103,7 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     if s.is_isoquant:
         headers["Isoquant-ZDR"] = "required"  # zero data retention: prompts are not stored
     req = urllib.request.Request(
-        s.nim_base_url.rstrip("/") + "/chat/completions",
+        s.chat_base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode("utf-8"),
         headers=headers,
         method="POST",
@@ -111,7 +115,7 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
         retry_after: float | None = None
         with inflight():
             try:
-                with urllib.request.urlopen(req, timeout=s.nim_timeout_s) as r:
+                with urllib.request.urlopen(req, timeout=s.chat_timeout_s) as r:
                     return json.loads(r.read())
             except urllib.error.HTTPError as e:
                 detail = e.read().decode("utf-8", "replace")[:300]
@@ -138,13 +142,63 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     raise NimError(f"NIM request failed after retries: {last}")
 
 
+# Models that refused reasoning_effort="minimal" (newer ones may only take "none"/"low"):
+# later calls send "low" straight away.
+_NO_MINIMAL: set[str] = set()
+
+
 def chat(body: dict[str, Any]) -> dict[str, Any]:
-    return (_transport or _http_post)(body)
+    send = _transport or _http_post
+    if body.get("reasoning_effort") != "minimal":
+        return send(body)
+    try:
+        return send(body)
+    except NimError as e:
+        if "HTTP 400" not in str(e) or "reasoning" not in str(e).lower():
+            raise
+        _NO_MINIMAL.add(str(body.get("model")))
+        return send({**body, "reasoning_effort": "low"})
 
 
-def thinking_options(off: bool) -> dict[str, Any]:
+def apply_reasoning_budget(body: dict[str, Any]) -> dict[str, Any]:
+    """OpenAI reasoning models count hidden thinking against max_completion_tokens. When the
+    caller wants thinking (no reasoning_effort set), raise the budget to the configured minimum
+    so the thinking can't crowd out the answer. With thinking turned down, keep the caller's
+    budget: a large one only lets a slow call run for minutes."""
+    s = get_settings()
+    if (
+        s.is_openai
+        and is_openai_reasoning(str(body.get("model", "")))
+        and "reasoning_effort" not in body
+        and "max_completion_tokens" in body
+    ):
+        body["max_completion_tokens"] = max(
+            body["max_completion_tokens"], s.openai_reasoning_min_tokens
+        )
+    return body
+
+
+_OPENAI_REASONING = re.compile(r"^(?:openai/)?(?:o\d|gpt-5)", re.I)
+
+
+def is_openai_reasoning(model: str) -> bool:
+    """OpenAI reasoning models (o-series, gpt-5 family): no temperature, `reasoning_effort`."""
+    return _OPENAI_REASONING.match(model) is not None
+
+
+def thinking_options(off: bool, model: str = "") -> dict[str, Any]:
     """Request fields that turn a reasoning model's thinking off (or keep it brief)."""
-    if get_settings().is_isoquant:
+    s = get_settings()
+    if s.is_openai:
+        # Other OpenAI models reject `reasoning_effort`; reasoning models keep their default
+        # unless the caller wants thinking off.
+        if off and is_openai_reasoning(model):
+            effort = s.openai_reasoning_effort_off
+            if effort == "minimal" and model in _NO_MINIMAL:
+                effort = "low"
+            return {"reasoning_effort": effort}
+        return {}
+    if s.is_isoquant:
         return {"reasoning_effort": "none" if off else "low"}
     return {"chat_template_kwargs": {"enable_thinking": False}} if off else {}
 
@@ -166,6 +220,13 @@ def build_body(
     }
     if json_mode:
         body["response_format"] = {"type": "json_object"}
+    if get_settings().is_openai:
+        # OpenAI: `max_tokens` is deprecated in favour of `max_completion_tokens` (which also
+        # covers reasoning tokens), and reasoning models reject any temperature but the
+        # default. Reproducibility then comes from the disk cache, as with Anthropic.
+        body["max_completion_tokens"] = body.pop("max_tokens")
+        if is_openai_reasoning(model):
+            body.pop("temperature")
     return body
 
 

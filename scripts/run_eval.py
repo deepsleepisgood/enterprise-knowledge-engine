@@ -4,6 +4,7 @@
     python scripts/run_eval.py --split all --config ablation  # A, B, C and D
     python scripts/run_eval.py --split dev --limit 20 --type conflict
     python scripts/run_eval.py --split dev --no-judge       # scenarios graded, judge skipped
+    python scripts/run_eval.py --split all --include-excluded  # also eval/excluded_questions.csv
 
 Writes reports/eval_<date>_<split>.md, a per-question CSV and the cards (JSONL) per config.
 Holdout: look at scores only, never at failures, until the freeze (TEST_PLAN section 3).
@@ -35,9 +36,19 @@ def main() -> None:
     ap.add_argument("--today", default="2026-11-07", help="the date questions are asked on")
     ap.add_argument("--tenant", help="tenant id (default: TENANT_ID)")
     ap.add_argument("--ids", help="only these question ids, comma-separated (reruns)")
+    ap.add_argument(
+        "--include-excluded",
+        action="store_true",
+        help="also run the questions listed in eval/excluded_questions.csv",
+    )
     args = ap.parse_args()
 
     qs = dataset.select(dataset.with_split(dataset.load()), args.split)
+    skipped: list[str] = []
+    if not args.include_excluded and not args.ids:
+        out = dataset.excluded()
+        skipped = sorted(q.id for q in qs if q.id.upper() in out)
+        qs = [q for q in qs if q.id.upper() not in out]
     if args.type:
         qs = [q for q in qs if q.type == args.type]
     if args.ids:
@@ -47,6 +58,8 @@ def main() -> None:
         qs = qs[: args.limit]
     configs = ["A", "B", "C", "D"] if args.config == "ablation" else [args.config.upper()]
     print(f"{len(qs)} questions ({args.split}), configs {configs}")
+    if skipped:
+        print(f"excluded ({len(skipped)}): {', '.join(skipped)} — see eval/excluded_questions.csv")
 
     results = {}
     for c in configs:
@@ -65,6 +78,8 @@ def main() -> None:
         )
 
     extra = {"questions": len(qs), "today": args.today}
+    if skipped:
+        extra["excluded"] = f"{', '.join(skipped)} (eval/excluded_questions.csv)"
     if "D" in results:
         judged = {r["id"]: r["verdict"] for r in results["D"] if r["type"] != "scenario"}
         cal = calibration(judged)

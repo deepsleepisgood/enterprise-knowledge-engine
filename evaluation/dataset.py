@@ -17,6 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKBOOK = ROOT / "eval" / "PS-07_qa_evaluation_set.xlsx"
 SPLIT_FILE = ROOT / "eval" / "split.csv"
+# Questions left out of evaluation runs by default; each row says why.
+EXCLUDE_FILE = ROOT / "eval" / "excluded_questions.csv"
 SEED = 7
 DEV_SHARE = 0.6
 
@@ -107,3 +109,15 @@ def with_split(questions: list[Question], path: Path = SPLIT_FILE) -> list[Quest
 
 def select(questions: list[Question], split: str) -> list[Question]:
     return questions if split == "all" else [q for q in questions if q.split == split]
+
+
+def excluded(path: Path = EXCLUDE_FILE) -> dict[str, str]:
+    """Question id -> note, from eval/excluded_questions.csv (empty if the file is absent)."""
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8", newline="") as f:
+        return {
+            r["question_id"].strip().upper(): (r.get("note") or "").strip()
+            for r in csv.DictReader(f)
+            if (r.get("question_id") or "").strip()
+        }

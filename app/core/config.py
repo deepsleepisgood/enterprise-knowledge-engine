@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,7 +15,7 @@ DEV_DB_URL_FILE = ROOT / ".pgdata" / "database_url.txt"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
 
-    llm_provider: str = "anthropic"  # anthropic | nim
+    llm_provider: str = "anthropic"  # anthropic | nim | openai
     anthropic_api_key: str = ""
     nvidia_api_key: str = ""
     # Any OpenAI-compatible endpoint runs through the NIM transport: set NIM_BASE_URL to it.
@@ -24,6 +25,22 @@ class Settings(BaseSettings):
     nim_timeout_s: float = 300
     nim_max_rpm: int = 35  # NIM free tier allows ~40 requests/minute; keep headroom
     nim_max_concurrent: int = 4  # parallel bursts get 429s well below the per-minute limit
+    # OpenAI (LLM_PROVIDER=openai) uses the same OpenAI-compatible transport as NIM.
+    openai_api_key: str = ""
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_max_rpm: int = 500  # paid tiers allow far more than NIM's free tier
+    openai_max_concurrent: int = 8
+    # Reasoning models (o-series, gpt-5*) take no temperature; this effort is sent when a call
+    # asks for thinking off. "low" is accepted by every reasoning model.
+    openai_reasoning_effort_off: str = "minimal"  # falls back to "low" if a model refuses it
+    openai_timeout_s: float = 120  # a stuck call fails fast instead of holding a transaction
+    # Reasoning models spend part of max_completion_tokens on hidden thinking, so a budget sized
+    # for the visible answer runs out. Their budget is raised to at least this. It is a cap,
+    # not a charge: only tokens actually generated are billed.
+    openai_reasoning_min_tokens: int = 16384
+    # Prices for models missing from llm.PRICES_PER_MTOK, USD per million tokens:
+    # "model=input/output,model2=input/output". Unknown models are logged with cost null.
+    model_prices: str = ""
     database_url: str = ""
     model_fast: str = "claude-haiku-5-5"
     model_smart: str = "claude-sonnet-5-5"
@@ -81,21 +98,55 @@ class Settings(BaseSettings):
     plugins_dir: Path = ROOT / "plugins"
     log_dir: Path = ROOT / "logs"
     cache_dir: Path = ROOT / ".cache" / "llm"
+    # Model that grades evaluation answers; empty = MODEL_SMART. Fix it when comparing runs
+    # that use different answer models, so the grading stays the same.
+    judge_model: str = ""
+
+    @field_validator("data_dir", "blob_dir", "log_dir", "cache_dir", mode="before")
+    @classmethod
+    def _empty_path_is_default(cls, v: object, info: object) -> object:
+        """`BLOB_DIR=` (empty) in .env means "use the default", not the current folder."""
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return cls.model_fields[info.field_name].default  # type: ignore[attr-defined]
+        return v
 
     @property
     def llm_configured(self) -> bool:
         """True when the selected provider has a key."""
-        if self.llm_provider == "nim":
+        if self.llm_provider in ("nim", "openai"):
             return bool(self.chat_api_key)
         return bool(self.anthropic_api_key)
 
     @property
+    def is_openai(self) -> bool:
+        return self.llm_provider.strip().lower() == "openai"
+
+    @property
+    def chat_base_url(self) -> str:
+        """The OpenAI-compatible endpoint for the selected provider."""
+        return self.openai_base_url if self.is_openai else self.nim_base_url
+
+    @property
+    def chat_timeout_s(self) -> float:
+        return self.openai_timeout_s if self.is_openai else self.nim_timeout_s
+
+    @property
+    def chat_max_rpm(self) -> int:
+        return self.openai_max_rpm if self.is_openai else self.nim_max_rpm
+
+    @property
+    def chat_max_concurrent(self) -> int:
+        return self.openai_max_concurrent if self.is_openai else self.nim_max_concurrent
+
+    @property
     def is_isoquant(self) -> bool:
-        return "isoquant.ai" in self.nim_base_url
+        return not self.is_openai and "isoquant.ai" in self.nim_base_url
 
     @property
     def chat_api_key(self) -> str:
-        """The key for NIM_BASE_URL."""
+        """The key for chat_base_url."""
+        if self.is_openai:
+            return self.openai_api_key
         return self.isoquant_api_key if self.is_isoquant else self.nvidia_api_key
 
     @property

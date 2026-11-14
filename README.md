@@ -189,7 +189,7 @@ This command:
 Ctrl+C stops everything and frees the ports. Optional flags are `--no-browser` and `--no-worker`. On other platforms, use `python scripts/run_app.py`.
 
 ### First-time setup
-Prerequisites: Python 3.11+, Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
+Prerequisites: Python 3.11 or 3.12 (the embedded Postgres, pgserver, has no builds for 3.13+), Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
 
 ```bash
 python -m venv .venv
@@ -200,8 +200,9 @@ cd web && npm install && cd ..
 ```
 
 Main `.env` settings:
-- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint) or `anthropic`.
+- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint), `openai` or `anthropic`.
 - `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models. For Isoquant, set `NIM_BASE_URL=https://api.isoquant.ai/v1` and `ISOQUANT_API_KEY`; for NVIDIA, set `NVIDIA_API_KEY`.
+- `OPENAI_API_KEY`: when `LLM_PROVIDER=openai`; set `MODEL_FAST` and `MODEL_SMART` to OpenAI model ids. `MODEL_PRICES` (`model=in/out,…`, USD per million tokens) makes the call log record cost.
 - `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`.
 - `SCHEMA_MODE`: `induced` or `baseline`.
 - `DATABASE_URL`: leave empty for the embedded database.
