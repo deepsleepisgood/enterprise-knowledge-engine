@@ -25,7 +25,7 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
 
 **Remaining features (listed 13 Nov evening; see BUILD_PLAN "After the MVP")**
 - Gate B (16 Nov):
-  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). Still to build: sending the digest by email or chat (no mail sending yet).
+  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). ~~Sending the digest by email or Teams~~: done 14 Nov (works once a client adds SMTP or a Teams workflow URL).
   - ~~The full format-invariance matrix~~: run 14 Nov (`reports/format_invariance_20261114.md`). Passing: pdf, md, html, eml and scanned. Below 0.9 fact F1: pptx 0.87, xlsx 0.86, flat docx 0.80; their calculations still match (100%; xlsx not judged). Open: a semantic comparison for free-text values. Done 14 Nov: `scripts/renormalise_money.py --apply` on Neon (4 facts revised, a second dry run finds 0), and `MODEL_VISION` set in `.env`.
 - Gate C (18 Nov):
   - Tacit capture, T10 (Phase 12): the 5-question interview chat, the structured habit fields, the check against current rules, and a named reviewer. The 21 vendor habits are already in the graph.
@@ -34,11 +34,11 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
   - Business case model + Teams replay (TEST_PLAN level 12); usability tests with 5 people (level 13).
   - Analytics page exists: add knowledge latency and acknowledgement rates.
   - Optional: v3.1 → v4.0 redline; a Graphiti baseline comparison.
-- Measurements owed: entity-resolution F1, induced vs baseline schema, abstention set (20), support-removal set, the 50-document freshness test, a second-corpus rerun.
+- Measurements owed: entity-resolution F1, induced vs baseline schema, ~~abstention set (20)~~ (14 Nov: 20/20 refused; routed right 18/20 after router v6, was 15/20), support-removal set, the 50-document freshness test, a second-corpus rerun.
 - Housekeeping:
   - Merge duplicate entities (194J / Section 194J), clean up the 104 entities with no facts, clear the 5 old stopped jobs.
   - Add a flag for an extraction that fails on every passage.
-  - README results to 13 Nov; MVP note; demo rehearsal; maybe host on Render.
+  - ~~README results~~ (updated 14 Nov); MVP note; demo rehearsal; maybe host on Render.
 
 **Never:** sleep the laptop with tests running (DNS fails, runs hang); look at holdout failures beyond Q021/Q062.
 
@@ -703,3 +703,122 @@ Also done first, with the user's OK:
   - The page requests the feed with its user id and treats `seen` as done.
 - **Test:** `test_the_feed_remembers_what_this_user_acknowledged`, with acks by one user not leaking to another or to anonymous requests. `pytest -q` 296 passed; tsc and eslint clean.
 - **Checked in the browser** (local database, replay tenant): "Got it" on change 116, then a reload, still shows "Seen"; an unacknowledged change still shows "Got it". The test ack was removed afterwards.
+
+## 2026-11-14 — Abstention set (TEST_PLAN level 8)
+
+- **Written:** `eval/abstain.csv`, 20 realistic questions the corpus does not cover (HR policy, product GST rates, tax advice, supplier contact or bank data, a foreign-currency invoice, IT, ERP plans, general knowledge, spend data), each with its acceptable routes. Written by hand, not from the eval workbook.
+- **Runner:** `scripts/run_abstention.py`. It asks through the normal pipeline as `eval-abstain` and writes `reports/abstention_20261114.md` and `.csv`.
+- **Result** (Neon, Isoquant): **20/20 not answered** (target ≥ 90%; no false answers). **15/20 routed to an acceptable role.**
+- **The 5 mis-routes:**
+  - A05, A06, A11 and A12: the router gives out-of-scope questions an empty role, so they fall back to Team Lead. `roles.yaml` `default_for` (supplier_data → Vendor Master team, tax_question → Tax Desk, hr_policy → HR / Admin) is never used.
+  - A14: routed to AP Processor, the asker's own role.
+- **Proposed fix, not applied:** router prompt v6 (choose a role for out-of-scope questions too, show `default_for`, never route to the asker's own role), then re-run the 160-question eval (about $0.06).
+
+## 2026-11-14 — Digest delivery: email (SMTP) and Microsoft Teams
+
+- **Approach:** the send code ships; each client adds its own settings (`.env` or the host environment). Until a channel is set up, the card says so and offers "Copy as text" only. No new dependency (standard-library `smtplib` and `urllib`), nothing company-specific in the core.
+- **Email:** any SMTP server (`SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY` starttls/ssl/none, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`) to `DIGEST_EMAIL_TO` (comma-separated). Plain-text and HTML parts; HTML escaped; at most 15 changes listed, then "and N more".
+- **Teams:** `TEAMS_WEBHOOK_URL` is the URL of a Teams Workflows "Post to a channel when a webhook request is received" flow (the old Office 365 connector webhooks are retired). The digest is posted as an Adaptive Card (v1.4), with an "Open the Changes page" button when `WEB_BASE_URL` is set.
+- **Automatic daily send:** `DIGEST_SEND_AT=HH:MM` in the team's time zone (`DIGEST_UTC_OFFSET_MINUTES`). The worker checks every minute and queues one `digest_send` job per local day (`jobs.exists_with` on the payload day). One attempt only, so a partial failure never emails twice. `DIGEST_SKIP_EMPTY` (default true) skips days without changes. The job row is the send log.
+- **Code:**
+  - `app/distribute/channels.py`: status, message bodies, transports, and `deliver` (one result per channel; secrets redacted from errors).
+  - `app/distribute/delivery.py`: the team digest, `due_day`, `schedule_tick`, the `digest_send` handler and the worker clock.
+  - API: `GET /digest/channels` (configured flags, recipient count, schedule; never addresses, passwords or URLs) and `POST /digest/send` (409 when nothing is set up, 422 for an unknown channel).
+  - Web: an owner-only "Send now" on the digest card, a result line per channel, and a setup hint when nothing is configured.
+- **Tests:** `tests/unit/test_digest_channels.py` (9) and `tests/integration/test_digest_send_db.py` (4). `tests/conftest.py` blanks the SMTP, Teams and schedule settings so a test never sends for real. pytest: 309 passed. ruff, tsc and eslint clean.
+- **Verified live:** local API and web with a local debugging SMTP server. "Send now" on the owner's digest card delivered a multipart email to 2 recipients (`reports/screenshots/digest_send_email.png`). The replay tenant's 11 Nov digest (28 rule changes) sent correctly with ₹ values. Fixed: the HTML said "No changes" on a day with only non-rule updates (now "No rule changes.").
+- **Not tested against a real Teams channel** (no workflow URL here): the card format is unit-tested only. The first real client setup should send one test digest.
+
+## 2026-11-14 — Router v6: a named role for every question, never the asker's own
+
+- **Change** (`app/answer/router.py`, `route-v6`):
+  - The router picks a role for every route, out-of-scope included.
+  - The role list shows "First contact for: …" from `default_for`.
+  - A role marked `asker: true` (new in `plugins/ap/roles.yaml`, set on the AP Processor) is left out of the list, and the router can never return it; it falls back to the card's default.
+  - The core stays generic: the flag lives in the plug-in.
+- **Check without a full rerun** (`scripts/check_router.py`): run only the router on the 160 evaluation questions plus the 20 abstention questions, for v5 and for v6 (about $0.01 each), then compare route, scope and as_of date.
+  - Fresh v5 matched the 13 Nov eval's routes on 160/160.
+  - v6 changed 10 evaluation questions (6 dev, 4 holdout): the unknown scope "Arvana Retail Pvt Ltd" now maps to "Arvana Group".
+  - Those 10 through the full pipeline: **10/10 correct** (`reports/eval_20261114_router_v6_changed.md`). The 13 Nov score (157/160) stands.
+- **Abstention set:** 20/20 not answered; **routed right 18/20** (was 15/20; target 90%). The 5 earlier mis-routes are fixed. The new misses, both arguable: A09 (employee income-tax regime) goes to HR / Admin; A17 (SAP password) goes to HR / Admin, and the plug-in has no IT role. Reports: `reports/abstention_20261114.md` (v6) and `abstention_20261114_router_v5.md` (before).
+- **Tests:** a new unit test (first-contact lines, the asker never routed to). pytest: 310 passed.
+
+## 2026-11-14 — Real Teams questions (32 from the operations workbook)
+
+- `scripts/run_teams_sample.py` asks chosen `teams_questions` messages (operations workbook) through the normal pipeline as `eval-teams` and saves the cards. 32 questions, weighted to client memos, expert habits and supplier habits, including all 7 that colleagues answered wrongly in Teams. Local knowledge base, Isoquant. Judged by hand against the documents (the sheet has no gold answers).
+- **Result:** 24/32 correct and cited, 5 partly right, 3 no answer, **0 wrong or outdated rules**. 7/7 questions colleagues got wrong were answered correctly. Pharma QA release 3/3, Infra cement quantity 7/7, GSTR-2B 3/3, approvals 3/3, IRN 2/2.
+- **Weak spots:**
+  - Infra GRN timing (0/3 fully right): the decision says "raise NO_GRN" and the expert's "wait until Tuesday noon" is only an aside.
+  - Duplicate -REV numbers (0/3): SOP 3.3's normalisation is never applied.
+  - Legal fee: misses RCM_REVIEW (SOP 5.6).
+  - One price question unverified (₹340 on ₹12,000).
+  - Supplier habit notes from the vendor master are not used.
+  - 4 cards show an unrelated expert tip.
+- Report: `reports/teams_sample_20261114.md`, with fixes in order of value.
+
+## 2026-11-14 — Fixes from the real Teams questions (generic, not tuned to the eval)
+
+Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root cause and fixed in the core or the AP plug-in:
+
+- **Habits about WHEN or HOW to apply a rule shape the decision** (answer prompt `answer-v9`, rule 6). A habit still never changes a rule's value or limit.
+  - Example: Infra GRN timing now says "Not yet: hold, raise NO_GRN only if no GRN by Tuesday noon".
+  - New rule 14: a note about one named party applies only to that party, and facts the question states win over a record.
+  - New rule 15: cite the rule passage for the rule, and the practice passage only for the know-how.
+- **Rule anchors** (`retrieve.rule_anchors`): when a kept practice passage's topic has no rule passage in the evidence, the closest in-force rules on that topic are added (at most 2). Example: SOP §5.6 RCM_REVIEW for legal fees.
+- **Procedures completed** (`retrieve.missing_steps`, `search.procedure_steps`): when two or more steps of one procedure are kept, the missing steps are added. Example: the bank-change call-back, SOP §8.2 step 2.
+- **Supplier notes gated** (`retrieve.notes_on_point`): a data-row note about a named party is used only if what it says is at least 0.70 cosine-similar to what the question asks, with the party's names removed from both sides. Calibrated: on-point 0.72–0.83, off-point 0.54–0.67.
+- **Expert tip** (`card.expert_tip`):
+  - A note from a cited passage, picked by similarity to what the answer said from that passage.
+  - Otherwise, one on an answer topic at 0.62 or more, or any note at 0.72 or more.
+  - A named-party note only when the answer relied on it.
+- **AP plug-in calculators:**
+  - New `duplicate` calculator. It reads the normalisation rule text and the match criteria from the graph (`duplicate_check.normalisation_rules`, `.match_criteria`), and strips leading zeros per segment.
+  - `price` accepts "PO line value + excess".
+  - Extractor `params-v3`.
+  - `grounded_inputs` also checks identifier inputs (text containing a digit) against the question.
+- **Bindings:** a parameter with no binding row binds to a schema attribute with exactly its key (what `bind()` would choose); a parameter the bind step left unresolved stays unresolved. No Neon write was needed.
+- **Router client list** (`pipeline.known_clients`): client entities plus every source `client_scope`. "Arvana Retail" has a memo but no client entity, so router v6 mapped it to "Arvana Group" and the search dropped CM-RET-03 (Q045). Found by the full eval below.
+
+**Results (Neon, Isoquant):**
+- Teams sample, the original 32: 32/32 correct.
+- Teams sample, 31 fresh questions (2 random per topic, seed 2026): 28/31 correct. Not fixed, on purpose:
+  - "Invoice came in on 28th": retrieval just below the abstain threshold.
+  - One courier answer used INV_INCOMPLETE where the SOP code is NON_PO_NOT_ALLOWED.
+  - An ERP maintenance-contract answer hedged instead of giving 194J.
+- No wrong or outdated rule in either set.
+- **Full eval: 158/160 (98.8%)**, up from 157 on 13 Nov.
+  - Dev 96/96, holdout 62/64.
+  - Citations strict 99.4%, lenient 100%.
+  - 0 abstained, 0 unverified.
+  - Median latency 12.4 s; cost $0.06.
+  - Report: `reports/eval_20261114_all.md`. The run before the scope fix (156/160) is kept as `*_before_scopes`.
+- **Tests:** 326 passed (14 new: calculators, notes, anchors, steps, bindings, client scopes).
+
+## 2026-11-14 — Concurrency: answers in flight during a publish, and a first load test
+
+**Fix: a change published while an answer is being written now reaches the asker.**
+- An answer takes about 12 s. Before this fix, if a change was approved during that time:
+  - The worker's recall could run before the answer was saved, and was never queued again, so the asker was never told.
+  - The answer read with Postgres's default isolation, so one card could mix old and new rules while showing the starting `kb_version`.
+- What changed:
+  - **One snapshot per answer.** `pipeline.ask` reads in a REPEATABLE READ transaction (`db.snapshot_scope(writable=True)`); it is writable only for the answer-log row. The early parallel search joins the same snapshot (`db.export_snapshot` / `snapshot_scope(snapshot=...)`). Checked on Neon through the pooler.
+  - **Recall after save.** After the answer is saved, if anything was published meanwhile (`kb.kb_version_count` grew; a count, because version ids need not commit in order), `answer_recall` is queued again (`recall_if_published_meanwhile`). Recall was already idempotent.
+  - **Recall by what was cited, not by timestamp.** An answer is recalled for a change when it cited a row the change replaced: a version of the fact that is retracted and no newer than `old_fact`. Only an answer that read the knowledge base before the change can cite such a row, whenever it was saved and in whatever order concurrent publishes committed. Previously it was "saved before the change's timestamp".
+  - **No publish lock.** A first version of this fix numbered versions in commit order with a per-tenant advisory lock. A guard run over the whole test suite showed publishes still update facts, sources and aliases after taking that lock (several documents in one transaction, version links), so two publishes on the same rule group could deadlock. Recall no longer depends on version order, so the lock was removed.
+- Tests: 5 new (answer saved after the change, publishes committing out of version order, shared snapshot, end-to-end publish during an answer, no needless re-queue). The end-to-end test fails with the fix switched off. **331 passed**; ruff clean.
+- Still open: a brand-new rule that retires nothing triggers no recall, and answers that cited only passages are not tracked.
+
+**Load test** (`scripts/run_load_test.py`, report `reports/load_20261114.md`):
+- Setup: the laptop API (one process, 16 logical cores) on Neon. 5, 10 and 25 users start at once, 2 questions each, using real Teams questions. 198 of 324 model calls came from the cache; new calls cost $0.01 in total.
+- 80/80 answers, 0 errors. Database connections peaked at 15.
+
+| Users | Median wait | Slowest | Answering itself (median) | Answers/min |
+|---|---|---|---|---|
+| 5 | 26.5 s | 31.9 s | 19.4 s | 10.5 |
+| 10 | 58.2 s | 71.3 s | 22.8 s | 9.0 |
+| 25 | 181.7 s | 209.6 s | 28.6 s | 8.0 |
+
+- **Reading:** throughput is flat at about 8–10 answers a minute. Above 5 users the extra time is queueing for the 4 answer threads; at 25 users, people wait about 3 minutes.
+- **CPU is the limit, not threads.** The API used 12–13 of 16 cores at every level, and answering itself slowed from 19 s to 29 s. The likely cause is the local embedding and reranker models (ONNX, which uses every core), but this was not profiled. More threads on this machine would not help.
+- A small cloud instance (1–2 vCPU) would do worse; hosting needs a bigger CPU, a hosted reranker, or fewer rerank candidates.
+- **Next:** profile one answer's CPU (reranker vs embeddings); cap ONNX threads per answer; test a hosted reranker; then rerun this test.

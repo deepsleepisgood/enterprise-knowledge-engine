@@ -1,0 +1,13 @@
+10 questions (all), configs ['D']
+  Q071  D ok          9.7s 
+  Q076  D ok         12.1s 
+  Q047  D ok         18.4s 
+  Q079  D ok         17.6s 
+  Q080  D ok         21.6s 
+  Q083  D ok         27.5s 
+  Q085  D ok         28.0s 
+  Q088  D ok         32.0s 
+  Q090  D ok         30.2s 
+  Q095  D ok         30.9s 
+config D: accuracy 100.0% (10/10), citations 100.0% (10/10), outdated (conflict) n/a, p50 24.6s
+report: D:\antigravity\company knowledge engine\reports\eval_20261114_all.md

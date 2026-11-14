@@ -16,9 +16,9 @@ from pydantic import BaseModel, Field
 
 from .base import calculators_yaml
 
-PROMPT_VERSION = "params-v2"
+PROMPT_VERSION = "params-v3"
 
-Family = Literal["price", "quantity", "approvals", "einvoice", "msme", "tds", "none"]
+Family = Literal["price", "quantity", "approvals", "einvoice", "msme", "tds", "duplicate", "none"]
 
 
 class Money(BaseModel):
@@ -27,9 +27,20 @@ class Money(BaseModel):
 
 
 class PriceArgs(BaseModel):
-    po_unit_price: float
-    invoice_unit_price: float
-    quantity: float
+    po_unit_price: float | None = Field(None, description="Only when unit prices are given")
+    invoice_unit_price: float | None = Field(None, description="Only when unit prices are given")
+    quantity: float | None = Field(None, description="Only when unit prices are given")
+    po_line_value: float | None = Field(
+        None, description="Only when the question gives the line's value instead of unit prices"
+    )
+    excess: float | None = Field(
+        None, description="Only when the question gives the price difference on the line itself"
+    )
+
+
+class DuplicateArgs(BaseModel):
+    invoice_number: str = Field(description="The first invoice number, exactly as written")
+    other_invoice_number: str = Field(description="The second invoice number, exactly as written")
 
 
 class QuantityArgs(BaseModel):
@@ -80,16 +91,19 @@ class ScenarioParams(BaseModel):
     einvoice: EinvoiceArgs | None = None
     msme: MsmeArgs | None = None
     tds: TdsArgs | None = None
+    duplicate: DuplicateArgs | None = None
 
 
 SYSTEM = """You read one accounts-payable question and extract the inputs a calculator needs.
 Choose the family:
-- price: invoice unit price vs PO unit price for a line
+- price: invoice price vs PO price for a line, given as unit prices and a quantity, or as the
+  line's value and the excess (the price difference) on it
 - quantity: invoice quantity vs goods-receipt (GRN) quantity
 - approvals: who must approve an invoice of a given total
 - einvoice: whether an invoice without an IRN / e-invoice is acceptable given supplier turnover
 - msme: due date and payment run for a supplier's invoice
 - tds: tax deducted at source on an invoice
+- duplicate: whether two given invoice numbers are the same invoice (duplicate check)
 - none: anything else
 Fill only the block for that family. Copy numbers exactly as written; do not compute anything.
 Money: give the amount and its unit as written (INR for plain rupee amounts, lakh, crore).
@@ -97,6 +111,10 @@ Dates: ISO format (YYYY-MM-DD). If a value is not stated, leave it null; never g
 
 Example: "Supplier billed ₹12.5 per kg against a PO price of ₹12 for 800 kg. Within tolerance?"
 -> family price, price {po_unit_price 12, invoice_unit_price 12.5, quantity 800}.
+Example: "The invoice is ₹75 above the PO on a ₹9,000 line. Pass or hold?"
+-> family price, price {po_line_value 9000, excess 75}.
+Example: "Is SB-0042/R the same bill as SB42?"
+-> family duplicate, duplicate {invoice_number "SB-0042/R", other_invoice_number "SB42"}.
 """
 
 

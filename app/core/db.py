@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import lru_cache
@@ -41,10 +42,27 @@ def session_scope() -> Iterator[Session]:
         session.close()
 
 
+_SNAPSHOT_ID = re.compile(r"[0-9A-Fa-f-]{1,64}")
+
+
 @contextmanager
-def snapshot_scope() -> Iterator[Session]:
-    """A read-only transaction on one snapshot: every read in it sees the same kb_version
-    (REPEATABLE READ in Postgres is snapshot isolation)."""
+def snapshot_scope(writable: bool = False, snapshot: str | None = None) -> Iterator[Session]:
+    """A transaction on one snapshot: every read in it sees the same kb_version, whatever is
+    published meanwhile (REPEATABLE READ in Postgres is snapshot isolation). Read-only unless
+    `writable` (the answer path inserts its log row). `snapshot` joins a snapshot another open
+    transaction exported with `export_snapshot`, so work split across connections (a search run
+    in parallel) reads exactly the same data; it fails once that transaction has ended."""
     with session_scope() as session:
-        session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
+        mode = "" if writable else " READ ONLY"
+        session.execute(text(f"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ{mode}"))
+        if snapshot is not None:
+            if not _SNAPSHOT_ID.fullmatch(snapshot):
+                raise ValueError(f"not a snapshot id: {snapshot!r}")
+            session.execute(text(f"SET TRANSACTION SNAPSHOT '{snapshot}'"))
         yield session
+
+
+def export_snapshot(session: Session) -> str:
+    """The id other transactions pass to `snapshot_scope(snapshot=...)` to read the same data
+    as `session` (valid while its transaction is open)."""
+    return str(session.scalar(text("SELECT pg_export_snapshot()")))

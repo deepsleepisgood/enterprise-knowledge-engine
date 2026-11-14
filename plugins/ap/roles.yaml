@@ -4,6 +4,7 @@ roles:
   ap_processor:
     name: AP Processor
     owns: Indexing invoices, matching and statutory checks, raising exceptions, posting clean invoices.
+    asker: true  # the people who ask: questions are never routed back to them
   senior_processor:
     name: Senior Processor
     owns: Exceptions a Processor cannot resolve; DUP_SUSPECT clearance; sampling new joiners' postings.

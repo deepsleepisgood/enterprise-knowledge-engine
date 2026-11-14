@@ -11,6 +11,7 @@ import type {
   ChangeFeedItem,
   ChangeItem,
   ClientKey,
+  DigestSendResult,
   DocumentEdit,
   InvoiceContext,
   Notification,
@@ -93,6 +94,12 @@ const FIXTURES: [RegExp, () => Promise<{ default: unknown }>][] = [
   [/^\/analytics$/, () => import("@/fixtures/analytics.json")],
   [/^\/notifications/, async () => ({ default: [] })],
   [/^\/changes/, () => import("@/fixtures/changes.json")],
+  [
+    /^\/digest\/channels$/,
+    async () => ({
+      default: { email: { configured: false, recipients: 0 }, teams: { configured: false }, schedule: null },
+    }),
+  ],
   [/^\/digest/, () => import("@/fixtures/digest.json")],
   [/^\/replay$/, () => import("@/fixtures/replay.json")],
 ];
@@ -257,6 +264,11 @@ export async function markNotificationRead(id: number, userId: string): Promise<
 /** Draft the edit to the document that still states a changed rule (one model call). */
 export async function draftDocumentEdit(changeId: number): Promise<DocumentEdit> {
   return apiSend<DocumentEdit>("POST", `/changes/${changeId}/document-edit`);
+}
+
+/** Send one day's team digest now to every set-up channel (email, Teams). */
+export async function sendDigest(day: string, utcOffsetMinutes: number): Promise<DigestSendResult> {
+  return apiSend<DigestSendResult>("POST", "/digest/send", { day, utc_offset_minutes: utcOffsetMinutes });
 }
 
 /** The live update stream (server-sent events), or null in demo mode. */

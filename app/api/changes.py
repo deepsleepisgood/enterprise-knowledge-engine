@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import not_found, read_session, write_session
 from app.core.db import session_scope
-from app.distribute import feed
+from app.distribute import channels, delivery, feed
 from app.distribute.digest import build_digest, local_today
 from app.distribute.document_edit import EditNotNeeded, draft_document_edit
 from app.store import answers as astore
@@ -55,6 +55,34 @@ def digest(
     return build_digest(
         s, day or local_today(utc_offset_minutes), utc_offset_minutes, user_id, users
     )
+
+
+@router.get("/digest/channels")
+def digest_channels() -> dict[str, Any]:
+    """Which delivery channels are set up (email, Teams) and the daily send time, if any.
+    Never returns an address list, password or webhook URL."""
+    return channels.status()
+
+
+class DigestSendIn(BaseModel):
+    day: date | None = None
+    utc_offset_minutes: int = 0
+    channels: list[str] | None = None  # default: every channel that is set up
+
+
+@router.post("/digest/send")
+def digest_send(body: DigestSendIn, s: Session = Depends(read_session)) -> dict[str, Any]:
+    """Send one day's team digest now. One result per channel; 409 when no channel is set up."""
+    status = channels.status()
+    if not any(status[c]["configured"] for c in channels.CHANNELS):
+        raise HTTPException(
+            409, "No delivery channel is set up. Add the SMTP or Teams settings to send digests."
+        )
+    unknown = [c for c in body.channels or [] if c not in channels.CHANNELS]
+    if unknown:
+        raise HTTPException(422, f"unknown channel: {', '.join(unknown)}")
+    day = body.day or local_today(body.utc_offset_minutes)
+    return delivery.send(s, day, body.utc_offset_minutes, body.channels)
 
 
 @router.post("/changes/{change_id}/document-edit")

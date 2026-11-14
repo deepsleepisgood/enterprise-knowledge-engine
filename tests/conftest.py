@@ -11,6 +11,9 @@ import pytest
 os.environ.setdefault("GOVERNANCE", "false")
 # No real vision model from a test run, whatever .env says (a test that wants one sets it).
 os.environ["MODEL_VISION"] = ""
+# Never send a real email or Teams message from a test run, whatever .env says.
+for _key in ("SMTP_HOST", "DIGEST_EMAIL_TO", "TEAMS_WEBHOOK_URL", "DIGEST_SEND_AT"):
+    os.environ[_key] = ""
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))

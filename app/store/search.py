@@ -206,6 +206,22 @@ def _as_known(session: Session, hits: dict[str, PassageHit], known_at: datetime)
                 h.valid_until = None
 
 
+def procedure_steps(session: Session, source_id: str, procedure: str) -> list[str]:
+    """Passage ids of every step of one procedure (locators "<procedure>, step <n>"), in
+    document order."""
+    q = (
+        select(Passage.id)
+        .where(
+            Passage.tenant_id == tenant(),
+            Passage.source_id == source_id,
+            Passage.segment_kind == "step",
+            Passage.locator.startswith(f"{procedure}, step ", autoescape=True),
+        )
+        .order_by(Passage.ordinal)
+    )
+    return list(session.scalars(q))
+
+
 # ---------------------------------------------------------------- entity linking
 
 

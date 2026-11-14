@@ -124,7 +124,8 @@ def get(name: str) -> Plugin | None:
 
 
 def roles() -> dict[str, dict[str, Any]]:
-    """Roles plug-ins declare (roles.yaml): key -> {name, owns, topics, default_for}."""
+    """Roles plug-ins declare (roles.yaml): key -> {name, owns, topics, default_for, asker}.
+    `asker: true` marks the people who ask questions: the router never sends a question back."""
     out: dict[str, dict[str, Any]] = {}
     for p in plugins():
         for key, r in (p.file(p.manifest.get("roles", "roles.yaml")).get("roles") or {}).items():

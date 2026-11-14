@@ -17,6 +17,13 @@ calculators:
     exception: QTY_VAR
     next_owner: Requester
 
+  duplicate:
+    rules:
+      normalisation: duplicate_check.normalisation_rules
+      match: duplicate_check.match_criteria
+    exception: DUP_SUSPECT
+    next_owner: Senior Processor (clears DUP_SUSPECT)
+
   approvals:
     rules:
       controller_above: approvals.controller_above_lakh

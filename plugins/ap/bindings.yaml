@@ -19,6 +19,12 @@ params:
   quantity_tolerance.materials:
     value_type: list
     description: Materials (for example bulk construction materials) the quantity tolerance applies to
+  duplicate_check.normalisation_rules:
+    value_type: text
+    description: How invoice numbers are normalised before the duplicate comparison (characters removed, leading zeros, suffixes dropped)
+  duplicate_check.match_criteria:
+    value_type: text
+    description: When two invoices count as suspected duplicates (which fields must match)
   approvals.controller_above_lakh:
     value_type: money
     description: Invoice total including GST above which the AP Controller must approve

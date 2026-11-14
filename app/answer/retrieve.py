@@ -9,6 +9,7 @@ as evidence for a rule. Superseded facts are not fetched here; the card asks for
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -18,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.graph.rows import ORIGIN as ROW_ORIGIN
 from app.graph.rules import CURRENT, IN_FORCE_THEN
+from app.store import entities as estore
 from app.store import facts as fstore
 from app.store import search
 from app.store.base import day_start
@@ -31,6 +33,12 @@ EVIDENCE_KINDS = ["rule", "attribute", "definition", "procedure"]
 ENTITY_MIN_SIM = 0.78
 TIP_MIN_SIM = 0.62
 NAMED_PRACTICE_MAX = 4
+ANCHOR_MAX = 2
+STEP_FILL_MAX = 4  # missing steps added per partly found procedure
+# A note about a named party is used only if what it says is this close to what the question
+# asks (cosine, names removed). Calibrated on supplier habit notes: on-point 0.72-0.83,
+# off-point 0.54-0.67.
+NOTE_MIN_SIM = 0.70
 
 
 @dataclass
@@ -46,6 +54,9 @@ class Retrieved:
     # never returns data rows, so without this they could not be cited; they are evidence tagged
     # as practice. Practice from documents is found by search as before and is not added here.
     named_practice: list[FactRow] = field(default_factory=list)
+    # Passages stating the rule a retrieved practice note is about, when search kept the note but
+    # not the rule (an expert's words can match a question better than the SOP's wording).
+    anchors: list[str] = field(default_factory=list)
 
 
 def rrf(rankings: list[list[str]], k: int = RRF_K) -> list[tuple[str, float]]:
@@ -191,7 +202,7 @@ def retrieve(
     )
     named_ids = {e[0] for e in named}
     day = as_of or today
-    named_practice = [
+    named_notes = [
         f
         for f in fstore.facts_touching(
             session,
@@ -204,5 +215,108 @@ def retrieve(
         if f.subject_id in named_ids
         and f.origin_key.startswith(ROW_ORIGIN)
         and _in_scope(f, client)
-    ][:NAMED_PRACTICE_MAX]
-    return Retrieved(kept, top, scorer, facts, tips, entities, vec, named_practice)
+    ]
+    named_practice = notes_on_point(session, question, named_notes, embed_fn)[:NAMED_PRACTICE_MAX]
+    anchors = missing_steps(session, kept) + rule_anchors(
+        session, kept, vec, client, day, known_at, bool(as_of)
+    )
+    return Retrieved(kept, top, scorer, facts, tips, entities, vec, named_practice, anchors)
+
+
+def _without(text: str, names: list[str]) -> str:
+    for n in sorted(names, key=len, reverse=True):
+        if len(n) >= 3:
+            text = re.sub(re.escape(n), " ", text, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _said(statement: str, names: list[str]) -> str:
+    """What a note says about its party, without the party's names ("Acme (V1): sends paper
+    copies" -> "sends paper copies")."""
+    s = _without(statement, names)
+    head, sep, tail = s.partition(":")
+    return tail.strip() if sep and len(head) <= 80 and tail.strip() else s
+
+
+def notes_on_point(
+    session: Session, question: str, notes: list[FactRow], embed_fn: EmbedFn
+) -> list[FactRow]:
+    """The notes about a named party that bear on what the question asks. Both sides are
+    compared without the party's names: naming a supplier says nothing about which of its
+    habits matters, and a shared name would make every note look relevant."""
+    if not notes:
+        return []
+    names: list[str] = []
+    for sid in {f.subject_id for f in notes}:
+        e = estore.get(session, sid)
+        if e is not None:
+            names += [e.name, *e.aliases]
+    vecs = embed_fn([_without(question, names), *[_said(f.statement, names) for f in notes]])
+    q, rest = vecs[0], vecs[1:]
+    scored = [
+        (sum(a * b for a, b in zip(q, v, strict=True)), f) for f, v in zip(notes, rest, strict=True)
+    ]
+    return [f for s, f in sorted(scored, key=lambda t: -t[0]) if s >= NOTE_MIN_SIM]
+
+
+STEP = re.compile(r"^(?P<procedure>.+), step \d+$")
+
+
+def missing_steps(session: Session, kept: list[PassageHit]) -> list[str]:
+    """The other steps of a procedure search found in part. A procedure is followed whole: an
+    answer built from steps 1, 3 and 4 silently skips step 2 (often the check that matters).
+    Filled only when at least two steps of the same procedure were kept."""
+    groups: dict[tuple[str, str], int] = {}
+    for h in kept:
+        m = STEP.match(h.locator or "") if h.segment_kind == "step" else None
+        if m:
+            key = (h.source_id, m["procedure"])
+            groups[key] = groups.get(key, 0) + 1
+    kept_ids = {h.id for h in kept}
+    out: list[str] = []
+    for (source_id, procedure), n in groups.items():
+        if n >= 2:
+            steps = search.procedure_steps(session, source_id, procedure)
+            out += [pid for pid in steps if pid not in kept_ids][:STEP_FILL_MAX]
+    return out
+
+
+def _topic(attribute: str) -> str | None:
+    return None if attribute.startswith("other:") else attribute.split(".", 1)[0]
+
+
+def rule_anchors(
+    session: Session,
+    kept: list[PassageHit],
+    vec: list[float],
+    client: str | None,
+    day: date,
+    known_at: datetime | None,
+    historical: bool,
+) -> list[str]:
+    """Passages of the rules that kept practice notes are about. A note says how colleagues work
+    within a rule; the answer must cite the rule itself, so when no kept passage states a rule
+    on the note's topic, the closest rules on that topic are added (at most ANCHOR_MAX)."""
+    if known_at is not None or not kept:
+        return []
+    kept_ids = {h.id for h in kept}
+    on_kept = fstore.live_for_passages(session, list(kept_ids))
+    practice = {_topic(f.attribute) for f in on_kept if f.kind == "practice"} - {None}
+    stated = {_topic(f.attribute) for f in on_kept if f.kind in EVIDENCE_KINDS}
+    missing = sorted(t for t in practice - stated if t)
+    if not missing:
+        return []
+    rules = [
+        f
+        for f in fstore.on_topics(
+            session,
+            missing,
+            valid_on=day,
+            statuses=IN_FORCE_THEN if historical else CURRENT,
+            kinds=["rule", "procedure"],
+        )
+        if f.passage_id and f.passage_id not in kept_ids and _in_scope(f, client)
+    ]
+    sims = fstore.similarity(session, [f.id for f in rules], vec) if vec else {}
+    rules.sort(key=lambda f: -sims.get(f.id, 0.0))
+    return list(dict.fromkeys(f.passage_id for f in rules if f.passage_id))[:ANCHOR_MAX]

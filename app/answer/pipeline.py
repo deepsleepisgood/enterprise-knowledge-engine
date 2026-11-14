@@ -20,8 +20,9 @@ from app.answer.generate import CalcView, GenOut, evidence_ids, evidence_tags, g
 from app.answer.retrieve import EmbedFn, RerankFn, retrieve
 from app.answer.router import route
 from app.core.config import get_settings
-from app.core.db import session_scope
+from app.core.db import export_snapshot, session_scope, snapshot_scope
 from app.graph.pipeline import active_ontology
+from app.graph.rows import ORIGIN as ROW_ORIGIN
 from app.graph.rules import RuleNotFound, canonical_client
 from app.plugins import calculate as calc_mod
 from app.plugins import registry
@@ -52,28 +53,46 @@ def grounded_inputs(
     units: dict[str, float],
     currencies: list[str] | None = None,
 ) -> list[str]:
-    """Numeric calculator inputs that do not come from the question: a number as written, or an
-    amount converted with the unit written next to it ("8.9 million" may become 8,900,000, never
-    890,000). A calculator never runs on figures the asker did not give."""
+    """Calculator inputs that do not come from the question: a number as written, or an amount
+    converted with the unit written next to it ("8.9 million" may become 8,900,000, never
+    890,000), and any identifier (a text input containing a digit, such as an invoice number)
+    exactly as written. A calculator never runs on figures the asker did not give."""
     from app.answer.verify import mentions, numbers
 
     given = numbers(question) | mentions(question, units, currencies)["money"]
+    asked = "".join(question.split()).lower()
 
-    def leaves(x: Any) -> list[float]:
+    def leaves(x: Any) -> list[float | str]:
         if isinstance(x, bool) or x is None:
             return []
         if isinstance(x, (int, float)):
             return [float(x)]
+        if isinstance(x, str):
+            return [x] if any(ch.isdigit() for ch in x) else []
         if isinstance(x, dict):
             return [v for item in x.values() for v in leaves(item)]
         if isinstance(x, (list, tuple)):
             return [v for item in x for v in leaves(item)]
         return []
 
-    def ok(v: float) -> bool:
+    def ok(v: float | str) -> bool:
+        if isinstance(v, str):
+            return "".join(v.split()).lower() in asked
         return any(abs(v - g) < 1e-6 * max(1.0, abs(v)) for g in given)
 
-    return [f"{v:g}" for v in leaves(inputs) if not ok(v)]
+    return [v if isinstance(v, str) else f"{v:g}" for v in leaves(inputs) if not ok(v)]
+
+
+def known_clients(session: Any) -> list[str]:
+    """Client names the router may pick from: client entities plus every scope a source is
+    written for. A scope with rules but no entity of its own (a memo for one client) must be
+    in the list, or the router maps a question about it to the nearest other client and the
+    search then filters that client's memo out."""
+    from app.store import episodes
+
+    names = [e.name for e in estore.list_entities(session, "client")]
+    known = {n.lower() for n in names}
+    return names + [c for c in episodes.client_scopes(session) if c.lower() not in known]
 
 
 def _with_model(structured: Any, model: str) -> Any:
@@ -126,6 +145,56 @@ def ask(
     embed_fn: EmbedFn | None = None,
     rerank_fn: RerankFn | None = None,
 ) -> dict[str, Any]:
+    """Answer `question` from one snapshot of the knowledge base (`_answer`), then, once the
+    answer is saved, make sure a change published while it was being written reaches the asker."""
+    built: dict[str, Any] = {}
+    card = _answer(
+        question,
+        client,
+        as_of,
+        known_at,
+        user_id,
+        viewer,
+        today,
+        structured_fn,
+        embed_fn,
+        rerank_fn,
+        built,
+    )
+    recall_if_published_meanwhile(built)
+    return card
+
+
+def recall_if_published_meanwhile(built: dict[str, Any]) -> bool:
+    """Queue answer recall again when something was published while the answer was being
+    written (more kb versions now than its snapshot saw: a count, because concurrent publishes
+    can commit out of id order). The recall queued by that change may already have run before
+    this answer was saved, and so missed it; recall is idempotent, so queueing it again is safe.
+    Only answers that cited facts and claim to be current can be recalled."""
+    if not built.get("cited_facts") or built.get("as_of"):
+        return False
+    from app.store import jobs
+
+    with session_scope() as s:
+        if kb.kb_version_count(s) <= built["kb_count"]:
+            return False
+        jobs.enqueue_once(s, "answer_recall", {})
+    return True
+
+
+def _answer(
+    question: str,
+    client: str | None,
+    as_of: date | None,
+    known_at: datetime | None,
+    user_id: str,
+    viewer: str,
+    today: date | None,
+    structured_fn: Any,
+    embed_fn: EmbedFn | None,
+    rerank_fn: RerankFn | None,
+    built: dict[str, Any],
+) -> dict[str, Any]:
     started = time.perf_counter()
     cfg = get_settings()
     structured = structured_fn or _default_structured()
@@ -134,12 +203,16 @@ def ask(
     calculators = calc_mod.routes()
     diag: dict[str, Any] = {}
 
-    with session_scope() as s:
+    # One snapshot for the whole answer: a change published while it is being written (about
+    # 12 s) cannot mix old and new rules in one card, and the card's kb_version is exactly what
+    # it read. Writable only for the answer log row.
+    with snapshot_scope(writable=True) as s:
         onto = active_ontology(s)
         if onto is None:
             raise RuntimeError("no frozen schema: build the graph first")
         kbv = kb.current_kb_version(s)
-        clients = [e.name for e in estore.list_entities(s, "client")]
+        built["kb_count"] = kb.kb_version_count(s)
+        clients = known_clients(s)
         timings: dict[str, float] = {}
         diag["timings_s"] = timings
 
@@ -166,9 +239,12 @@ def ask(
         spec_as_of = as_of
         spec: Future | None = None
         if cfg.early_retrieval and (not client or client == "all"):
+            snap = export_snapshot(s)
 
             def _search() -> Any:
-                with session_scope() as s2:
+                # Same snapshot as the answer. If the answer finished first (the router chose a
+                # different search) this fails, and its result was not wanted anyway.
+                with snapshot_scope(snapshot=snap) as s2:
                     return retrieve(
                         s2, question, None, spec_as_of, known_at, today, embed_fn, rerank_fn
                     )
@@ -215,6 +291,7 @@ def ask(
             )
             card["answer_id"] = str(aid)
             astore.update_card(s, aid, card)
+            built.update(cited_facts=bool(facts), as_of=as_of)
             return cards.view_for(card, viewer)
 
         if r.route == "out_of_scope":
@@ -292,7 +369,9 @@ def ask(
         fact_pids = [f.passage_id for f in got.facts if f.passage_id]
         named_pids = [f.passage_id for f in got.named_practice if f.passage_id]
         order = list(
-            dict.fromkeys([*calc_pids, *named_pids, *[p.id for p in got.passages], *fact_pids])
+            dict.fromkeys(
+                [*calc_pids, *named_pids, *[p.id for p in got.passages], *got.anchors, *fact_pids]
+            )
         )
         hits = search.hydrate(s, order[:MAX_EVIDENCE], known_at)
         evidence = evidence_ids([hits[i] for i in order[:MAX_EVIDENCE] if i in hits])
@@ -305,6 +384,7 @@ def ask(
         attempts: list[list[str]] = []
         in_force: list = []
         not_in_force: list = []
+        attrs: list[str] = []
         for _attempt in range(2):
             gen = generate(
                 question,
@@ -395,6 +475,21 @@ def ask(
                     cited_keys.setdefault((f.subject_id, f.attribute), 0)
         cited_facts = [f.id for f in in_force if f.passage_id in cited_set]
         cited_facts += [c.fact_id for c in (res.citations if res else [])]
+        # What the answer said from each cited passage, to pick the note it actually used.
+        said: dict[str, list[str]] = {}
+        for sent in gen.sentences:
+            for key in sent.sources:
+                if key in evidence:
+                    said.setdefault(evidence[key].id, []).append(sent.text)
+        embedder = embed_fn
+        if embedder is None:
+            from app.core.embed import embed as embedder
+        used_vecs = (
+            dict(zip(said, embedder([" ".join(v) for v in said.values()]), strict=True))
+            if said
+            else {}
+        )
+        answer_topics = {a.split(".", 1)[0] for a in attrs if not a.startswith("other:")}
         card = dict(base)
         card.update(
             rule={"text": rule_text, "citations": cites},
@@ -408,17 +503,19 @@ def ask(
                 ),
                 [] if as_of or known_at else cards.conflicting_sources(s, sorted(set(cited_facts))),
             ),
-            # A practice note about the entity the question names beats a merely similar tip.
-            expert_tip=(
-                got.named_practice
-                and cards.expert_tip(s, [(f, 1.0) for f in got.named_practice], as_of or today)
-            )
-            or cards.expert_tip(
+            # The note the answer relied on first; otherwise one about the question's topic.
+            expert_tip=cards.expert_tip(
                 s,
-                got.tips,
                 as_of or today,
-                {r.doc_type for r in onto.source_ranking if r.practice},
-                [(p.id, p.score) for p in got.passages],
+                cited=cited,
+                named=got.named_practice,
+                tips=got.tips,
+                ranked_passages=[p.id for p in got.passages],
+                question_vec=got.vec,
+                practice_types={r.doc_type for r in onto.source_ranking if r.practice},
+                row_origin=ROW_ORIGIN,
+                used_vecs=used_vecs,
+                answer_topics=answer_topics,
             ),
             related=[q for q in gen.related if q.strip()][:4],
         )
