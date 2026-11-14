@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "key": "subject",
+      "label": "About",
+      "ask": "Who or what is this about? A supplier, a client, a system, a kind of document…"
+    },
+    {
+      "key": "habit",
+      "label": "Habit",
+      "ask": "What do they do that a newcomer would not expect?"
+    },
+    {
+      "key": "trigger",
+      "label": "How to spot it",
+      "ask": "How do you spot it? What does it look like when it happens?"
+    },
+    {
+      "key": "what_to_do",
+      "label": "What to do",
+      "ask": "What should someone do when they see it?"
+    },
+    {
+      "key": "evidence",
+      "label": "How you know",
+      "ask": "How do you know, and since when? (an email, an incident, years of practice…)"
+    }
+  ],
+  "reviewers": [
+    "Process owner",
+    "Senior Processor",
+    "Team Lead",
+    "AP Controller",
+    "Tax Desk",
+    "Vendor Master team",
+    "Treasury (client)",
+    "PO buyer",
+    "Requester",
+    "Client QA",
+    "HR / Admin team",
+    "AP Process Excellence"
+  ],
+  "default_reviewer": "Process owner"
+}

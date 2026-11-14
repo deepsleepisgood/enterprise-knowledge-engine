@@ -66,6 +66,30 @@ The engine tells people instead of waiting to be asked again (`app/distribute/`)
 
 ---
 
+## Capturing what experts know, and what the team says in Teams
+
+**Expert capture** (Expert capture page, `app/capture/`, `/capture/*`):
+- **Five questions.** An expert answers who or what the habit is about, what happens, how to spot it, what to do, and how they know. The "who" answer is matched to known entities (a supplier, say), so the note is linked to them.
+- **Rule check.** The entry is checked against the rules in force: it fits, it may conflict (shown to the reviewer), or no rule covers it.
+- **Named reviewer.** The entry goes to the reviewer the expert picks, as one practice note held for review **whatever the `GOVERNANCE` setting is**. The reviewer can approve, edit or reject it on the same page or in the review queue.
+- **Once approved,** it behaves like the vendor sheet's notes:
+  - it is shown beside answers when a question names its subject;
+  - it is a citable expert tip, with its author and date;
+  - it appears in the invoice composer's vendor tips.
+- **Never a rule.** A practice note never overrides a rule, and reloading the vendor sheet never retires a captured note.
+- **Already known.** The page lists the know-how already in the knowledge base, so a habit is not captured twice.
+
+**Teams chat export** (upload a `.json` export on the Sources page; `app/ingest/connectors/teams.py`):
+- **Threads.** Messages in the Microsoft Graph shape become one episode per thread: a post with its replies, or a chat split at pauses of more than 4 hours. Each message is a turn with its speaker and time, so answers cite "Teams thread [10:05]".
+- **Triage, as for email:**
+  - a question from chat history is recorded but never answered again;
+  - greetings and out-of-office replies are dropped;
+  - a tip or a rule claim is extracted and held for the owner.
+- **Low authority.** A thread's type is "teams", never what its words suggest, so a chat claim cannot outrank a document.
+- **Test data.** `scripts/make_teams_export.py` builds `synthetic/teams_export.json`: 32 real questions from the operations workbook (2 per topic) plus 6 hand-written threads covering every route.
+
+---
+
 ## How an answer is produced
 
 ```mermaid
@@ -141,7 +165,7 @@ Retrieval, precisely:
 | LLM providers | Any OpenAI-compatible endpoint (NVIDIA NIM, Isoquant), or Anthropic Claude | The public demo runs on Isoquant `deepseek-v4.1-flash-1017-fast` with zero data retention requested |
 | Web | Next.js 14 (App Router), TypeScript, Tailwind CSS | Ask, Sources, Conflicts, Review, Entities, Changes, Analytics and Setup pages; citation drawer; timeline |
 | Hosting | Vercel (web), Neon (Postgres), Cloudflare quick tunnel (API) | Public demo |
-| Tests | pytest, ruff, Playwright | 353 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
+| Tests | pytest, ruff, Playwright | 365 tests in the default run (`pytest -q`); live-LLM and acceptance tests are opt-in |
 
 ---
 
@@ -151,7 +175,8 @@ Retrieval, precisely:
 .
 ├── app/                    # Generic core engine
 │   ├── answer/             # Router, retrieval, generation, verification, answer cards, escalation
-│   ├── api/                # FastAPI routes (/ask, /ask/jobs, /episodes, /conflicts, /review, ...)
+│   ├── api/                # FastAPI routes (/ask, /ask/jobs, /episodes, /conflicts, /review, /capture, ...)
+│   ├── capture/            # Expert capture: five questions, rule check, held practice notes
 │   ├── core/               # Config, DB, LLM gateway, OpenAI-compatible client, redaction, reranker
 │   ├── govern/             # Governance: what is applied automatically vs held for owner review
 │   ├── graph/              # Extraction, entity resolution, rules, authority, conflicts, schema induction/evolution
@@ -164,8 +189,8 @@ Retrieval, precisely:
 ├── evaluation/             # Evaluation harness and metrics (configs A-D, judge, outdated-answer checks)
 ├── scripts/                # run_app, serve_public, dev_db, ingest_all, build_graph, run_eval,
 │                           # run_replay, run_second_corpus, run_format_invariance, run_intake,
-│                           # run_abstention, run_teams_sample, check_router, conflict_report,
-│                           # delete_episodes
+│                           # run_abstention, run_teams_sample, run_load_test, check_router,
+│                           # conflict_report, make_teams_export, delete_episodes
 ├── tests/                  # unit, integration (Postgres), plugins, acceptance (live), leakage, generic-core guard
 ├── reports/                # Every measured result quoted below
 ├── migrations/             # Alembic
@@ -263,6 +288,8 @@ Last updated 15 November 2026. The source of each number is in `reports/`. The e
 | Unverified or "not covered" answers on the 160 | 0/160 | — | same |
 | Several people asking at once (laptop API on Neon; 5, 10, 25 users × 2 questions; 14 Nov) | **80/80 answered, 0 errors**; median wait 26 s / 58 s / 182 s; 8–10 answers a minute at every level | — | `load_20261114.md` |
 | GPT-5 as the answer model instead (OpenAI; teammate's run, 14 Nov) | 151/158 (95.6%) by hand review, 88.0% by its GPT-5 judge; Q017 and Q062 left out; $1.50 a run | — | `eval_20261114_all_openai_gpt5_v2.md` |
+| T10 expert capture, end to end in the running app (local database, Isoquant; 15 Nov) | **passes**: 5 answers → entry; rule check "fits" (cited SOP §3.3); held for the reviewer; approved in the UI; a question naming the supplier then used it and showed it as the expert tip | T10 | `PROGRESS.md` |
+| Teams export, synthetic `teams_export.json` (38 threads, Isoquant triage; 15 Nov) | **38/38 routed as intended**: 32 real questions recorded, not re-answered; tip and both rule claims held for review (the "2% again" claim not applied); lunch and out-of-office dropped | — | `PROGRESS.md` |
 | Real questions processors asked in Teams (operations workbook; 14 Nov) | **32/32** on a hand-picked sample (client memos, expert and supplier habits); **28/31** on a fresh random sample (2 per topic); no wrong or outdated rule in either | — | `teams_sample_20261114.md`, `teams_sample_20261114_final*.jsonl` |
 | Questions outside the documents (abstention set, 20; 14 Nov) | **20/20 not answered**; **18/20** sent to a sensible role | ≥ 90% | `abstention_20261114.md` |
 | Same document in 8 other formats: fact F1 vs the original .docx (14 Nov) | md 1.00, html 1.00, pdf 0.94, eml 0.93, scanned pdf (vision) 0.90 pass; pptx 0.87, xlsx 0.86, flat docx 0.80 below target | ≥ 0.90 (scanned ≥ 0.80) | `format_invariance_20261114.md` |
@@ -293,6 +320,7 @@ Notes:
   - paraphrase and adversarial question sets.
 - **Formats:** pptx, xlsx and flat docx are below the F1 target (see above). Audio and video transcription (tier 4) is not built.
 - **Digest delivery:** email was tested against a local mail server; Teams has not been tested against a real channel.
+- **Teams export:** tested on a synthetic export in the Graph message shape, not on a real tenant's export. A tip from Teams is held and, once approved, answers can use it, but it is not shown as the "expert tip" beside an answer (that slot takes interviews, observations, data-row notes and captured entries).
 - **Extraction failures are not flagged:** an episode whose extraction fails on every passage is still marked published.
 - **Latency:** answers take 10–25 seconds. Most of the time goes to model calls, and the reranker adds about 3 s on CPU.
 - **Many users at once:** one API process answers about 8–10 questions a minute, and the CPU is the limit. Serving bursts needs a larger machine plus more answer threads, releasing the database connection during model calls, and moving pending answers out of process memory before running several API processes.

@@ -518,3 +518,26 @@ def counts_by_subject(session: Session) -> dict[str, int]:
         .group_by(Fact.subject_id)
     )
     return dict(rows.all())
+
+
+def notes_about(session: Session, names: list[str], origin_prefix: str) -> list[FactRow]:
+    """Current practice notes whose subject is known by one of `names` (an id or a name, any
+    case), from the given origin (e.g. notes an expert captured)."""
+    from app.store.base import norm_name
+    from app.store.models import EntityAlias
+
+    wanted = sorted({norm_name(n) for n in names if n and norm_name(n)})
+    if not wanted:
+        return []
+    subjects = select(EntityAlias.entity_id).where(
+        EntityAlias.tenant_id == tenant(), EntityAlias.alias_norm.in_(wanted)
+    )
+    q = _joined().where(
+        Fact.tenant_id == tenant(),
+        Fact.retracted_at.is_(None),
+        Fact.status == "current",
+        Fact.kind == "practice",
+        Fact.origin_key.startswith(origin_prefix),
+        Fact.subject_id.in_(subjects),
+    )
+    return [_row(f, n, lbl, loc) for f, n, lbl, loc in session.execute(q.order_by(Fact.id))]

@@ -222,6 +222,21 @@ def invoice_search(session: Any, tenant_id: str, q: str = "", limit: int = 20) -
     return [invoice_context(r, vens.get(r["vendor_id"])) for r in rows]
 
 
+def _tips(session: Any, ven: dict | None) -> list[str]:
+    """The vendor sheet's habit note, then notes experts captured about this supplier and the
+    reviewer approved (the knowledge graph, app/capture)."""
+    if not ven:
+        return []
+    from app.graph.rows import CAPTURE_ORIGIN
+    from app.store import facts as fstore
+
+    tips = [ven["habit_note"]] if ven.get("habit_note") else []
+    # By vendor id only: vendor names repeat across ids, a name could pick another's notes.
+    names = [str(ven.get("vendor_id") or "")]
+    tips += [f.statement for f in fstore.notes_about(session, names, CAPTURE_ORIGIN)]
+    return list(dict.fromkeys(tips))
+
+
 def context(
     session: Any, tenant_id: str, invoice_id: str | None = None, vendor_id: str | None = None
 ) -> dict[str, Any] | None:
@@ -261,6 +276,6 @@ def context(
         }
         if ven
         else None,
-        "tips": [ven["habit_note"]] if ven and ven.get("habit_note") else [],
+        "tips": _tips(session, ven),
         "client": (inv or {}).get("client") or (ven or {}).get("primary_client"),
     }

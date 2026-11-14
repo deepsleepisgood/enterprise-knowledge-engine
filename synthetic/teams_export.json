@@ -1,0 +1,828 @@
+{
+ "team": "AP Operations",
+ "channel": "ap-questions",
+ "exported": "2026-11-14T00:00:00+00:00",
+ "note": "Synthetic test export: real question texts from teams_questions (sampled), plus hand-written SYN-* threads. Built by scripts/make_teams_export.py.",
+ "value": [
+  {
+   "id": "M50181",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-08T08:29:32.635000Z",
+   "from": {
+    "user": {
+     "displayName": "Harpreet Dhillon",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Credit note from Sai Traders for an invoice already paid — how do I apply it?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50496",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-10T17:19:34.973000Z",
+   "from": {
+    "user": {
+     "displayName": "Thomas Mathew",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Invoice came in on 27th, can I still post it this month?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50699",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-10T19:50:03.339000Z",
+   "from": {
+    "user": {
+     "displayName": "Gaurav Verma",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Credit note from Sunrise Enterprises Pvt Ltd for an invoice already paid — how do I apply it?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50554",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-13T03:50:52.348000Z",
+   "from": {
+    "user": {
+     "displayName": "Priya Rani Verma",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>What's the cut-off for this week's payment run?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51250",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-13T04:31:29.426000Z",
+   "from": {
+    "user": {
+     "displayName": "Anitha Raju",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Infra invoice from Trident Enterprises Pvt Ltd has no GRN since Saturday, should I raise NO_GRN now?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51796",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-13T18:35:43.877000Z",
+   "from": {
+    "user": {
+     "displayName": "Prakash Subramanian",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Anand Exports Pvt Ltd invoice not showing in 2B — hold full amount or only GST?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51899",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-15T16:02:44.982000Z",
+   "from": {
+    "user": {
+     "displayName": "Aishwarya Reddy",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Which TDS section for Trident Distributors's lift AMC?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50044",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-28T16:04:14.901000Z",
+   "from": {
+    "user": {
+     "displayName": "Priya Goyal",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Infra cement invoice from Navkar Auto Parts Pvt Ltd is 8.0% over GRN — within tolerance?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51720",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-29T06:51:45.050000Z",
+   "from": {
+    "user": {
+     "displayName": "Aishwarya Reddy",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Krishna Electricals is MSME (small) — is due date 45 days or 60?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50749",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-29T12:16:12.807000Z",
+   "from": {
+    "user": {
+     "displayName": "Arun Krishnan",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Is INV/0746 same as INV427-REV from Krishna Industries Pvt Ltd?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50833",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-04-29T22:51:16.120000Z",
+   "from": {
+    "user": {
+     "displayName": "Divya Kurian",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Pharma excipient invoice from Vertex Pharma Pvt Ltd, batch in quarantine — does it need QA release?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50899",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-05-15T04:37:48.419000Z",
+   "from": {
+    "user": {
+     "displayName": "Prakash Subramanian",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Price diff of ₹340 on a ₹140,000 line for Trident Distributors Pvt Ltd — can I pass it or PRICE_VAR?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50867",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-05-23T10:19:26.094000Z",
+   "from": {
+    "user": {
+     "displayName": "Fathima Siddiqui",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Who approves Anand Exports Pvt Ltd's invoice of ₹32.0 lakh?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50902",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-05-31T13:14:34.096000Z",
+   "from": {
+    "user": {
+     "displayName": "Sindhu Rao",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Invoice came in on 28th, can I still post it this month?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51711",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-06-10T00:15:55.436000Z",
+   "from": {
+    "user": {
+     "displayName": "Anitha Raju",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Infra invoice from Prime Solutions has no GRN since Saturday, should I raise NO_GRN now?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51165",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-06-22T17:21:21.522000Z",
+   "from": {
+    "user": {
+     "displayName": "Manju Ansari",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Courier invoice from Anand Retail has no PO — can I post as non-PO?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50661",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-06-26T06:38:09.861000Z",
+   "from": {
+    "user": {
+     "displayName": "Gaurav Verma",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Infra cement invoice from Northstar Associates Pvt Ltd is 2.5% over GRN — within tolerance?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50924",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-08T03:14:42.116000Z",
+   "from": {
+    "user": {
+     "displayName": "Manju Ansari",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Courier invoice from Sai Industries Pvt Ltd has no PO — can I post as non-PO?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51802",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-08T12:00:25.575000Z",
+   "from": {
+    "user": {
+     "displayName": "Manju Ansari",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Bluestone Enterprises wants to change bank account, they mailed from their registered id. Can I send for approval?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51146",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-19T04:47:39.693000Z",
+   "from": {
+    "user": {
+     "displayName": "Thomas Mathew",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Pharma excipient invoice from Bluestone Industries, batch in quarantine — does it need QA release?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50601",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-21T12:52:23.553000Z",
+   "from": {
+    "user": {
+     "displayName": "Gurpreet Singh",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Navkar Associates Pvt Ltd sent invoice without IRN, their turnover is around ₹14.0 crore. OK to process?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51417",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-29T02:35:14.276000Z",
+   "from": {
+    "user": {
+     "displayName": "Rajesh Tiwari",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Legal fee invoice from Om Auto Parts Pvt Ltd has no GST, should I return it?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51008",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-30T13:04:02.201000Z",
+   "from": {
+    "user": {
+     "displayName": "Arjun Rawat",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Is INV/0373 same as INV606-REV from Northstar Textiles?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51467",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-07-31T20:42:47.663000Z",
+   "from": {
+    "user": {
+     "displayName": "Yash Solanki",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Who approves Ganga Agencies Pvt Ltd's invoice of ₹60.0 lakh?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51127",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-08-04T13:52:11.209000Z",
+   "from": {
+    "user": {
+     "displayName": "Arjun Rawat",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Price diff of ₹340 on a ₹12,000 line for Anand Solutions — can I pass it or PRICE_VAR?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51858",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-08-08T04:34:05.568000Z",
+   "from": {
+    "user": {
+     "displayName": "Abhijit Nayak",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Legal fee invoice from Sai Retail has no GST, should I return it?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50223",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-08-18T16:15:33.022000Z",
+   "from": {
+    "user": {
+     "displayName": "Balaji Krishnan",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Which TDS section for Sai Retail Pvt Ltd's HVAC AMC?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M51201",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-08-21T16:24:31.140000Z",
+   "from": {
+    "user": {
+     "displayName": "Jignesh Shinde",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Sunrise Enterprises Pvt Ltd wants to change bank account, they mailed from their registered id. Can I send for approval?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50200",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-08-31T02:53:57.440000Z",
+   "from": {
+    "user": {
+     "displayName": "Anitha Raju",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Anand Agencies Pvt Ltd is MSME (small) — is due date 45 days or 60?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50818",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-09-06T11:53:21.407000Z",
+   "from": {
+    "user": {
+     "displayName": "Divya Kurian",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Sai Foods Pvt Ltd invoice not showing in 2B — hold full amount or only GST?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50520",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-09-19T09:26:16.385000Z",
+   "from": {
+    "user": {
+     "displayName": "Manish Khan",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>What's the cut-off for this week's payment run?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "M50189",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-09-20T09:38:52.534000Z",
+   "from": {
+    "user": {
+     "displayName": "Sanjib Sahoo",
+     "jobTitle": "Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Kaveri Logistics sent invoice without IRN, their turnover is around ₹7.5 crore. OK to process?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-TIP",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-02T09:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Kavya Menon",
+     "jobTitle": "Senior Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Heads-up for anyone on the Pharma desk: when a payment is late, <b>Balaji Logistics</b> re-sends the same invoice with /A added to the number. Check for the original before you post it.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-TIP-R1",
+   "replyToId": "SYN-TIP",
+   "messageType": "message",
+   "createdDateTime": "2026-11-02T09:12:00Z",
+   "from": {
+    "user": {
+     "displayName": "Sneha Iyer",
+     "jobTitle": "AP Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Thanks! Saw one of those last week.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-CLAIM",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-02T11:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Sneha Iyer",
+     "jobTitle": "AP Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>FYI the price tolerance is 2% again for all clients from next Monday.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-LUNCH",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-02T12:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Rohan Gupta",
+     "jobTitle": "Team Lead"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Team lunch on Friday at 1? Reply here 🙂</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-LUNCH-R1",
+   "replyToId": "SYN-LUNCH",
+   "messageType": "message",
+   "createdDateTime": "2026-11-02T12:05:00Z",
+   "from": {
+    "user": {
+     "displayName": "Kavya Menon",
+     "jobTitle": "Senior Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>I'm in.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-Q",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-03T09:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Sneha Iyer",
+     "jobTitle": "AP Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Can I post a courier invoice without a PO if it's small?</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-Q-R1",
+   "replyToId": "SYN-Q",
+   "messageType": "message",
+   "createdDateTime": "2026-11-03T09:20:00Z",
+   "from": {
+    "user": {
+     "displayName": "Kavya Menon",
+     "jobTitle": "Senior Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Check the non-PO list in the SOP first, I'm not sure courier is on it.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-OOO",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-03T10:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Kavya Menon",
+     "jobTitle": "Senior Processor"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Automatic reply: I am out of office until Monday.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  },
+  {
+   "id": "SYN-REMIND",
+   "replyToId": null,
+   "messageType": "message",
+   "createdDateTime": "2026-11-04T09:00:00Z",
+   "from": {
+    "user": {
+     "displayName": "Rohan Gupta",
+     "jobTitle": "Team Lead"
+    }
+   },
+   "body": {
+    "contentType": "html",
+    "content": "<p>Reminder: invoices for the payment run must be approved by 1 pm the working day before the run, as the SOP says. Late ones wait for the next run.</p>"
+   },
+   "channelIdentity": {
+    "teamId": "ap-ops",
+    "channelId": "ap-questions"
+   }
+  }
+ ]
+}

@@ -17,7 +17,7 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.graph.rows import ORIGIN as ROW_ORIGIN
+from app.graph.rows import NOTE_ORIGINS
 from app.graph.rules import CURRENT, IN_FORCE_THEN
 from app.store import entities as estore
 from app.store import facts as fstore
@@ -213,7 +213,7 @@ def retrieve(
             kinds=["practice"],
         )
         if f.subject_id in named_ids
-        and f.origin_key.startswith(ROW_ORIGIN)
+        and f.origin_key.startswith(NOTE_ORIGINS)
         and _in_scope(f, client)
     ]
     named_practice = notes_on_point(session, question, named_notes, embed_fn)[:NAMED_PRACTICE_MAX]

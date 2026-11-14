@@ -22,7 +22,7 @@ from app.answer.router import route
 from app.core.config import get_settings
 from app.core.db import export_snapshot, session_scope, snapshot_scope
 from app.graph.pipeline import active_ontology
-from app.graph.rows import ORIGIN as ROW_ORIGIN
+from app.graph.rows import NOTE_ORIGINS
 from app.graph.rules import RuleNotFound, canonical_client
 from app.plugins import calculate as calc_mod
 from app.plugins import registry
@@ -513,7 +513,7 @@ def _answer(
                 ranked_passages=[p.id for p in got.passages],
                 question_vec=got.vec,
                 practice_types={r.doc_type for r in onto.source_ranking if r.practice},
-                row_origin=ROW_ORIGIN,
+                row_origin=NOTE_ORIGINS,
                 used_vecs=used_vecs,
                 answer_topics=answer_topics,
             ),

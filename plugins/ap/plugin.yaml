@@ -4,6 +4,11 @@ title: Accounts payable
 description: Deterministic AP calculators, role routing, invoice picker and ERP data loaders.
 calculators: [price, quantity, approvals, einvoice, msme, tds]
 entry: calc.registry
+# Expert capture (core, app/capture): a captured habit is a note about a supplier, filed with the
+# vendor sheet's habit notes (a separate origin, so reloading the sheet never retires it).
+capture:
+  subject_type: supplier
+  attribute: supplier_habits.habit_note
 hooks:
   on_spreadsheet: loaders.ops.on_spreadsheet
   invoice_search: loaders.ops.invoice_search   # GET /invoices

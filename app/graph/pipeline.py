@@ -150,7 +150,7 @@ def extract_and_publish(
         msg_dates: dict[str, date] = {}
         for eid in episodes:
             ep = estore.get_episode(s, eid)
-            if ep is not None and ep.channel in ("email", "api", "expert_answer"):
+            if ep is not None and ep.channel in ("email", "api", "expert_answer", "teams"):
                 msg_dates[eid] = ep.received_at.date()
         carried: dict[str, list[Draft]] = {}
         for p in passages:

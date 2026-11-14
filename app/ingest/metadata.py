@@ -451,8 +451,8 @@ _TYPE_WORDS = [
 
 
 def _type_by_keywords(text: str, channel: str) -> str | None:
-    if channel in ("email", "expert_answer"):
-        return channel
+    if channel in ("email", "expert_answer", "teams"):
+        return channel  # a message is a message, whatever words its title holds
     t = text.lower()
     for rx, kind in _TYPE_WORDS:
         if re.search(rx, t):

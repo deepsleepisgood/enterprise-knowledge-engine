@@ -39,6 +39,7 @@ HANDLER_MODULES = (
     "app.govern.apply",
     "app.distribute.recall",
     "app.distribute.delivery",
+    "app.capture.interview",
 )
 
 

@@ -340,7 +340,7 @@ def expert_tip(
     ranked_passages: list[str],
     question_vec: list[float] | None,
     practice_types: set[str] | None = None,
-    row_origin: str = "",
+    row_origin: str | tuple[str, ...] = "",
     used_vecs: dict[str, list[float]] | None = None,
     answer_topics: set[str] | None = None,
 ) -> dict[str, Any] | None:

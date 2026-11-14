@@ -26,6 +26,12 @@ from app.store import jobs, kb
 from app.store.base import stable_id, tenant
 from app.worker import handler
 
+# Expert-capture entries (app/capture) skip extraction: the expert already gave the structure.
+CAPTURE_CHANNEL = "expert_capture"
+# Inputs that are never a new version of an earlier one (each entry or chat thread stands alone,
+# however similar its title).
+UNVERSIONED_CHANNELS = {CAPTURE_CHANNEL, "teams"}
+
 
 def governed() -> bool:
     """Owner approval applies to new input, except in the replay tenant (the owner's seeding)."""
@@ -223,6 +229,13 @@ def _triage(episode: Any, blocks: list[Any], structured: Any, summary: dict[str,
         with session_scope() as s:
             store.set_status(s, episode.id, "ignored", triage_label=t.label, meta=meta)
         return True
+    if t.label == "question" and episode.channel in triage.ARCHIVE_CHANNELS:
+        # A question from a chat export was asked (and answered by colleagues) long ago: keep it
+        # for analytics, but do not answer it again or notify anyone.
+        meta["question"] = t.question or text[:500]
+        with session_scope() as s:
+            store.set_status(s, episode.id, "ignored", triage_label=t.label, meta=meta)
+        return True
     if t.label == "question":
         from app.answer.pipeline import ask
 
@@ -297,8 +310,8 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
             llm_fn=structured,
         )
         src = _source_row(episode, doc, m)
-        if summary.get("triage") == "tacit_tip":  # know-how, never a rule
-            src["meta"] = {**(src.get("meta") or {}), "practice": True}
+        if summary.get("triage") == "tacit_tip" or episode.channel == CAPTURE_CHANNEL:
+            src["meta"] = {**(src.get("meta") or {}), "practice": True}  # know-how, never a rule
         return src, passage_rows(src, segment(doc)), m.low_confidence()
 
     from concurrent.futures import ThreadPoolExecutor
@@ -326,7 +339,7 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
         links = []
         govern = governed()
         for src, _, _ in sources:
-            if govern:
+            if govern or episode.channel in UNVERSIONED_CHANNELS:
                 break  # a governed new version replaces the old one only once approved
             for link in versions.link_versions(s, src["id"]):
                 links.append(link.__dict__)
@@ -350,7 +363,11 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
                 "defer_versions": govern,
             },
         )
-        jobs.enqueue(s, "extract_episode", {"episode_id": eid, "govern": govern})
+        if episode.channel == CAPTURE_CHANNEL:
+            # Already structured by the expert: one practice note, always held for review.
+            jobs.enqueue(s, "capture_entry", {"episode_id": eid})
+        else:
+            jobs.enqueue(s, "extract_episode", {"episode_id": eid, "govern": govern})
         jobs.enqueue_once(s, "index_embeddings", {})
         if kind in ("xlsx", "csv"):
             jobs.enqueue(s, "plugin_hooks", {"episode_id": eid, "event": "on_spreadsheet"})

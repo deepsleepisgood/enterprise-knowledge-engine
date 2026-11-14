@@ -553,3 +553,69 @@ export interface ReplayState {
   run: ReplayRun;
   steps: ReplayStep[];
 }
+
+/* ---------------------------------------------------------------- expert capture (T10) */
+
+export interface CaptureQuestion {
+  key: "subject" | "habit" | "trigger" | "what_to_do" | "evidence";
+  label: string;
+  ask: string;
+}
+
+export interface CaptureQuestions {
+  questions: CaptureQuestion[];
+  reviewers: string[];
+  default_reviewer: string;
+}
+
+export interface CaptureEntry {
+  subject: string;
+  habit: string;
+  trigger: string;
+  what_to_do: string;
+  evidence: string;
+  author: string;
+  author_role?: string | null;
+  date?: string;
+  subject_entity_id?: string | null;
+}
+
+export interface CaptureCandidate {
+  id: string;
+  type: string;
+  name: string;
+}
+
+export interface RuleCheck {
+  verdict: "compatible" | "conflict" | "no_rule" | "unchecked";
+  reason: string;
+  rules: { label: string; locator: string; text: string }[];
+}
+
+export interface CapturedEntry {
+  episode_id: string;
+  status: string;
+  entry: CaptureEntry | null;
+  subject_name: string | null;
+  reviewer: string | null;
+  check: RuleCheck | null;
+  edited_from: string | null;
+  received_at: string | null;
+  statement: string | null;
+  fact_status: string | null;
+  approved_by: string | null;
+  review: { id: number; status: string; row_version: number; decided_by: string | null } | null;
+}
+
+export interface KnownNote {
+  statement: string;
+  source: string | null;
+  author: string | null;
+  date: string | null;
+  origin: "capture" | "data row" | "document";
+}
+
+export interface CaptureEntries {
+  entries: CapturedEntry[];
+  known: { total: number; by_origin: Record<string, number>; notes: KnownNote[] };
+}

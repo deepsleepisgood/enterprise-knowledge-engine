@@ -843,3 +843,49 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 - The GPT-5 cards were unchanged by the re-score (0/21, Q032).
 
 **Tests:** 353 passed; ruff clean. README results updated: judge, load test, GPT-5 comparison, the outdated rule, and known gaps for load and judge calibration.
+
+## 2026-11-15 — Expert capture (T10) and the Teams chat-export connector
+
+**Expert capture** (`app/capture/interview.py`, `app/api/capture.py`, Capture page):
+- **The flow:**
+  - Five questions: who or what, the habit, how to spot it, what to do, how they know.
+  - The "who" answer is matched to known entities (`/capture/match`), so the note is linked to them.
+  - A rule check against the rules in force (`/capture/check`: retrieval, rule passages only, one fast-model call): compatible, conflict or no rule.
+  - A named reviewer picked from the plug-in's roles.
+- **Submission:** the entry becomes an `expert_capture` episode, rendered as one interview turn, so its document type is `interview` (a practice type) and the expert is the speaker.
+- **No LLM extraction:** the worker job `capture_entry` writes one pending practice fact citing that turn (origin `capture:`) and opens a review item carrying the answers, the reviewer and the rule check. It is always held, whatever `GOVERNANCE` says (CLAUDE.md rules 9 and 13).
+- **Reviewer actions** (Capture page or review queue):
+  - Approve or Reject use `/review/{id}`.
+  - Edit (`/capture/entries/{id}/edit`) rejects the original and submits the edited entry in its place.
+- **Once approved,** a captured note behaves like a vendor-sheet note:
+  - retrieval uses it when a question names its subject (`NOTE_ORIGINS` = `row:` or `capture:`);
+  - it can be the expert tip;
+  - the AP plug-in's vendor panel lists it, matched by vendor id only, because vendor names repeat across ids.
+- **Filing:** set by the plug-in (`plugin.yaml` `capture:`): AP files notes as `supplier_habits.habit_note` about a `supplier`. Reloading the vendor sheet never retires them, because the replace-on-reload logic only touches `row:` facts.
+- **"Already known"** lists know-how already in force: interviews and observations, data-row notes, captures.
+
+**Teams chat export** (`app/ingest/connectors/teams.py`):
+- **Input:** a Graph `chatMessage` export (`value`/`messages`/list) uploaded as `.json` is detected in `from_upload`. System and deleted messages are skipped.
+- **Threads:** one episode per thread, a post plus its replies; chats are split at gaps over 4 h. Each message is one line `[HH:MM] Name: text`.
+  - A line break inside a turn used to drop the rest of the message; caught by a test and fixed.
+  - A question joins the reply after it, as in interviews.
+- **Classification:** the document type is `teams` (the channel, never title words), and the title never quotes message text.
+- **Triage:** `teams` is a message channel. A question from chat history is recorded (`ignored`, triage `question`, question kept in meta) and never answered again (`ARCHIVE_CHANNELS`). Tips and rule claims are extracted and governed. Relative dates are read against the post time.
+- **Not versioned:** capture and Teams episodes are never linked as versions of each other (`UNVERSIONED_CHANNELS`), since their titles look alike.
+- **Test data:** `scripts/make_teams_export.py` builds `synthetic/teams_export.json` from 32 real `teams_questions` (2 per topic, seed 7, names and roles from `employees`) plus 6 hand-written `SYN-*` threads.
+
+**Verified on the running app** (local database, Isoquant; Neon untouched):
+- **T10 end to end:**
+  - the five answers about Balaji Logistics' "/A" re-sends were entered;
+  - the rule check said "fits", citing SOP §3.3 and a training video;
+  - the entry was held for the Process owner and approved in the UI;
+  - the question "Balaji Logistics sent an invoice whose number ends in /A, what should I do?" was answered from it, with the entry as the expert tip.
+- **Teams:** the synthetic export (38 threads) was uploaded through `/episodes/upload` with `GOVERNANCE=true`. All 32 real questions were recorded, none answered. The tip (2 practice facts) and both rule claims were held, so the "2% again" claim was not applied. Lunch and out-of-office were dropped.
+- **Web checks:** tsc, eslint and the token check pass.
+
+**Tests:** 365 passed (12 new: 6 unit, 6 integration); ruff clean.
+
+**Open:**
+- A Teams tip is not shown in the expert-tip slot, because its type is not a practice type.
+- The capture page uses the signed-in user id as the expert's name.
+- Untested on a real tenant's Teams export.

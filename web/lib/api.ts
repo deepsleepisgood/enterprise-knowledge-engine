@@ -102,6 +102,8 @@ const FIXTURES: [RegExp, () => Promise<{ default: unknown }>][] = [
   ],
   [/^\/digest/, () => import("@/fixtures/digest.json")],
   [/^\/replay$/, () => import("@/fixtures/replay.json")],
+  [/^\/capture\/questions$/, () => import("@/fixtures/capture_questions.json")],
+  [/^\/capture\/entries$/, () => import("@/fixtures/capture_entries.json")],
 ];
 
 async function errorFrom(res: Response): Promise<ApiError> {

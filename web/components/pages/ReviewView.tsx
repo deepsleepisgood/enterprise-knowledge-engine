@@ -43,6 +43,33 @@ function Sides({ a, b }: { a: ConflictSide | null; b: ConflictSide | null }) {
   );
 }
 
+interface CapturePayload {
+  entry?: { trigger?: string; evidence?: string };
+  reviewer?: string;
+  check?: { verdict: string; reason: string } | null;
+}
+
+/** An expert-capture entry: how to spot the habit, how the expert knows, the rule check. */
+function CaptureDetail({ capture }: { capture: CapturePayload }) {
+  const e = capture.entry ?? {};
+  const rows = [
+    ["How to spot it", e.trigger],
+    ["How they know", e.evidence],
+    ["Rule check", capture.check ? `${capture.check.verdict.replace(/_/g, " ")}: ${capture.check.reason}` : ""],
+  ].filter(([, v]) => v);
+  if (!rows.length) return null;
+  return (
+    <dl className="mt-2 space-y-1 text-[13px]">
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex gap-2">
+          <dt className="eyebrow w-28 shrink-0">{k}</dt>
+          <dd className="text-ink">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /** What changed, rendered for each kind of item. Removed text struck through, added underlined. */
 function ItemBody({ item }: { item: ReviewItem }) {
   const p = item.payload;
@@ -121,6 +148,7 @@ function ItemBody({ item }: { item: ReviewItem }) {
               {facts.length > 6 && <li className="font-mono text-[11px] text-muted">+{facts.length - 6} more</li>}
             </ul>
           )}
+          {p.capture ? <CaptureDetail capture={p.capture as CapturePayload} /> : null}
           {Boolean(p.sender || p.channel) && (
             <p className="mt-1.5 font-mono text-[11px] text-muted">
               {[str(p.sender), str(p.sender_role), str(p.channel), p.effective ? `from ${fmtDate(str(p.effective))}` : ""]

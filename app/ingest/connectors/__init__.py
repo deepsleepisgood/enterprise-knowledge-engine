@@ -21,7 +21,7 @@ SKIP_NAMES = {".ds_store", "thumbs.db", "desktop.ini"}
 
 @dataclass
 class EpisodeIn:
-    channel: str  # upload, api, email, expert_answer, watched_folder, replay
+    channel: str  # upload, api, email, expert_answer, expert_capture, teams, watched_folder, replay
     data: bytes
     filename: str
     received_at: datetime = field(default_factory=lambda: datetime.now(UTC))
@@ -61,6 +61,11 @@ def from_upload(name: str, data: bytes, **kw: Any) -> list[EpisodeIn]:
         # who governance judges; the From header counts only when nobody is named.
         # An uploaded file keeps its own name (citations show what was uploaded).
         return from_eml(data, channel="upload", filename=name, **kw)
+    if name.lower().endswith(".json"):
+        from app.ingest.connectors.teams import from_teams_export, is_teams_export
+
+        if is_teams_export(data):  # a chat export: one episode per thread
+            return from_teams_export(data, name, **kw)
     return [EpisodeIn(channel="upload", data=data, filename=name, **kw)]
 
 

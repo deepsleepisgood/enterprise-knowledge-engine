@@ -1,0 +1,66 @@
+{
+  "entries": [
+    {
+      "episode_id": "demo-capture-1",
+      "status": "pending_review",
+      "entry": {
+        "subject": "Balaji Logistics",
+        "habit": "Re-sends a late-paid invoice with /A added to the number",
+        "trigger": "Same amount and date as an invoice already posted",
+        "what_to_do": "Check for the original before posting it",
+        "evidence": "Three cases on the Pharma desk this year",
+        "author": "Kavya Menon",
+        "author_role": "Senior Processor",
+        "date": "2026-11-14",
+        "subject_entity_id": "demo-v20000"
+      },
+      "subject_name": "Balaji Logistics (V20000)",
+      "reviewer": "Team Lead",
+      "check": {
+        "verdict": "compatible",
+        "reason": "It adds a warning sign to the duplicate check; the rule still applies.",
+        "rules": [
+          {
+            "label": "SOP v4.0 §7.1",
+            "locator": "7.1",
+            "text": "Normalise the invoice number before the duplicate check."
+          }
+        ]
+      },
+      "edited_from": null,
+      "received_at": "2026-11-14T10:20:00+00:00",
+      "statement": "Balaji Logistics (V20000): Re-sends a late-paid invoice with /A added to the number. What to do: Check for the original before posting it.",
+      "fact_status": "pending",
+      "approved_by": null,
+      "review": {
+        "id": 901,
+        "status": "open",
+        "row_version": 1,
+        "decided_by": null
+      }
+    }
+  ],
+  "known": {
+    "total": 2,
+    "by_origin": {
+      "data row": 1,
+      "document": 1
+    },
+    "notes": [
+      {
+        "statement": "Balaji Logistics (V20000, Arvana Pharma Ltd): adds /A or -REV when re-sending the same invoice",
+        "source": "Vendor master row 1",
+        "author": null,
+        "date": null,
+        "origin": "data row"
+      },
+      {
+        "statement": "Experienced processors check the GRN date before raising NO_GRN on day one.",
+        "source": "Interview 1 [02:30]",
+        "author": "Lakshmi",
+        "date": "2026-03-10",
+        "origin": "document"
+      }
+    ]
+  }
+}

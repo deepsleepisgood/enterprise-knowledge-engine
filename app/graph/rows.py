@@ -26,6 +26,10 @@ from app.store import jobs, kb
 from app.store.base import day_start, utcnow
 
 ORIGIN = "row:"
+# A note an expert captured about one named entity (app/capture): like a data-row note, it is
+# about that entity only, so answers use it the same way.
+CAPTURE_ORIGIN = "capture:"
+NOTE_ORIGINS = (ORIGIN, CAPTURE_ORIGIN)
 
 
 @dataclass

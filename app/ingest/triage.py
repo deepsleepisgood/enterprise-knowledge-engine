@@ -22,7 +22,9 @@ from pydantic import BaseModel, Field
 PROMPT_VERSION = "triage-v1"
 LABELS = ("rule_change", "document", "tacit_tip", "question", "noise")
 EXTRACT = {"rule_change", "document", "tacit_tip"}
-MESSAGE_CHANNELS = {"email", "api"}
+MESSAGE_CHANNELS = {"email", "api", "teams"}
+# Exported chat history: a question in it is recorded, never answered again.
+ARCHIVE_CHANNELS = {"teams"}
 
 SYSTEM = """You sort one incoming message for a company's knowledge base. Labels:
 - rule_change: it states, changes or announces a rule, limit, threshold, date, owner or step

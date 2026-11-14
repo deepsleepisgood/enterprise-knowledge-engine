@@ -109,6 +109,12 @@ def change_payload(
         "topics": verdict.topics,
         "high_risk": verdict.high_risk,
         "source_ids": source_ids,
+        # An expert-capture entry (app/capture): the five answers, reviewer and rule check.
+        **(
+            {"capture": (episode.meta or {})["capture"]}
+            if (episode.meta or {}).get("capture")
+            else {}
+        ),
         "fact_ids": [f.id for f in facts],
         "facts": [
             {
