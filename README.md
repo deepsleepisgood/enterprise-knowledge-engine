@@ -175,7 +175,7 @@ This command:
 Ctrl+C stops everything and frees the ports. Optional flags are `--no-browser` and `--no-worker`. On other platforms, use `python scripts/run_app.py`.
 
 ### First-time setup
-Prerequisites: Python 3.11+, Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
+Prerequisites: Python 3.11 or 3.12 (the embedded Postgres, pgserver, has no builds for 3.13+), Node.js 20+. Postgres is optional, because the embedded instance is used when `DATABASE_URL` is empty.
 
 ```bash
 python -m venv .venv
