@@ -11,6 +11,8 @@ Providers (LLM_PROVIDER):
   reject `temperature`, so none is sent; reproducibility comes from the disk cache.
 - nim: NVIDIA NIM (OpenAI-compatible), app/core/nim.py. Temperature 0, JSON mode, the
   JSON Schema in the system prompt, Pydantic validation and one corrective retry.
+- openai: api.openai.com through the same transport and adapters as nim. Reasoning models
+  (o-series, gpt-5*) get no temperature; the disk cache keeps runs reproducible.
 The cache key includes the model id, so switching provider never reuses another's output.
 """
 
@@ -93,8 +95,21 @@ def _get_client() -> Any:
 # --- helpers ---------------------------------------------------------------------------
 
 
+def _env_prices() -> dict[str, tuple[float, float]]:
+    """MODEL_PRICES="model=in/out,..." from the environment (USD per million tokens)."""
+    out: dict[str, tuple[float, float]] = {}
+    for item in get_settings().model_prices.split(","):
+        name, _, pair = item.strip().partition("=")
+        inp, _, outp = pair.partition("/")
+        try:
+            out[name.strip()] = (float(inp), float(outp))
+        except ValueError:
+            continue  # blank or malformed entry: that model's cost is logged as unknown
+    return out
+
+
 def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float | None:
-    price = PRICES_PER_MTOK.get(model)
+    price = _env_prices().get(model) or PRICES_PER_MTOK.get(model)
     if price is None:
         return None
     return round(input_tokens * price[0] / 1e6 + output_tokens * price[1] / 1e6, 6)
@@ -229,9 +244,9 @@ def _call(
     }
     if safe_system:
         request["system"] = safe_system
-    if effort and _provider() != "nim":
+    if effort and not _openai_compatible():
         request["output_config"] = {"effort": effort}
-    if thinking is False and _provider() == "nim":
+    if thinking is False and _openai_compatible():
         request["thinking_off"] = True  # read by the NIM adapters, never sent to Anthropic
     elif thinking is False and model_id in NO_THINKING:
         request["thinking"] = NO_THINKING[model_id]
@@ -293,7 +308,7 @@ def _nim_complete(req: dict[str, Any]) -> tuple[Any, Any]:
         max_tokens=req["max_tokens"],
         json_mode=False,
     )
-    body.update(nim.thinking_options(bool(req.get("thinking_off"))))
+    body.update(nim.thinking_options(bool(req.get("thinking_off")), req["model"]))
     resp = nim.chat(body)
     text, finish = nim.message_text(resp)
     if finish == "length":
@@ -320,7 +335,7 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             max_tokens=budget,
             json_mode=True,
         )
-        body.update(nim.thinking_options(bool(req.get("thinking_off"))))
+        body.update(nim.thinking_options(bool(req.get("thinking_off")), req["model"]))
         resp = nim.chat(body)
         i, o = nim.usage(resp)
         in_tok, out_tok = in_tok + i, out_tok + o
@@ -357,6 +372,11 @@ def _provider() -> str:
     return get_settings().llm_provider.strip().lower()
 
 
+def _openai_compatible() -> bool:
+    """NIM and OpenAI share the /chat/completions transport and adapters."""
+    return _provider() in ("nim", "openai")
+
+
 # --- public API ------------------------------------------------------------------------
 
 
@@ -376,7 +396,7 @@ def complete(
     None leaves the provider's default."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _provider() == "nim":
+        if _openai_compatible():
             return _nim_complete(req)
         resp = _get_client().messages.create(**req)
         _check_stop(resp)
@@ -412,7 +432,7 @@ def structured(
     """Return a validated `schema` instance using the API's structured outputs."""
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
-        if _provider() == "nim":
+        if _openai_compatible():
             return _nim_structured(req, schema)
         resp = _get_client().messages.parse(**req, output_format=schema)
         _check_stop(resp)
@@ -456,7 +476,7 @@ def vision(
 
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         text = req["messages"][0]["content"]
-        if _provider() == "nim":
+        if _openai_compatible():
             from app.core import nim
 
             parts: list[dict[str, Any]] = [

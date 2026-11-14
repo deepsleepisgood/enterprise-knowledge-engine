@@ -97,7 +97,10 @@ def main() -> None:
     if args.dry_run:
         return
     if not settings.llm_configured:
-        sys.exit("No LLM key configured (LLM_PROVIDER / NVIDIA_API_KEY / ANTHROPIC_API_KEY).")
+        sys.exit(
+            "No LLM key configured "
+            "(LLM_PROVIDER / OPENAI_API_KEY / NVIDIA_API_KEY / ANTHROPIC_API_KEY)."
+        )
 
     if args.reset_graph:
         with session_scope() as s:

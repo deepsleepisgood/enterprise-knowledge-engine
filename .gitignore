@@ -23,3 +23,4 @@ node_modules/
 # local helper binaries (cloudflared)
 tools/
 web/.vercel
+*.egg-info/

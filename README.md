@@ -186,8 +186,9 @@ cd web && npm install && cd ..
 ```
 
 Main `.env` settings:
-- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint) or `anthropic`.
+- `LLM_PROVIDER`: `nim` (any OpenAI-compatible endpoint), `openai` or `anthropic`.
 - `NIM_BASE_URL`, `MODEL_SMART`, `MODEL_FAST`: endpoint and models. For Isoquant, set `NIM_BASE_URL=https://api.isoquant.ai/v1` and `ISOQUANT_API_KEY`; for NVIDIA, set `NVIDIA_API_KEY`.
+- `OPENAI_API_KEY`: when `LLM_PROVIDER=openai`; set `MODEL_FAST` and `MODEL_SMART` to OpenAI model ids. `MODEL_PRICES` (`model=in/out,…`, USD per million tokens) makes the call log record cost.
 - `ANTHROPIC_API_KEY`: when `LLM_PROVIDER=anthropic`.
 - `SCHEMA_MODE`: `induced` or `baseline`.
 - `DATABASE_URL`: leave empty for the embedded database.
