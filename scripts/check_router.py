@@ -21,10 +21,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from app.plugins import calculate as calc_mod  # noqa: E402
 from app.answer.pipeline import _default_structured  # noqa: E402
 from app.answer.router import PROMPT_VERSION, route  # noqa: E402
 from app.core.db import session_scope  # noqa: E402
+from app.plugins import calculate as calc_mod  # noqa: E402
 from app.plugins import registry  # noqa: E402
 from app.store import entities as estore  # noqa: E402
 from evaluation import dataset  # noqa: E402

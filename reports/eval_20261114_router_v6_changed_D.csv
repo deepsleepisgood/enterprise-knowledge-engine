@@ -1,0 +1,105 @@
+id,split,type,difficulty,question,gold,config,status,route,latency_s,error,answer_text,verified,cite_strict,cite_lenient,outdated,has_must_not_say,verdict,correct,judge_reason,cause,calls,cached,input_tokens,output_tokens,cost_usd
+Q047,holdout,tacit,hard,An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on Monday morning?,"Hold it (the system reminds after two working days), but experienced staff wait until Tuesday noon before any manual chase because Infra sites post GRNs in a Monday-morning batch.",D,answered,lookup,18.42,,"Status: answered
+Decision: No — hold as NO_GRN; wait until Tuesday noon before chasing
+Answer: No — the invoice should be held as NO_GRN with the requester notified automatically, and you should not post it against the PO without a GRN whatever the requester says on the phone. [1] The system sends a reminder after two working days and escalates to the requester's manager after five working days, and the Requester owns resolution of NO_GRN with a target of 5 working days. [1][2] For Arvana Infra Projects, requesters must post GRNs within two working days of receipt. [3] In practice, Infra sites batch their GRNs on Monday morning, so anything that comes in Friday to Sunday is waited on until Tuesday noon rather than chased on Monday. [4][5]
+Expert tip: Infra sites batch their GRNs on Monday morning.
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1); client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55]); 10% (Part F)",True,True,True,False,False,correct,True,"The answer states the hold as NO_GRN, the two-working-day system reminder, and the practice of waiting until Tuesday noon because Infra sites batch GRNs on Monday morning, matching all key facts of the gold answer.",,4,4,0,0,0.0
+Q071,dev,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 500 units; the invoice charges ₹122 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹1,080 on a line value of ₹60,000; limit is the lower of 1% (₹600) and ₹500 = ₹500.",D,answered,calculator:ap.price,9.68,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹1,000 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500, and here the limit is ₹500. [1] The held line is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹120 × 500): ₹60,000
+  Excess on line (₹2 × 500): ₹1,000
+  1% of PO line value: ₹600
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1080.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1000.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q076,dev,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹640 for 100 units; the invoice charges ₹647 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹704 on a line value of ₹64,000; limit is the lower of 1% (₹640) and ₹500 = ₹500.",D,answered,calculator:ap.price,12.13,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹700 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] The rule is that where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹640 × 100): ₹64,000
+  Excess on line (₹7 × 100): ₹700
+  1% of PO line value: ₹640
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 704.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 700.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q079,holdout,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹640 for 1000 units; the invoice charges ₹643 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹2,560 on a line value of ₹640,000; limit is the lower of 1% (₹6,400) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.64,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹3,000 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500, and here the lower figure is ₹500. [1] The held line is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹640 × 1000): ₹6,40,000
+  Excess on line (₹3 × 1000): ₹3,000
+  1% of PO line value: ₹6,400
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 2560.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 3000.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q080,dev,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 500 units; the invoice charges ₹122 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹1,080 on a line value of ₹60,000; limit is the lower of 1% (₹600) and ₹500 = ₹500.",D,answered,calculator:ap.price,21.57,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹1,000 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500, and here the limit is ₹500. [1] The held line is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹120 × 500): ₹60,000
+  Excess on line (₹2 × 500): ₹1,000
+  1% of PO line value: ₹600
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1080.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1000.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q083,dev,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹15,000 for 50 units; the invoice charges ₹15,120 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹6,000 on a line value of ₹750,000; limit is the lower of 1% (₹7,500) and ₹500 = ₹500.",D,answered,calculator:ap.price,27.54,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹6,000 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500. [1] The held line is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹15,000 × 50): ₹7,50,000
+  Excess on line (₹120 × 50): ₹6,000
+  1% of PO line value: ₹7,500
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 6000.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 6000.0, 'limit': 500.0}",,3,2,2378,347,0.00021
+Q085,holdout,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹395 for 100 units; the invoice charges ₹399 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹434 on a line value of ₹39,500; limit is the lower of 1% (₹395) and ₹500 = ₹395.",D,answered,calculator:ap.price,28.03,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹400 on the line is above the applicable limit of ₹395, so the line is held with exception PRICE_VAR. [1] The rule is that where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] Here 1% of the PO line value is ₹395 and the cap is ₹500, so the limit is ₹395, and the ₹400 excess is not within it. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who either amends the PO or asks the supplier for a credit note. [1] In practice, the note to the buyer should state the line, the invoice and PO unit prices, the excess amount and that it is above the limit, and ask for the PO to be amended or a credit note obtained. [2]
+  PO line value (₹395 × 100): ₹39,500
+  Excess on line (₹4 × 100): ₹400
+  1% of PO line value: ₹395
+  Cap: ₹500
+  Limit (lower of the two): ₹395
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 434.0, 'limit': 395.0}; calculator price: {'passed': False, 'excess': 400.0, 'limit': 395.0}",,5,5,0,0,0.0
+Q088,holdout,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 5 units; the invoice charges ₹123 per unit. Can the line pass the price match?,No — raise PRICE_VAR. Excess ₹15.00 on a line value of ₹600; limit is the lower of 1% (₹6.00) and ₹500 = ₹6.00.,D,answered,calculator:ap.price,31.99,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match, because the invoice unit price of ₹123 is higher than the PO unit price of ₹120 and the excess on the line is ₹15, which is more than the limit of ₹6. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500; here 1% of the ₹600 PO line value is ₹6, which is lower than the ₹500 cap. [1] The line is therefore held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer must either amend the PO or ask the supplier for a credit note. [1] In practice, the note to the buyer should name the line and item, give the invoice and PO unit prices and the excess, and ask for the PO to be amended or a credit note obtained. [2]
+  PO line value (₹120 × 5): ₹600
+  Excess on line (₹3 × 5): ₹15
+  1% of PO line value: ₹6
+  Cap: ₹500
+  Limit (lower of the two): ₹6
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 15.0, 'limit': 6.0}; calculator price: {'passed': False, 'excess': 15.0, 'limit': 6.0}",,5,5,0,0,0.0
+Q090,dev,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹395 for 200 units; the invoice charges ₹398 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹632 on a line value of ₹79,000; limit is the lower of 1% (₹790) and ₹500 = ₹500.",D,answered,calculator:ap.price,30.24,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match: the excess of ₹600 on the line is above the ₹500 limit, so the line is held with exception PRICE_VAR. [1] The rule is that a line with a higher invoice price passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500; here 1% is ₹790 and the cap is ₹500, so the limit is ₹500. [1] The held line is sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1] In practice, the note to the buyer should state the line, the invoice and PO unit prices, the excess amount and that it is above the ₹500 limit, and ask for the PO to be amended or a credit note obtained. [2]
+  PO line value (₹395 × 200): ₹79,000
+  Excess on line (₹3 × 200): ₹600
+  1% of PO line value: ₹790
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 632.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 600.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q095,dev,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹2,500 for 500 units; the invoice charges ₹2,538 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹18,750 on a line value of ₹1,250,000; limit is the lower of 1% (₹12,500) and ₹500 = ₹500.",D,answered,calculator:ap.price,30.86,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match, because the excess of ₹19,000 on the line is above the ₹500 limit. [1] A line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500. [1] The line is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1] In practice, a good note states the line, the invoice and PO prices, the excess and that it is above the ₹500 limit, and asks for a PO amendment or credit note. [2]
+  PO line value (₹2,500 × 500): ₹12,50,000
+  Excess on line (₹38 × 500): ₹19,000
+  1% of PO line value: ₹12,500
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 18750.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 19000.0, 'limit': 500.0}",,3,3,0,0,0.0

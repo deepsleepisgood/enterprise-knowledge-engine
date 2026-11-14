@@ -19,7 +19,7 @@ from app.core.llm import LLMError
 
 log = logging.getLogger(__name__)
 
-PROMPT_VERSION = "route-v5"
+PROMPT_VERSION = "route-v6"
 
 SYSTEM = """You route one question from a member of staff to the part of a company knowledge
 engine that should answer it. The engine answers only from the company's own documents.
@@ -39,9 +39,11 @@ Scopes the company knows (clients, departments, sites or regions that have their
 {clients}
 Name the scope only if the question refers to one of them (by name or a clear short form).
 
-Roles who can answer what the documents do not cover:
+Roles who can answer what the documents do not cover ("first contact for" lists the kinds of
+question a role takes when no other role owns them):
 {roles}
-Always pick the one role key best placed to answer this question if the documents do not.
+Always pick the one role key best placed to answer this question if the documents do not,
+for every route including out_of_scope: the person asking still needs someone to ask.{askers}
 
 A question that asks how a rule stood at another time ("in March 2026, what was...", "what
 applied on 1 May 2025?", "what will the rule be from 16 November?") has an as_of date. Dates
@@ -67,10 +69,32 @@ class RouteOut(BaseModel):
     )
 
 
+def _routable(roles: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Roles a question can be sent to: not the people who ask (`asker: true` in roles.yaml)."""
+    return {k: r for k, r in roles.items() if not r.get("asker")}
+
+
 def _role_lines(roles: dict[str, dict[str, Any]]) -> str:
-    if not roles:
+    routable = _routable(roles)
+    if not routable:
         return "- process_owner: the owner of the process"
-    return "\n".join(f"- {k}: {r.get('name', k)}. {r.get('owns', '')}" for k, r in roles.items())
+
+    def line(k: str, r: dict[str, Any]) -> str:
+        out = f"- {k}: {r.get('name', k)}. {r.get('owns', '')}".rstrip()
+        first = [str(x).replace("_", " ") for x in r.get("default_for") or []]
+        return out + (f" First contact for: {', '.join(first)}." if first else "")
+
+    return "\n".join(line(k, r) for k, r in routable.items())
+
+
+def _asker_note(roles: dict[str, dict[str, Any]]) -> str:
+    names = [str(r.get("name", k)) for k, r in roles.items() if r.get("asker")]
+    if not names:
+        return ""
+    return (
+        f"\nThe people asking are usually: {', '.join(names)}. Never send a question back to "
+        "them; pick who they should ask instead."
+    )
 
 
 def _match_role(given: str | None, roles: dict[str, dict[str, Any]]) -> str | None:
@@ -97,6 +121,7 @@ def route(
         routes=routes or "(no calculators installed)",
         clients=", ".join(clients) or "none",
         roles=_role_lines(roles),
+        askers=_asker_note(roles),
     )
     try:
         out: RouteOut = structured_fn(
@@ -122,5 +147,6 @@ def route(
         and out.confidence < get_settings().router_min_confidence
     ):
         out.route = "lookup"
-    out.role = _match_role(out.role, roles)
+    # An asker's own role is never an answer: leave it empty so the card's fallback applies.
+    out.role = _match_role(out.role, _routable(roles))
     return out

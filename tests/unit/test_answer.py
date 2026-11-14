@@ -381,3 +381,25 @@ def test_an_unusable_routing_reply_falls_back_to_lookup() -> None:
 
     r = route("What is the price tolerance?", [], {"calculator:x.price": "price"}, {}, broken)
     assert r.route == "lookup" and r.confidence == 0.0
+
+
+def test_router_shows_first_contact_roles_and_never_routes_to_the_asker() -> None:
+    from app.answer.router import _role_lines
+
+    roles = {
+        "clerk": {"name": "Clerk", "owns": "Posting.", "asker": True},
+        "tax": {"name": "Tax Desk", "owns": "Tax cases.", "default_for": ["tax_question"]},
+    }
+    lines = _role_lines(roles)
+    assert "Clerk" not in lines.split("\n")[0] and "- clerk:" not in lines
+    assert "First contact for: tax question." in lines
+    seen = {}
+
+    def fake(prompt, schema, system, **kw):
+        seen["system"] = system
+        return RouteOut(route="out_of_scope", confidence=0.9, role="Clerk")
+
+    out = route("What is the capital of France?", [], {}, roles, fake)
+    assert out.role is None  # the asker's own role falls back on the card
+    assert "Never send a question back to them" in seen["system"]
+    assert "including out_of_scope" in seen["system"]

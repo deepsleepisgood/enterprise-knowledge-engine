@@ -34,11 +34,11 @@ Uncommitted changes since the last commit: eval runner survives judge errors and
   - Business case model + Teams replay (TEST_PLAN level 12); usability tests with 5 people (level 13).
   - Analytics page exists: add knowledge latency and acknowledgement rates.
   - Optional: v3.1 → v4.0 redline; a Graphiti baseline comparison.
-- Measurements owed: entity-resolution F1, induced vs baseline schema, ~~abstention set (20)~~ (14 Nov: 20/20 refused, 15/20 routed right), support-removal set, the 50-document freshness test, a second-corpus rerun.
+- Measurements owed: entity-resolution F1, induced vs baseline schema, ~~abstention set (20)~~ (14 Nov: 20/20 refused; routed right 18/20 after router v6, was 15/20), support-removal set, the 50-document freshness test, a second-corpus rerun.
 - Housekeeping:
   - Merge duplicate entities (194J / Section 194J), clean up the 104 entities with no facts, clear the 5 old stopped jobs.
   - Add a flag for an extraction that fails on every passage.
-  - README results to 13 Nov; MVP note; demo rehearsal; maybe host on Render.
+  - ~~README results~~ (updated 14 Nov); MVP note; demo rehearsal; maybe host on Render.
 
 **Never:** sleep the laptop with tests running (DNS fails, runs hang); look at holdout failures beyond Q021/Q062.
 
@@ -728,3 +728,17 @@ Also done first, with the user's OK:
 - **Tests:** `tests/unit/test_digest_channels.py` (9) and `tests/integration/test_digest_send_db.py` (4). `tests/conftest.py` blanks the SMTP, Teams and schedule settings so a test never sends for real. pytest: 309 passed. ruff, tsc and eslint clean.
 - **Verified live:** local API and web with a local debugging SMTP server. "Send now" on the owner's digest card delivered a multipart email to 2 recipients (`reports/screenshots/digest_send_email.png`). The replay tenant's 11 Nov digest (28 rule changes) sent correctly with ₹ values. Fixed: the HTML said "No changes" on a day with only non-rule updates (now "No rule changes.").
 - **Not tested against a real Teams channel** (no workflow URL here): the card format is unit-tested only. The first real client setup should send one test digest.
+
+## 2026-11-14 — Router v6: a named role for every question, never the asker's own
+
+- **Change** (`app/answer/router.py`, `route-v6`):
+  - The router picks a role for every route, out-of-scope included.
+  - The role list shows "First contact for: …" from `default_for`.
+  - A role marked `asker: true` (new in `plugins/ap/roles.yaml`, set on the AP Processor) is left out of the list, and the router can never return it; it falls back to the card's default.
+  - The core stays generic: the flag lives in the plug-in.
+- **Check without a full rerun** (`scripts/check_router.py`): run only the router on the 160 evaluation questions plus the 20 abstention questions, for v5 and for v6 (about $0.01 each), then compare route, scope and as_of date.
+  - Fresh v5 matched the 13 Nov eval's routes on 160/160.
+  - v6 changed 10 evaluation questions (6 dev, 4 holdout): the unknown scope "Arvana Retail Pvt Ltd" now maps to "Arvana Group".
+  - Those 10 through the full pipeline: **10/10 correct** (`reports/eval_20261114_router_v6_changed.md`). The 13 Nov score (157/160) stands.
+- **Abstention set:** 20/20 not answered; **routed right 18/20** (was 15/20; target 90%). The 5 earlier mis-routes are fixed. The new misses, both arguable: A09 (employee income-tax regime) goes to HR / Admin; A17 (SAP password) goes to HR / Admin, and the plug-in has no IT role. Reports: `reports/abstention_20261114.md` (v6) and `abstention_20261114_router_v5.md` (before).
+- **Tests:** a new unit test (first-contact lines, the asker never routed to). pytest: 310 passed.

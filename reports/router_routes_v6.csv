@@ -1,0 +1,181 @@
+id,split,route,client,as_of,role,reason,confidence
+Q001,dev,lookup,,,team_lead,,0.95
+Q002,holdout,lookup,,,team_lead,,0.95
+Q003,dev,lookup,,,team_lead,,0.9
+Q004,dev,lookup,,,team_lead,,0.95
+Q005,dev,lookup,,,team_lead,,0.95
+Q006,holdout,lookup,,,tax_desk,,0.95
+Q007,dev,lookup,,,tax_desk,,0.9
+Q008,dev,lookup,,,tax_desk,,0.82
+Q009,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q010,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q011,dev,lookup,,,team_lead,,0.9
+Q012,dev,lookup,,,team_lead,,0.9
+Q013,holdout,lookup,,,team_lead,,0.95
+Q014,dev,lookup,,,requester,,0.9
+Q015,holdout,lookup,,,senior_processor,,0.95
+Q016,dev,lookup,,,senior_processor,,0.95
+Q017,holdout,lookup,,,vendor_master_team,,0.95
+Q018,dev,lookup,,,vendor_master_team,,0.9
+Q019,dev,lookup,,,vendor_master_team,,0.95
+Q020,holdout,lookup,,,vendor_master_team,,0.9
+Q021,holdout,lookup,,,team_lead,,0.95
+Q022,holdout,lookup,,,team_lead,,0.9
+Q023,dev,lookup,,,team_lead,,0.95
+Q024,holdout,lookup,,,tax_desk,,0.9
+Q025,holdout,lookup,,,tax_desk,,0.95
+Q026,dev,lookup,,,tax_desk,,0.9
+Q027,dev,lookup,,,tax_desk,,0.9
+Q028,holdout,lookup,,,tax_desk,,0.9
+Q029,dev,lookup,,,tax_desk,,0.9
+Q030,dev,lookup,,,tax_desk,,0.9
+Q031,holdout,lookup,,,tax_desk,,0.9
+Q032,dev,lookup,,,tax_desk,,0.9
+Q033,holdout,lookup,,,tax_desk,,0.9
+Q034,dev,lookup,,,tax_desk,,0.55
+Q035,dev,lookup,,,tax_desk,,0.9
+Q036,holdout,lookup,,,tax_desk,,0.9
+Q037,dev,lookup,,,tax_desk,,0.9
+Q038,dev,lookup,,,tax_desk,,0.9
+Q039,holdout,calculator:ap.einvoice,,,tax_desk,,0.9
+Q040,dev,lookup,Arvana Infra Projects,,team_lead,,0.95
+Q041,dev,lookup,Arvana Infra Projects,,team_lead,,0.9
+Q042,dev,lookup,Arvana Pharma,,client_qa,,0.9
+Q043,dev,lookup,Arvana Pharma,,client_qa,,0.9
+Q044,holdout,lookup,Arvana Group,,team_lead,,0.6
+Q045,dev,lookup,Arvana Group,,team_lead,,0.55
+Q046,dev,lookup,Arvana Retail,,tax_desk,,0.55
+Q047,holdout,lookup,Arvana Infra Projects,,requester,,0.82
+Q048,dev,lookup,,,senior_processor,,0.9
+Q049,holdout,lookup,,,tax_desk,,0.72
+Q050,dev,lookup,Arvana Pharma,,requester,,0.9
+Q051,holdout,practice,,,senior_processor,,0.9
+Q052,dev,lookup,,,vendor_master_team,,0.9
+Q053,holdout,lookup,,,senior_processor,,0.9
+Q054,holdout,lookup,,,team_lead,,0.9
+Q055,dev,lookup,,,team_lead,,0.9
+Q056,dev,lookup,,,team_lead,,0.95
+Q057,holdout,lookup,,,team_lead,,0.9
+Q058,dev,lookup,,,tax_desk,,0.95
+Q059,dev,lookup,,,team_lead,,0.95
+Q060,dev,lookup,,,team_lead,,0.9
+Q061,holdout,lookup,,,team_lead,,0.9
+Q062,holdout,lookup,,,process_owner,,0.9
+Q063,dev,lookup,,,senior_processor,,0.9
+Q064,holdout,lookup,,,team_lead,,0.9
+Q065,holdout,lookup,,,vendor_master_team,,0.9
+Q066,dev,calculator:ap.price,Arvana Pharma,,po_buyer,,0.97
+Q067,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q068,dev,calculator:ap.price,Arvana Pharma,,,,0.95
+Q069,holdout,calculator:ap.price,Arvana Infra Projects,,team_lead,,0.97
+Q070,dev,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q071,dev,calculator:ap.price,Arvana Group,,team_lead,,0.9
+Q072,dev,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q073,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q074,dev,calculator:ap.price,Arvana Pharma,,po_buyer,,0.95
+Q075,dev,calculator:ap.price,Arvana Infra Projects,,team_lead,,0.97
+Q076,dev,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q077,dev,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q078,dev,calculator:ap.price,Arvana Group,,senior_processor,,0.95
+Q079,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q080,dev,calculator:ap.price,Arvana Group,,team_lead,,0.9
+Q081,dev,calculator:ap.price,Arvana Pharma,,,,0.95
+Q082,dev,calculator:ap.price,Arvana Pharma,,senior_processor,,0.97
+Q083,dev,calculator:ap.price,Arvana Group,,po_buyer,,0.95
+Q084,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q085,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q086,dev,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q087,holdout,calculator:ap.price,Arvana Pharma,,team_lead,,0.97
+Q088,holdout,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q089,holdout,calculator:ap.price,Arvana Infra Projects,,,,0.97
+Q090,dev,calculator:ap.price,Arvana Group,,,,0.9
+Q091,dev,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q092,holdout,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q093,holdout,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q094,dev,calculator:ap.price,Arvana Infra Projects,,po_buyer,,0.97
+Q095,dev,calculator:ap.price,Arvana Group,,po_buyer,,0.9
+Q096,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q097,dev,calculator:ap.tds,,,tax_desk,,0.95
+Q098,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q099,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q100,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q101,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q102,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q103,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q104,dev,calculator:ap.tds,,,tax_desk,,0.95
+Q105,dev,calculator:ap.tds,,,tax_desk,,0.95
+Q106,holdout,calculator:ap.tds,,,tax_desk,,0.95
+Q107,holdout,calculator:ap.tds,,,tax_desk,,0.95
+Q108,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q109,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q110,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q111,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q112,dev,calculator:ap.tds,,,tax_desk,,0.95
+Q113,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q114,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q115,holdout,calculator:ap.tds,,,tax_desk,,0.9
+Q116,holdout,calculator:ap.tds,,,tax_desk,,0.95
+Q117,dev,calculator:ap.tds,,,tax_desk,,0.95
+Q118,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q119,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q120,dev,calculator:ap.tds,,,tax_desk,,0.9
+Q121,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q122,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q123,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q124,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q125,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q126,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q127,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q128,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q129,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q130,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q131,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q132,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q133,holdout,calculator:ap.approvals,,,ap_controller,,0.95
+Q134,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q135,dev,calculator:ap.approvals,,,ap_controller,,0.95
+Q136,holdout,calculator:ap.msme,,,,,0.95
+Q137,holdout,calculator:ap.msme,,,team_lead,,0.95
+Q138,dev,calculator:ap.msme,,,,,0.95
+Q139,dev,calculator:ap.msme,,,,,0.95
+Q140,dev,calculator:ap.msme,,,team_lead,,0.95
+Q141,dev,calculator:ap.msme,,,,,0.95
+Q142,holdout,calculator:ap.msme,,,,,0.95
+Q143,holdout,calculator:ap.msme,,,,,0.95
+Q144,dev,calculator:ap.msme,,,team_lead,,0.95
+Q145,dev,calculator:ap.msme,,,team_lead,,0.95
+Q146,holdout,calculator:ap.msme,,,team_lead,,0.95
+Q147,dev,calculator:ap.msme,,,,,0.95
+Q148,dev,calculator:ap.msme,,,,,0.95
+Q149,dev,calculator:ap.msme,,,,,0.95
+Q150,holdout,calculator:ap.msme,,,team_lead,,0.95
+Q151,holdout,calculator:ap.einvoice,,,,,0.95
+Q152,dev,calculator:ap.einvoice,,,,,0.95
+Q153,holdout,calculator:ap.einvoice,,,tax_desk,,0.95
+Q154,holdout,calculator:ap.einvoice,,,,,0.95
+Q155,dev,calculator:ap.einvoice,,,,,0.95
+Q156,holdout,calculator:ap.einvoice,,,tax_desk,,0.95
+Q157,dev,calculator:ap.einvoice,,,tax_desk,,0.95
+Q158,dev,calculator:ap.einvoice,,,,,0.95
+Q159,dev,calculator:ap.einvoice,,,tax_desk,,0.95
+Q160,dev,calculator:ap.einvoice,,,,,0.95
+A01,abstain,lookup,,,hr_admin,,0.9
+A02,abstain,out_of_scope,,,hr_admin,general_knowledge,0.9
+A03,abstain,out_of_scope,,,hr_admin,general_knowledge,0.95
+A04,abstain,out_of_scope,,,hr_admin,general_knowledge,0.9
+A05,abstain,out_of_scope,,,hr_admin,general_knowledge,0.95
+A06,abstain,out_of_scope,,,tax_desk,general_knowledge,0.9
+A07,abstain,lookup,,,tax_desk,,0.9
+A08,abstain,out_of_scope,,,tax_desk,advice,0.8
+A09,abstain,out_of_scope,Arvana Pharma,,hr_admin,advice,0.8
+A10,abstain,out_of_scope,,,tax_desk,advice,0.8
+A11,abstain,out_of_scope,,,vendor_master_team,personal_data,0.9
+A12,abstain,out_of_scope,,,vendor_master_team,personal_data,0.9
+A13,abstain,out_of_scope,Arvana Infra Projects,,vendor_master_team,personal_data,0.7
+A14,abstain,lookup,,,team_lead,,0.9
+A15,abstain,lookup,,,team_lead,,0.9
+A16,abstain,lookup,Meridian Shared Services,,team_lead,,0.9
+A17,abstain,out_of_scope,,,hr_admin,general_knowledge,0.9
+A18,abstain,out_of_scope,Arvana Infra Projects,,team_lead,general_knowledge,0.55
+A19,abstain,out_of_scope,,,team_lead,general_knowledge,0.95
+A20,abstain,out_of_scope,Arvana Group,,ap_controller,personal_data,0.9
