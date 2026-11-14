@@ -124,3 +124,13 @@ def test_format_invariance_scoring_helpers() -> None:
         == 1
     )
     assert fi.recovery(base, ["Something else entirely, nothing in common here."]) == 0
+
+
+def test_excluded_questions_file(tmp_path) -> None:
+    from evaluation import dataset
+
+    f = tmp_path / "excluded.csv"
+    f.write_text("question_id,note\nq017,owner\n,blank\nQ062,\n", encoding="utf-8")
+    assert dataset.excluded(f) == {"Q017": "owner", "Q062": ""}
+    assert dataset.excluded(tmp_path / "missing.csv") == {}
+    assert set(dataset.excluded()) >= {"Q017", "Q062"}  # the repo's own list

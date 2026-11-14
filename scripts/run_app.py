@@ -70,6 +70,12 @@ def ensure_database() -> None:
 
     say("run", "starting the embedded database...")
     dev_db.start()
+    # A fresh embedded database has no tables yet; bring it to the latest schema (a no-op when
+    # it is already current). Deployed databases (DATABASE_URL) are migrated deliberately.
+    from alembic import command
+    from alembic.config import Config
+
+    command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
     say("run", "database ready")
 
 
