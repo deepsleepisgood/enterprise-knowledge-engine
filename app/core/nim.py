@@ -115,7 +115,7 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
         retry_after: float | None = None
         with inflight():
             try:
-                with urllib.request.urlopen(req, timeout=s.nim_timeout_s) as r:
+                with urllib.request.urlopen(req, timeout=s.chat_timeout_s) as r:
                     return json.loads(r.read())
             except urllib.error.HTTPError as e:
                 detail = e.read().decode("utf-8", "replace")[:300]
@@ -142,8 +142,40 @@ def _http_post(body: dict[str, Any]) -> dict[str, Any]:
     raise NimError(f"NIM request failed after retries: {last}")
 
 
+# Models that refused reasoning_effort="minimal" (newer ones may only take "none"/"low"):
+# later calls send "low" straight away.
+_NO_MINIMAL: set[str] = set()
+
+
 def chat(body: dict[str, Any]) -> dict[str, Any]:
-    return (_transport or _http_post)(body)
+    send = _transport or _http_post
+    if body.get("reasoning_effort") != "minimal":
+        return send(body)
+    try:
+        return send(body)
+    except NimError as e:
+        if "HTTP 400" not in str(e) or "reasoning" not in str(e).lower():
+            raise
+        _NO_MINIMAL.add(str(body.get("model")))
+        return send({**body, "reasoning_effort": "low"})
+
+
+def apply_reasoning_budget(body: dict[str, Any]) -> dict[str, Any]:
+    """OpenAI reasoning models count hidden thinking against max_completion_tokens. When the
+    caller wants thinking (no reasoning_effort set), raise the budget to the configured minimum
+    so the thinking can't crowd out the answer. With thinking turned down, keep the caller's
+    budget: a large one only lets a slow call run for minutes."""
+    s = get_settings()
+    if (
+        s.is_openai
+        and is_openai_reasoning(str(body.get("model", "")))
+        and "reasoning_effort" not in body
+        and "max_completion_tokens" in body
+    ):
+        body["max_completion_tokens"] = max(
+            body["max_completion_tokens"], s.openai_reasoning_min_tokens
+        )
+    return body
 
 
 _OPENAI_REASONING = re.compile(r"^(?:openai/)?(?:o\d|gpt-5)", re.I)
@@ -161,7 +193,10 @@ def thinking_options(off: bool, model: str = "") -> dict[str, Any]:
         # Other OpenAI models reject `reasoning_effort`; reasoning models keep their default
         # unless the caller wants thinking off.
         if off and is_openai_reasoning(model):
-            return {"reasoning_effort": s.openai_reasoning_effort_off}
+            effort = s.openai_reasoning_effort_off
+            if effort == "minimal" and model in _NO_MINIMAL:
+                effort = "low"
+            return {"reasoning_effort": effort}
         return {}
     if s.is_isoquant:
         return {"reasoning_effort": "none" if off else "low"}
@@ -192,9 +227,6 @@ def build_body(
         body["max_completion_tokens"] = body.pop("max_tokens")
         if is_openai_reasoning(model):
             body.pop("temperature")
-            body["max_completion_tokens"] = max(
-                body["max_completion_tokens"], get_settings().openai_reasoning_min_tokens
-            )
     return body
 
 

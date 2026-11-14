@@ -92,7 +92,7 @@ def test_reasoning_model_budget_has_a_floor(setup) -> None:
 def test_thinking_off_sets_reasoning_effort_on_reasoning_models(setup) -> None:
     fake = _use(FakeTransport(["ok"]))
     llm.complete("hi", thinking=False)
-    assert fake.bodies[0]["reasoning_effort"] == "low"
+    assert fake.bodies[0]["reasoning_effort"] == "minimal"
 
 
 def test_effort_is_not_sent_in_anthropic_shape(setup) -> None:
@@ -122,3 +122,72 @@ def test_model_prices_from_env(setup, monkeypatch) -> None:
 )
 def test_reasoning_model_detection(model: str, reasoning: bool) -> None:
     assert nim.is_openai_reasoning(model) is reasoning
+
+
+def test_thinking_off_keeps_the_callers_budget(setup) -> None:
+    fake = _use(FakeTransport(["ok"]))
+    llm.complete("short", thinking=False, max_tokens=2048)
+    assert fake.bodies[0]["max_completion_tokens"] == 2048  # no 16k floor: a stuck call ends sooner
+
+
+class RefuseMinimal(FakeTransport):
+    def __call__(self, body: dict[str, Any]) -> dict[str, Any]:
+        if body.get("reasoning_effort") == "minimal":
+            self.bodies.append(body)
+            raise nim.NimError(
+                "NIM HTTP 400: Unsupported value: 'reasoning_effort' does not support 'minimal'"
+            )
+        return super().__call__(body)
+
+
+def test_minimal_refused_falls_back_to_low_and_is_remembered(setup, monkeypatch) -> None:
+    monkeypatch.setattr(nim, "_NO_MINIMAL", set())
+    fake = _use(RefuseMinimal(["ok", "ok"]))
+    assert llm.complete("one", thinking=False).text == "ok"
+    assert [b.get("reasoning_effort") for b in fake.bodies] == ["minimal", "low"]
+    llm.complete("two", thinking=False)
+    assert fake.bodies[-1]["reasoning_effort"] == "low"  # no second refused call
+
+
+def test_other_errors_are_not_swallowed(setup) -> None:
+    class Broken(FakeTransport):
+        def __call__(self, body: dict[str, Any]) -> dict[str, Any]:
+            raise nim.NimError("NIM HTTP 401: invalid key")
+
+    _use(Broken([]))
+    with pytest.raises(Exception, match="401"):
+        llm.complete("x", thinking=False)
+
+
+def test_openai_timeout_is_shorter(setup) -> None:
+    assert setup.chat_timeout_s == setup.openai_timeout_s == 120
+
+
+def test_empty_path_settings_mean_default(monkeypatch) -> None:
+    from app.core.config import ROOT, Settings
+
+    monkeypatch.setenv("BLOB_DIR", "")
+    monkeypatch.setenv("CACHE_DIR", "  ")
+    s = Settings()
+    assert s.blob_dir == ROOT / "data" / "blobs"
+    assert s.cache_dir == ROOT / ".cache" / "llm"
+    monkeypatch.setenv("BLOB_DIR", "/data/blobs")
+    assert str(Settings().blob_dir) == "/data/blobs"
+
+
+def test_judge_model_setting(setup, monkeypatch) -> None:
+    from evaluation import judge
+
+    seen: dict[str, Any] = {}
+
+    def fake_structured(prompt: str, schema: Any, **kw: Any) -> Any:
+        seen.update(kw)
+        return schema(verdict="correct", reason="ok")
+
+    card = {"status": "answered", "rule": {"text": "x"}}
+    monkeypatch.setattr(setup, "judge_model", "gpt-5")
+    judge.judge("q", "gold", "factual", card, fake_structured)
+    assert seen["model"] == "gpt-5"
+    monkeypatch.setattr(setup, "judge_model", "")
+    judge.judge("q", "gold", "factual", card, fake_structured)
+    assert seen["model"] == "smart"

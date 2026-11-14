@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,7 +32,8 @@ class Settings(BaseSettings):
     openai_max_concurrent: int = 8
     # Reasoning models (o-series, gpt-5*) take no temperature; this effort is sent when a call
     # asks for thinking off. "low" is accepted by every reasoning model.
-    openai_reasoning_effort_off: str = "low"
+    openai_reasoning_effort_off: str = "minimal"  # falls back to "low" if a model refuses it
+    openai_timeout_s: float = 120  # a stuck call fails fast instead of holding a transaction
     # Reasoning models spend part of max_completion_tokens on hidden thinking, so a budget sized
     # for the visible answer runs out. Their budget is raised to at least this. It is a cap,
     # not a charge: only tokens actually generated are billed.
@@ -96,6 +98,17 @@ class Settings(BaseSettings):
     plugins_dir: Path = ROOT / "plugins"
     log_dir: Path = ROOT / "logs"
     cache_dir: Path = ROOT / ".cache" / "llm"
+    # Model that grades evaluation answers; empty = MODEL_SMART. Fix it when comparing runs
+    # that use different answer models, so the grading stays the same.
+    judge_model: str = ""
+
+    @field_validator("data_dir", "blob_dir", "log_dir", "cache_dir", mode="before")
+    @classmethod
+    def _empty_path_is_default(cls, v: object, info: object) -> object:
+        """`BLOB_DIR=` (empty) in .env means "use the default", not the current folder."""
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return cls.model_fields[info.field_name].default  # type: ignore[attr-defined]
+        return v
 
     @property
     def llm_configured(self) -> bool:
@@ -112,6 +125,10 @@ class Settings(BaseSettings):
     def chat_base_url(self) -> str:
         """The OpenAI-compatible endpoint for the selected provider."""
         return self.openai_base_url if self.is_openai else self.nim_base_url
+
+    @property
+    def chat_timeout_s(self) -> float:
+        return self.openai_timeout_s if self.is_openai else self.nim_timeout_s
 
     @property
     def chat_max_rpm(self) -> int:

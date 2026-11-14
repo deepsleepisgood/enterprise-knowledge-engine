@@ -9,6 +9,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from app.core.config import get_settings
+
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT = ROOT / "eval" / "judge" / "prompt.md"
 HAND = ROOT / "eval" / "judge" / "hand_graded.csv"
@@ -66,7 +68,7 @@ def judge(
         prompt,
         Verdict,
         system=PROMPT.read_text(encoding="utf-8"),
-        model="smart",
+        model=get_settings().judge_model or "smart",
         prompt_version=PROMPT_VERSION,
         max_tokens=2048,
     )

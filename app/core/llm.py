@@ -309,6 +309,7 @@ def _nim_complete(req: dict[str, Any]) -> tuple[Any, Any]:
         json_mode=False,
     )
     body.update(nim.thinking_options(bool(req.get("thinking_off")), req["model"]))
+    nim.apply_reasoning_budget(body)
     resp = nim.chat(body)
     text, finish = nim.message_text(resp)
     if finish == "length":
@@ -336,6 +337,7 @@ def _nim_structured(req: dict[str, Any], schema: type[BaseModel]) -> tuple[Any, 
             json_mode=True,
         )
         body.update(nim.thinking_options(bool(req.get("thinking_off")), req["model"]))
+        nim.apply_reasoning_budget(body)
         resp = nim.chat(body)
         i, o = nim.usage(resp)
         in_tok, out_tok = in_tok + i, out_tok + o
