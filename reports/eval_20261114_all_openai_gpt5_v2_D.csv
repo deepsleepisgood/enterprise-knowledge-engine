@@ -1,0 +1,1083 @@
+id,split,type,difficulty,question,gold,config,status,route,latency_s,error,answer_text,verified,cite_strict,cite_lenient,outdated,has_must_not_say,verdict,correct,judge_reason,cause,calls,cached,input_tokens,output_tokens,cost_usd
+Q001,dev,conflict,easy,What is the price tolerance for an invoice line where the unit price is higher than the PO?,The excess on the line must be no more than the lower of 1% of the PO line value and ₹500.,D,answered,lookup,20.33,,"Status: answered
+Answer: The price tolerance for a line where the invoice unit price is higher than the PO is the lower of 1% of the PO line value and ₹500 per line. [1] A line that exceeds this tolerance must be held with exception PRICE_VAR and sent to the buyer who raised the PO to either amend the PO or obtain a credit note. [1][2] PRICE_VAR is owned by the PO buyer and must be resolved within 3 working days. [2]
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,The answer states the correct tolerance (lower of 1% of PO line value and ₹500) and includes the required practice/escalation details without contradiction.,,4,0,5020,835,0.01037
+Q002,holdout,conflict,easy,Is there a quantity tolerance when the invoice quantity is above the GRN?,"No, except the Arvana Infra bulk-material tolerance in client memo CM-INF-02.",D,answered,lookup,20.22,,"Status: answered
+Decision: No tolerance
+Answer: No, there is no quantity tolerance when the invoice quantity is above the GRN quantity, except for the Arvana Infra Projects memo CM-INF-02. [1][2] The rule states ""Invoice quantity must not exceed the GRN quantity"" and that there is ""no quantity tolerance for any client, except the bulk-material tolerance agreed with Arvana Infra Projects in Client Memo CM-INF-02"". [1] If the invoice quantity is above the GRN, raise the exception code QTY_VAR, owned by the Requester with a target to resolve in 3 working days. [3]
+Older sources (superseded): client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55]); 2% (AP SOP v3.1)",True,True,True,False,True,correct,True,The answer states there is no tolerance except the Arvana Infra bulk-material tolerance per CM-INF-02 and adds consistent escalation details without contradicting the gold answer.,,4,0,4914,682,0.01012
+Q003,dev,conflict,easy,How much rounding difference is accepted automatically?,Up to ₹10 at invoice-total level.,D,answered,lookup,24.05,,"Status: answered
+Answer: Up to ₹10 of rounding difference at invoice-total level is auto-accepted when it is caused by line-level tax rounding, and it is posted to the rounding-difference account. [1] Anything above ₹10 is treated as a mismatch. [1] This is the current SOP v4.0 rule. [2]
+Older sources (superseded): ₹50 (AP SOP v3.1)",True,True,True,False,True,partial,False,"It correctly states the ₹10 at invoice-total level auto-acceptance, but adds extra conditions and procedural details not present in the gold answer. Missing: ['Condition that it must be due to line-level tax rounding is not stated in gold answer', 'Posting to rounding-difference account is not in gold answer', 'Treatment above ₹10 as mismatch is not in gold answer', 'Reference to SOP versions is not in gold answer']",generation,5,0,7019,1052,0.01596
+Q004,dev,conflict,easy,On which days are payment runs held?,Tuesday and Friday; cut-off 1 pm on the previous working day.,D,answered,lookup,13.52,,"Status: answered
+Answer: Payment runs are held on Tuesday and Friday. [1][2] AP SOP v4.0 states: Payment runs are on Tuesday and Friday. [1]
+Expert tip: Payment runs occur on Friday.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,partial,False,"It correctly states payment runs are on Tuesday and Friday, but omits the 1 pm previous working day cut-off noted in the gold answer. Missing: ['Cut-off is 1 pm on the previous working day']",generation,4,0,4895,543,0.00751
+Q005,dev,conflict,easy,What is the cut-off time for an invoice to be included in a payment run?,1 pm on the working day before the run.,D,answered,lookup,12.05,,"Status: answered
+Answer: The cut-off time is 1 pm on the previous working day for an invoice to be included in a payment run. [1] Payment runs are on Tuesday and Friday, and you should pay on the last payment run that falls on or before the due date and never pay early without Treasury approval. [1]
+Expert tip: Payment runs occur on Friday.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,partial,False,"It correctly gives the 1 pm previous working day cut-off and aligns with run days and payment timing guidance, but the expert tip omits Tuesday, missing a key fact present in the gold/practice details. Missing: ['State that runs are on Tuesday and Friday as standard (expert tip only mentions Friday)']",generation,4,0,4979,571,0.00886
+Q006,holdout,conflict,medium,Above what turnover must a supplier issue an e-invoice with an IRN?,Aggregate annual turnover above ₹5 crore in any financial year since 2017-18.,D,answered,lookup,15.16,,"Status: answered
+Answer: Above an aggregate annual turnover of ₹5 crore, a supplier must issue an e-invoice with an IRN and QR code. [1] AP SOP v4.0 §5.4 states that a supplier whose AATO has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code. [1] If such a supplier sends an invoice without an IRN, return it as IRN_MISSING and do not pay the base value until a valid e-invoice is received, with the Supplier owning the exception until resolution. [1][2]
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,True,correct,True,The answer states the correct ₹5 crore aggregate annual turnover threshold and adds consistent procedural details without contradicting the gold answer.,,4,0,5172,922,0.01094
+Q007,dev,conflict,medium,Which GST return is used to decide whether input tax credit can be claimed?,"GSTR-2B, generated on the 14th of the following month.",D,answered,lookup,14.01,,"Status: answered
+Answer: Input tax credit is decided using the client's GSTR-2B. [1] Input tax credit is claimed only for invoices that appear in the client's GSTR-2B, which is generated on the 14th of the following month. [1]
+Expert tip: Input Tax Credit verification uses GSTR-2B (changed from GSTR-2A).
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); GSTR-2A (AP SOP v3.1 §4)",True,True,True,False,True,correct,True,"The answer correctly states GSTR-2B and that it is generated on the 14th of the following month, matching the gold answer and adding no contradictions.",,4,0,4814,820,0.00881
+Q008,dev,conflict,medium,An invoice is not in GSTR-2B by the 14th of the next month. What do I pay?,Pay the base value on the due date and hold the GST amount until the invoice appears; escalate as NOT_IN_2B after two further cycles.,D,answered,lookup,13.91,,"Status: answered
+Answer: Pay only the base value on the due date and hold the GST amount because the invoice is not in GSTR-2B by the 14th of the next month. [1] This follows the rule that input tax credit is claimed only for invoices that appear in the client's GSTR-2B, which is generated on the 14th of the following month, and if an invoice does not appear by then, pay the base value on the due date and hold the GST amount until it appears. [1] If it remains missing after two further GSTR-2B cycles, raise NOT_IN_2B to the vendor relationship owner. [1][2] Exception: if the supplier is required to issue an e-invoice and the invoice lacks an IRN, return it as IRN_MISSING and do not pay the base value either because a valid invoice will follow. [3]
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); ₹10 crore (AP SOP v3.1 §4)",True,True,True,False,True,correct,True,"The answer states to pay base value on due date, hold GST until it appears in 2B, and escalate as NOT_IN_2B after two further cycles, matching the gold without contradiction; extra valid exception detail does not conflict.",,4,0,5028,1048,0.01322
+Q009,holdout,conflict,easy,Who approves an invoice of ₹30 lakh including GST?,The AP Controller (above ₹10 lakh up to ₹50 lakh).,D,answered,calculator:ap.approvals,17.41,,"Status: answered
+Decision: AP Controller + Budget owner
+Answer: AP Controller and the Budget owner must approve a ₹30,00,000 non‑PO invoice before posting. [1] The rule is that invoices above ₹10 lakh up to ₹50 lakh require AP Controller approval, and any non‑PO invoice also requires Budget owner approval. [1] Such invoices park automatically for AP Controller approval after posting checks, so expect it to route there. [2] During verification, open the GST tab and confirm the buyer GSTIN before proceeding. [3]
+  Invoice total (incl. GST): ₹30,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: No
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,True,partial,False,"It correctly states AP Controller approval for ₹10–50 lakh but adds Budget owner approval for a non‑PO invoice, which is an extra condition not present in the gold answer. Missing: ['No mention that only AP Controller approval is required; inclusion of Budget owner is not in gold']",generation,4,0,5346,958,0.01103
+Q010,dev,conflict,easy,Who approves an invoice of ₹75 lakh?,"The client CFO, through the approval workflow.",D,answered,calculator:ap.approvals,15.51,,"Status: answered
+Decision: Client CFO + Budget owner
+Answer: For an invoice of ₹75,00,000 that is non-PO, approval is by the Client CFO and also the budget owner in the workflow. [1][2] The rule is that invoices with total above ₹50 lakh require Client CFO approval through the approval workflow before posting, and any non-PO invoice needs the budget owner's approval in addition to the above. [1][2]
+  Invoice total (incl. GST): ₹75,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: No
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,True,wrong,False,"The gold answer says only the Client CFO approves via the workflow; the graded answer adds a budget owner and extra rules, contradicting the gold.",generation,4,0,5335,804,0.00991
+Q011,dev,factual,medium,Does a non-PO rent invoice need any approval?,"Yes. Any non-PO invoice needs the budget owner's approval, in addition to the amount-based approval.",D,answered,lookup,15.31,,"Status: answered
+Answer: Yes: a non-PO rent invoice requires the budget owner's approval in the workflow. [1][2] Under SOP 4.5, rent may be processed without a PO as it is listed among the allowed non-PO categories. [1] Approvals by amount still apply, with no approval beyond a clean match for invoices up to ₹10 lakh, and the budget owner approval is in addition to the applicable threshold approvals. [2]
+Older sources (superseded): courier (Part F); ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",True,True,True,False,False,partial,False,"It correctly states that non-PO rent invoices need budget owner approval and that amount-based approvals still apply, but it introduces an extraneous ₹10 lakh clean-match rule that could conflict with the unconditional requirement for budget owner approval. Missing: ['Clarify explicitly that the amount-based approval applies in addition to the budget owner approval (stated, but could be clearer that both are required regardless of amount)']",generation,4,0,5242,940,0.01122
+Q012,dev,conflict,medium,Can a courier invoice be processed without a PO?,No. Since SOP v4.0 courier and travel-agency invoices need a PO.,D,answered,lookup,15.58,,"Status: answered
+Decision: Not allowed without PO
+Answer: No: a courier invoice cannot be processed without a PO under SOP 4.5. [1][2] The rule says only electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums may be processed without a PO, and every other invoice needs a PO. [1] Courier invoices, which were non-PO under version 3.1, now need a PO, so a non-PO courier invoice should be held as NON_PO_NOT_ALLOWED. [1][3][2]
+Older sources (superseded): courier (Part F); utilities, rent, statutory payments, insurance, courier services, travel agency invoices (AP SOP v3.1)",True,True,True,False,True,partial,False,"It correctly states courier invoices require a PO now, but omits that travel-agency invoices also require a PO per the gold answer. Missing: ['Travel-agency invoices also need a PO since SOP v4.0']",generation,4,0,5150,870,0.01117
+Q013,holdout,conflict,easy,Which categories may be processed without a PO?,"Utilities (electricity, water, telecom), store and office rent under a registered lease, statutory payments and government fees, and insurance premiums.",D,answered,lookup,9.93,,"Status: answered
+Answer: The categories that may be processed without a PO are electricity, water and telecom utilities; store and office rent under a registered lease; statutory payments and government fees; and insurance premiums. [1] Every other invoice needs a PO. [1] A non-PO invoice of any amount needs the budget owner's approval in the workflow. [1]
+Older sources (superseded): courier (Part F); utilities, rent, statutory payments, insurance, courier services, travel agency invoices (AP SOP v3.1)",True,True,True,False,True,correct,True,The answer lists exactly the four allowed non-PO categories matching the gold answer and adds no conflicting information.,,3,0,4275,492,0.00872
+Q014,dev,procedural,medium,A goods invoice has no GRN. What should I do?,"Hold it as NO_GRN; the system notifies the requester, reminds after two working days and escalates to the requester's manager after five. Never post without a GRN.",D,answered,lookup,16.52,,"Status: answered
+Answer: Hold the goods invoice as NO_GRN and let the system notify the requester automatically. [1] Do not post a goods invoice against a purchase order without a GRN under any circumstances. [1] The requester is the owner responsible for resolving NO_GRN, with a target resolution time of 5 working days. [2] The system sends a reminder after two working days and escalates to the requester's manager after five working days. [1] When a GRN becomes available, enter or confirm the PO number so the system pulls PO lines and open GRNs, then select the GRN lines the invoice covers. [3]
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1)",True,True,True,False,False,partial,False,"Includes hold as NO_GRN, automatic notification, 2-day reminder, 5-day escalation, and never post without GRN, but adds an unsupported 5-day target resolution ownership detail not in the gold answer. Missing: ['State that the system notifies the requester (already included) and that escalation happens after five days (included), but missing: no additional target resolution time beyond escalation is specified in gold']",generation,4,0,5224,1194,0.01307
+Q015,holdout,conflict,medium,How is a duplicate invoice detected?,"Same supplier GSTIN and normalised invoice number (spaces, slashes, hyphens, leading zeros and /A, /R or -REV suffixes removed), or same supplier, invoice date and total within ₹1.",D,answered,lookup,16.8,,"Status: answered
+Answer: A duplicate is detected by running the Duplicate Check, which compares each invoice against invoices received in the last 18 months for the same supplier. [1][2] The system normalises invoice numbers by removing spaces, slashes, hyphens, leading zeros, and dropping a trailing suffix of /A, /R or -REV before comparison. [2] Two invoices are flagged as suspected duplicates if either the supplier GSTIN and normalised invoice number match, or the supplier, invoice date, and total amount match within ₹1. [2] If the system shows an amber flag you must stop and raise DUP_SUSPECT, routing it to the exception queue where it is never posted until a Senior Processor clears it. [1][2]
+Expert tip: Duplicate invoices must be sent to DUP_SUSPECT with a note and not overridden.
+Older sources (superseded): reject the new invoice as a duplicate (AP SOP v3.1 §2); stop and raise DUP_SUSPECT; do not override (DI-03 Part A, step 2); stop_and_raise_DUP_SUSPECT (Video 1 [02:10])",True,True,True,False,True,correct,True,"The answer correctly states both detection rules (GSTIN + normalized invoice number; or same supplier, invoice date, and total within ₹1) and matches the specified normalization details, without contradictions.",,4,0,5693,1285,0.01341
+Q016,dev,procedural,easy,Who clears a suspected duplicate?,"A Senior Processor, before the invoice can be posted.",D,answered,lookup,9.11,,"Status: answered
+Answer: A suspected duplicate is cleared by a Senior Processor. [1][2] Suspected duplicates go to the exception queue as DUP_SUSPECT and are never posted until a Senior Processor clears them. [1] If the system shows an amber flag, stop and raise DUP_SUSPECT; do not override, and DUP_SUSPECT always goes to a Senior Processor. [3][4]
+Expert tip: Duplicate invoices must be sent to DUP_SUSPECT with a note and not overridden.
+Older sources (superseded): reject the new invoice as a duplicate (AP SOP v3.1 §2); stop and raise DUP_SUSPECT; do not override (DI-03 Part A, step 2); stop_and_raise_DUP_SUSPECT (Video 1 [02:10]); ₹1 crore (AP SOP v3.1 §6)",True,True,True,False,False,correct,True,The answer correctly states that a Senior Processor clears suspected duplicates and adds consistent procedural details without contradicting the gold answer.,,3,0,4190,521,0.0089
+Q018,dev,procedural,medium,A bank change request asks me to call a mobile number to verify. What do I do?,"Do not call it. Call the number already in the vendor master, log the request as suspicious and tell the AP Controller.",D,answered,lookup,14.36,,"Status: answered
+Answer: Do not call the mobile number in the request; log it as suspicious and tell the AP Controller if the request gives a different phone number or asks you to call someone else. [1] Call the supplier using the phone number already held in the vendor master and confirm the change with a named person, asking for the authorised signatory and confirming the old and new account numbers' last four digits. [2][3] Verify the paperwork first: the request must be on letterhead, signed by an authorised signatory, and include a cancelled cheque for the new account. [4][5] Record the call details in the change ticket, then send for approval to the Vendor Master lead and then the AP Controller. [6][7][8] No payment is made to the new account until 24 hours after approval, and the ERP blocks payments for 24 hours after the second approval; do not ask IT to lift the block. [9][10] Do not make bank changes in the three working days before month-end close. [11]
+Expert tip: A verification call to the supplier's phone number in the vendor master is required when a bank account change request is received.
+Older sources (superseded): Vendor Master lead (AP SOP v3.1 §7)",True,True,True,False,False,partial,False,"Includes the core actions (don’t call the number in the request; call the vendor-master number; log as suspicious; inform AP Controller) but adds non-required steps and conditions and nuances the “suspicious” logging to only when a different number is given. Missing: ['Explicitly state to log the request as suspicious regardless, not only if a different number is provided', 'Immediate notification to the AP Controller (without adding extra routing/approvals)']",generation,4,0,4751,1301,0.0158
+Q019,dev,conflict,medium,When can a new bank account first be used for payment?,Not until 24 hours after the second approval.,D,answered,lookup,11.7,,"Status: answered
+Answer: You can first use the new bank account for payment 24 hours after the approval cycle is completed. [1][2] The rule is that ""No payment is made to the new account until 24 hours after approval,"" and specifically the ERP ""blocks payments to the new account for 24 hours after the second approval."" [1][2] Do not ask IT to lift the block. [2]
+Expert tip: A verification call to the supplier's phone number in the vendor master is required when a bank account change request is received.",True,True,True,False,True,correct,True,The answer states the 24-hour wait after the second approval and includes the practice note not to lift the block; it does not contradict the gold answer.,,4,0,4563,660,0.00857
+Q020,holdout,factual,medium,Can bank details be changed just before month-end?,No. Bank changes are frozen for the three working days before month-end close.,D,answered,lookup,11.09,,"Status: answered
+Decision: Not allowed in the last three working days
+Answer: No: bank details cannot be changed in the three working days before month-end close. [1][2] The rule is that the vendor master is frozen for bank changes for the three working days before close. [2]
+Expert tip: If a bank account change request provides a different phone number for verification, the processor must not call that number but must call the number in the vendor master.
+Older sources (superseded): GRNs not invoiced are accrued. (AP SOP v3.1 §10); The Team Lead reviews open exceptions before close. (AP SOP v3.1 §10); Invoices received up to the second-last working day of the month are posted in that month. (AP SOP v3.1 §10)",True,True,True,False,False,correct,True,The answer matches the gold: it clearly states bank details cannot be changed in the three working days before month-end close and adds a consistent expert tip without contradiction.,,4,0,4582,502,0.00771
+Q021,holdout,conflict,medium,What is the maximum payment term for a micro or small enterprise supplier?,"The agreed term, never more than 45 days from acceptance; 15 days if there is no written agreement.",D,answered,lookup,15.86,,"Status: answered
+Answer: The maximum payment term for a micro or small enterprise supplier is 45 days from the day of acceptance when there is a written agreement. [1][2] If there is no written agreement on terms, pay within 15 days from acceptance. [1][2] Medium enterprises follow normal terms and are not subject to the 45-day cap. [1]
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,Includes both conditions: up to 45 days when agreed in writing and 15 days if no written agreement; no contradictions to the gold answer.,,4,0,5186,773,0.00982
+Q022,holdout,factual,medium,Do the MSME payment limits apply to medium enterprises?,No. Only micro and small enterprises; medium enterprises follow normal terms.,D,answered,lookup,13.52,,"Status: answered
+Answer: No, the MSME payment limits do not apply to medium enterprises; medium enterprises follow normal terms. [1] The rule says: ""Medium enterprises follow normal terms"" and for non‑MSME suppliers the default is ""60 days from invoice acceptance, unless the PO says otherwise."" [1]
+Expert tip: Payment runs occur on Friday.
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,partial,False,"It correctly states that MSME payment limits do not apply to medium enterprises and that they follow normal terms, but adds an extra rule about non‑MSME payment terms not present in the gold answer. Missing: ['Answer should not introduce non-MSME supplier default terms (""60 days from invoice acceptance, unless the PO says otherwise"") which are not in the gold answer']",generation,4,0,5029,584,0.00879
+Q023,dev,factual,easy,What are the default payment terms for non-MSME suppliers?,60 days from invoice acceptance unless the PO says otherwise.,D,answered,lookup,11.62,,"Status: answered
+Answer: Default payment terms for suppliers that are not micro or small enterprises are 60 days from invoice acceptance, unless the PO says otherwise. [1] Payment runs are on Tuesday and Friday, and the cut-off for an invoice to be included is 1 pm on the previous working day. [1] Pay on the last payment run that falls on or before the due date and never pay early without Treasury approval. [1]
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"The answer correctly states the default terms as 60 days from invoice acceptance unless the PO says otherwise, matching the gold answer without contradiction; extra operational details do not conflict.",,3,0,4298,540,0.00922
+Q024,holdout,factual,easy,Is TDS calculated on the amount including GST?,No. On the taxable value excluding GST where GST is shown separately.,D,answered,lookup,25.89,,"Status: answered
+Answer: No: when GST is shown separately on the invoice, TDS is calculated on the taxable value excluding GST. [1] The rule states, ""TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice,"" and the section and rate come from the nature of the payment. [1] If the supplier has not furnished a valid PAN, deduct TDS at 20% or the applicable rate, whichever is higher. [1] When a contract is mixed or unclear, raise TDS_SECTION_UNCLEAR, and the Tax Desk decides GST and TDS treatment for cases this SOP sends to them under that code. [1][2]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,The answer correctly states TDS is calculated on the taxable value excluding GST when GST is shown separately and does not contradict the gold; added details do not conflict.,,6,0,8562,1853,0.02103
+Q025,holdout,factual,easy,What TDS rate applies to professional fees such as legal or audit?,10% under section 194J.,D,answered,lookup,13.26,,"Status: answered
+Answer: For professional fees such as legal or audit, deduct TDS at 10% under section 194J. [1] The section and rate come from the nature of the payment, not from the supplier's description. [2] Calculate TDS on the taxable value excluding GST wherever GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,The answer states the key fact: 10% under section 194J; additional correct context does not contradict the gold answer.,,4,0,4736,701,0.01003
+Q026,dev,factual,easy,What TDS rate applies to fees for technical services?,2% under section 194J.,D,answered,lookup,14.79,,"Status: answered
+Decision: 2% under section 194J
+Answer: The TDS rate for fees for technical services (not professional), including software support, is 2% under section 194J. [1] Use the section and rate based on the nature of the payment, not the supplier’s description, and compute TDS on the taxable value excluding GST when GST is shown separately. [2] For AMCs that are mainly technical or software support, apply section 194J at 2%, but if the contract is mixed or unclear, raise TDS_SECTION_UNCLEAR to the Tax Desk instead of guessing. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,The answer correctly states the TDS rate as 2% under section 194J and adds no contradictions; extra details are consistent and acceptable.,,4,0,5058,975,0.01182
+Q027,dev,factual,easy,What TDS rate applies to rent of a building?,10% under section 194I.,D,answered,lookup,11.85,,"Status: answered
+Answer: The TDS rate for rent of a building is 10% under section 194I. [1] AP SOP v4.0 §6 lists ""Rent of land, building or furniture"" under section 194I at a rate of 10%. [1]",True,True,True,False,False,correct,True,"The answer states the exact TDS rate (10%) and the correct section (194I), matching the gold answer without contradiction.",,4,0,4588,542,0.00753
+Q028,holdout,factual,easy,What TDS rate applies to rent of machinery?,2% under section 194I.,D,answered,lookup,13.43,,"Status: answered
+Decision: TDS 2% under 194I
+Answer: For rent of machinery, deduct TDS under section 194I at 2%. [1] The rule is that rent of plant, machinery or equipment falls under section 194I at the rate of 2%. [1] The section and rate are determined by the nature of the payment, not by the supplier's description. [2]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,"The answer correctly states that rent of machinery attracts TDS at 2% under section 194I, matching the gold answer without contradictions.",,4,0,4840,630,0.00886
+Q029,dev,factual,medium,What TDS applies to purchases of goods?,"0.1% under section 194Q on purchases from a supplier above ₹50 lakh in the financial year, on the excess.",D,answered,lookup,14.39,,"Status: answered
+Answer: For purchases of goods, apply TDS under section 194Q at 0.1% on the amount exceeding ₹50 lakh in the financial year per supplier. [1] The rule is: ""Purchase of goods, once purchases from the supplier exceed ₹50 lakh in the financial year (on the excess) | 194Q | 0.1%."" [1] When posting a goods invoice, open the TDS tab, use the vendor master’s suggested section, and check it against the invoice’s nature; if they disagree, raise TDS_SECTION_UNCLEAR. [2]
+Older sources (superseded): ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6); send it to Tax Desk (Video 2 [13:30])",True,True,True,False,False,correct,True,The answer correctly states 0.1% under section 194Q on the amount exceeding ₹50 lakh per supplier in the financial year and adds non-contradictory escalation guidance.,,4,0,4631,922,0.0102
+Q030,dev,factual,medium,What if the supplier has not given a PAN?,"Deduct TDS at 20% or the applicable rate, whichever is higher.",D,answered,lookup,13.34,,"Status: answered
+Answer: Deduct TDS at 20% or the applicable rate, whichever is higher when the supplier has not furnished a valid PAN. [1] Apply TDS on the taxable value excluding GST wherever GST is shown separately on the invoice. [1] Do not disclose any PAN details outside the Vendor Master team and AP Controllers. [2]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,partial,False,"It correctly states the core rule (deduct TDS at 20% or the applicable rate, whichever is higher) but adds extra procedural details not in the gold; no contradictions to the gold content. Missing: ['None']",generation,4,0,4950,637,0.00955
+Q031,holdout,procedural,medium,How do I apply a lower-deduction certificate?,"Only within its validity dates and up to its amount limit, as held in the vendor master.",D,answered,lookup,13.16,,"Status: answered
+Answer: Apply the lower-deduction certificate only within its validity dates and only up to its amount limit, and check both in the vendor master before deducting TDS at the reduced rate. [1] The rule is: ""A lower-deduction certificate under section 197 is applied only within its validity dates and up to its amount limit, both of which are held in the vendor master."" [1]
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,"The answer states both key facts—apply only within validity dates and up to the amount limit—and notes these are held in the vendor master, matching the gold answer without contradiction.",,4,0,5265,586,0.00889
+Q032,dev,tacit,hard,Which TDS section applies to a lift maintenance AMC?,"Usually 194C because it is mostly technicians and parts, but it is the Tax Desk's decision: raise TDS_SECTION_UNCLEAR rather than guessing.",D,answered,lookup,15.68,,"Status: answered
+Answer: For a lift maintenance AMC, apply section 194C if it is mainly manpower and repairs, and raise TDS_SECTION_UNCLEAR to the Tax Desk if the contract is mixed or unclear. [1] The rule is that AMCs are classified by what is mostly supplied: mainly manpower and repairs is 194C, and mainly technical or software support is 194J at 2%. [1] Determine the section by the nature of the payment, not by the supplier's description. [1]
+Expert tip: Tax Desk usually classifies lift maintenance AMC under TDS section 194C as it involves technicians and parts.
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,True,True,correct,True,"Answer includes both the usual treatment (194C for lift AMCs with technicians and parts) and the tacit step to raise TDS_SECTION_UNCLEAR to Tax Desk rather than guessing, with no contradictions.",,4,0,5259,766,0.01031
+Q033,holdout,tacit,hard,Which TDS section applies to an ERP software support AMC?,194J at 2% (technical or software support).,D,answered,lookup,15.56,,"Status: answered
+Answer: For an ERP software support AMC, apply section 194J at 2% because it is mainly technical or software support. [1][2] The rule is that AMCs are classified by what is mostly supplied, and mainly technical or software support is 194J at 2%. [1] Determine the section by the nature of the payment, not by the supplier’s description. [1]
+Expert tip: When the TDS section for lift AMC is unclear, the processor raises a TDS_SECTION_UNCLEAR exception without changing the vendor master suggestion.
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,partial,False,"States the correct section (194J) and rate (2%) with proper rationale and includes general practice notes, but the expert tip provided is about lift AMC, not the tacit step relevant to this ERP software support AMC query. Missing: ['Tacit escalation/practice specific to ERP software support AMC, if any']",generation,4,0,5294,765,0.01013
+Q034,dev,tacit,hard,How is a CCTV maintenance contract with remote monitoring classified for TDS?,It is a mixed case decided by the Tax Desk case by case; raise TDS_SECTION_UNCLEAR.,D,needs_specialist,lookup,15.02,,"Status: needs_specialist
+Answer: Do not classify it yourself: raise TDS_SECTION_UNCLEAR to the Tax Desk for a case-by-case decision because CCTV maintenance with remote monitoring is a mixed AMC. [1][2] The rule is that AMCs are classified by what is mostly supplied, with mainly manpower and repairs under 194C and mainly technical or software support under 194J at 2%, and when a contract is mixed or unclear we must raise TDS_SECTION_UNCLEAR and not guess. [1] In practice, the mixed ones are security systems, and CCTV maintenance with remote monitoring is decided case by case by the Tax Desk. [2]
+Expert tip: The Tax Desk classifies lift/HVAC/DG set maintenance AMCs under section 194C, software/ERP/network monitoring AMCs under section 194J at 2%, and security system AMCs on a case-by-case basis.
+Route to: Tax Desk
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,"The answer states that CCTV maintenance with remote monitoring is a mixed case and must be raised to the Tax Desk under TDS_SECTION_UNCLEAR for case-by-case decision, matching the gold answer without contradictions.",,4,0,5625,863,0.01089
+Q035,dev,procedural,medium,A legal fee invoice from an advocate shows no GST. Is the invoice wrong?,No. Legal services from advocates are under reverse charge; flag RCM_REVIEW and send to the Tax Desk.,D,answered,lookup,18.95,,"Status: answered
+Answer: No, a legal fee invoice from an advocate showing no GST is not wrong because legal services from an advocate are under reverse charge. [1][2] Under the rule, services on which the buyer pays GST under reverse charge — for example legal services from an advocate or a firm of advocates — are flagged RCM_REVIEW and routed to the Tax Desk before posting. [1] In practice, the invoice won't show GST and new processors think the supplier forgot the tax, but they didn't; send it to us. [2] Do not correct supplier invoices by hand, and if any mandatory field like supplier and buyer GSTINs, invoice number and date, HSN/SAC, taxable value, tax rate and amount, place of supply, or required IRN/QR is missing, return it as INV_INCOMPLETE. [3] If the supplier is required to issue an e-invoice and the invoice lacks an IRN, return it as IRN_MISSING and do not pay the base value. [4]
+Expert tip: Legal fees from advocates are always subject to reverse charge mechanism (RCM) and the invoice will not show GST.
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,False,correct,True,"The answer states that advocate legal services are under reverse charge and instructs to flag RCM_REVIEW and route to the Tax Desk, matching the gold answer without contradictions.",,4,0,5474,1301,0.01459
+Q036,holdout,procedural,medium,The supplier's GSTIN is cancelled. What do I pay?,"Nothing, including the base value; hold as GSTIN_INACTIVE and inform the Tax Desk.",D,answered,lookup,16.09,,"Status: answered
+Decision: Pay nothing
+Answer: Pay nothing, including the base value, and hold the invoice as GSTIN_INACTIVE while informing the Tax Desk. [1] The rule is that the supplier GSTIN must be active on the GST portal on the invoice date, and if it is cancelled or suspended we make no payment until the Tax Desk decides. [1] Confirm the GSTIN status on the GST tab before proceeding. [2]
+Older sources (superseded): block payment until Tax Desk review (Video 2 [01:15]); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"The answer states to pay nothing including base, hold as GSTIN_INACTIVE, and inform the Tax Desk, matching the gold answer without contradictions.",,4,0,5037,830,0.00992
+Q037,dev,procedural,medium,The buyer GSTIN on the invoice is for the wrong state. What happens?,Hold as GSTIN_MISMATCH and return to the supplier for a corrected invoice (credit note and re-issue is acceptable).,D,answered,lookup,14.5,,"Status: answered
+Answer: If the buyer GSTIN is for the wrong state, hold the invoice as GSTIN_MISMATCH and return it to the supplier for a corrected invoice. [1][2] The rule is that the buyer GSTIN must be the client entity's registration in the state where the goods were delivered or the service was received. [1] The exception code GSTIN_MISMATCH means 'Wrong buyer GSTIN (5.2)', the owner is Supplier, and the target to resolve is until corrected invoice. [2] Confirm the buyer GSTIN on the GST tab when checking the invoice. [3]
+Older sources (superseded): active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,partial,False,"Mentions holding as GSTIN_MISMATCH and returning to supplier, but omits that a credit note and re-issue is an acceptable correction path. Missing: ['Credit note and re-issue is acceptable as a way to correct the invoice']",generation,4,0,5099,930,0.01118
+Q038,dev,procedural,easy,An inter-state supply is invoiced with CGST and SGST. What do I do?,Return it to the supplier as TAX_TYPE_WRONG; inter-state supplies carry IGST.,D,answered,lookup,14.06,,"Status: answered
+Answer: No: inter-state supplies must carry IGST, so an invoice showing CGST and SGST for an inter-state supply is wrong and must be returned to the supplier as TAX_TYPE_WRONG. [1] Confirm on the GST tab that the buyer GSTIN and tax type are correct before returning it. [2] Do not correct the supplier invoice by hand; send it back for correction instead. [3]
+Older sources (superseded): active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"The answer states that inter-state supplies should have IGST and instructs to return invoices with CGST/SGST as TAX_TYPE_WRONG, matching the gold answer without contradiction; added checks and process tips are consistent extras.",,4,0,4972,832,0.00982
+Q039,holdout,procedural,medium,A supplier with AATO above ₹5 crore sent an invoice without an IRN. Do I pay the base value?,No. Return it as IRN_MISSING; it is not valid for ITC and nothing is paid until a valid e-invoice arrives.,D,answered,calculator:ap.einvoice,30.54,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: No: if the supplier’s AATO is ₹5,00,00,000 and e‑invoicing is not required, you may pay the base value despite no IRN. [1][2] The rule to withhold base value applies only when “A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code … If such a supplier sends an invoice without an IRN … Do not pay the base value either; a valid invoice will follow.” [1] Still confirm mandatory fields, as “where required by 5.4, the IRN and QR code” are mandatory only when §5.4 applies, and otherwise the invoice is not returned for IRN. [3]
+  Highest turnover (AATO): ₹5,00,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: No
+  IRN on the invoice?: No
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,wrong,False,"The graded answer allows payment without IRN at ₹5 crore and omits the IRN_MISSING return, ITC invalidity, and the hold on payment until a valid e-invoice, directly contradicting the gold rule. Missing: ['Return as IRN_MISSING', 'Invoice is not valid for ITC', 'Do not pay anything until valid e-invoice arrives']",generation,6,0,9432,2476,0.02598
+Q040,dev,conflict,medium,What is the quantity tolerance for cement at Arvana Infra?,"Up to 5% above GRN quantity, provided the excess value does not exceed ₹25,000; applies to cement, reinforcement steel, sand and aggregates only.",D,answered,lookup,17.27,,"Status: answered
+Answer: For Arvana Infra Projects, cement invoices may be up to 5% above the GRN quantity, provided the excess value on the invoice does not exceed ₹25,000; above either limit, raise QTY_VAR. [1] This is a client-specific exception under CM-INF-02 for cement, reinforcement steel, sand and aggregates, and all other materials follow SOP v4.0 section 4.3 with no tolerance. [1][2] SOP v4.0 confirms there is no quantity tolerance except the bulk-material tolerance agreed with Arvana Infra Projects in Client Memo CM-INF-02. [2][3]
+Expert tip: Infra quantity tolerance applies to only four materials.
+Older sources (superseded): client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55]); 2% (AP SOP v3.1); 10% (Part F)",True,True,True,False,True,correct,True,"The answer matches the gold: 5% above GRN with excess value cap ₹25,000, and clarifies it applies only to cement, reinforcement steel, sand, and aggregates; no contradictions.",,4,0,5632,1004,0.01232
+Q041,dev,factual,medium,Does the Infra bulk-material tolerance apply to electrical cables?,"No. Only cement, reinforcement steel, sand and aggregates; all other materials have no quantity tolerance.",D,answered,lookup,17.61,,"Status: answered
+Answer: No, the Infra bulk-material tolerance does not apply to electrical cables; it applies only to cement, reinforcement steel, sand and aggregates, and all other materials follow SOP v4.0 section 4.3 (no tolerance). [1] Under SOP v4.0 section 4.3, invoice quantity must not exceed the GRN quantity. [2] For those four materials only, an invoice quantity up to 5% above the GRN quantity is accepted provided the excess value on the invoice does not exceed ₹25,000, otherwise raise QTY_VAR. [1]
+Expert tip: Infra quantity tolerance applies to only four materials.
+Older sources (superseded): client-specific bulk materials (Arvana Infra Projects per CM-INF-02) (AP SOP v4.0 §4.3); specific materials (Infra bulk materials per client memo) (Video 1 [06:55]); 2% (AP SOP v3.1); 10% (Part F)",True,True,True,False,False,correct,True,"The answer correctly states that the tolerance does not apply to electrical cables and applies only to cement, reinforcement steel, sand, and aggregates, with all other materials having no quantity tolerance, matching the gold answer without contradictions.",,4,0,5359,883,0.01153
+Q042,dev,conflict,medium,Do Arvana Pharma excipient invoices need QA release before payment?,"Yes. APIs, excipients and primary packaging need batch status Released in QMS; raise QA_RELEASE_PENDING otherwise.",D,answered,lookup,14.95,,"Status: answered
+Answer: Yes: for Arvana Pharma, excipient invoices must not be paid until the batch shows status Released in QMS. [1] The rule says to check the batch number on the GRN against QMS and, if the batch is in Quarantine or Rejected, raise QA_RELEASE_PENDING. [1] The invoice may be posted, but the payment block stays until release, and the QA_RELEASE_PENDING exception (meaning 'Pharma batch not released (CM-PHA-01)') is owned by Client QA with a target to resolve before the due date. [1][2]
+Expert tip: Excipients must have QA release.
+Older sources (superseded): false (Part F)",True,True,True,False,True,correct,True,"The answer states that excipient invoices require QMS batch status Released and to raise QA_RELEASE_PENDING otherwise, matching the gold answer without contradictions.",,4,0,5152,781,0.01125
+Q043,dev,procedural,medium,A Pharma batch is in Quarantine. Can I post the invoice?,"Yes, it may be posted, but the payment block stays until the batch is Released; raise QA_RELEASE_PENDING.",D,answered,lookup,17.44,,"Status: answered
+Answer: Yes, you may post the invoice, but raise QA_RELEASE_PENDING and note that payment is blocked until the batch shows Released in QMS for Arvana Pharma. [1] The client memo states: ""If the batch is in Quarantine or Rejected, raise QA_RELEASE_PENDING"" and ""The invoice may be posted, but the payment block stays until release."" [1] Before posting, check the batch number on the GRN against QMS as instructed and ensure the TDS tab is opened and the vendor master’s suggested section is checked against the nature of the service on the invoice. [1][2] If anything is not clean beyond the quarantine status, park the document with the appropriate exception code; otherwise you may proceed to Post. [3]
+Expert tip: Batch status must be Released for payment; Quarantine triggers QA_RELEASE_PENDING exception.
+Older sources (superseded): ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6); send it to Tax Desk (Video 2 [13:30]); false (Part F)",True,True,True,False,False,correct,True,"Answer includes both parts: invoice may be posted, payment remains blocked until batch is Released, and specifies to raise QA_RELEASE_PENDING; no contradictions.",,4,0,5447,1105,0.01268
+Q044,holdout,factual,medium,What must an Arvana Retail store rent invoice quote?,"The store code and the lease agreement number; without both, return it to the landlord.",D,answered,lookup,11.58,,"Status: answered
+Answer: For Arvana Retail, each store rent invoice must quote the store code and the lease agreement number. [1] If a store rent invoice lacks both the store code and the lease agreement number, return it to the landlord. [1]
+Older sources (superseded): courier (Part F)",True,True,True,False,False,correct,True,"The answer states both required items (store code and lease agreement number) and includes the action to return the invoice to the landlord if both are missing, matching the gold answer without contradictions.",,3,0,4310,414,0.00796
+Q045,dev,factual,medium,Can a marketing agency invoice for Arvana Retail be posted without a campaign ID?,No. Hold it as NON_PO_NOT_ALLOWED even if a PO exists.,D,answered,lookup,16.4,,"Status: answered
+Decision: Do not post
+Answer: No, for Arvana Retail a marketing agency invoice cannot be posted without a campaign ID. [1] The client memo states that marketing agency invoices must quote an approved campaign ID, and invoices without a campaign ID are held as NON_PO_NOT_ALLOWED even when a PO exists, so do not post until the campaign ID is provided. [1]
+Older sources (superseded): courier (Part F)",True,True,True,False,False,correct,True,The answer correctly states that invoices without a campaign ID must not be posted and should be held as NON_PO_NOT_ALLOWED even if a PO exists.,,4,0,5464,641,0.00905
+Q046,dev,factual,easy,What TDS applies to store rent paid to an individual landlord at Arvana Retail?,194I at 10%.,D,answered,lookup,15.35,,"Status: answered
+Decision: TDS 10% under section 194I
+Answer: For Arvana Retail, store rent paid to an individual landlord is subject to TDS under section 194I at 10%. [1][2] Arvana Retail’s memo states ""Rent paid to an individual landlord is subject to TDS under 194I at 10%"" and also that each rent invoice must quote the store code and the lease agreement number. [1] If a store rent invoice lacks both the store code and the lease agreement number, return it to the landlord. [1]
+Older sources (superseded): courier (Part F)",True,True,True,False,False,correct,True,The answer correctly states TDS under section 194I at 10% for store rent paid to an individual landlord at Arvana Retail and does not contradict the gold answer; extra details do not conflict.,,4,0,4702,679,0.00957
+Q047,holdout,tacit,hard,An Infra goods invoice arrived on Saturday with no GRN. Should I chase the site on Monday morning?,"Hold it (the system reminds after two working days), but experienced staff wait until Tuesday noon before any manual chase because Infra sites post GRNs in a Monday-morning batch.",D,answered,lookup,16.86,,"Status: answered
+Answer: No: hold the invoice as NO_GRN and do not chase until Tuesday noon because Infra sites batch GRNs on Monday mornings. [1][2][3] The rule is to hold a goods invoice with no GRN as NO_GRN and the system notifies the requester automatically, sends a reminder after two working days, and escalates after five working days. [1] For Arvana Infra Projects, the owner responsible for resolving NO_GRN is the Requester and the target to resolve is 5 working days. [4]
+Expert tip: Infra sites batch their GRNs on Monday morning.
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1)",True,True,True,False,False,correct,True,"The answer states to hold as NO_GRN, wait until Tuesday noon before manual chase because Infra sites post GRNs Monday morning, and includes the system’s two-working-day reminder; it does not contradict the gold answer.",,4,0,5062,846,0.01105
+Q048,dev,tacit,hard,A transporter's invoice 'TR/2026/0881/A' looks like an earlier 'TR/2026/881'. Is it a new invoice?,Almost certainly the same invoice re-sent — some transporters add /A or -REV when resending. Raise DUP_SUSPECT with a note; a Senior Processor clears it.,D,answered,calculator:ap.duplicate,17.36,,"Status: answered
+Decision: Suspected duplicate — the normalised numbers match; for the same supplier, raise DUP_SUSPECT
+Answer: No: by the duplicate-check rule, it is a suspected duplicate because the normalised numbers match, so raise DUP_SUSPECT and stop. [1][2][3] The rule is to compare using a normalised invoice number that removes spaces, slashes, hyphens and leading zeros, and drops a trailing suffix of /A, /R or -REV, and two invoices are suspected duplicates when the supplier GSTIN and normalised number match. [1][3] If the system shows an amber flag during Run Duplicate Check, you must stop and raise DUP_SUSPECT and it is never posted until a Senior Processor clears it. [2][1] In practice, transporters may add '/A' when they re-send the same invoice, but we still send it to DUP_SUSPECT with a note. [4][5]
+  Normalisation (rule in force): remove spaces, slashes, hyphens and leading zeros, and drop a trailing suffix of /A, /R or -REV
+  TR/2026/0881/A normalised: TR2026881
+  TR/2026/881 normalised: TR2026881
+  Normalised numbers match?: Yes
+Exception code: DUP_SUSPECT
+Expert tip: The transporter adds the suffix '/A' when re-sending invoices.
+Older sources (superseded): reject the new invoice as a duplicate (AP SOP v3.1 §2); stop and raise DUP_SUSPECT; do not override (DI-03 Part A, step 2); stop_and_raise_DUP_SUSPECT (Video 1 [02:10])",True,True,True,False,False,correct,True,"Includes both the practice (transporters add /A when resending) and the process (raise DUP_SUSPECT; Senior Processor clears), with matching details and no contradictions.",,4,0,6326,1213,0.01438
+Q049,holdout,tacit,hard,A small supplier's invoice is missing from GSTR-2B. Should I chase them this month?,"Pay base and hold GST per the SOP, but first check the QRMP flag: quarterly filers often upload only at quarter-end, so do not chase them in months one and two of a quarter.",D,answered,lookup,14.54,,"Status: answered
+Answer: No: first check if the supplier is a quarterly (QRMP) filer, and if so do not chase them in month one or two of the quarter. [1] By rule, claim input tax credit only when the invoice appears in the client's GSTR-2B, which is generated on the 14th of the following month. [2] If the invoice is not in GSTR-2B by the 14th, pay the base value on the due date and hold the GST amount until it appears. [2] If it remains missing after two further GSTR-2B cycles, raise NOT_IN_2B to the vendor relationship owner. [2][3]
+Expert tip: Check whether the supplier is a quarterly filer under QRMP before chasing for GSTR-2B mismatches.
+Older sources (superseded): 20th of the following month (AP SOP v3.1 §4); 20th (Part F); hold GST portion (AP SOP v3.1 §4); GSTR-2A (AP SOP v3.1 §4)",True,True,True,False,False,correct,True,Includes both the tacit practice and escalation: check QRMP and don’t chase in months 1–2; pay base and hold GST until invoice appears in GSTR‑2B.,,4,0,5405,1100,0.01295
+Q050,dev,tacit,hard,A Pharma packaging supplier's invoice arrives before the GRN. Should I raise NO_GRN immediately?,"Hold it, but this supplier invoices before dispatch so the GRN usually follows in two or three days; avoid an immediate manual chase.",D,answered,lookup,22.63,,"Status: answered
+Answer: Not yet on day one: for the Pharma packaging supplier that invoices before dispatch, wait instead of raising NO_GRN immediately. [1] The rule is that if a goods invoice has no GRN, you must hold it as NO_GRN and the system notifies the requester automatically, and you must not post it against a PO without a GRN. [2] The owner responsible for resolving NO_GRN is the Requester, with a target resolution time of 5 working days. [3] For Arvana Pharma primary packaging material, once the GRN arrives you must check the batch number against the Quality Management System and, if the batch is in Quarantine or Rejected, raise QA_RELEASE_PENDING and keep the payment block until release. [4] Do not post any goods invoice where the invoice quantity would exceed the GRN quantity when it arrives. [5]
+Expert tip: A Pharma packaging supplier invoices two or three days before dispatch, causing GRN to be delayed.
+Older sources (superseded): held and requester e-mailed (AP SOP v3.1); 2% (AP SOP v3.1); false (Part F)",True,True,True,False,False,partial,False,"It correctly says to hold and not raise NO_GRN immediately for this supplier, but it omits the practice note to avoid manual chasing because the GRN typically follows in 2–3 days. Missing: ['Avoid an immediate manual chase; GRN usually follows in two or three days']",generation,5,0,7665,1906,0.02353
+Q051,holdout,tacit,medium,What mistake do new joiners make most often with price variances?,Applying the ₹500 limit without first checking 1% of the line value; on small lines the 1% limit is lower.,D,answered,practice,15.36,,"Status: answered
+Answer: New joiners most often apply a flat ₹500 tolerance and forget it must be the lower of 1% and ₹500 per line. [1][2] The rule says the line passes only if the excess is no more than the lower of 1% of the PO line value and ₹500. [3] If the invoice price is lower than the PO price, accept it and pay the invoice price, and lines that fail the tolerance are held with exception PRICE_VAR and sent to the buyer. [3] In practice, shadowing notes say new joiners often apply ₹500 without checking 1% first, causing PRICE_VAR rework. [4][1]
+Expert tip: New joiners often mistakenly apply the ₹500 cap without checking the 1% percentage first.
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"The answer identifies the common mistake (applying ₹500 without checking 1% first) and includes the practice/escalation context, matching the gold answer without contradictions.",,4,0,5137,1072,0.0118
+Q052,dev,tacit,medium,Is a request to rush a bank change before month-end a concern?,"Yes. Changes are frozen three working days before close, so a rush request near month-end is itself a warning sign.",D,answered,lookup,15.84,,"Status: answered
+Answer: Yes: a request to rush a bank change before month-end is a concern because no bank changes are allowed in the three working days before month-end close. [1][2] The rule is that the vendor master is frozen for bank changes for the three working days before close, so such a request conflicts with policy and should not proceed. [2] In practice, being asked to rush a bank change before month-end is itself a warning sign. [3]
+Expert tip: If a bank account change request provides a different phone number for verification, the processor must not call that number but must call the number in the vendor master.
+Older sources (superseded): GRNs not invoiced are accrued. (AP SOP v3.1 §10); The Team Lead reviews open exceptions before close. (AP SOP v3.1 §10); Invoices received up to the second-last working day of the month are posted in that month. (AP SOP v3.1 §10)",True,True,True,False,False,correct,True,"The answer states that changes are frozen three working days before close and that a rush request near month-end is a warning sign, matching the gold answer without contradiction.",,4,0,4816,834,0.00933
+Q053,holdout,procedural,easy,What should an exception note contain?,"Enough for the owner to act without calling you: the line, the numbers, the rule breached and the action requested.",D,answered,lookup,14.43,,"Status: answered
+Answer: Include the exception code and the owner, because every exception has a code and an owner. [1] Make the note immediately actionable so the owner can act without calling you. [1] Write concrete specifics (item, quantities, price or variance, the rule/limit breached, and the exact action needed) rather than vague text. [2] Write the note so a stranger in future can understand it clearly. [3]
+Older sources (superseded): ₹1,000 (AP SOP v3.1 §12, step 1)",True,True,True,False,False,partial,False,"Answer includes actionability, numbers/specifics, rule breached, and action requested, but it doesn’t explicitly state including the exact line as required by the gold answer. Missing: ['Specify the exact line']",generation,4,0,4751,918,0.01024
+Q054,holdout,factual,easy,Which exception does the Team Lead want escalated the same day?,MSME_DUE — a micro or small supplier within seven days of the due date and still stuck.,D,answered,lookup,13.47,,"Status: answered
+Answer: MSME_DUE is the exception that must be escalated the same day. [1] The practice states: if a micro or small supplier is within seven days of the due date and still stuck, the Team Lead wants to know that day, and MSME_DUE is escalated to Sandeep. [1] By rule, MSME_DUE means micro/small supplier within 7 days of due date and its owner is Team Lead with target to resolve before due date. [2]",True,True,True,False,False,correct,True,"The answer identifies MSME_DUE as the same-day escalation and includes both the written rule (micro/small supplier within 7 days of due date) and the practice/escalation step (Team Lead wants to know that day, escalated to Sandeep).",,4,0,4582,774,0.00916
+Q055,dev,conflict,medium,When are invoices not posted in the current month at month-end?,When received after the third-last working day; open GRNs are accrued instead.,D,answered,lookup,12.29,,"Status: answered
+Answer: Invoices are not posted in the current month when they are received after the third-last working day of the month. [1] Instead, goods received but not invoiced are accrued from open GRNs at month-end. [1]
+Older sources (superseded): GRNs not invoiced are accrued. (AP SOP v3.1 §10); The Team Lead reviews open exceptions before close. (AP SOP v3.1 §10); Invoices received up to the second-last working day of the month are posted in that month. (AP SOP v3.1 §10)",True,True,True,False,True,correct,True,"It states the same cutoff (after the third-last working day) and the practice (accrue open GRNs instead), matching the gold without contradiction.",,4,0,5053,445,0.00799
+Q056,dev,factual,easy,How long are invoices kept?,Eight years.,D,answered,lookup,10.7,,"Status: answered
+Answer: Invoices and supporting documents are kept for eight years. [1] Rule: AP SOP v4.0 states that invoices and supporting documents are kept for eight years. [1]
+Older sources (superseded): Do not share supplier bank details outside the AP team. (AP SOP v3.1 §11)",True,True,True,False,False,correct,True,The answer matches the gold by stating invoices are kept for eight years and introduces no contradictions.,,4,0,4740,395,0.00704
+Q057,holdout,factual,medium,How is a credit note applied when the original invoice is already paid?,Set it off against the next invoice from the same supplier and record the link.,D,answered,lookup,9.23,,"Status: answered
+Answer: Set off the credit note against the next invoice from the same supplier when the original invoice is already paid, and record the link. [1] The rule is to apply a credit note against the original invoice, and the credit note must quote the original invoice number and date. [1]
+Expert tip: Duplicate invoices must be sent to DUP_SUSPECT with a note and not overridden.",True,True,True,False,False,wrong,False,"The answer contradicts the gold by saying the rule is to apply the credit note to the original invoice, while the gold specifies setting it off against the next invoice when the original is already paid.",generation,3,0,4276,471,0.0085
+Q058,dev,factual,medium,Who decides GST and TDS treatment for unclear cases?,The Tax Desk (codes TDS_SECTION_UNCLEAR and RCM_REVIEW).,D,answered,lookup,12.71,,"Status: answered
+Answer: The Tax Desk decides GST and TDS treatment when the SOP sends a case to them under the codes TDS_SECTION_UNCLEAR and RCM_REVIEW. [1] When an AMC contract is mixed or unclear, you must raise TDS_SECTION_UNCLEAR to the Tax Desk and not guess the section. [2]
+Expert tip: When the TDS section for lift AMC is unclear, the processor raises a TDS_SECTION_UNCLEAR exception without changing the vendor master suggestion.
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,False,correct,True,The answer correctly states that the Tax Desk decides GST and TDS treatment via the codes TDS_SECTION_UNCLEAR and RCM_REVIEW and adds aligned examples without contradicting the gold answer.,,4,0,4949,567,0.00868
+Q059,dev,factual,medium,Which paper invoices are accepted?,"Only from Arvana Infra Projects construction sites, scanned within one working day.",D,answered,lookup,14.62,,"Status: answered
+Answer: Only paper invoices from Arvana Infra Projects construction sites are accepted, and no other paper invoices are allowed. [1] These paper invoices are scanned at the Hyderabad mail room within one working day of receipt. [1] All clients can instead send invoices via the supplier portal or by e-mail to the AP inbox. [1]
+Older sources (superseded): supplier portal, AP e-mail inbox, mail room (AP SOP v3.1 §2); day of receipt (AP SOP v3.1 §2)",True,True,True,False,False,partial,False,"It captures that only Arvana Infra Projects construction site paper invoices are accepted and they must be scanned within one working day, but it adds an unverified location detail and extra guidance not in the gold answer. Missing: ['Scanned within one working day (without adding location-specific detail)']",generation,4,0,4851,731,0.00972
+Q060,dev,procedural,medium,An invoice is missing the HSN/SAC code. Can I add it?,No. Return it to the supplier as INV_INCOMPLETE; do not correct supplier invoices by hand.,D,answered,lookup,14.03,,"Status: answered
+Answer: No: you must not add the HSN/SAC code on the invoice. [1] HSN or SAC code per line is a mandatory field, and an invoice missing any mandatory field is returned to the supplier with code INV_INCOMPLETE. [1] Supplier invoices must not be corrected by hand, so do not fill in the HSN/SAC yourself. [1] Since the invoice is not clean, click Park with exception and pick INV_INCOMPLETE, adding a one-line note. [2][1]",True,True,True,False,False,correct,True,"The answer states not to add the code, to return the invoice to the supplier with INV_INCOMPLETE, and not to correct supplier invoices by hand, matching the gold answer without contradiction.",,4,0,5302,911,0.01056
+Q061,holdout,procedural,easy,The invoice price is lower than the PO price. What do I do?,Accept it and pay the invoice price.,D,unverified,lookup,16.47,,"Status: unverified
+Answer: Accept the line and pay at the invoice price when the invoice price is lower than the PO price. [1] The rule is that price tolerance applies when the invoice unit price is higher than the PO unit price, using the lower of 1% of the PO line value and ₹500 per line. [1] If a line fails the tolerance check, hold it with exception PRICE_VAR and send it to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1] Every other invoice needs a PO, and courier and travel-agency invoices now need a PO, while a non-PO invoice of any amount needs the budget owner's approval in the workflow. [2]
+Route to: PO buyer
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",False,True,True,False,False,correct,True,"The answer clearly states to accept the line and pay at the invoice price when it is lower than the PO price, which matches the gold answer, and it does not contradict it; extra procedural details do not conflict.",,4,0,7305,1748,0.02505
+Q063,dev,factual,easy,Who reviews a new joiner's postings and for how long?,A Senior Processor reviews a 10% sample for the first 60 days.,D,answered,lookup,7.98,,"Status: answered
+Answer: A Senior Processor reviews a 10% sample of a new joiner’s postings for their first 60 days. [1]",True,True,True,False,False,correct,True,"The answer exactly matches the gold: a Senior Processor reviews a 10% sample for the first 60 days, with no contradictions or omissions.",,3,0,4036,309,0.00658
+Q064,holdout,factual,medium,Who can approve a write-off and up to what amount?,"The Team Lead, up to ₹1,000.",D,answered,lookup,11.69,,"Status: answered
+Answer: A Team Lead can approve a write-off, and the limit is up to ₹1,000. [1] The rule states the Team Lead ""approves write-offs up to ₹1,000."" [1]",True,True,True,False,False,correct,True,"The answer exactly matches the gold: Team Lead can approve write-offs up to ₹1,000, with no contradictions or omissions.",,4,0,4570,487,0.00715
+Q065,holdout,factual,easy,What is the e-mail rule for supplier bank details and PAN?,"Visible only to the Vendor Master team and AP Controllers; never pasted into e-mail, chat or external tools.",D,answered,lookup,14.26,,"Status: answered
+Answer: Do not e-mail supplier bank details or PAN: these are visible only to the Vendor Master team and AP Controllers and must never be pasted into e-mail, chat or any external tool. [1] Supplier bank account changes are verified by a call-back control and e-mail confirmation is not used. [2] Where a client has agreed a different rule, the client memo in the desk instructions takes precedence over the SOP for that client only. [2]
+Expert tip: A verification call to the supplier's phone number in the vendor master is required when a bank account change request is received.
+Older sources (superseded): Do not share supplier bank details outside the AP team. (AP SOP v3.1 §11); true (AP SOP v3.1 §7)",True,True,True,False,False,correct,True,"The answer states that supplier bank details and PAN are visible only to Vendor Master and AP Controllers and must never be pasted into email, chat, or external tools, matching the gold without contradiction; extra details do not conflict.",,4,0,5173,788,0.01026
+Q066,dev,scenario,medium,"Arvana Pharma Ltd: PO unit price ₹1,200 for 1000 units; the invoice charges ₹1,218 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹18,000 on a line value of ₹1,200,000; limit is the lower of 1% (₹12,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,19.41,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess exceeds the lower of 1% of the PO line value and ₹500 per line. [1] Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500, and this line is therefore held. [1] Hold the line with exception PRICE_VAR and send it to the buyer who raised the PO to either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹1,200 × 1000): ₹12,00,000
+  Excess on line (₹18 × 1000): ₹18,000
+  1% of PO line value: ₹12,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 18000.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 18000.0, 'limit': 500.0}",,3,0,4680,873,0.00969
+Q067,holdout,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹1,200 for 1000 units; the invoice charges ₹1,222 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹21,600 on a line value of ₹1,200,000; limit is the lower of 1% (₹12,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,19.61,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the calculator shows the excess is above the tolerance limit. [1] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500, and a line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO; the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹1,200 × 1000): ₹12,00,000
+  Excess on line (₹22 × 1000): ₹22,000
+  1% of PO line value: ₹12,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 21600.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 22000.0, 'limit': 500.0}",,3,0,4484,830,0.00981
+Q068,dev,scenario,medium,Arvana Pharma Ltd: PO unit price ₹250 for 500 units; the invoice charges ₹250 per unit. Can the line pass the price match?,"Yes. Excess ₹250 on a line value of ₹125,000; limit is the lower of 1% (₹1,250) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.92,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because the tolerance rule allows differences within the lower of 1% of the PO line value and ₹500 per line, and there is no excess over the PO price here. [1] AP SOP v4.0 §4.2 states: ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500,"" and ""Where the invoice price is lower than the PO price, accept it and pay the invoice price."" [1] For Arvana Pharma, payment cannot be made until the batch shows status Released in QMS, and you must check the batch number on the GRN against QMS and keep the payment block until release. [2]
+  PO line value (₹250 × 500): ₹1,25,000
+  Excess on line (₹0 × 500): ₹0
+  1% of PO line value: ₹1,250
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 250.0, 'limit': 500.0}; calculator price: {'passed': True, 'excess': 0.0, 'limit': 500.0}",,3,0,4666,917,0.01069
+Q069,holdout,scenario,hard,Arvana Infra Projects Ltd: PO unit price ₹250 for 20 units; the invoice charges ₹254 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹90.00 on a line value of ₹5,000; limit is the lower of 1% (₹50.00) and ₹500 = ₹50.00.",D,answered,calculator:ap.price,16.29,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the calculator says ""Hold the line — price variance above tolerance."" [1] The rule is that when the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails this check is held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹250 × 20): ₹5,000
+  Excess on line (₹4 × 20): ₹80
+  1% of PO line value: ₹50
+  Cap: ₹500
+  Limit (lower of the two): ₹50
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 90.0, 'limit': 50.0}; calculator price: {'passed': False, 'excess': 80.0, 'limit': 50.0}",,3,0,4632,798,0.00936
+Q070,dev,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹45.00 for 1000 units; the invoice charges ₹45.36 per unit. Can the line pass the price match?,"Yes. Excess ₹360 on a line value of ₹45,000; limit is the lower of 1% (₹450) and ₹500 = ₹450.",D,answered,calculator:ap.price,16.05,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because the calculator shows the excess is within the lower of 1% of the PO line value and ₹500. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] If a line fails this check, it is held with exception PRICE_VAR and sent to the buyer who raised the PO, who either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹45 × 1000): ₹45,000
+  Excess on line (₹0.36 × 1000): ₹360
+  1% of PO line value: ₹450
+  Cap: ₹500
+  Limit (lower of the two): ₹450
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 360.0, 'limit': 450.0}; calculator price: {'passed': True, 'excess': 360.0, 'limit': 450.0}",,3,0,4468,674,0.00909
+Q071,dev,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 500 units; the invoice charges ₹122 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹1,080 on a line value of ₹60,000; limit is the lower of 1% (₹600) and ₹500 = ₹500.",D,answered,calculator:ap.price,21.14,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match because the excess over the PO price exceeds the lower of 1% of the PO line value and ₹500. [1][2] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹120 × 500): ₹60,000
+  Excess on line (₹2 × 500): ₹1,000
+  1% of PO line value: ₹600
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1080.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1000.0, 'limit': 500.0}",,3,0,4724,800,0.00953
+Q072,dev,scenario,hard,Arvana Infra Projects Ltd: PO unit price ₹640 for 10 units; the invoice charges ₹652 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹115 on a line value of ₹6,400; limit is the lower of 1% (₹64.00) and ₹500 = ₹64.00.",D,answered,calculator:ap.price,14.64,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess exceeds the allowed limit. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹640 × 10): ₹6,400
+  Excess on line (₹12 × 10): ₹120
+  1% of PO line value: ₹64
+  Cap: ₹500
+  Limit (lower of the two): ₹64
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 115.0, 'limit': 64.0}; calculator price: {'passed': False, 'excess': 120.0, 'limit': 64.0}",,3,0,4474,689,0.00894
+Q073,holdout,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹395 for 20 units; the invoice charges ₹397 per unit. Can the line pass the price match?,"Yes. Excess ₹47.40 on a line value of ₹7,900; limit is the lower of 1% (₹79.00) and ₹500 = ₹79.00.",D,answered,calculator:ap.price,18.91,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because the calculator shows the excess is within the price tolerance. [1] The rule is that where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] If a line fails this check, it is held with exception PRICE_VAR and sent to the buyer who raised the PO to either amend the PO or ask the supplier for a credit note, but that is not needed here since it passes. [1]
+  PO line value (₹395 × 20): ₹7,900
+  Excess on line (₹2 × 20): ₹40
+  1% of PO line value: ₹79
+  Cap: ₹500
+  Limit (lower of the two): ₹79
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 47.4, 'limit': 79.0}; calculator price: {'passed': True, 'excess': 40.0, 'limit': 79.0}",,3,0,4608,822,0.00942
+Q074,dev,scenario,medium,Arvana Pharma Ltd: PO unit price ₹250 for 200 units; the invoice charges ₹256 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹1,250 on a line value of ₹50,000; limit is the lower of 1% (₹500) and ₹500 = ₹500.",D,answered,calculator:ap.price,16.53,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess exceeds the lower of 1% of the PO line value and ₹500 per line. [1] Under AP SOP v4.0 §4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500, and a line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO; the buyer either amends the PO or asks the supplier for a credit note. [1] If the invoice price were lower than the PO price, we would accept it and pay the invoice price, but that does not apply here. [1]
+  PO line value (₹250 × 200): ₹50,000
+  Excess on line (₹6 × 200): ₹1,200
+  1% of PO line value: ₹500
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1250.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1200.0, 'limit': 500.0}",,3,0,4647,887,0.01014
+Q075,dev,scenario,hard,Arvana Infra Projects Ltd: PO unit price ₹640 for 50 units; the invoice charges ₹647 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹352 on a line value of ₹32,000; limit is the lower of 1% (₹320) and ₹500 = ₹320.",D,answered,calculator:ap.price,16.81,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the unit price is higher than the PO and the excess exceeds the allowed limit. [1] The rule is that when the invoice unit price is higher than the PO unit price, the line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails this check is held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹640 × 50): ₹32,000
+  Excess on line (₹7 × 50): ₹350
+  1% of PO line value: ₹320
+  Cap: ₹500
+  Limit (lower of the two): ₹320
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 352.0, 'limit': 320.0}; calculator price: {'passed': False, 'excess': 350.0, 'limit': 320.0}",,3,0,4635,802,0.00929
+Q076,dev,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹640 for 100 units; the invoice charges ₹647 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹704 on a line value of ₹64,000; limit is the lower of 1% (₹640) and ₹500 = ₹500.",D,answered,calculator:ap.price,21.12,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass, because the invoice unit price is higher than the PO unit price and the excess exceeds the lower of 1% of the PO line value and ₹500 per line. [1][2] The rule is: ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500"" and otherwise it fails. [1] A failing line must be held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹640 × 100): ₹64,000
+  Excess on line (₹7 × 100): ₹700
+  1% of PO line value: ₹640
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 704.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 700.0, 'limit': 500.0}",,3,0,4728,900,0.01003
+Q077,dev,scenario,medium,"Arvana Infra Projects Ltd: PO unit price ₹8,800 for 1000 units; the invoice charges ₹8,958 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹158,400 on a line value of ₹8,800,000; limit is the lower of 1% (₹88,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,18.57,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess is above the lower of 1% of the PO line value and ₹500. [1] Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] Hold the line with exception PRICE_VAR and send it to the PO buyer to either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹8,800 × 1000): ₹88,00,000
+  Excess on line (₹158 × 1000): ₹1,58,000
+  1% of PO line value: ₹88,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 158400.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 158000.0, 'limit': 500.0}",,3,0,4690,778,0.00926
+Q078,dev,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹1,200 for 200 units; the invoice charges ₹1,207 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹1,440 on a line value of ₹240,000; limit is the lower of 1% (₹2,400) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.49,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess must be no more than the lower of 1% of the PO line value and ₹500, and this case is above that limit. [1] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹1,200 × 200): ₹2,40,000
+  Excess on line (₹7 × 200): ₹1,400
+  1% of PO line value: ₹2,400
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1440.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1400.0, 'limit': 500.0}",,3,0,4496,711,0.00925
+Q079,holdout,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹640 for 1000 units; the invoice charges ₹643 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹2,560 on a line value of ₹640,000; limit is the lower of 1% (₹6,400) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.19,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess exceeds the lower-of limit of 1% of the PO line value and ₹500 per line. [1] The rule is: ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500."" [1] A line that fails must be held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹640 × 1000): ₹6,40,000
+  Excess on line (₹3 × 1000): ₹3,000
+  1% of PO line value: ₹6,400
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 2560.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 3000.0, 'limit': 500.0}",,3,0,4657,870,0.00964
+Q080,dev,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 500 units; the invoice charges ₹122 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹1,080 on a line value of ₹60,000; limit is the lower of 1% (₹600) and ₹500 = ₹500.",D,answered,calculator:ap.price,8.08,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No — the line cannot pass the price match because the excess over the PO price exceeds the lower of 1% of the PO line value and ₹500. [1][2] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹120 × 500): ₹60,000
+  Excess on line (₹2 × 500): ₹1,000
+  1% of PO line value: ₹600
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 1080.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 1000.0, 'limit': 500.0}",,3,3,0,0,0.0
+Q081,dev,scenario,medium,Arvana Pharma Ltd: PO unit price ₹120 for 100 units; the invoice charges ₹120 per unit. Can the line pass the price match?,"Yes. Excess ₹24.00 on a line value of ₹12,000; limit is the lower of 1% (₹120) and ₹500 = ₹120.",D,answered,calculator:ap.price,17.09,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match, because excess within tolerance is allowed by the rule that a line passes if the excess is no more than the lower of 1% of the PO line value and ₹500. [1] The rule states: ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500."" [1] If the line were to fail, it would be held with exception PRICE_VAR and sent to the PO buyer to amend the PO or request a credit note. [1] For Arvana Pharma, even if the invoice posts, payment must wait until the batch shows status Released in QMS, and the payment block stays until release. [2]
+  PO line value (₹120 × 100): ₹12,000
+  Excess on line (₹0 × 100): ₹0
+  1% of PO line value: ₹120
+  Cap: ₹500
+  Limit (lower of the two): ₹120
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 24.0, 'limit': 120.0}; calculator price: {'passed': True, 'excess': 0.0, 'limit': 120.0}",,3,0,4787,949,0.01081
+Q082,dev,scenario,medium,Arvana Pharma Ltd: PO unit price ₹45.00 for 50 units; the invoice charges ₹45.18 per unit. Can the line pass the price match?,"Yes. Excess ₹9.00 on a line value of ₹2,250; limit is the lower of 1% (₹22.50) and ₹500 = ₹22.50.",D,answered,calculator:ap.price,16.21,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because the total excess is within the lower of 1% of the PO line value and ₹500, and the calculator confirms it is within the limit. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1]
+  PO line value (₹45 × 50): ₹2,250
+  Excess on line (₹0.18 × 50): ₹9
+  1% of PO line value: ₹22.50
+  Cap: ₹500
+  Limit (lower of the two): ₹22.50
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 9.0, 'limit': 22.5}; calculator price: {'passed': True, 'excess': 9.0, 'limit': 22.5}",,3,0,4483,515,0.00757
+Q083,dev,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹15,000 for 50 units; the invoice charges ₹15,120 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹6,000 on a line value of ₹750,000; limit is the lower of 1% (₹7,500) and ₹500 = ₹500.",D,answered,calculator:ap.price,16.78,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess is above the lower-of 1% or ₹500 tolerance. [1] Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO; the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹15,000 × 50): ₹7,50,000
+  Excess on line (₹120 × 50): ₹6,000
+  1% of PO line value: ₹7,500
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 6000.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 6000.0, 'limit': 500.0}",,3,0,4510,703,0.00907
+Q084,holdout,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹15,000 for 500 units; the invoice charges ₹15,270 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹135,000 on a line value of ₹7,500,000; limit is the lower of 1% (₹75,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,20.09,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess is above tolerance and must be held. [1] The rule says a higher-than-PO unit price passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500, and this case is above that limit. [1] Hold it with exception PRICE_VAR and send it to the buyer to either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹15,000 × 500): ₹75,00,000
+  Excess on line (₹270 × 500): ₹1,35,000
+  1% of PO line value: ₹75,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 135000.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 135000.0, 'limit': 500.0}",,3,0,4806,907,0.01021
+Q085,holdout,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹395 for 100 units; the invoice charges ₹399 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹434 on a line value of ₹39,500; limit is the lower of 1% (₹395) and ₹500 = ₹395.",D,answered,calculator:ap.price,16.43,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess is above the lower of 1% of the PO line value and ₹500 per line. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹395 × 100): ₹39,500
+  Excess on line (₹4 × 100): ₹400
+  1% of PO line value: ₹395
+  Cap: ₹500
+  Limit (lower of the two): ₹395
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 434.0, 'limit': 395.0}; calculator price: {'passed': False, 'excess': 400.0, 'limit': 395.0}",,3,0,4471,697,0.00914
+Q086,dev,scenario,medium,Arvana Infra Projects Ltd: PO unit price ₹640 for 20 units; the invoice charges ₹645 per unit. Can the line pass the price match?,"Yes. Excess ₹102 on a line value of ₹12,800; limit is the lower of 1% (₹128) and ₹500 = ₹128.",D,answered,calculator:ap.price,18.06,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because the calculator shows the excess is within the price tolerance. [1] The rule is that when the invoice unit price is higher, the line passes only if the total excess is no more than the lower of 1% of the PO line value and ₹500. [1] If the line failed this check it would be held with exception PRICE_VAR and sent to the buyer to amend the PO or request a credit note, but that is not needed here. [1]
+  PO line value (₹640 × 20): ₹12,800
+  Excess on line (₹5 × 20): ₹100
+  1% of PO line value: ₹128
+  Cap: ₹500
+  Limit (lower of the two): ₹128
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': True, 'excess': 102.0, 'limit': 128.0}; calculator price: {'passed': True, 'excess': 100.0, 'limit': 128.0}",,3,0,4614,755,0.00904
+Q087,holdout,scenario,hard,"Arvana Pharma Ltd: PO unit price ₹15,000 for 20 units; the invoice charges ₹15,030 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹600 on a line value of ₹300,000; limit is the lower of 1% (₹3,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,19.28,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess must be within the lower of 1% of the PO line value and ₹500 per line, which it is not. [1] Under the rule, ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500."" [1] Because it fails tolerance, hold the line with exception PRICE_VAR and send it to the buyer who raised the PO, who must either amend the PO or ask the supplier for a credit note. [1]
+  PO line value (₹15,000 × 20): ₹3,00,000
+  Excess on line (₹30 × 20): ₹600
+  1% of PO line value: ₹3,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 600.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 600.0, 'limit': 500.0}",,3,0,4683,878,0.00969
+Q088,holdout,scenario,medium,Arvana Retail Pvt Ltd: PO unit price ₹120 for 5 units; the invoice charges ₹123 per unit. Can the line pass the price match?,No — raise PRICE_VAR. Excess ₹15.00 on a line value of ₹600; limit is the lower of 1% (₹6.00) and ₹500 = ₹6.00.,D,answered,calculator:ap.price,18.06,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess exceeds the lower-of tolerance. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹120 × 5): ₹600
+  Excess on line (₹3 × 5): ₹15
+  1% of PO line value: ₹6
+  Cap: ₹500
+  Limit (lower of the two): ₹6
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 15.0, 'limit': 6.0}; calculator price: {'passed': False, 'excess': 15.0, 'limit': 6.0}",,3,0,4463,679,0.00903
+Q089,holdout,scenario,medium,"Arvana Infra Projects Ltd: PO unit price ₹8,800 for 200 units; the invoice charges ₹8,835 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹7,040 on a line value of ₹1,760,000; limit is the lower of 1% (₹17,600) and ₹500 = ₹500.",D,answered,calculator:ap.price,16.25,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO and the excess exceeds the lower-of limit. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹8,800 × 200): ₹17,60,000
+  Excess on line (₹35 × 200): ₹7,000
+  1% of PO line value: ₹17,600
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 7040.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 7000.0, 'limit': 500.0}",,3,0,4527,698,0.00912
+Q090,dev,scenario,hard,Arvana Retail Pvt Ltd: PO unit price ₹395 for 200 units; the invoice charges ₹398 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹632 on a line value of ₹79,000; limit is the lower of 1% (₹790) and ₹500 = ₹500.",D,answered,calculator:ap.price,18.11,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess is above the lower-of tolerance and must be held. [1] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO; the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹395 × 200): ₹79,000
+  Excess on line (₹3 × 200): ₹600
+  1% of PO line value: ₹790
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 632.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 600.0, 'limit': 500.0}",,3,0,4470,695,0.00912
+Q091,dev,scenario,hard,"Arvana Retail Pvt Ltd: PO unit price ₹1,200 for 5 units; the invoice charges ₹1,222 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹108 on a line value of ₹6,000; limit is the lower of 1% (₹60.00) and ₹500 = ₹60.00.",D,answered,calculator:ap.price,16.81,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the invoice unit price is higher than the PO unit price and the excess on the line is above the lower-of 1%/₹500 tolerance. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹1,200 × 5): ₹6,000
+  Excess on line (₹22 × 5): ₹110
+  1% of PO line value: ₹60
+  Cap: ₹500
+  Limit (lower of the two): ₹60
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,correct,True,"expected {'passed': False, 'excess': 108.0, 'limit': 60.0}; calculator price: {'passed': False, 'excess': 110.0, 'limit': 60.0}",,3,0,4484,773,0.00939
+Q092,holdout,scenario,hard,Arvana Infra Projects Ltd: PO unit price ₹120 for 100 units; the invoice charges ₹121 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹132 on a line value of ₹12,000; limit is the lower of 1% (₹120) and ₹500 = ₹120.",D,answered,calculator:ap.price,15.88,,"Status: answered
+Decision: Pass — excess within the price tolerance
+Answer: Yes, the line can pass the price match because an invoice unit price higher than the PO unit price is allowed if the total excess on the line is no more than the lower of 1% of the PO line value and ₹500, and the calculator shows the excess is within that limit. [1] The rule states: ""Where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500."" [1] If the line were to fail this tolerance, it would be held with exception PRICE_VAR and sent to the buyer, who either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹120 × 100): ₹12,000
+  Excess on line (₹1 × 100): ₹100
+  1% of PO line value: ₹120
+  Cap: ₹500
+  Limit (lower of the two): ₹120
+  Excess within limit?: Yes
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,True,wrong,False,"expected {'passed': False, 'excess': 132.0, 'limit': 120.0}; calculator price: {'passed': True, 'excess': 100.0, 'limit': 120.0}",calculator,3,0,4654,790,0.00943
+Q093,holdout,scenario,medium,"Arvana Infra Projects Ltd: PO unit price ₹15,000 for 20 units; the invoice charges ₹15,375 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹7,500 on a line value of ₹300,000; limit is the lower of 1% (₹3,000) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.82,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the total excess of ₹7,500 exceeds the lower-of limit of ₹500. [1] The rule is: where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, and the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹15,000 × 20): ₹3,00,000
+  Excess on line (₹375 × 20): ₹7,500
+  1% of PO line value: ₹3,000
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 7500.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 7500.0, 'limit': 500.0}",,3,0,4500,703,0.00912
+Q094,dev,scenario,medium,Arvana Infra Projects Ltd: PO unit price ₹640 for 10 units; the invoice charges ₹656 per unit. Can the line pass the price match?,"No — raise PRICE_VAR. Excess ₹160 on a line value of ₹6,400; limit is the lower of 1% (₹64.00) and ₹500 = ₹64.00.",D,answered,calculator:ap.price,12.43,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: The rule is that where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO, who either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹640 × 10): ₹6,400
+  Excess on line (₹16 × 10): ₹160
+  1% of PO line value: ₹64
+  Cap: ₹500
+  Limit (lower of the two): ₹64
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 160.0, 'limit': 64.0}; calculator price: {'passed': False, 'excess': 160.0, 'limit': 64.0}",,2,0,3780,564,0.00874
+Q095,dev,scenario,medium,"Arvana Retail Pvt Ltd: PO unit price ₹2,500 for 500 units; the invoice charges ₹2,538 per unit. Can the line pass the price match?","No — raise PRICE_VAR. Excess ₹18,750 on a line value of ₹1,250,000; limit is the lower of 1% (₹12,500) and ₹500 = ₹500.",D,answered,calculator:ap.price,17.89,,"Status: answered
+Decision: Hold the line — price variance above tolerance
+Answer: No, the line cannot pass the price match because the excess exceeds the lower of 1% of the PO line value and ₹500. [1] Under SOP 4.2, where the invoice unit price is higher than the PO unit price, the line passes only if the total excess on that line is no more than the lower of 1% of the PO line value and ₹500. [1] A line that fails is held with exception PRICE_VAR and sent to the buyer who raised the PO; the buyer either amends the PO or asks the supplier for a credit note. [1]
+  PO line value (₹2,500 × 500): ₹12,50,000
+  Excess on line (₹38 × 500): ₹19,000
+  1% of PO line value: ₹12,500
+  Cap: ₹500
+  Limit (lower of the two): ₹500
+  Excess within limit?: No
+Exception code: PRICE_VAR
+Older sources (superseded): ₹1,000 (AP SOP v3.1); ₹1,000 (Part F); 2% (AP SOP v3.1); 2% (Part F)",True,True,True,False,False,correct,True,"expected {'passed': False, 'excess': 18750.0, 'limit': 500.0}; calculator price: {'passed': False, 'excess': 19000.0, 'limit': 500.0}",,3,0,4484,692,0.00913
+Q096,dev,scenario,hard,"An invoice for an annual audit fee to a CA firm: taxable value ₹18,000 plus GST ₹3,240. The supplier has not given a PAN. What TDS should be deducted?","Section 194J at 20% on the taxable value excluding GST: ₹3,600. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,14.75,,"Status: answered
+Decision: Section 194J at 20%: ₹3,600
+Answer: Deduct TDS of ₹3,600 under section 194J at 20% on the ₹18,000 taxable value, because no PAN was furnished and GST is excluded from the base. [1][2] Audit fees are a professional service under section 194J. [1] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice, and if the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹18,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194J at 20%: ₹3,600
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 20.0, 'amount': 3600.0}; calculator tds: {'section': '194J', 'rate': 20.0, 'amount': 3600.0}",,3,0,4746,782,0.0092
+Q097,dev,scenario,medium,"An invoice for legal advice from a law firm: taxable value ₹910,000 plus GST ₹163,800. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹91,000.",D,answered,calculator:ap.tds,12.93,,"Status: answered
+Decision: Section 194J at 10%: ₹91,000
+Answer: Deduct TDS of ₹91,000 under section 194J at 10% on the taxable value of ₹9,10,000 for legal services. [1][2] The rule is that professional services including legal are under section 194J at 10%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2]
+  Base (taxable value, GST excluded): ₹9,10,000
+  TDS: section 194J at 10%: ₹91,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 91000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 91000.0}",,3,0,4607,570,0.0078
+Q098,dev,scenario,medium,"An invoice for software support for the ERP: taxable value ₹910,000 plus GST ₹163,800. What TDS should be deducted?","Section 194J at 2% on the taxable value excluding GST: ₹18,200.",D,answered,calculator:ap.tds,14.04,,"Status: answered
+Decision: Section 194J at 2%: ₹18,200
+Answer: Deduct TDS under section 194J at 2% on the taxable value excluding GST for software support, giving ₹18,200 on ₹9,10,000. [1][2] Fees for technical services (not professional), including software support, are under section 194J at 2%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2] If this is an AMC that is mixed or unclear, raise TDS_SECTION_UNCLEAR to the Tax Desk and do not guess the section. [2] If a supplier required to issue an e-invoice sends an invoice without an IRN, return it as IRN_MISSING and do not pay the base value. [3]
+  Base (taxable value, GST excluded): ₹9,10,000
+  TDS: section 194J at 2%: ₹18,200
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 2.0, 'amount': 18200.0}; calculator tds: {'section': '194J', 'rate': 2.0, 'amount': 18200.0}",,3,0,4610,927,0.0115
+Q099,dev,scenario,medium,"An invoice for a transport contract with a company: taxable value ₹250,000 plus GST ₹45,000. What TDS should be deducted?","Section 194C at 2% on the taxable value excluding GST: ₹5,000.",D,answered,calculator:ap.tds,15.52,,"Status: answered
+Decision: Section 194C at 2%: ₹5,000
+Answer: Deduct ₹5,000 as TDS under section 194C at 2% on the ₹2,50,000 taxable value for a transport payment to a non-individual payee. [1][2] TDS is computed on the taxable value excluding GST where GST is shown separately on the invoice. [2] If the payee is an individual or HUF, the 194C rate is 1% instead of 2%. [3] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹2,50,000
+  TDS: section 194C at 2%: ₹5,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 2.0, 'amount': 5000.0}; calculator tds: {'section': '194C', 'rate': 2.0, 'amount': 5000.0}",,3,0,4979,981,0.01076
+Q100,dev,scenario,hard,"An invoice for a housekeeping manpower contract with an individual contractor: taxable value ₹480,000 plus GST ₹86,400. The supplier has not given a PAN. What TDS should be deducted?","Section 194C at 20% on the taxable value excluding GST: ₹96,000. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,15.51,,"Status: answered
+Decision: Section 194C at 20%: ₹96,000
+Answer: Deduct TDS of ₹96,000 under section 194C at 20% on the taxable value of ₹4,80,000 because the supplier has not furnished a PAN. [1][2] When PAN is not furnished, the rule is to deduct at 20% or the applicable rate, whichever is higher, and for manpower to an individual the applicable section is 194C. [1][2] Compute TDS on the taxable value excluding GST since GST is shown separately on the invoice. [1]
+  Base (taxable value, GST excluded): ₹4,80,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194C at 20%: ₹96,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 20.0, 'amount': 96000.0}; calculator tds: {'section': '194C', 'rate': 20.0, 'amount': 96000.0}",,3,0,4936,788,0.00932
+Q101,dev,scenario,medium,"An invoice for rent for a warehouse building: taxable value ₹480,000 plus GST ₹86,400. What TDS should be deducted?","Section 194I at 10% on the taxable value excluding GST: ₹48,000.",D,answered,calculator:ap.tds,12.75,,"Status: answered
+Decision: Section 194I at 10%: ₹48,000
+Answer: Deduct TDS of ₹48,000 under section 194I at 10% on the taxable value ₹4,80,000, excluding GST. [1][2] Rent of land, building or furniture is under section 194I at 10%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹4,80,000
+  TDS: section 194I at 10%: ₹48,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194I', 'rate': 10.0, 'amount': 48000.0}; calculator tds: {'section': '194I', 'rate': 10.0, 'amount': 48000.0}",,3,0,4594,687,0.00906
+Q102,holdout,scenario,hard,"An invoice for hire of a crane: taxable value ₹480,000 plus GST ₹86,400. The supplier has not given a PAN. What TDS should be deducted?","Section 194I at 20% on the taxable value excluding GST: ₹96,000. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,15.21,,"Status: answered
+Decision: Section 194I at 20%: ₹96,000
+Answer: Deduct TDS of ₹96,000 under section 194I at 20% on the ₹4,80,000 base (GST excluded). [1][2] Rent of plant, machinery or equipment is section 194I at 2%, but when no valid PAN is furnished you must deduct at 20% or the applicable rate, whichever is higher. [1][2] TDS is calculated on the taxable value excluding GST wherever GST is shown separately on the invoice. [2]
+  Base (taxable value, GST excluded): ₹4,80,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194I at 20%: ₹96,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194I', 'rate': 20.0, 'amount': 96000.0}; calculator tds: {'section': '194I', 'rate': 20.0, 'amount': 96000.0}",,3,0,5094,880,0.00965
+Q103,dev,scenario,medium,"An invoice for network monitoring services: taxable value ₹120,000 plus GST ₹21,600. What TDS should be deducted?","Section 194J at 2% on the taxable value excluding GST: ₹2,400.",D,answered,calculator:ap.tds,16.39,,"Status: answered
+Decision: Section 194J at 2%: ₹2,400
+Answer: Deduct TDS of ₹2,400 under section 194J at 2% on the ₹1,20,000 taxable value (GST excluded). [1][2] Fees for technical services, including software support, are under section 194J at 2%, and the section and rate come from the nature of the payment, not from the supplier's description. [1][2] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2] When an AMC contract is mixed or unclear, raise TDS_SECTION_UNCLEAR to the Tax Desk and do not guess the section. [2]
+  Base (taxable value, GST excluded): ₹1,20,000
+  TDS: section 194J at 2%: ₹2,400
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 2.0, 'amount': 2400.0}; calculator tds: {'section': '194J', 'rate': 2.0, 'amount': 2400.0}",,3,0,4591,856,0.01078
+Q104,dev,scenario,medium,"An invoice for an interior works contract with a partnership firm: taxable value ₹120,000 plus GST ₹21,600. What TDS should be deducted?","Section 194C at 2% on the taxable value excluding GST: ₹2,400.",D,answered,calculator:ap.tds,15.5,,"Status: answered
+Decision: Section 194C at 2%: ₹2,400
+Answer: Deduct TDS of ₹2,400 under section 194C at 2% on the taxable value ₹1,20,000, since the contractor is a partnership firm (non‑individual) and GST is excluded from the base. [1][2] The rule is that for work contracts where the payee is any other than individual or HUF, section 194C applies at 2%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2]
+  Base (taxable value, GST excluded): ₹1,20,000
+  TDS: section 194C at 2%: ₹2,400
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 2.0, 'amount': 2400.0}; calculator tds: {'section': '194C', 'rate': 2.0, 'amount': 2400.0}",,3,0,4969,749,0.00852
+Q105,dev,scenario,medium,"An invoice for architect's design fees: taxable value ₹120,000 plus GST ₹21,600. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹12,000.",D,answered,calculator:ap.tds,15.01,,"Status: answered
+Decision: Section 194J at 10%: ₹12,000
+Answer: Deduct TDS of ₹12,000 under section 194J at 10% on the architect’s professional services. [1] This applies because professional services (architects) fall under section 194J at 10%. [1] Calculate TDS on the taxable value excluding GST since GST is shown separately on the invoice. [2]
+  Base (taxable value, GST excluded): ₹1,20,000
+  TDS: section 194J at 10%: ₹12,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 12000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 12000.0}",,3,0,4694,697,0.00818
+Q106,holdout,scenario,medium,"An invoice for an annual audit fee to a CA firm: taxable value ₹250,000 plus GST ₹45,000. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹25,000.",D,answered,calculator:ap.tds,16.0,,"Status: answered
+Decision: Section 194J at 10%: ₹25,000
+Answer: Deduct TDS of ₹25,000 under section 194J at 10% on the taxable value ₹2,50,000 for an audit fee invoice with GST shown separately. [1][2] Professional services including audit fall under section 194J at a rate of 10%. [1] TDS is calculated on the taxable value excluding GST wherever GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹2,50,000
+  TDS: section 194J at 10%: ₹25,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 25000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 25000.0}",,3,0,4685,763,0.00924
+Q107,holdout,scenario,medium,"An invoice for legal advice from a law firm: taxable value ₹480,000 plus GST ₹86,400. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹48,000.",D,answered,calculator:ap.tds,15.04,,"Status: answered
+Decision: Section 194J at 10%: ₹48,000
+Answer: Deduct TDS of ₹48,000 under section 194J at 10% on the ₹4,80,000 taxable value (GST excluded). [1][2] Professional services including legal are covered by section 194J at 10%. [1] TDS is calculated on the taxable value excluding GST wherever GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹4,80,000
+  TDS: section 194J at 10%: ₹48,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 48000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 48000.0}",,3,0,4671,738,0.00906
+Q108,dev,scenario,medium,"An invoice for software support for the ERP: taxable value ₹1,500,000 plus GST ₹270,000. What TDS should be deducted?","Section 194J at 2% on the taxable value excluding GST: ₹30,000.",D,answered,calculator:ap.tds,16.11,,"Status: answered
+Decision: Section 194J at 2%: ₹30,000
+Answer: Deduct TDS of ₹30,000 under section 194J at 2% on the taxable value for software support. [1][2] Fees for technical services, including software support, are under section 194J at 2%, and TDS is deducted on the taxable value excluding GST where GST is shown separately. [1][2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2] If a supplier required to issue e-invoices sends one without an IRN, return it as IRN_MISSING and do not pay the base value. [3]
+  Base (taxable value, GST excluded): ₹15,00,000
+  TDS: section 194J at 2%: ₹30,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 2.0, 'amount': 30000.0}; calculator tds: {'section': '194J', 'rate': 2.0, 'amount': 30000.0}",,3,0,4606,798,0.01018
+Q109,holdout,scenario,medium,"An invoice for a transport contract with a company: taxable value ₹45,000 plus GST ₹8,100. What TDS should be deducted?",Section 194C at 2% on the taxable value excluding GST: ₹900.,D,answered,calculator:ap.tds,15.25,,"Status: answered
+Decision: Section 194C at 2%: ₹900
+Answer: Deduct TDS of ₹900 under section 194C at 2% on the ₹45,000 taxable value (GST excluded). [1][2] For work contracts such as transport, the rate is 2% when the payee is any other payee (not an individual or HUF). [1] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [2]
+  Base (taxable value, GST excluded): ₹45,000
+  TDS: section 194C at 2%: ₹900
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 2.0, 'amount': 900.0}; calculator tds: {'section': '194C', 'rate': 2.0, 'amount': 900.0}",,3,0,4686,668,0.00828
+Q110,holdout,scenario,hard,"An invoice for a housekeeping manpower contract with an individual contractor: taxable value ₹18,000 plus GST ₹3,240. The supplier has not given a PAN. What TDS should be deducted?","Section 194C at 20% on the taxable value excluding GST: ₹3,600. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,15.9,,"Status: answered
+Decision: Section 194C at 20%: ₹3,600
+Answer: Deduct TDS of ₹3,600 under section 194C at 20% on the ₹18,000 taxable value, because the payee is an individual contractor for manpower and no PAN was furnished. [1][2] For manpower paid to an individual or HUF, the section is 194C with a normal rate of 1%, but if the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [1][2] Compute TDS on the taxable value excluding GST when GST is shown separately on the invoice. [2]
+  Base (taxable value, GST excluded): ₹18,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194C at 20%: ₹3,600
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 20.0, 'amount': 3600.0}; calculator tds: {'section': '194C', 'rate': 20.0, 'amount': 3600.0}",,3,0,5029,848,0.00976
+Q111,holdout,scenario,medium,"An invoice for rent for a warehouse building: taxable value ₹120,000 plus GST ₹21,600. What TDS should be deducted?","Section 194I at 10% on the taxable value excluding GST: ₹12,000.",D,answered,calculator:ap.tds,12.89,,"Status: answered
+Decision: Section 194I at 10%: ₹12,000
+Answer: Deduct ₹12,000 as TDS under section 194I at 10% on the rent of a building, computed on the taxable value excluding GST. [1][2] The rule is that rent of land, building or furniture falls under section 194I at 10%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹1,20,000
+  TDS: section 194I at 10%: ₹12,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194I', 'rate': 10.0, 'amount': 12000.0}; calculator tds: {'section': '194I', 'rate': 10.0, 'amount': 12000.0}",,3,0,4598,621,0.00869
+Q112,dev,scenario,medium,"An invoice for hire of a crane: taxable value ₹1,500,000 plus GST ₹270,000. What TDS should be deducted?","Section 194I at 2% on the taxable value excluding GST: ₹30,000.",D,answered,calculator:ap.tds,14.77,,"Status: answered
+Decision: Section 194I at 2%: ₹30,000
+Answer: Deduct TDS of ₹30,000 under section 194I at 2% on the taxable value ₹15,00,000, excluding GST. [1][2] This follows the rule that rent of plant, machinery or equipment is under section 194I at 2%, and that TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2]
+  Base (taxable value, GST excluded): ₹15,00,000
+  TDS: section 194I at 2%: ₹30,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194I', 'rate': 2.0, 'amount': 30000.0}; calculator tds: {'section': '194I', 'rate': 2.0, 'amount': 30000.0}",,3,0,4615,603,0.00801
+Q113,holdout,scenario,medium,"An invoice for network monitoring services: taxable value ₹45,000 plus GST ₹8,100. What TDS should be deducted?",Section 194J at 2% on the taxable value excluding GST: ₹900.,D,answered,calculator:ap.tds,15.6,,"Status: answered
+Decision: Section 194J at 2%: ₹900
+Answer: Deduct TDS of ₹900 under section 194J at 2% on the ₹45,000 taxable value, excluding GST. [1][2] Fees for technical services, including software support, are under section 194J at 2%. [1] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹45,000
+  TDS: section 194J at 2%: ₹900
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 2.0, 'amount': 900.0}; calculator tds: {'section': '194J', 'rate': 2.0, 'amount': 900.0}",,3,0,4651,749,0.00898
+Q114,dev,scenario,medium,"An invoice for an interior works contract with a partnership firm: taxable value ₹250,000 plus GST ₹45,000. What TDS should be deducted?","Section 194C at 2% on the taxable value excluding GST: ₹5,000.",D,answered,calculator:ap.tds,15.87,,"Status: answered
+Decision: Section 194C at 2%: ₹5,000
+Answer: Deduct TDS of ₹5,000 under section 194C at 2% on the taxable value ₹2,50,000, since interior works is a work contract and the payee is a partnership firm (not an individual or HUF). [1][2][3] For work contracts where the payee is any other payee, the rate is 2% under section 194C, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2] The 1% rate under section 194C applies only when the payee is an individual or HUF, which does not include a partnership firm. [3]
+  Base (taxable value, GST excluded): ₹2,50,000
+  TDS: section 194C at 2%: ₹5,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 2.0, 'amount': 5000.0}; calculator tds: {'section': '194C', 'rate': 2.0, 'amount': 5000.0}",,3,0,4780,814,0.00945
+Q115,holdout,scenario,hard,"An invoice for architect's design fees: taxable value ₹1,500,000 plus GST ₹270,000. The supplier has not given a PAN. What TDS should be deducted?","Section 194J at 20% on the taxable value excluding GST: ₹300,000. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,18.22,,"Status: answered
+Decision: Section 194J at 20%: ₹3,00,000
+Answer: Deduct TDS of ₹3,00,000 at 20% under section 194J on the ₹15,00,000 taxable value excluding GST. [1][2] Architects are covered as professional services under section 194J at 10%, but since no PAN is furnished you must deduct at 20% or the applicable rate, whichever is higher. [1][2] When GST is shown separately, TDS is calculated on the taxable value excluding GST, which here is ₹15,00,000. [2]
+  Base (taxable value, GST excluded): ₹15,00,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194J at 20%: ₹3,00,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 20.0, 'amount': 300000.0}; calculator tds: {'section': '194J', 'rate': 20.0, 'amount': 300000.0}",,3,0,5249,890,0.00968
+Q116,holdout,scenario,medium,"An invoice for an annual audit fee to a CA firm: taxable value ₹910,000 plus GST ₹163,800. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹91,000.",D,answered,calculator:ap.tds,15.43,,"Status: answered
+Decision: Section 194J at 10%: ₹91,000
+Answer: Deduct TDS of ₹91,000 under section 194J at 10% on the taxable value ₹9,10,000 (GST excluded). [1][2] Professional services including audit fall under section 194J at 10%. [1] TDS is calculated on the taxable value excluding GST when GST is shown separately on the invoice. [2] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [2]
+  Base (taxable value, GST excluded): ₹9,10,000
+  TDS: section 194J at 10%: ₹91,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 91000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 91000.0}",,3,0,4691,742,0.00908
+Q117,dev,scenario,medium,"An invoice for legal advice from a law firm: taxable value ₹910,000 plus GST ₹163,800. What TDS should be deducted?","Section 194J at 10% on the taxable value excluding GST: ₹91,000.",D,answered,calculator:ap.tds,6.45,,"Status: answered
+Decision: Section 194J at 10%: ₹91,000
+Answer: Deduct TDS of ₹91,000 under section 194J at 10% on the taxable value of ₹9,10,000 for legal services. [1][2] The rule is that professional services including legal are under section 194J at 10%, and TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1][2]
+  Base (taxable value, GST excluded): ₹9,10,000
+  TDS: section 194J at 10%: ₹91,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 10.0, 'amount': 91000.0}; calculator tds: {'section': '194J', 'rate': 10.0, 'amount': 91000.0}",,3,3,0,0,0.0
+Q118,dev,scenario,hard,"An invoice for software support for the ERP: taxable value ₹1,500,000 plus GST ₹270,000. The supplier has not given a PAN. What TDS should be deducted?","Section 194J at 20% on the taxable value excluding GST: ₹300,000. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,14.96,,"Status: answered
+Decision: Section 194J at 20%: ₹3,00,000
+Answer: Deduct TDS of ₹3,00,000 under section 194J at 20% on a base of ₹15,00,000 because the supplier has not furnished a PAN. [1][2] For software support, the section is 194J with a normal rate of 2%, but when PAN is not furnished you must deduct at 20% or the applicable rate, whichever is higher. [2][1] TDS is calculated on the taxable value excluding GST where GST is shown separately on the invoice. [1]
+  Base (taxable value, GST excluded): ₹15,00,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194J at 20%: ₹3,00,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194J', 'rate': 20.0, 'amount': 300000.0}; calculator tds: {'section': '194J', 'rate': 20.0, 'amount': 300000.0}",,3,0,5368,906,0.00987
+Q119,dev,scenario,hard,"An invoice for a transport contract with a company: taxable value ₹250,000 plus GST ₹45,000. The supplier has not given a PAN. What TDS should be deducted?","Section 194C at 20% on the taxable value excluding GST: ₹50,000. The 20% no-PAN rate applies because it is higher than the normal rate.",D,answered,calculator:ap.tds,16.22,,"Status: answered
+Decision: Section 194C at 20%: ₹50,000
+Answer: Deduct TDS of ₹50,000 under section 194C at 20% on the ₹2,50,000 taxable value because PAN is not furnished. [1][2][3] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [1] If the supplier has not furnished a valid PAN, deduct at 20% or the applicable rate, whichever is higher. [1] For work contracts, transport, repairs, manpower, the section is 194C, with rate 2% for any other payee or 1% if the payee is an individual or HUF, but the higher 20% no-PAN rate applies here. [2][3][1]
+  Base (taxable value, GST excluded): ₹2,50,000
+  PAN furnished?: No — higher of the no-PAN rate and the normal rate
+  TDS: section 194C at 20%: ₹50,000
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 20.0, 'amount': 50000.0}; calculator tds: {'section': '194C', 'rate': 20.0, 'amount': 50000.0}",,3,0,5252,949,0.01103
+Q120,dev,scenario,medium,"An invoice for a housekeeping manpower contract with an individual contractor: taxable value ₹910,000 plus GST ₹163,800. What TDS should be deducted?","Section 194C at 1% on the taxable value excluding GST: ₹9,100.",D,answered,calculator:ap.tds,15.43,,"Status: answered
+Decision: Section 194C at 1%: ₹9,100
+Answer: Deduct TDS of ₹9,100 under section 194C at 1% on the taxable value ₹9,10,000, excluding the separately shown GST. [1][2] For work contracts including manpower where the payee is an individual or HUF, section 194C rate is 1%. [1] TDS is deducted on the taxable value excluding GST wherever GST is shown separately on the invoice. [2]
+  Base (taxable value, GST excluded): ₹9,10,000
+  TDS: section 194C at 1%: ₹9,100
+Older sources (superseded): value before GST (AP SOP v3.1 §5); value before GST if GST is shown separately (Video 2 [09:05]); ask the Team Lead (AP SOP v3.1 §5); raise TDS_SECTION_UNCLEAR (DI-03 Part A, step 6)",True,True,True,False,True,correct,True,"expected {'section': '194C', 'rate': 1.0, 'amount': 9100.0}; calculator tds: {'section': '194C', 'rate': 1.0, 'amount': 9100.0}",,3,0,4706,703,0.00841
+Q121,holdout,scenario,easy,Who must approve a PO-backed invoice with a total of ₹120.00 lakh including GST?,Client CFO (SOP v4.0 §7).,D,answered,calculator:ap.approvals,14.75,,"Status: answered
+Decision: Client CFO
+Answer: Client CFO must approve it through the approval workflow because the invoice total of ₹1,20,00,000 is above ₹50 lakh. [1] The rule states that invoices with a total above ₹50 lakh require Client CFO approval through the approval workflow before posting. [1] Also open the GST tab and confirm the buyer GSTIN on that tab. [2]
+  Invoice total (incl. GST): ₹1,20,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,expected {'decision': 'Client CFO'}; calculator approvals: {'decision': 'Client CFO'},,3,0,4415,651,0.00792
+Q122,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹4.50 lakh including GST?,No approval beyond a clean match (SOP v4.0 §7).,D,answered,calculator:ap.approvals,17.23,,"Status: answered
+Decision: No approval beyond a clean match
+Answer: No one needs to approve it beyond a clean match because the total ₹4,50,000 is up to ₹10 lakh. [1] The rule says ""Up to ₹10 lakh | None beyond a clean match"" and applies to totals including GST. [1] If there is any exception, it is cleared by a Senior Processor for invoices up to ₹10 lakh. [1] For reference, invoices above ₹10 lakh up to ₹50 lakh require AP Controller approval and above ₹50 lakh require the Client CFO through the approval workflow. [1]
+  Invoice total (incl. GST): ₹4,50,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'No approval beyond a clean match'}; calculator approvals: {'decision': 'No approval beyond a clean match'},,3,0,4627,887,0.00924
+Q123,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹9.80 lakh including GST?,No approval beyond a clean match (SOP v4.0 §7).,D,answered,calculator:ap.approvals,15.43,,"Status: answered
+Decision: No approval beyond a clean match
+Answer: No one needs to approve it beyond a clean match because the total ₹9,80,000 is up to ₹10 lakh. [1] The rule states: ""Up to ₹10 lakh | None beyond a clean match. Exceptions are cleared by a Senior Processor."" [1] Since it is PO-backed, the non-PO budget-owner approval does not apply. [2]
+  Invoice total (incl. GST): ₹9,80,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'No approval beyond a clean match'}; calculator approvals: {'decision': 'No approval beyond a clean match'},,3,0,4501,713,0.00797
+Q124,holdout,scenario,medium,Who must approve a PO-backed invoice with a total of ₹22.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,13.41,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this invoice before posting. [1][2] For invoice totals above ₹10 lakh up to ₹50 lakh, approval needed before posting is AP Controller. [1] This invoice is PO-backed, so the non-PO budget owner approval does not apply. [3][1]
+  Invoice total (incl. GST): ₹22,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,True,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,0,4613,708,0.00818
+Q125,holdout,scenario,medium,Who must approve a PO-backed invoice with a total of ₹80.00 lakh including GST?,Client CFO (SOP v4.0 §7).,D,answered,calculator:ap.approvals,15.53,,"Status: answered
+Decision: Client CFO
+Answer: Client CFO must approve the ₹80,00,000 PO-backed invoice through the approval workflow. [1] The rule states that for invoice totals above ₹50 lakh, approval before posting is Client CFO, through the approval workflow. [1] AP Controller approval applies only to invoices above ₹10 lakh up to ₹50 lakh, so it does not cover ₹80,00,000. [1][2] Budget owner approval is only for non-PO invoices, and every other invoice needs a PO. [3]
+  Invoice total (incl. GST): ₹80,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,True,correct,True,expected {'decision': 'Client CFO'}; calculator approvals: {'decision': 'Client CFO'},,3,0,4674,986,0.00984
+Q126,holdout,scenario,easy,Who must approve a PO-backed invoice with a total of ₹120.00 lakh including GST?,Client CFO (SOP v4.0 §7).,D,answered,calculator:ap.approvals,5.83,,"Status: answered
+Decision: Client CFO
+Answer: Client CFO must approve it through the approval workflow because the invoice total of ₹1,20,00,000 is above ₹50 lakh. [1] The rule states that invoices with a total above ₹50 lakh require Client CFO approval through the approval workflow before posting. [1] Also open the GST tab and confirm the buyer GSTIN on that tab. [2]
+  Invoice total (incl. GST): ₹1,20,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,expected {'decision': 'Client CFO'}; calculator approvals: {'decision': 'Client CFO'},,3,3,0,0,0.0
+Q127,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹49.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,13.74,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this PO-backed invoice of ₹49,00,000 before posting. [1] The rule is that invoices with total above ₹10 lakh up to ₹50 lakh require AP Controller approval, while above ₹50 lakh require Client CFO approval, and up to ₹10 lakh need none beyond a clean match. [1] The non-PO budget owner approval does not apply because this is a PO-backed invoice. [2][1]
+  Invoice total (incl. GST): ₹49,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,0,4598,790,0.00903
+Q128,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹49.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,11.73,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this PO-backed invoice of ₹49,00,000 before posting. [1] The rule is that invoices with total above ₹10 lakh up to ₹50 lakh require AP Controller approval, while above ₹50 lakh require Client CFO approval, and up to ₹10 lakh need none beyond a clean match. [1] The non-PO budget owner approval does not apply because this is a PO-backed invoice. [2][1]
+  Invoice total (incl. GST): ₹49,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,2,1017,304,0.00086
+Q129,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹49.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,6.41,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this PO-backed invoice of ₹49,00,000 before posting. [1] The rule is that invoices with total above ₹10 lakh up to ₹50 lakh require AP Controller approval, while above ₹50 lakh require Client CFO approval, and up to ₹10 lakh need none beyond a clean match. [1] The non-PO budget owner approval does not apply because this is a PO-backed invoice. [2][1]
+  Invoice total (incl. GST): ₹49,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,3,0,0,0.0
+Q130,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹4.50 lakh including GST?,No approval beyond a clean match (SOP v4.0 §7).,D,answered,calculator:ap.approvals,6.03,,"Status: answered
+Decision: No approval beyond a clean match
+Answer: No one needs to approve it beyond a clean match because the total ₹4,50,000 is up to ₹10 lakh. [1] The rule says ""Up to ₹10 lakh | None beyond a clean match"" and applies to totals including GST. [1] If there is any exception, it is cleared by a Senior Processor for invoices up to ₹10 lakh. [1] For reference, invoices above ₹10 lakh up to ₹50 lakh require AP Controller approval and above ₹50 lakh require the Client CFO through the approval workflow. [1]
+  Invoice total (incl. GST): ₹4,50,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'No approval beyond a clean match'}; calculator approvals: {'decision': 'No approval beyond a clean match'},,3,3,0,0,0.0
+Q131,holdout,scenario,medium,Who must approve a PO-backed invoice with a total of ₹22.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,6.12,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this invoice before posting. [1][2] For invoice totals above ₹10 lakh up to ₹50 lakh, approval needed before posting is AP Controller. [1] This invoice is PO-backed, so the non-PO budget owner approval does not apply. [3][1]
+  Invoice total (incl. GST): ₹22,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,True,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,3,0,0,0.0
+Q132,holdout,scenario,easy,Who must approve a PO-backed invoice with a total of ₹120.00 lakh including GST?,Client CFO (SOP v4.0 §7).,D,answered,calculator:ap.approvals,7.05,,"Status: answered
+Decision: Client CFO
+Answer: Client CFO must approve it through the approval workflow because the invoice total of ₹1,20,00,000 is above ₹50 lakh. [1] The rule states that invoices with a total above ₹50 lakh require Client CFO approval through the approval workflow before posting. [1] Also open the GST tab and confirm the buyer GSTIN on that tab. [2]
+  Invoice total (incl. GST): ₹1,20,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,expected {'decision': 'Client CFO'}; calculator approvals: {'decision': 'Client CFO'},,3,3,0,0,0.0
+Q133,holdout,scenario,medium,Who must approve a PO-backed invoice with a total of ₹22.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,6.42,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve this invoice before posting. [1][2] For invoice totals above ₹10 lakh up to ₹50 lakh, approval needed before posting is AP Controller. [1] This invoice is PO-backed, so the non-PO budget owner approval does not apply. [3][1]
+  Invoice total (incl. GST): ₹22,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,True,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,3,0,0,0.0
+Q134,dev,scenario,easy,Who must approve a PO-backed invoice with a total of ₹9.80 lakh including GST?,No approval beyond a clean match (SOP v4.0 §7).,D,answered,calculator:ap.approvals,6.02,,"Status: answered
+Decision: No approval beyond a clean match
+Answer: No one needs to approve it beyond a clean match because the total ₹9,80,000 is up to ₹10 lakh. [1] The rule states: ""Up to ₹10 lakh | None beyond a clean match. Exceptions are cleared by a Senior Processor."" [1] Since it is PO-backed, the non-PO budget-owner approval does not apply. [2]
+  Invoice total (incl. GST): ₹9,80,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F); courier (Part F)",True,True,True,False,False,correct,True,expected {'decision': 'No approval beyond a clean match'}; calculator approvals: {'decision': 'No approval beyond a clean match'},,3,3,0,0,0.0
+Q135,dev,scenario,medium,Who must approve a PO-backed invoice with a total of ₹12.00 lakh including GST?,AP Controller (SOP v4.0 §7).,D,answered,calculator:ap.approvals,14.07,,"Status: answered
+Decision: AP Controller
+Answer: The AP Controller must approve the ₹12,00,000 PO-backed invoice before posting. [1] The rule is that invoices above ₹10 lakh up to ₹50 lakh require AP Controller approval, and this total is within that band. [1] Client CFO approval applies only when the invoice total is above ₹50 lakh, which is not the case here. [1]
+  Invoice total (incl. GST): ₹12,00,000
+  AP Controller above: ₹10,00,000
+  Client CFO above: ₹50,00,000
+  PO-backed: Yes
+Older sources (superseded): ₹1 crore (AP SOP v3.1 §6); ₹25 lakh (AP SOP v3.1 §6); ₹25 lakh (Part F)",True,True,True,False,True,correct,True,expected {'decision': 'AP Controller'}; calculator approvals: {'decision': 'AP Controller'},,3,0,4488,699,0.00792
+Q136,holdout,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 02 August 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 01 October 2026 (60 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Tuesday 29 September 2026.,D,answered,calculator:ap.msme,15.45,,"Status: answered
+Decision: Due Thursday 1 October 2026; pay in the Tuesday 29 September 2026 run
+Answer: Due Thursday 1 October 2026; pay it in the Tuesday 29 September 2026 run, with a 1 pm cut-off on Monday 28 September 2026. [1][2] Medium enterprises follow normal terms and the default is 60 days from invoice acceptance, and payments run Tuesday and Friday with a 1 pm previous working day cut-off. [1][2] Pay on the last payment run that falls on or before the due date and never pay early without Treasury approval. [1]
+  Supplier category: medium
+  Accepted on: Sunday 2 August 2026
+  Term: 60 days (default term (normal terms))
+  Due date: Thursday 1 October 2026
+  Payment run (last on or before due): Tuesday 29 September 2026
+  Cut-off: 1 pm → Monday 28 September 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-10-01', 'run_date': '2026-09-29'}; calculator msme: {'due_date': '2026-10-01', 'run_date': '2026-09-29'}",,3,0,4872,831,0.01036
+Q137,holdout,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 13 July 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 28 July 2026 (15 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Tuesday 28 July 2026.,D,answered,calculator:ap.msme,16.47,,"Status: answered
+Decision: Due Tuesday 28 July 2026; pay in the Tuesday 28 July 2026 run
+Answer: Due Tuesday 28 July 2026; pay in the Tuesday 28 July 2026 run. [1] Micro and small enterprises registered on Udyam with no written agreement must be paid within 15 days from the day of acceptance, and payment must be made on the last payment run that falls on or before the due date. [1] Payment runs are on Tuesday and Friday, with a cut-off of 1 pm on the previous working day for an invoice to be included. [1]
+  Supplier category: micro
+  Accepted on: Monday 13 July 2026
+  Term: 15 days (no written agreement)
+  Due date: Tuesday 28 July 2026
+  Payment run (last on or before due): Tuesday 28 July 2026
+  Cut-off: 1 pm → Monday 27 July 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-07-28', 'run_date': '2026-07-28'}; calculator msme: {'due_date': '2026-07-28', 'run_date': '2026-07-28'}",,3,0,4798,800,0.01024
+Q138,dev,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 09 June 2026; agreed payment term 45 days. What is the due date and which payment run should pay it?,Due 24 July 2026 (45 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Friday 24 July 2026.,D,answered,calculator:ap.msme,17.22,,"Status: answered
+Decision: Due Friday 24 July 2026; pay in the Friday 24 July 2026 run
+Answer: For a medium enterprise, normal terms apply, so with a 45-day agreed term from acceptance on Tuesday 9 June 2026 the due date is Friday 24 July 2026. [1] Pay on the last payment run on or before the due date, and payment runs are on Tuesday and Friday with a 1 pm cut-off on the previous working day, so the paying run is Friday 24 July 2026. [1]
+  Supplier category: medium
+  Accepted on: Tuesday 9 June 2026
+  Term: 45 days (agreed term (normal terms))
+  Due date: Friday 24 July 2026
+  Payment run (last on or before due): Friday 24 July 2026
+  Cut-off: 1 pm → Thursday 23 July 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-07-24', 'run_date': '2026-07-24'}; calculator msme: {'due_date': '2026-07-24', 'run_date': '2026-07-24'}",,3,0,4995,1026,0.01129
+Q139,dev,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 01 April 2026; agreed payment term 60 days. What is the due date and which payment run should pay it?,Due 16 May 2026 (45 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 15 May 2026.,D,answered,calculator:ap.msme,20.29,,"Status: answered
+Decision: Due Saturday 16 May 2026; pay in the Friday 15 May 2026 run
+Answer: Due Saturday 16 May 2026; pay it in the Friday 15 May 2026 run. [1] For a micro or small enterprise registered on Udyam with a written agreement, the term is within the agreed term but can never exceed 45 days from the day of acceptance, and you pay on the last payment run that falls on or before the due date. [1] Payment runs are on Tuesday and Friday, with a cut-off of 1 pm on the previous working day, so the last run on or before the due date is Friday 15 May 2026. [1]
+  Supplier category: small
+  Accepted on: Wednesday 1 April 2026
+  Term: 45 days (agreed 60 days, capped at 45)
+  Due date: Saturday 16 May 2026
+  Payment run (last on or before due): Friday 15 May 2026
+  Cut-off: 1 pm → Thursday 14 May 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-05-16', 'run_date': '2026-05-15'}; calculator msme: {'due_date': '2026-05-16', 'run_date': '2026-05-15'}",,3,0,4957,996,0.01062
+Q140,dev,scenario,hard,A micro enterprise supplier registered on Udyam; invoice accepted on 01 August 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 16 August 2026 (15 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 14 August 2026.,D,answered,calculator:ap.msme,18.48,,"Status: answered
+Decision: Due Sunday 16 August 2026; pay in the Friday 14 August 2026 run
+Answer: Due Sunday 16 August 2026; pay in the Friday 14 August 2026 run. [1] For micro and small enterprises registered on Udyam with no written agreement, pay within 15 days from the day of acceptance, and pay on the last payment run that falls on or before the due date with a cut-off of 1 pm on the previous working day and runs on Tuesday and Friday. [1][2] If this invoice is within seven days of due date, flag MSME_DUE to the Team Lead and resolve before due date. [3]
+  Supplier category: micro
+  Accepted on: Saturday 1 August 2026
+  Term: 15 days (no written agreement)
+  Due date: Sunday 16 August 2026
+  Payment run (last on or before due): Friday 14 August 2026
+  Cut-off: 1 pm → Thursday 13 August 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-08-16', 'run_date': '2026-08-14'}; calculator msme: {'due_date': '2026-08-16', 'run_date': '2026-08-14'}",,3,0,4867,1031,0.01172
+Q141,dev,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 27 June 2026; agreed payment term 30 days. What is the due date and which payment run should pay it?,Due 27 July 2026 (30 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 24 July 2026.,D,answered,calculator:ap.msme,17.3,,"Status: answered
+Decision: Due Monday 27 July 2026; pay in the Friday 24 July 2026 run
+Answer: Due Monday 27 July 2026, to be paid in the Friday 24 July 2026 run with a 1 pm cut-off on Thursday 23 July 2026. [1] For micro and small enterprises registered on Udyam, pay within the agreed term capped at 45 days from acceptance, and pay on the last payment run on or before the due date; payment runs are Tuesday and Friday with a 1 pm previous working day cut-off. [1][2]
+  Supplier category: small
+  Accepted on: Saturday 27 June 2026
+  Term: 30 days (agreed 30 days, capped at 45)
+  Due date: Monday 27 July 2026
+  Payment run (last on or before due): Friday 24 July 2026
+  Cut-off: 1 pm → Thursday 23 July 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-07-27', 'run_date': '2026-07-24'}; calculator msme: {'due_date': '2026-07-27', 'run_date': '2026-07-24'}",,3,0,4773,830,0.01012
+Q142,holdout,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 12 August 2026; agreed payment term 30 days. What is the due date and which payment run should pay it?,Due 11 September 2026 (30 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 11 September 2026.,D,answered,calculator:ap.msme,15.83,,"Status: answered
+Decision: Due Friday 11 September 2026; pay in the Friday 11 September 2026 run
+Answer: Due Friday 11 September 2026; pay in the Friday 11 September 2026 run. [1][2] For a micro or small enterprise registered on Udyam, pay within the agreed term but never beyond 45 days from acceptance, and pay on the last payment run on or before the due date. [1] Payment runs are on Tuesday and Friday with a cut-off of 1 pm on the previous working day, so the Friday 11 September 2026 run is the last on or before the due date. [1][2]
+  Supplier category: small
+  Accepted on: Wednesday 12 August 2026
+  Term: 30 days (agreed 30 days, capped at 45)
+  Due date: Friday 11 September 2026
+  Payment run (last on or before due): Friday 11 September 2026
+  Cut-off: 1 pm → Thursday 10 September 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-09-11', 'run_date': '2026-09-11'}; calculator msme: {'due_date': '2026-09-11', 'run_date': '2026-09-11'}",,3,0,5081,943,0.01065
+Q143,holdout,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 24 June 2026; agreed payment term 60 days. What is the due date and which payment run should pay it?,Due 08 August 2026 (45 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 07 August 2026.,D,answered,calculator:ap.msme,18.01,,"Status: answered
+Decision: Due Saturday 8 August 2026; pay in the Friday 7 August 2026 run
+Answer: Due Saturday 8 August 2026; pay in the Friday 7 August 2026 run. [1] Because the supplier is a micro or small enterprise registered on Udyam with an agreed term, the term cannot exceed 45 days from acceptance, yielding a due date of Saturday 8 August 2026 from the 24 June 2026 acceptance. [1] Payment runs are on Tuesday and Friday, and we must pay on the last payment run on or before the due date, which is Friday 7 August 2026 with a 1 pm previous working day cut-off. [1][2]
+  Supplier category: small
+  Accepted on: Wednesday 24 June 2026
+  Term: 45 days (agreed 60 days, capped at 45)
+  Due date: Saturday 8 August 2026
+  Payment run (last on or before due): Friday 7 August 2026
+  Cut-off: 1 pm → Thursday 6 August 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-08-08', 'run_date': '2026-08-07'}; calculator msme: {'due_date': '2026-08-08', 'run_date': '2026-08-07'}",,3,0,5276,1036,0.01078
+Q144,dev,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 16 April 2026; agreed payment term 45 days. What is the due date and which payment run should pay it?,Due 31 May 2026 (45 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Friday 29 May 2026.,D,answered,calculator:ap.msme,18.23,,"Status: answered
+Decision: Due Sunday 31 May 2026; pay in the Friday 29 May 2026 run
+Answer: The due date is Sunday 31 May 2026, and it should be paid in the Friday 29 May 2026 run. [1] Medium enterprises follow normal terms, so with an agreed 45‑day term from acceptance on Thursday 16 April 2026, the due date is 31 May 2026 and we must pay on the last payment run on or before the due date. [1] Payment runs are on Tuesday and Friday, and the cut-off for inclusion is 1 pm on the previous working day, so the cut-off for the Friday 29 May 2026 run is 1 pm on Thursday 28 May 2026. [1][2]
+  Supplier category: medium
+  Accepted on: Thursday 16 April 2026
+  Term: 45 days (agreed term (normal terms))
+  Due date: Sunday 31 May 2026
+  Payment run (last on or before due): Friday 29 May 2026
+  Cut-off: 1 pm → Thursday 28 May 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-05-31', 'run_date': '2026-05-29'}; calculator msme: {'due_date': '2026-05-31', 'run_date': '2026-05-29'}",,3,0,5295,944,0.01028
+Q145,dev,scenario,hard,A small enterprise supplier registered on Udyam; invoice accepted on 10 September 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 25 September 2026 (15 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Friday 25 September 2026.,D,answered,calculator:ap.msme,17.2,,"Status: answered
+Decision: Due Friday 25 September 2026; pay in the Friday 25 September 2026 run
+Answer: Due Friday 25 September 2026, to be paid in the Friday 25 September 2026 run. [1] Micro and small enterprises registered on Udyam without a written agreement must be paid within 15 days from the day of acceptance, and payment must be on the last payment run that falls on or before the due date. [1] Payment runs are on Tuesday and Friday, with a cut-off for inclusion at 1 pm on the previous working day, and MSME_DUE flags must be treated as urgent. [1]
+  Supplier category: micro
+  Accepted on: Thursday 10 September 2026
+  Term: 15 days (no written agreement)
+  Due date: Friday 25 September 2026
+  Payment run (last on or before due): Friday 25 September 2026
+  Cut-off: 1 pm → Thursday 24 September 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-09-25', 'run_date': '2026-09-25'}; calculator msme: {'due_date': '2026-09-25', 'run_date': '2026-09-25'}",,3,0,5587,915,0.01092
+Q146,holdout,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 21 July 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 19 September 2026 (60 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Friday 18 September 2026.,D,answered,calculator:ap.msme,17.36,,"Status: answered
+Decision: Due Saturday 19 September 2026; pay in the Friday 18 September 2026 run
+Answer: The due date is Saturday 19 September 2026, because a medium enterprise follows normal terms and the default for non‑MSME suppliers is 60 days from invoice acceptance unless a PO says otherwise. [1] Pay it in the Friday 18 September 2026 run, as payments run Tuesday and Friday with a 1 pm cut‑off on the previous working day, and we must pay on the last payment run that falls on or before the due date. [1][2]
+  Supplier category: medium
+  Accepted on: Tuesday 21 July 2026
+  Term: 60 days (default term (normal terms))
+  Due date: Saturday 19 September 2026
+  Payment run (last on or before due): Friday 18 September 2026
+  Cut-off: 1 pm → Thursday 17 September 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-09-19', 'run_date': '2026-09-18'}; calculator msme: {'due_date': '2026-09-19', 'run_date': '2026-09-18'}",,3,0,5116,880,0.01031
+Q147,dev,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 05 September 2026; agreed payment term 45 days. What is the due date and which payment run should pay it?,Due 20 October 2026 (45 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Tuesday 20 October 2026.,D,answered,calculator:ap.msme,16.69,,"Status: answered
+Decision: Due Tuesday 20 October 2026; pay in the Tuesday 20 October 2026 run
+Answer: Due Tuesday 20 October 2026, to be paid in the Tuesday 20 October 2026 run. [1] Medium enterprises follow normal terms, and with a 45‑day agreed term from acceptance on 05 September 2026, the due date falls on 20 October 2026. [1] Payment runs are on Tuesday and Friday with a 1 pm previous‑working‑day cut‑off, and we must pay on the last run on or before the due date. [1]
+  Supplier category: medium
+  Accepted on: Saturday 5 September 2026
+  Term: 45 days (agreed term (normal terms))
+  Due date: Tuesday 20 October 2026
+  Payment run (last on or before due): Tuesday 20 October 2026
+  Cut-off: 1 pm → Monday 19 October 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-10-20', 'run_date': '2026-10-20'}; calculator msme: {'due_date': '2026-10-20', 'run_date': '2026-10-20'}",,3,0,4969,886,0.01036
+Q148,dev,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 01 May 2026; agreed payment term 60 days. What is the due date and which payment run should pay it?,Due 30 June 2026 (60 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Tuesday 30 June 2026.,D,answered,calculator:ap.msme,13.89,,"Status: answered
+Decision: Due Tuesday 30 June 2026; pay in the Tuesday 30 June 2026 run
+Answer: Medium enterprises follow normal terms, and default terms for suppliers that are not micro or small are 60 days from invoice acceptance unless the PO says otherwise. [1] Payment runs are on Tuesday and Friday, the cut-off for an invoice to be included is 1 pm on the previous working day, and we pay on the last payment run that falls on or before the due date and never pay early without Treasury approval. [1]
+  Supplier category: medium
+  Accepted on: Friday 1 May 2026
+  Term: 60 days (agreed term (normal terms))
+  Due date: Tuesday 30 June 2026
+  Payment run (last on or before due): Tuesday 30 June 2026
+  Cut-off: 1 pm → Monday 29 June 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-06-30', 'run_date': '2026-06-30'}; calculator msme: {'due_date': '2026-06-30', 'run_date': '2026-06-30'}",,2,0,4001,616,0.0095
+Q149,dev,scenario,hard,A micro enterprise supplier registered on Udyam; invoice accepted on 22 August 2026; agreed payment term 60 days. What is the due date and which payment run should pay it?,Due 06 October 2026 (45 days). Micro/small: agreed term capped at 45 days; 15 days without a written agreement. Pay on the last Tuesday or Friday run on or before that date: Tuesday 06 October 2026.,D,answered,calculator:ap.msme,141.42,,"Status: answered
+Decision: Due Tuesday 6 October 2026; pay in the Tuesday 6 October 2026 run
+Answer: The invoice is due Tuesday 6 October 2026, and it should be paid in the Tuesday 6 October 2026 payment run. [1] For micro and small enterprises registered on Udyam, the agreed term can never exceed 45 days from the day of acceptance, and payment must be on the last payment run that falls on or before the due date. [1] Payment runs are on Tuesday and Friday, with a cut-off of 1 pm on the previous working day, so the cut-off for this run is 1 pm on Monday 5 October 2026. [1] If the invoice is within seven days of due date and still stuck, raise MSME_DUE to the Team Lead with a target to resolve before due date. [2]
+  Supplier category: micro
+  Accepted on: Saturday 22 August 2026
+  Term: 45 days (agreed 60 days, capped at 45)
+  Due date: Tuesday 6 October 2026
+  Payment run (last on or before due): Tuesday 6 October 2026
+  Cut-off: 1 pm → Monday 5 October 2026
+Exception code: MSME_DUE
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,True,correct,True,"expected {'due_date': '2026-10-06', 'run_date': '2026-10-06'}; calculator msme: {'due_date': '2026-10-06', 'run_date': '2026-10-06'}",,3,0,4990,1243,0.01294
+Q150,holdout,scenario,hard,A medium enterprise supplier registered on Udyam; invoice accepted on 12 September 2026; no written agreement on payment terms. What is the due date and which payment run should pay it?,Due 11 November 2026 (60 days). Medium enterprises follow normal terms. Pay on the last Tuesday or Friday run on or before that date: Tuesday 10 November 2026.,D,answered,calculator:ap.msme,139.97,,"Status: answered
+Decision: Due Wednesday 11 November 2026; pay in the Tuesday 10 November 2026 run
+Answer: The due date is Wednesday 11 November 2026 and it should be paid in the Tuesday 10 November 2026 payment run. [1] Medium enterprises follow normal terms, and for suppliers that are not micro or small the default is 60 days from invoice acceptance, paid on the last payment run on or before the due date. [1] Payment runs are on Tuesday and Friday with a cut-off of 1 pm on the previous working day. [1]
+  Supplier category: medium
+  Accepted on: Saturday 12 September 2026
+  Term: 60 days (default term (normal terms))
+  Due date: Wednesday 11 November 2026
+  Payment run (last on or before due): Tuesday 10 November 2026
+  Cut-off: 1 pm → Monday 9 November 2026
+Older sources (superseded): 5 pm (AP SOP v3.1 §8); 5 pm (Part F); Thursday (AP SOP v3.1 §8); Thursday (Part F)",True,True,True,False,False,correct,True,"expected {'due_date': '2026-11-11', 'run_date': '2026-11-10'}; calculator msme: {'due_date': '2026-11-11', 'run_date': '2026-11-10'}",,3,0,4821,718,0.0097
+Q151,holdout,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹45.0 crore sends an invoice without an IRN. Is it acceptable?,"No. The supplier is above ₹5 crore, so an e-invoice is required: return as IRN_MISSING and pay nothing until it arrives.",D,answered,calculator:ap.einvoice,139.52,,"Status: answered
+Decision: Not acceptable — return for an e-invoice; pay nothing, including the base value
+Answer: No: since the supplier’s AATO is ₹45,00,00,000, they must issue an e-invoice with IRN, so an invoice without an IRN is not acceptable. [1][2] Under the rule, “A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.” [1] An invoice from such a supplier without an IRN is “not valid for input tax credit: return it as IRN_MISSING and ask for an e-invoice,” and “Do not pay the base value either; a valid invoice will follow.” [1] For checks, the work instruction requires confirming “for suppliers in AATO band B or above, the IRN,” which this invoice lacks. [2]
+  Highest turnover (AATO): ₹45,00,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: No
+Exception code: IRN_MISSING
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"expected {'passed': False, 'exception': 'IRN_MISSING'}; calculator einvoice: {'passed': False, 'exception': 'IRN_MISSING'}",,3,0,4613,964,0.01044
+Q152,dev,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹3.2 crore sends an invoice without an IRN. Is it acceptable?,"Yes. The supplier is below the ₹5 crore e-invoice threshold, so a normal tax invoice is valid.",D,answered,calculator:ap.einvoice,17.25,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: Yes, it is acceptable because e-invoices are required only when a supplier’s AATO has exceeded ₹5 crore in any year since 2017-18, and this supplier’s highest AATO is ₹3,20,00,000 which is below ₹5,00,00,000. [1][2] The rule is that a supplier whose AATO in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with IRN and QR code, and only then is IRN a mandatory field. [1][2] If a supplier who is required to issue e-invoices sends an invoice without an IRN, the invoice is not valid for input tax credit and must be returned as IRN_MISSING without paying the base value. [1]
+  Highest turnover (AATO): ₹3,20,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: No
+  IRN on the invoice?: No
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,False,correct,True,"expected {'passed': True, 'exception': None}; calculator einvoice: {'passed': True, 'exception': None}",,3,0,4840,988,0.01057
+Q153,holdout,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹45.0 crore sends an invoice without an IRN. Is it acceptable?,"No. The supplier is above ₹5 crore, so an e-invoice is required: return as IRN_MISSING and pay nothing until it arrives.",D,answered,calculator:ap.einvoice,6.33,,"Status: answered
+Decision: Not acceptable — return for an e-invoice; pay nothing, including the base value
+Answer: No: since the supplier’s AATO is ₹45,00,00,000, they must issue an e-invoice with IRN, so an invoice without an IRN is not acceptable. [1][2] Under the rule, “A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code.” [1] An invoice from such a supplier without an IRN is “not valid for input tax credit: return it as IRN_MISSING and ask for an e-invoice,” and “Do not pay the base value either; a valid invoice will follow.” [1] For checks, the work instruction requires confirming “for suppliers in AATO band B or above, the IRN,” which this invoice lacks. [2]
+  Highest turnover (AATO): ₹45,00,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: No
+Exception code: IRN_MISSING
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"expected {'passed': False, 'exception': 'IRN_MISSING'}; calculator einvoice: {'passed': False, 'exception': 'IRN_MISSING'}",,3,3,0,0,0.0
+Q154,holdout,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹8.9 crore sends an invoice with an IRN. Is it acceptable?,Yes — a valid e-invoice.,D,answered,calculator:ap.einvoice,15.06,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: Yes, it is acceptable because the supplier is above the ₹5 crore threshold and has issued the invoice with an IRN. [1][2] The rule is that a supplier whose AATO in any year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an IRN and QR code. [1] For suppliers in AATO band B or above, confirm the IRN on the GST tab. [2] If such a supplier sends an invoice without an IRN, return it as IRN_MISSING and do not pay the base value. [1]
+  Highest turnover (AATO): ₹8,90,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: Yes
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"expected {'passed': True, 'exception': None}; calculator einvoice: {'passed': True, 'exception': None}",,3,0,4788,735,0.00996
+Q155,dev,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹4.8 crore sends an invoice without an IRN. Is it acceptable?,"Yes. The supplier is below the ₹5 crore e-invoice threshold, so a normal tax invoice is valid.",D,answered,calculator:ap.einvoice,17.96,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: Yes, it is acceptable because e-invoices are required only when a supplier’s AATO has exceeded ₹5 crore in any year since 2017-18, and here the highest is ₹4,80,00,000 which is below that threshold. [1][2] Section 5.4 states that a supplier whose AATO in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with IRN and QR code, so IRN is mandatory only in those cases. [1][2] Where IRN is not required by §5.4, its absence is not a missing mandatory field under §3.2. [2] If a supplier required to issue e-invoices sends one without an IRN, return it as IRN_MISSING and do not pay the base value. [1]
+  Highest turnover (AATO): ₹4,80,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: No
+  IRN on the invoice?: No
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,False,correct,True,"expected {'passed': True, 'exception': None}; calculator einvoice: {'passed': True, 'exception': None}",,3,0,5440,1094,0.01203
+Q156,holdout,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹4.8 crore sends an invoice with an IRN. Is it acceptable?,"Yes. The supplier is below the ₹5 crore e-invoice threshold, so a normal tax invoice is valid.",D,answered,calculator:ap.einvoice,18.23,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: Yes, it is acceptable because e-invoices are required only when a supplier’s AATO has exceeded ₹5 crore since 2017-18, and here the highest AATO is ₹4,80,00,000 so the IRN is not required. [1][2] Section 5.4 states that a supplier whose AATO in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with IRN and QR code, and otherwise the IRN requirement does not apply. [1] Section 3.2 makes IRN and QR code mandatory only where required by 5.4, so their presence is not a condition for acceptance when the supplier is below the ₹5 crore threshold. [2][1]
+  Highest turnover (AATO): ₹4,80,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: No
+  IRN on the invoice?: Yes
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,False,correct,True,"expected {'passed': True, 'exception': None}; calculator einvoice: {'passed': True, 'exception': None}",,3,0,5399,1020,0.01053
+Q157,dev,conflict,hard,A supplier whose highest aggregate annual turnover since 2017-18 is ₹6.5 crore sends an invoice without an IRN. Is it acceptable?,"No. The supplier is above ₹5 crore, so an e-invoice is required: return as IRN_MISSING and pay nothing until it arrives.",D,answered,calculator:ap.einvoice,16.73,,"Status: answered
+Decision: Not acceptable — return for an e-invoice; pay nothing, including the base value
+Answer: Not acceptable — return it for an e-invoice and pay nothing, because a supplier whose AATO has exceeded ₹5 crore must issue an e-invoice with IRN and QR code. [1] Since the supplier’s highest aggregate annual turnover since 2017-18 is ₹6,50,00,000, they are required to include an IRN and QR code on the invoice. [1] An invoice from such a supplier without an IRN is not valid for input tax credit and must be returned with exception code IRN_MISSING, with no payment of the base value. [1]
+  Highest turnover (AATO): ₹6,50,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: No
+Exception code: IRN_MISSING
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,True,correct,True,"The answer matches the gold: supplier over ₹5 crore must issue e-invoice with IRN; invoice without IRN is not acceptable, return as IRN_MISSING, and make no payment until IRN arrives.",,4,0,5593,1078,0.01152
+Q158,dev,conflict,hard,A supplier whose highest aggregate annual turnover since 2017-18 is ₹6.5 crore sends an invoice without an IRN. Is it acceptable?,"No. The supplier is above ₹5 crore, so an e-invoice is required: return as IRN_MISSING and pay nothing until it arrives.",D,answered,calculator:ap.einvoice,11.37,,"Status: answered
+Decision: Not acceptable — return for an e-invoice; pay nothing, including the base value
+Answer: Not acceptable — return it for an e-invoice and pay nothing, because a supplier whose AATO has exceeded ₹5 crore must issue an e-invoice with IRN and QR code. [1] Since the supplier’s highest aggregate annual turnover since 2017-18 is ₹6,50,00,000, they are required to include an IRN and QR code on the invoice. [1] An invoice from such a supplier without an IRN is not valid for input tax credit and must be returned with exception code IRN_MISSING, with no payment of the base value. [1]
+  Highest turnover (AATO): ₹6,50,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: No
+Exception code: IRN_MISSING
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,True,correct,True,"The answer states that e-invoice is required above ₹5 crore AATO, that the supplier’s AATO is ₹6.5 crore, and instructs to return with IRN_MISSING and make no payment until an IRN is provided, matching the gold answer without contradictions.",,4,2,1835,444,0.00279
+Q159,dev,scenario,medium,A supplier whose highest aggregate annual turnover since 2017-18 is ₹45.0 crore sends an invoice with an IRN. Is it acceptable?,Yes — a valid e-invoice.,D,answered,calculator:ap.einvoice,19.3,,"Status: answered
+Decision: Acceptable on the e-invoice check
+Answer: Yes, it is acceptable because a supplier whose AATO has exceeded ₹5 crore must issue an e-invoice with an IRN, and this invoice has an IRN. [1][2] The rule is that “A supplier whose aggregate annual turnover (AATO) in any financial year since 2017-18 has exceeded ₹5 crore must issue an e-invoice with an Invoice Reference Number (IRN) and QR code,” and where required by 5.4 the IRN and QR code are mandatory fields on the invoice. [1][2] If the IRN were missing we would return it as IRN_MISSING and not pay the base value, and for suppliers in AATO band B or above we must confirm the IRN on the GST tab. [1][3]
+  Highest turnover (AATO): ₹45,00,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: Yes
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); active on the invoice date (DI-03 Part A, step 5)",True,True,True,False,False,correct,True,"expected {'passed': True, 'exception': None}; calculator einvoice: {'passed': True, 'exception': None}",,3,0,6698,1245,0.01219
+Q160,dev,conflict,hard,A supplier whose highest aggregate annual turnover since 2017-18 is ₹6.5 crore sends an invoice without an IRN. Is it acceptable?,"No. The supplier is above ₹5 crore, so an e-invoice is required: return as IRN_MISSING and pay nothing until it arrives.",D,answered,calculator:ap.einvoice,7.09,,"Status: answered
+Decision: Not acceptable — return for an e-invoice; pay nothing, including the base value
+Answer: Not acceptable — return it for an e-invoice and pay nothing, because a supplier whose AATO has exceeded ₹5 crore must issue an e-invoice with IRN and QR code. [1] Since the supplier’s highest aggregate annual turnover since 2017-18 is ₹6,50,00,000, they are required to include an IRN and QR code on the invoice. [1] An invoice from such a supplier without an IRN is not valid for input tax credit and must be returned with exception code IRN_MISSING, with no payment of the base value. [1]
+  Highest turnover (AATO): ₹6,50,00,000
+  E-invoice required above: ₹5,00,00,000
+  E-invoice required?: Yes
+  IRN on the invoice?: No
+Exception code: IRN_MISSING
+Older sources (superseded): ₹10 crore (AP SOP v3.1 §4); ten crore (Video 2 [03:40]); ₹10 crore (Part F); 1 October 2022 (Video 2 [03:40])",True,True,True,False,True,correct,True,"The answer states that e-invoice is required above ₹5 crore AATO, that the supplier’s AATO is ₹6.5 crore, and instructs to return with IRN_MISSING and make no payment until an IRN is provided, matching the gold answer without contradictions.",,4,4,0,0,0.0
