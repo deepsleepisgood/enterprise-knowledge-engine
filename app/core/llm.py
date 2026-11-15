@@ -88,8 +88,28 @@ def _get_client() -> Any:
         import anthropic
 
         settings = get_settings()
-        _client = anthropic.Anthropic(api_key=settings.anthropic_api_key or None)
+        _client = anthropic.Anthropic(
+            api_key=settings.anthropic_api_key or None,
+            max_retries=settings.anthropic_max_retries,
+            timeout=settings.anthropic_timeout_s,
+        )
     return _client
+
+
+_anthropic_slots: threading.BoundedSemaphore | None = None
+_slots_lock = threading.Lock()
+
+
+def _anthropic_call(method: str, **kwargs: Any) -> Any:
+    """`client.messages.<method>(**kwargs)`, at most ANTHROPIC_MAX_CONCURRENT at once: a burst
+    of users queues here instead of tripping the account's rate limit all together."""
+    global _anthropic_slots
+    with _slots_lock:
+        if _anthropic_slots is None:
+            n = max(1, get_settings().anthropic_max_concurrent)
+            _anthropic_slots = threading.BoundedSemaphore(n)
+    with _anthropic_slots:
+        return getattr(_get_client().messages, method)(**kwargs)
 
 
 # --- helpers ---------------------------------------------------------------------------
@@ -406,7 +426,7 @@ def complete(
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         if _openai_compatible(req["model"]):
             return _nim_complete(req)
-        resp = _get_client().messages.create(**req)
+        resp = _anthropic_call("create", **req)
         _check_stop(resp)
         text = "".join(getattr(b, "text", "") for b in resp.content if b.type == "text")
         return text, resp
@@ -442,7 +462,7 @@ def structured(
     def invoke(req: dict[str, Any]) -> tuple[Any, Any]:
         if _openai_compatible(req["model"]):
             return _nim_structured(req, schema)
-        resp = _get_client().messages.parse(**req, output_format=schema)
+        resp = _anthropic_call("parse", **req, output_format=schema)
         _check_stop(resp)
         parsed = resp.parsed_output
         if parsed is None:
@@ -519,8 +539,8 @@ def vision(
             for b, mt in images
         ]
         blocks.append({"type": "text", "text": text})
-        resp = _get_client().messages.create(
-            **{**req, "messages": [{"role": "user", "content": blocks}]}
+        resp = _anthropic_call(
+            "create", **{**req, "messages": [{"role": "user", "content": blocks}]}
         )
         _check_stop(resp)
         return "".join(getattr(b, "text", "") for b in resp.content if b.type == "text"), resp

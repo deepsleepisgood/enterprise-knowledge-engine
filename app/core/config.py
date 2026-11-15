@@ -17,6 +17,11 @@ class Settings(BaseSettings):
 
     llm_provider: str = "anthropic"  # anthropic | nim | openai
     anthropic_api_key: str = ""
+    # Anthropic calls at once for the whole process (more wait), and how often the SDK retries a
+    # rate limit or overload (it honours Retry-After). The SDK's own default gives up after 2.
+    anthropic_max_concurrent: int = 8
+    anthropic_max_retries: int = 6
+    anthropic_timeout_s: float = 120
     nvidia_api_key: str = ""
     # Any OpenAI-compatible endpoint runs through the NIM transport: set NIM_BASE_URL to it.
     # Isoquant (api.isoquant.ai) uses ISOQUANT_API_KEY; everything else uses NVIDIA_API_KEY.
