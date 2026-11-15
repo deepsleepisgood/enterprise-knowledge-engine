@@ -466,7 +466,13 @@ export function AskView() {
                 </span>
               )}
               {unsupported ? (
-                <NotCoveredCard route={card.route_to} sent={sentTo} sending={sending} onSend={() => void sendToExpert()} />
+                <NotCoveredCard
+                  route={card.route_to}
+                  sent={sentTo}
+                  sending={sending}
+                  onSend={() => void sendToExpert()}
+                  specialist={card.status === "needs_specialist"}
+                />
               ) : (
                 <>
                   <CitedText text={rule?.text ?? ""} citations={citations} active={active} onActivate={activate} />
