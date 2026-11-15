@@ -110,7 +110,11 @@ class Settings(BaseSettings):
     rerank_chars: int = 1200
     answer_passages: int = 6  # kept after reranking
     graph_facts: int = 10  # graph-context facts, ranked by similarity
-    abstain_rerank_score: float = -4.0  # top reranker logit below this: unsupported
+    # Top reranker logit below this: unsupported without asking the model. 15 Nov: casual wording
+    # ("Invoice came in on 27th, can I still post it this month?") put the right passage first at
+    # -4.8 and was refused at -4.0; dev questions all score above -2.7, and abstain-set questions
+    # above the gate are refused by the model and verifier (0/20 answered on 14 Nov).
+    abstain_rerank_score: float = -6.0
     abstain_vector_score: float = 0.55  # used when the reranker is off
     router_min_confidence: float = 0.6  # below this a calculator route falls back to lookup
     router_model: str = "fast"  # fast | smart | a model id

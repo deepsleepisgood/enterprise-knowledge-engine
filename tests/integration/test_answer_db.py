@@ -61,7 +61,8 @@ STOP = {
 
 def fake_rerank(q: str, docs: list[str]) -> list[float]:
     qw = set(WORD.findall(q.lower())) - STOP
-    return [len(qw & set(WORD.findall(d.lower()))) - 5.0 for d in docs]
+    # No shared word scores 1 below the abstain gate (ABSTAIN_RERANK_SCORE -6), one word meets it.
+    return [len(qw & set(WORD.findall(d.lower()))) - 7.0 for d in docs]
 
 
 def passages_in(prompt: str) -> dict[str, str]:

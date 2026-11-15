@@ -932,4 +932,17 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
   route-to card without its lead line (`NotCoveredCard showLead={false}`), then older sources.
   Without rule text it still shows the not-covered card.
 - **Verified:** `tsc --noEmit` and eslint clean; local web against the Railway API renders the
-  answer + Tax Desk card, no console errors. **Redeploy Vercel** to make it live.
+  answer + Tax Desk card, no console errors. Redeployed to Vercel (scripts/point_vercel.py, API still Railway); the live
+  site shows the answer and the Tax Desk card for this question.
+
+## 15 Nov — abstain gate too strict for casual wording
+
+- "Invoice came in on 27th, can I still post it this month?" got "The documents don't cover this"
+  in 0.9 s: SOP v4.0 §11 was the top passage but scored -4.78 against the -4.0 gate, so the
+  model was never asked. (The 28th version failed the same way in the 14 Nov Teams sample.)
+- Top reranker scores: all 88 dev questions above -2.7; 3 of 31 Teams questions below -4;
+  8 of 20 abstain-set questions above -4 (refused by model + verifier anyway).
+- `ABSTAIN_RERANK_SCORE` -4.0 → -6.0. Now answered from §11 + Video 3 [12:40] (16 s).
+  Abstention set re-run (reports/abstention_20261115.md): 19/20 not answered, 17/20 routed
+  acceptably. The one answered, A14 (US-dollar invoice), scored -0.79, above either gate; it was
+  refused on 13–14 Nov, so this is run-to-run model variance, not the gate. Open issue.
