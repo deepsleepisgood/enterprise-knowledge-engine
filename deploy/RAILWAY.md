@@ -14,6 +14,11 @@ original" works), `scripts/railway_env.py`, `scripts/point_vercel.py`, `scripts/
 - **Railway Hobby plan** ($5 a month, includes $5 of usage; card needed). The trial's 1 GB of
   memory is too small: the API and the worker each load the reranker, about 2.5–3 GB together.
   If Railway offers a usage limit, set it to $10.
+- **Anthropic instead of DeepSeek:** set `LLM_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and the
+  Claude model names in `.env` before running `scripts/railway_env.py` (it copies them). The
+  engine makes at most `ANTHROPIC_MAX_CONCURRENT` (8) calls at once and retries a rate limit
+  `ANTHROPIC_MAX_RETRIES` (6) times; fit both to the account's limits (Anthropic console →
+  Limits). The cached answers are per model, so rerun `warm_demo.py` after switching.
 - **Code on GitHub:** commit and push `main` with the files above.
 - **Neon:** nothing to do. Same region as below (Singapore). About 12 of the free plan's 100
   compute hours were used by 15 Nov; a worker running until 18 Nov adds roughly 20–40.

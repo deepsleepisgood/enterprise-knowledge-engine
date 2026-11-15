@@ -7,8 +7,9 @@ Variables. Values are never printed; only the names are listed. Delete the file 
 
 What goes in: the database (Neon's pooled URL as DATABASE_URL), the model provider and models
 as configured locally, and fixed settings for the container (files on the Railway volume at
-/data, folder watching off, owner approval on). Keys only a laptop needs (the Vercel token, the
-evaluation judge's Anthropic key, the unused NVIDIA key) stay out.
+/data, folder watching off, owner approval on). Only the key of the provider that answers
+(LLM_PROVIDER) goes in; keys only a laptop needs (the Vercel token, the evaluation judge's
+Anthropic key when another provider answers, an unused NVIDIA key) stay out.
 """
 
 from __future__ import annotations
@@ -24,8 +25,9 @@ OUT = ROOT / "deploy" / "railway.env"
 FROM_ENV = [
     "LLM_PROVIDER",
     "NIM_BASE_URL",
-    "ISOQUANT_API_KEY",
-    "OPENAI_API_KEY",
+    "ANTHROPIC_MAX_CONCURRENT",
+    "ANTHROPIC_MAX_RETRIES",
+    "ANTHROPIC_TIMEOUT_S",
     "MODEL_FAST",
     "MODEL_SMART",
     "MODEL_VISION",
@@ -33,6 +35,10 @@ FROM_ENV = [
     "NIM_MAX_RPM",
     "NIM_MAX_CONCURRENT",
     "NIM_TIMEOUT_S",
+    "DB_POOL_SIZE",
+    "DB_MAX_OVERFLOW",
+    "DB_POOL_TIMEOUT_S",
+    "ASK_CONCURRENCY",
     "MODEL_PRICES",
     "PLUGINS",
     "SCHEMA_MODE",
@@ -61,9 +67,19 @@ def main() -> int:
     rows = {"DATABASE_URL": db}
     rows.update({k: clean(env.get(k)) for k in FROM_ENV if clean(env.get(k))})
     rows.update(FIXED)
-    if not (rows.get("ISOQUANT_API_KEY") or rows.get("OPENAI_API_KEY")):
-        print("No model API key in .env.", file=sys.stderr)
+    # Only the key of the provider that answers: the Anthropic key is otherwise the evaluation
+    # judge's, and an unused key has no business on the server.
+    provider = (rows.get("LLM_PROVIDER") or "anthropic").strip().lower()
+    nim_key = (
+        "ISOQUANT_API_KEY" if "isoquant.ai" in rows.get("NIM_BASE_URL", "") else "NVIDIA_API_KEY"
+    )
+    key = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "nim": nim_key}.get(
+        provider
+    )
+    if not key or not clean(env.get(key)):
+        print(f"No API key in .env for LLM_PROVIDER={provider} ({key}).", file=sys.stderr)
         return 1
+    rows[key] = clean(env.get(key))
     OUT.write_text("".join(f"{k}={v}\n" for k, v in rows.items()), encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)} with {len(rows)} variables (values not shown):")
     print("  " + ", ".join(rows))
