@@ -50,10 +50,17 @@ def _known_scope(name: str | None) -> str | None:
     return max(hits, key=len) if hits else name
 
 
+_SCHEMA_READY = False  # once a schema is frozen it stays so; stop asking the database
+
+
 def _ready() -> None:
+    global _SCHEMA_READY
+    if _SCHEMA_READY:
+        return
     with session_scope() as s:
         if active_ontology(s) is None:
             raise HTTPException(409, "No frozen schema yet: build the graph first.")
+    _SCHEMA_READY = True
 
 
 @router.post("/ask")
@@ -119,8 +126,12 @@ def ask_job(body: AskIn) -> dict[str, Any]:
 
 
 @router.get("/ask/jobs/{job_id}")
-def ask_job_status(job_id: str) -> dict[str, Any]:
-    """`pending`, `done` (with `card`) or `error` (with `status_code` and `error`)."""
+async def ask_job_status(job_id: str) -> dict[str, Any]:
+    """`pending`, `done` (with `card`) or `error` (with `status_code` and `error`).
+
+    Async on purpose: it only reads memory, so it runs on the event loop and never waits for a
+    free request thread while answers are being worked out (polls stayed unanswered for over a
+    minute under 20 simultaneous questions when it shared the thread pool)."""
     with _LOCK:
         job = _JOBS.get(job_id)
         if job is None:

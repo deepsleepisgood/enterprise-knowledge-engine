@@ -171,19 +171,13 @@ def _cpu() -> dict[str, Any]:
     MODEL_THREADS needs the quota, not the host's count."""
     import os
 
-    quota = None
-    try:
-        with open("/sys/fs/cgroup/cpu.max", encoding="ascii") as f:
-            q, period = f.read().split()
-        quota = None if q == "max" else round(int(q) / int(period), 2)
-    except (OSError, ValueError):
-        pass
-    from app.core.config import get_settings
+    from app.core.cpu import cgroup_quota, model_threads
 
+    quota = cgroup_quota()
     return {
         "visible": os.cpu_count(),
-        "quota": quota,
-        "model_threads": get_settings().model_threads or "default",
+        "quota": None if quota is None else round(quota, 2),
+        "model_threads": model_threads() or "default",
     }
 
 

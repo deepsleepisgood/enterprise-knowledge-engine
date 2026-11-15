@@ -889,3 +889,20 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 - A Teams tip is not shown in the expert-tip slot, because its type is not a practice type.
 - The capture page uses the signed-in user id as the expert's name.
 - Untested on a real tenant's Teams export.
+
+## 15 Nov — 20 users at once on Railway, and the fixes
+
+- **Test:** 20 simultaneous questions on Railway (reports/load_20261115railway20.md). All 20 answers
+  were produced (answers_log), average 133.9 s, median 141 s, slowest 212 s, in a ~10 s ladder:
+  one answer at a time was getting through a shared step. Half the testers' status polls got no
+  reply within 60 s, so the script (no retries) counted them as errors.
+- **Causes found:** the reranker runs one question at a time and took ~10 s on Railway; the model
+  runtimes started one thread per *visible* CPU (48) on an 8-CPU quota. Model calls are capped at
+  8 in parallel / 120 a minute, while Isoquant accepted 32 parallel calls (probe_llm_limits.py).
+  The poll endpoint shared the request thread pool with the answering work.
+- **Fixed:** `app/core/cpu.py` sizes model threads from the cgroup quota (`/health` shows it;
+  `MODEL_THREADS` overrides). `GET /ask/jobs/{id}` is async (memory only); the schema-ready check
+  is cached. `RERANK_K` / `RERANK_CHARS` (20 / 1200): on the 88 distinct dev questions 1200 chars
+  kept the same top 6 passages for every question; 16 or 12 candidates started losing the gold source.
+- **Railway variables to set:** `NIM_MAX_CONCURRENT=24`, `NIM_MAX_RPM=1200`.
+- Tests: unit + answer integration 220 passed. Re-run the 20-user test after deploying.

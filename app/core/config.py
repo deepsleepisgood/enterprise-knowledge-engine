@@ -101,6 +101,13 @@ class Settings(BaseSettings):
     # gets, so set it to the service's vCPUs there (GET /health shows what the process sees).
     model_threads: int = 0
     retrieve_k: int = 20  # full-text and vector candidates each
+    # The reranker is the slowest local step (~0.5 s per passage on a few CPUs) and one runs at a
+    # time, so under load every question queues behind it: score this many fused candidates,
+    # reading this many characters of each (header included).
+    # Dev split, 15 Nov (88 questions): 1200 chars kept the same top 6 for every question;
+    # fewer candidates (16, 12) started dropping the gold source.
+    rerank_k: int = 20
+    rerank_chars: int = 1200
     answer_passages: int = 6  # kept after reranking
     graph_facts: int = 10  # graph-context facts, ranked by similarity
     abstain_rerank_score: float = -4.0  # top reranker logit below this: unsupported

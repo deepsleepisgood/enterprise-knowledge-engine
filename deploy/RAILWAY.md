@@ -52,8 +52,14 @@ tolerance?": the answer should cite AP SOP v4.0.
   load, the pool is the limit, not Neon. Keep `DATABASE_URL` on Neon's `-pooler` address.
 - **Model calls:** `NIM_MAX_RPM` / `NIM_MAX_CONCURRENT` throttle the whole server. The
   NVIDIA free-tier values (35 / 4) queue calls with more than a few users; set them to what the
-  Isoquant account allows. With `LLM_PROVIDER=anthropic` these do not apply; check the
-  account's limits in the Anthropic console instead.
+  Isoquant account allows. `scripts/probe_llm_limits.py` measured it on 15 Nov: 32 parallel
+  calls all accepted, so use `NIM_MAX_CONCURRENT=24` and `NIM_MAX_RPM=1200`. With
+  `LLM_PROVIDER=anthropic` these do not apply; check the account's limits in the Anthropic
+  console instead.
+- **CPU:** the reranker is the slowest local step and handles one question at a time, so under
+  load every answer queues behind it. `RERANK_K` (candidates scored) and `RERANK_CHARS` (text
+  read per candidate) set its cost. The model threads follow the container's CPU quota on their
+  own (`/health` → `cpu.model_threads`); `MODEL_THREADS` overrides it.
 
 ## 4. Warm up, load test, rehearse
 - `python scripts/warm_demo.py --base https://<address>`: asks the 8 demo questions once, so on

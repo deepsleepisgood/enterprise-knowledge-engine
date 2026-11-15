@@ -301,3 +301,34 @@ def test_report_wrong_answer_creates_an_owner_item(kb_built) -> None:
     escalate.report_wrong(int(card["answer_id"]), "processor-2", "looks off")
     with session_scope() as s:
         assert [i.kind for i in kb.list_review_items(s)].count("report") == 1
+
+
+def test_reranker_scores_only_rerank_k_candidates_cut_to_rerank_chars(
+    kb_built, monkeypatch
+) -> None:
+    from app.answer.retrieve import retrieve
+    from app.core.config import get_settings
+
+    seen: list[list[str]] = []
+
+    def recording(q: str, docs: list[str]) -> list[float]:
+        seen.append(docs)
+        return fake_rerank(q, docs)
+
+    monkeypatch.setenv("RERANK_K", "2")
+    monkeypatch.setenv("RERANK_CHARS", "40")
+    get_settings.cache_clear()
+    try:
+        with session_scope() as s:
+            got = retrieve(
+                s,
+                "How many days of annual leave?",
+                today=TODAY,
+                embed_fn=fake_embed,
+                rerank_fn=recording,
+            )
+    finally:
+        get_settings.cache_clear()
+    (docs,) = seen
+    assert 1 <= len(docs) <= 2 and all(len(d) <= 40 for d in docs)
+    assert got.scorer == "rerank" and len(got.passages) <= 2

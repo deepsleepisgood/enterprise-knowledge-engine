@@ -172,7 +172,9 @@ def retrieve(
     hits = search.hydrate(session, [i for i, _ in fused], known_at)
     cands = [hits[i] for i, _ in fused if i in hits]
     if rerank_fn is not None and cands:
-        scores = rerank_fn(question, [f"{h.context_header}\n{h.text}"[:2000] for h in cands])
+        cands = cands[: max(1, cfg.rerank_k)]
+        texts = [f"{h.context_header}\n{h.text}"[: cfg.rerank_chars] for h in cands]
+        scores = rerank_fn(question, texts)
         for h, sc in zip(cands, scores, strict=True):
             h.score = sc
         cands.sort(key=lambda h: -h.score)
