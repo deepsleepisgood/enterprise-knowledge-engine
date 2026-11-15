@@ -166,6 +166,27 @@ def version(s: Session = Depends(read_session)) -> dict[str, Any]:
     }
 
 
+def _cpu() -> dict[str, Any]:
+    """CPUs this process sees and the container's CPU quota (Linux cgroup v2), if any: sizing
+    MODEL_THREADS needs the quota, not the host's count."""
+    import os
+
+    quota = None
+    try:
+        with open("/sys/fs/cgroup/cpu.max", encoding="ascii") as f:
+            q, period = f.read().split()
+        quota = None if q == "max" else round(int(q) / int(period), 2)
+    except (OSError, ValueError):
+        pass
+    from app.core.config import get_settings
+
+    return {
+        "visible": os.cpu_count(),
+        "quota": quota,
+        "model_threads": get_settings().model_threads or "default",
+    }
+
+
 @router.get("/health", response_model=None)
 def health() -> dict[str, Any] | JSONResponse:
     try:
@@ -173,4 +194,4 @@ def health() -> dict[str, Any] | JSONResponse:
             ok = kb.ping(s)
     except Exception as exc:  # report, never raise: load balancers poll this
         return JSONResponse({"status": "down", "db": False, "error": type(exc).__name__}, 503)
-    return {"status": "ok", "db": ok, "db_pool": pool_status()}
+    return {"status": "ok", "db": ok, "db_pool": pool_status(), "cpu": _cpu()}

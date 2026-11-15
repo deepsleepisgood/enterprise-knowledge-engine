@@ -209,9 +209,21 @@ export async function ask(params: {
     throw e;
   }
   const deadline = Date.now() + ASK_TIMEOUT_MS;
+  let misses = 0;
   while (Date.now() < deadline) {
     await delay(ASK_POLL_MS);
-    const got = await apiGet<AskJob>(`/ask/jobs/${job.job_id}`, headers);
+    let got: AskJob;
+    try {
+      got = await apiGet<AskJob>(`/ask/jobs/${job.job_id}`, headers);
+      misses = 0;
+    } catch (e) {
+      // A dropped connection or a proxy hiccup (502/503/504) while the server is busy: the
+      // answer is still being worked on, so keep waiting. A 404 means the job is gone (the
+      // server restarted): stop.
+      const transient = !(e instanceof ApiError) || [502, 503, 504].includes(e.status);
+      if (!transient || ++misses > ASK_POLL_RETRIES) throw e;
+      continue;
+    }
     if (got.status === "done" && got.card) return got.card;
     if (got.status === "error") {
       throw new ApiError(got.status_code ?? 500, got.error ?? "The answer failed.");
@@ -229,6 +241,7 @@ interface AskJob {
 }
 
 const ASK_POLL_MS = 2_000;
+const ASK_POLL_RETRIES = 5; // consecutive failed polls tolerated before giving up
 const ASK_TIMEOUT_MS = 10 * 60_000;
 
 export async function getChanges(sinceVersion: number): Promise<ChangeFeedItem[]> {

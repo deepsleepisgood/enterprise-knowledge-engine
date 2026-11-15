@@ -33,9 +33,17 @@ def _http(method: str, url: str, body: dict | None = None) -> dict:
 def ask(base: str, question: str, timeout_s: float = 240) -> tuple[dict, float]:
     t0 = time.perf_counter()
     job = _http("POST", f"{base}/ask/jobs", {"question": question, "user_id": "eval-warm"})
+    misses = 0
     while True:
         time.sleep(1.0)
-        st = _http("GET", f"{base}/ask/jobs/{job['job_id']}")
+        try:
+            st = _http("GET", f"{base}/ask/jobs/{job['job_id']}")
+            misses = 0
+        except (urllib.error.URLError, OSError):  # a dropped poll: the answer is still coming
+            misses += 1
+            if misses > 5:
+                raise
+            continue
         if st["status"] != "pending" or time.perf_counter() - t0 > timeout_s:
             return st, time.perf_counter() - t0
 

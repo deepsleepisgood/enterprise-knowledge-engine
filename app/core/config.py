@@ -96,6 +96,10 @@ class Settings(BaseSettings):
 
     # Answer pipeline (BUILD_PLAN Phase 4)
     rerank_model: str = "BAAI/bge-reranker-base"  # fastembed cross-encoder; "none" disables
+    # CPU threads for the local embedding and reranker models; 0 = the runtime's default (one
+    # per CPU it sees). In a container that is the host's CPU count, not the share the service
+    # gets, so set it to the service's vCPUs there (GET /health shows what the process sees).
+    model_threads: int = 0
     retrieve_k: int = 20  # full-text and vector candidates each
     answer_passages: int = 6  # kept after reranking
     graph_facts: int = 10  # graph-context facts, ranked by similarity

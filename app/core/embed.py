@@ -13,7 +13,9 @@ _lock = threading.Lock()
 def _model():
     from fastembed import TextEmbedding
 
-    return TextEmbedding(MODEL)
+    from app.core.config import get_settings
+
+    return TextEmbedding(MODEL, threads=get_settings().model_threads or None)
 
 
 @lru_cache(maxsize=4096)

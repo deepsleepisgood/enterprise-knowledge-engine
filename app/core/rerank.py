@@ -18,7 +18,8 @@ def enabled() -> bool:
 def _model():
     from fastembed.rerank.cross_encoder import TextCrossEncoder
 
-    return TextCrossEncoder(get_settings().rerank_model)
+    s = get_settings()
+    return TextCrossEncoder(s.rerank_model, threads=s.model_threads or None)
 
 
 def rerank(query: str, docs: list[str]) -> list[float]:
