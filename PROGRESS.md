@@ -906,3 +906,15 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
   kept the same top 6 passages for every question; 16 or 12 candidates started losing the gold source.
 - **Railway variables to set:** `NIM_MAX_CONCURRENT=24`, `NIM_MAX_RPM=1200`.
 - Tests: unit + answer integration 220 passed. Re-run the 20-user test after deploying.
+- **Re-test after deploy** (reports/load_20261115railway20_after.md; 20 questions not yet cached
+  on Railway, `--start 20`; Railway quota now 6 CPUs, model_threads 6): all 20 answers produced
+  (answers_log), answer time avg 22.7 s / median 21.6 s / slowest 32.5 s (was 133.9 / 141 / 212);
+  what the asker waited avg 26.6 s, all 20 done in 41 s. 1 poll hit a connection timeout at 32 s
+  (the web app retries; was 10 of 20).
+- **Second re-test** (reports/load_20261115railway20_run2.md; questions 40–59, not cached):
+  all 20 answers produced; answer time on the server avg 16.4 s, median 17.9 s, slowest 24.1 s,
+  none over 30 s. What the asker waited: avg 18.7 s, 17 of 19 polled answers under 30 s; the two
+  over (30.7 s, 31.5 s) and one at 28.9 s each spent ~10 s waiting for a free answer slot
+  (`ASK_CONCURRENCY` 16, so questions 17–20 queue). 1 poll connection timeout (answer saved).
+  Next: `ASK_CONCURRENCY=24` with `DB_MAX_OVERFLOW=40` (pool 50 ≥ 2 × 24) on Railway to remove
+  that queue.

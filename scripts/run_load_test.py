@@ -280,13 +280,16 @@ def main() -> None:
     ap.add_argument("--api-pid", type=int, default=None)
     ap.add_argument("--pause", type=float, default=10.0, help="seconds between levels")
     ap.add_argument("--tag", default="")
+    ap.add_argument(
+        "--start", type=int, default=0, help="first question (skip ones already cached there)"
+    )
     args = ap.parse_args()
 
     qs = questions()
     _http("GET", f"{args.base}/health")  # fail fast when the API is not up
     db_url = os.environ.get("DATABASE_URL", "").replace("postgresql+psycopg://", "postgresql://")
     levels = []
-    start = 0
+    start = args.start
     for i, n in enumerate(int(x) for x in args.levels.split(",")):
         if i:
             time.sleep(args.pause)
