@@ -251,6 +251,10 @@ cd web && npm run dev
 
 ## Public demo
 
+**Hosted (Railway):** the API and worker run as one Docker service on Railway, the web app on Vercel and the data on Neon. Step by step in [deploy/RAILWAY.md](deploy/RAILWAY.md): `Dockerfile`, `railway.json`, `scripts/start_service.sh`, then `scripts/railway_env.py` for the variables, `scripts/point_vercel.py` to point the website at the service and `scripts/warm_demo.py` before a demo.
+
+**From this laptop (backup):**
+
 ```powershell
 .\run_public.ps1
 ```

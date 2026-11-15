@@ -26,6 +26,24 @@ def store_blob(data: bytes, digest: str, filename: str) -> Path:
     return path
 
 
+def blob_file(stored: str | None) -> Path | None:
+    """The original file for a stored blob path, on this machine. Blobs are named by content
+    hash (`<tenant>/<hash[:2]>/<hash><ext>`), so when the path was written on another machine
+    (a Windows path in a database now used by a Linux server) the same file is found under this
+    machine's BLOB_DIR by its name."""
+    if not stored:
+        return None
+    if Path(stored).exists():
+        return Path(stored)
+    from pathlib import PurePosixPath, PureWindowsPath
+
+    parts = (PureWindowsPath(stored) if "\\" in stored else PurePosixPath(stored)).parts
+    if len(parts) < 3:
+        return None
+    candidate = get_settings().blob_dir / parts[-3] / parts[-2] / parts[-1]
+    return candidate if candidate.exists() else None
+
+
 def submit(session: Session, ep: EpisodeIn, enqueue: bool = True) -> tuple[str, bool]:
     """Register one episode. Returns (episode_id, created); duplicates only add a confirmation."""
     kind, mime = detect(ep.data, ep.filename)

@@ -8,7 +8,6 @@ queue extraction. Low parse quality holds the episode as needs_attention.
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -31,6 +30,16 @@ CAPTURE_CHANNEL = "expert_capture"
 # Inputs that are never a new version of an earlier one (each entry or chat thread stands alone,
 # however similar its title).
 UNVERSIONED_CHANNELS = {CAPTURE_CHANNEL, "teams"}
+
+
+def _original(stored: str | None) -> bytes:
+    """The episode's original bytes (found by content-hash name if stored elsewhere)."""
+    from app.ingest.intake import blob_file
+
+    path = blob_file(stored)
+    if path is None:
+        raise FileNotFoundError(f"original file not found: {stored}")
+    return path.read_bytes()
 
 
 def governed() -> bool:
@@ -199,7 +208,7 @@ def plugin_hooks(payload: dict[str, Any]) -> dict[str, Any]:
 
     with session_scope() as s:
         ep = store.get_episode(s, payload["episode_id"])
-        data = Path(ep.blob_path).read_bytes()
+        data = _original(ep.blob_path)
         out: dict[str, Any] = {}
         for plugin, fn in registry.hooks(payload["event"]):
             res = fn(s, data, tenant())
@@ -261,7 +270,7 @@ def parse_episode(payload: dict[str, Any]) -> dict[str, Any]:
         ep = store.get_episode(s, eid)
         if ep is None:
             raise LookupError(f"episode {eid} not found")
-        data = Path(ep.blob_path).read_bytes()
+        data = _original(ep.blob_path)
         filename = ep.source_uri or ""
         episode = type(
             "E",

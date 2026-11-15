@@ -1,0 +1,20 @@
+# Demo question script, in order. Ask them on stage in exactly this wording: warm-up caches the
+# model calls by exact text, so these come back fast and identical.
+# 1-7 are dev-set questions the engine answered correctly in the 15 Nov run (DeepSeek v4.1);
+# 8 is outside the documents (it should be refused and routed). Lines starting with # are skipped.
+# 1 A current rule, with citations
+What is the quantity tolerance for cement at Arvana Infra?
+# 2 A client override and its limits
+Does the Infra bulk-material tolerance apply to electrical cables?
+# 3 A rule that changed (the old version shown as superseded)
+Which GST return is used to decide whether input tax credit can be claimed?
+# 4 The engine's own calculation
+A medium enterprise supplier registered on Udyam; invoice accepted on 16 April 2026; agreed payment term 45 days. What is the due date and which payment run should pay it?
+# 5 Expert know-how beyond the SOP
+A transporter's invoice 'TR/2026/0881/A' looks like an earlier 'TR/2026/881'. Is it a new invoice?
+# 6 Knowing when to hand over to a specialist
+How is a CCTV maintenance contract with remote monitoring classified for TDS?
+# 7 Fraud control
+A bank change request asks me to call a mobile number to verify. What do I do?
+# 8 Refusing what is not in the documents
+What is the canteen subsidy for employees?

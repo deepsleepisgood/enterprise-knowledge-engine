@@ -26,3 +26,6 @@ web/.vercel
 *.egg-info/
 .vscode/
 /default/
+
+# Railway variables written by scripts/railway_env.py (secrets)
+deploy/railway.env

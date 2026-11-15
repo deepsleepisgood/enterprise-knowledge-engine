@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import not_found, read_session, row, write_session
 from app.core.config import get_settings
 from app.ingest.connectors import EpisodeIn, from_eml, from_text, from_upload
-from app.ingest.intake import submit
+from app.ingest.intake import blob_file, submit
 from app.store import episodes as estore
 from app.store import facts as fstore
 from app.store import jobs
@@ -208,7 +208,7 @@ def get_episode(episode_id: str, s: Session = Depends(read_session)) -> dict[str
         by_status[f.status] = by_status.get(f.status, 0) + 1
     return {
         **row(e, drop={"blob_path"}),
-        "has_original": bool(e.blob_path and Path(e.blob_path).exists()),
+        "has_original": blob_file(e.blob_path) is not None,
         "sources": [row(src) for src in estore.list_sources(s, episode_id=episode_id)],
         "passages": len(estore.passages_for_episode(s, episode_id)),
         "facts": {"total": len(facts), "by_status": by_status},
@@ -218,7 +218,8 @@ def get_episode(episode_id: str, s: Session = Depends(read_session)) -> dict[str
 @router.get("/episodes/{episode_id}/original")
 def original(episode_id: str, s: Session = Depends(read_session)) -> FileResponse:
     e = estore.get_episode(s, episode_id)
-    if e is None or not e.blob_path or not Path(e.blob_path).exists():
+    path = blob_file(e.blob_path) if e is not None else None
+    if path is None:
         raise not_found("original file")
     name = Path(e.source_uri or "original").name
-    return FileResponse(e.blob_path, media_type=e.mime or None, filename=name)
+    return FileResponse(path, media_type=e.mime or None, filename=name)
