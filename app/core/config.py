@@ -53,6 +53,15 @@ class Settings(BaseSettings):
     schema_mode: str = "induced"  # induced | baseline (a plug-in's hand-written schema)
     plugins: str = "ap"  # comma-separated plug-in folders under plugins_dir to enable
     worker_threads: int = 4
+    # Database connections per process. Each answer keeps one open for its whole snapshot (about
+    # 10-20 s, model calls included) and opens a second for the parallel search, so the pool must
+    # cover about two per answer being worked on. SQLAlchemy's own default (5 + 10) queued the
+    # 16th connection. Use Neon's pooled (-pooler) URL when these add up past the direct limit.
+    db_pool_size: int = 10
+    db_max_overflow: int = 30
+    db_pool_timeout_s: float = 60
+    # Answers worked on at once through POST /ask/jobs; more wait their turn in memory.
+    ask_concurrency: int = 16
     # Owner approval of inputs that arrive after setup (BUILD_PLAN Phase 9). Bulk seeding and
     # evaluation scripts turn it off for their own runs.
     governance: bool = True

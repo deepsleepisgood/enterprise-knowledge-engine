@@ -56,7 +56,9 @@ def leave_entity(api: TestClient) -> str:
 
 def test_health_version_scopes_and_schema(api: TestClient) -> None:
     h = api.get("/health")
-    assert h.status_code == 200 and h.json() == {"status": "ok", "db": True}
+    assert h.status_code == 200
+    assert {k: h.json()[k] for k in ("status", "db")} == {"status": "ok", "db": True}
+    assert h.json()["db_pool"]["max"] > 15
     v = api.get("/version")
     assert v.status_code == 200 and v.json()["kb_version"] >= 1 and v.json()["schema_version"]
     assert v.headers["x-kb-version"] == str(v.json()["kb_version"])

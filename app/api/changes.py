@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import not_found, read_session, write_session
-from app.core.db import session_scope
+from app.core.db import pool_status, session_scope
 from app.distribute import channels, delivery, feed
 from app.distribute.digest import build_digest, local_today
 from app.distribute.document_edit import EditNotNeeded, draft_document_edit
@@ -173,4 +173,4 @@ def health() -> dict[str, Any] | JSONResponse:
             ok = kb.ping(s)
     except Exception as exc:  # report, never raise: load balancers poll this
         return JSONResponse({"status": "down", "db": False, "error": type(exc).__name__}, 503)
-    return {"status": "ok", "db": ok}
+    return {"status": "ok", "db": ok, "db_pool": pool_status()}

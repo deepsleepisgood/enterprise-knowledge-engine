@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from app.answer.pipeline import ask as answer
 from app.api.plugins import plugin_context
+from app.core.config import get_settings
 from app.core.db import session_scope
 from app.graph.pipeline import active_ontology
 from app.store import facts as fstore
@@ -84,7 +85,9 @@ def _card(body: AskIn) -> dict[str, Any]:
 
 # ---------------------------------------------------------------- asked without waiting
 
-_POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="ask-job")
+_POOL = ThreadPoolExecutor(
+    max_workers=max(1, get_settings().ask_concurrency), thread_name_prefix="ask-job"
+)
 _JOBS: dict[str, dict[str, Any]] = {}
 _LOCK = threading.Lock()
 _KEEP_S = 3600  # finished jobs are kept an hour, then dropped
