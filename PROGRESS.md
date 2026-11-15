@@ -889,3 +889,40 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 - A Teams tip is not shown in the expert-tip slot, because its type is not a practice type.
 - The capture page uses the signed-in user id as the expert's name.
 - Untested on a real tenant's Teams export.
+
+## 2026-11-15 — GPT-5 evaluation review (Akshat)
+
+**Two full runs on Neon** (`LLM_PROVIDER=openai`, `MODEL_SMART=gpt-5`, `MODEL_FAST=gpt-5-mini`, gpt-5 also judging; 158 questions, Q017 and Q062 excluded):
+
+| Run | Accuracy (judge) | Citations | Outdated (conflict) | p50 / p95 | Cost | Report |
+|---|---|---|---|---|---|---|
+| 1 (before main's route-v6 / answer-v9 merge) | 88.6% (140/158) | 98.7% | 0/21 | 32.5 s / 80.4 s | not tracked | `eval_20261114_all_openai_gpt5.md` |
+| 2 (after merge + faster GPT path) | 88.0% (139/158) | 100% | 0/21 | 15.5 s / 21.1 s | $1.50 | `eval_20261114_all_openai_gpt5_v2.md` |
+
+- **Run 2 hand review:** every answer the judge marked wrong or partial was read against the gold answer and the cited passages. Several were correct and misgraded by the strict gpt-5 judge; one judged correct (Q044) was actually wrong. **Hand-reviewed accuracy: 95.6%.**
+- **Real misses:** Q039 (e-invoice input read "above ₹5 crore" as exactly ₹5 crore), Q009/Q010 (GPT assumed a non-PO invoice, so the approvals calculator added the budget owner), Q044 ("lacks both" vs "either missing"), Q057 (self-contradicting answer), Q061 (unverified). Q092 is the known answer-key defect. Unrelated expert tips were attached to some cards (`TIP_MIN_SIM` 0.62 may be low).
+- **Why GPT trailed DeepSeek's 98.8%:** run 1 predated main's prompt and router fixes; gpt-5 as judge is stricter and uncalibrated; full reasoning on the answer path was slow (some answers outlived Neon's idle-in-transaction timeout). The faster path (`reasoning_effort` minimal/low on answers) halved p50.
+- **Decision (15 Nov):** live answers from GPT were weaker in hands-on testing; the team stays on DeepSeek v4.1 (Isoquant), with Anthropic as the fallback provider. The OpenAI provider stays in the code.
+
+## 2026-11-15 — Concurrency limits, Anthropic limits, provider-limit probe (PRs #3, #4, #5; Akshat)
+
+**Diagnosis of the live test** ("the 16th request lands in a queue"): not Neon. `db.get_engine()` used SQLAlchemy's default pool (5 + 10 = 15), and each answer holds a connection for its whole snapshot (model calls included) plus one for the early parallel search, so about 7 concurrent answers exhausted it. The model-side throttling came partly from the engine itself: `NIM_MAX_RPM` / `NIM_MAX_CONCURRENT` default to NVIDIA's free-tier 35 / 4 for the whole server, and the `/ask/jobs` pool ran 4 answers at a time.
+
+**PR #3, concurrency limits:**
+- `DB_POOL_SIZE` / `DB_MAX_OVERFLOW` / `DB_POOL_TIMEOUT_S` (defaults 10 / 30 / 60 s): 40 connections per process.
+- `ASK_CONCURRENCY` (default 16) sizes the `/ask/jobs` pool; the early-input pool scales with it (2 per answer), so the early search no longer queues behind 4 workers.
+- `/health` also returns `db_pool` (`in_use`, `idle`, `max`): if `in_use` sits at `max` under load, the pool is the limit.
+- `.env.example` and `deploy/RAILWAY.md`: the new settings, Neon's `-pooler` URL, and the server-wide model throttle.
+
+**PR #4, Anthropic limits:**
+- With `LLM_PROVIDER=anthropic` nothing capped parallel calls and the SDK retried a 429 only twice. Now `ANTHROPIC_MAX_CONCURRENT` (default 8, process-wide semaphore), `ANTHROPIC_MAX_RETRIES` (6; Retry-After honoured) and `ANTHROPIC_TIMEOUT_S` (120 s).
+- `scripts/railway_env.py` copies exactly one API key, chosen by `LLM_PROVIDER` (and `NIM_BASE_URL` for Isoquant vs NVIDIA). The judge's Anthropic key no longer leaves the laptop when DeepSeek answers, and an Anthropic-only `.env` no longer fails the key check. Also copies the pool, `ASK_CONCURRENCY` and Anthropic settings.
+
+**PR #5, `scripts/probe_llm_limits.py`:** Isoquant publishes no rate limits. The probe sends bursts of tiny calls (4, 8, 16, 24, 32 at once) straight to the endpoint without the engine's throttle, stops at the first 429, prints any rate-limit headers and suggests `NIM_MAX_CONCURRENT` / `NIM_MAX_RPM` at 75% of the highest clean level. Under 100 tiny calls.
+
+**Tests:** PR #3 on the Mac: 368 passed. #3–#5 merged together: 369 passed, ruff clean; the two `test_capture_teams_db` tests that fail in a sandbox without network (embedding model download) pass on a machine with it. New: `tests/unit/test_db_pool.py`, `tests/unit/test_llm_anthropic_limits.py` (cap holds under 12 parallel calls); probe and `railway_env.py` checked against a fake endpoint and sample `.env` files.
+
+**Open:**
+- **Set the real model limits:** run the probe with the Isoquant key, put the result in `.env` (`NIM_MAX_CONCURRENT` ≤ 24), rerun `railway_env.py`, update Railway. Then the load test at 5/10/20 users on the Railway URL, watching `/health`.
+- **Connection held during model calls** (the cause behind the pool pressure; Arnav's area, after 18 Nov): pin each answer to its kb_version's publish time (`known_at`) and run each DB step in a short transaction, after checking that every read path honours `known_at` (ontology, entities, scopes, calculator rules), with a publish-mid-answer test and a full eval re-run.
+- **Gate B:** `railway_env.py` sets `WATCH_ENABLED=false` on Railway, but gate B asks for the watched folder on the deployed build. Show ingestion by upload or turn it on: team decision.
