@@ -918,3 +918,18 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
   (`ASK_CONCURRENCY` 16, so questions 17–20 queue). 1 poll connection timeout (answer saved).
   Next: `ASK_CONCURRENCY=24` with `DB_MAX_OVERFLOW=40` (pool 50 ≥ 2 × 24) on Railway to remove
   that queue.
+
+## 15 Nov — "Needs a specialist" answers were hidden on the Ask page
+
+- **Symptom:** "Which TDS section for Bluestone Agencies Pvt Ltd's HVAC AMC?" showed
+  "The documents don't cover this." above two citations and a Tax Desk card, which contradicts itself.
+- **Cause (web only):** the API was right. Railway returned `needs_specialist` with a verified,
+  cited answer: AMC section depends on what it mostly supplies (194C manpower/repairs, 194J 2%
+  technical/software); mixed or unclear → TDS_SECTION_UNCLEAR to the Tax Desk. `AskView` treated
+  `needs_specialist` like `unsupported`, so it dropped the answer text and showed only the
+  not-covered card. The deployed Vercel build also predates the specialist wording (6a5ef6b).
+- **Fix:** for `needs_specialist` with rule text, the Ask page shows the cited answer, then the
+  route-to card without its lead line (`NotCoveredCard showLead={false}`), then older sources.
+  Without rule text it still shows the not-covered card.
+- **Verified:** `tsc --noEmit` and eslint clean; local web against the Railway API renders the
+  answer + Tax Desk card, no console errors. **Redeploy Vercel** to make it live.

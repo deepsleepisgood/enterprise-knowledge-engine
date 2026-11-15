@@ -182,6 +182,7 @@ export function NotCoveredCard({
   sending,
   onSend,
   specialist = false,
+  showLead = true,
 }: {
   route: RouteTo | null;
   sent: string | null;
@@ -189,15 +190,19 @@ export function NotCoveredCard({
   onSend: () => void;
   /** The documents cover the case and say a specialist decides it (status `needs_specialist`). */
   specialist?: boolean;
+  /** False when the cited answer is shown above the card, so the lead line would repeat it. */
+  showLead?: boolean;
 }) {
   const role = route?.role || "the process owner";
   return (
     <div className="space-y-4">
-      <p className="text-base leading-[1.65] text-ink">
-        {specialist
-          ? `The documents send this to ${route?.role || "a specialist"} to decide.`
-          : "The documents don't cover this."}
-      </p>
+      {showLead && (
+        <p className="text-base leading-[1.65] text-ink">
+          {specialist
+            ? `The documents send this to ${route?.role || "a specialist"} to decide.`
+            : "The documents don't cover this."}
+        </p>
+      )}
       <section aria-label="Who to ask" className="rounded-2xl border border-hairline bg-surface p-4 shadow-card">
         <div className="flex items-start gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-fill text-muted">

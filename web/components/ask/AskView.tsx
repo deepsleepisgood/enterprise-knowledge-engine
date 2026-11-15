@@ -465,7 +465,21 @@ export function AskView() {
                   {asOfLine(card)}
                 </span>
               )}
-              {unsupported ? (
+              {card.status === "needs_specialist" && rule?.text ? (
+                // The documents answer the rule and name who decides: show both.
+                <>
+                  <CitedText text={rule.text} citations={citations} active={active} onActivate={activate} />
+                  <NotCoveredCard
+                    route={card.route_to}
+                    sent={sentTo}
+                    sending={sending}
+                    onSend={() => void sendToExpert()}
+                    specialist
+                    showLead={false}
+                  />
+                  <CurrentVsOlderCard items={older} firstCitation={citations[0]} active={active} onActivate={activate} />
+                </>
+              ) : unsupported ? (
                 <NotCoveredCard
                   route={card.route_to}
                   sent={sentTo}
