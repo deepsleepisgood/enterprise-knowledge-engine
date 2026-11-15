@@ -4,41 +4,34 @@ Running log of what was built, test results, assumptions and open issues. Newest
 
 ## Resume here (keep this block current)
 
-**Status (11 Nov 2026, 14:20): Phase 9 deployed for testing (Vercel + Neon + this laptop via Cloudflare tunnel; demo stopped). Tests paused for the night; code changes since the last commit are NOT committed.**
+**Status (15 Nov 2026, evening): the API and worker run on Railway (Hobby plan, one Docker service, built from `main`), the web app on Vercel, the data on Neon. Demo days: 16 Nov (gate B, internal auction) and 18 Nov (gate C, final). Answer model: DeepSeek v4.1 on Isoquant; GPT-5 was evaluated and dropped (15 Nov).**
 
-Results so far (NVIDIA NIM, Neon): eval 157/160 (98.1%; dev 100%, holdout 95.3%; citations 98.1%; p50 36 s); replay 22/22, idempotent; second company 10/10 (after the uploaded-.eml filename fix); UI gate 6/6; intake 11/12; privacy grep 0 hits; format invariance md 0.99, html 0.99, flat docx 0.92, pdf 0.88 (was 0.65), eml 0.77 (was 0.61), xlsx 0.00 (fix since made, not yet rerun). Conflict questions: 0/23 present an old rule as current; 2/23 (Q021, Q062, holdout, examined with the user's consent) name an old value while correcting it.
-
-Uncommitted changes since the last commit: eval runner survives judge errors and has `--ids`; outdated metric fix ("60 days"); answer-v8 prompt; router route-v5 reads dates asked about in words (as_of); support check sees source in-force tags; search runs while the router runs (`early_retrieval`); uploaded .eml keeps its file name; PDF "a | b" text tables; pipe tables in plain text/email; numbered section titles kept in plain text; header table under a leading caption row or under the first of several headings (xlsx).
-
-**Update 11 Nov evening:** T1-T11 all pass on the public URL (`reports/public_acceptance_20261111.md`). LLM moved to Isoquant (`deepseek-v4.1-flash-1017-fast`, ~$0.0006/question; NVIDIA lines commented in `.env`). New: `POST /ask/jobs` + `GET /ask/jobs/{id}` (web app polls; tunnel 100 s limit), garbled-reply retry, router fallback to lookup. Uncommitted. Open: an extraction that fails on every passage still marks the episode published. Public demo stopped (`.\run_public.ps1` to restart).
-
-**Update 13 Nov:** full eval on Isoquant, final code: 157/160 (98.1%; dev 96/96, holdout 61/64), citations 98.8%, outdated (conflict, strict) 1/23, p50 22 s, $0.06 (`reports/eval_20261113_all.md`). Replay button built. Next action 2 done.
+Results (DeepSeek v4.1 on Isoquant, Neon; README "Results"):
+- Evaluation, 160 questions (15 Nov, judge Claude Sonnet 5.5): **158/160 (98.8%)**, dev 96/96, holdout 62/64; citations strict 99.4%; outdated on conflict questions 0/23; must-not-say 1/71 (Q032); 0 unverified. The DeepSeek judge agrees on all 68 judge-graded questions.
+- Latency in the full eval (14 Nov, laptop CPU): p50 12.4 s, p95 24 s. Cost: $0.06 for 160 questions.
+- Abstention 20/20 (routed right 18/20); replay 22/22; second company 10/10; T1-T11 pass on the public site (11 Nov); T10 expert capture passes (15 Nov); Teams export 38/38 routed; real Teams questions 32/32 and 28/31.
+- Format invariance (fact F1 vs .docx): md 1.00, html 1.00, pdf 0.94, eml 0.93, scanned pdf 0.90 pass; pptx 0.87, xlsx 0.86, flat docx 0.80 below target.
+- GPT-5 as the answer model (14 Nov): 95.6% by hand review, 88.0% by its own GPT-5 judge.
+- **Load on Railway (15 Nov, before `MODEL_THREADS`): 3 users median 34.8 s, p95 43.2 s; 5 users 4/5 answered (one connection timeout), p95 47.2 s. Above the 30 s target** (`reports/load_20261115_railway.md`).
 
 **Next actions, in order**
-0. Commit today's evening work when the user asks; run the full `pytest -q`.
-1. Rerun format invariance for xlsx and eml (`python scripts/run_format_invariance.py --no-scenarios --variants xlsx,eml`), then `python scripts/run_second_corpus.py` (parser changes touch its xlsx/eml/pdf).
-2. Full `pytest -q`, then the full eval on the final code (`run_eval.py --split all --workers 2`, DATABASE_URL=Neon) and the 6 fresh conflict questions (scratchpad script `fresh_conflicts.py`, copy into scripts/ if kept).
-3. ~~Build the Replay button~~ Done 13 Nov: Sources → Replay history (`/sources/replay`); see the 13 Nov entry. Not committed yet.
-4. Not yet measured for gate A: entity-resolution F1, induced vs baseline schema, conflict scan on Neon, T2-T4/T6/T7/T9/T11 by hand on the public URL.
-5. Decide the demo LLM: Claude is faster (p50 14 s on 10 Nov) but only about $1.47 credit is left; NIM p50 36 s. Retrieval itself is 4.5-5.5 s on this laptop (reranker on CPU ~3 s).
-6. PROGRESS entry, one-page MVP note, commit (when the user asks), restart `run_public.ps1`.
+1. On Railway: set `MODEL_THREADS` to the service's vCPUs (`GET /health` shows `cpu.quota`), and `NIM_MAX_CONCURRENT` / `NIM_MAX_RPM` from `python scripts/probe_llm_limits.py` (the current 4 / 35 are NVIDIA free-tier values). Redeploy.
+2. Rerun the load test on the Railway URL: `python scripts/run_load_test.py --base <railway URL> --levels 5,10,20 --per-user 2`, watching `/health` (`db_pool`, `cpu`). Target: 0 errors, p95 under 30 s. If `db_pool.in_use` reaches `max`, raise `DB_MAX_OVERFLOW`.
+3. Point the Vercel site at Railway (`python scripts/point_vercel.py <railway URL>`, needs `VERCEL_TOKEN` in the laptop's `.env`, never on Railway) and ask one question on https://ps07-knowledge-engine.vercel.app.
+4. Add Q001's wording ("What is the price tolerance for an invoice line where the unit price is higher than the PO?") to `deploy/demo_questions.txt`, run `scripts/warm_demo.py --base <railway URL>`, and rehearse with the demo script (study-guide doc, "Demo script" tab).
+5. Check three demo risks on Neon before the 16th (see the 15 Nov demo-preparation entry): the canteen T11 test fact, the Infra 7% from 16 Nov, the replay steps.
+6. Team decision for gate B: the watched folder is off on Railway (`WATCH_ENABLED=false`); turn it on or show upload instead.
+7. Gate C: usability tests (5 people, 8 tasks; TEST_PLAN level 13), the business case (level 12), judge calibration (30 hand grades in `eval/judge/hand_graded.csv`), entity-resolution F1, induced vs baseline schema, the A-D ablation at scale (built, smoke-tested on one question only).
 
-**Remaining features (listed 13 Nov evening; see BUILD_PLAN "After the MVP")**
-- Gate B (16 Nov):
-  - Distribution, Phase 11: ~~answer recall~~, ~~acknowledgement counter~~ (already existed), ~~live updates (`/stream`)~~: done 13 Nov. ~~daily digest~~ and ~~draft document (SOP) edit text~~: done 14 Nov. ~~"Seen" after a reload~~ (fixed 14 Nov). ~~Sending the digest by email or Teams~~: done 14 Nov (works once a client adds SMTP or a Teams workflow URL).
-  - ~~The full format-invariance matrix~~: run 14 Nov (`reports/format_invariance_20261114.md`). Passing: pdf, md, html, eml and scanned. Below 0.9 fact F1: pptx 0.87, xlsx 0.86, flat docx 0.80; their calculations still match (100%; xlsx not judged). Open: a semantic comparison for free-text values. Done 14 Nov: `scripts/renormalise_money.py --apply` on Neon (4 facts revised, a second dry run finds 0), and `MODEL_VISION` set in `.env`.
-- Gate C (18 Nov):
-  - Tacit capture, T10 (Phase 12): the 5-question interview chat, the structured habit fields, the check against current rules, and a named reviewer. The 21 vendor habits are already in the graph.
-  - Teams chat export (JSON) connector. `synthetic/` has no teams_export.json yet.
-  - Audio/video transcription (parser tier 4).
-  - Business case model + Teams replay (TEST_PLAN level 12); usability tests with 5 people (level 13).
-  - Analytics page exists: add knowledge latency and acknowledgement rates.
-  - Optional: v3.1 → v4.0 redline; a Graphiti baseline comparison.
-- Measurements owed: entity-resolution F1, induced vs baseline schema, ~~abstention set (20)~~ (14 Nov: 20/20 refused; routed right 18/20 after router v6, was 15/20), support-removal set, the 50-document freshness test, a second-corpus rerun.
-- Housekeeping:
-  - Merge duplicate entities (194J / Section 194J), clean up the 104 entities with no facts, clear the 5 old stopped jobs.
-  - Add a flag for an extraction that fails on every passage.
-  - ~~README results~~ (updated 14 Nov); MVP note; demo rehearsal; maybe host on Render.
+**Open issues**
+- Each answer holds a DB connection during its model calls (the pool, now 40 per process, covers demo scale). Fix after 18 Nov: pin answers to their kb_version's publish time (`known_at`) and run each DB step in a short transaction (15 Nov entry).
+- Pending answers live in one API process's memory: run exactly one replica.
+- Audio/video transcription (tier 4) not built; pptx, xlsx and flat docx below the F1 target.
+- An extraction that fails on every passage still marks the episode published.
+- A Teams tip is not shown in the expert-tip slot; the capture page uses the signed-in user id as the expert's name.
+- Housekeeping: merge duplicate entities (194J / Section 194J), clean up entities with no facts, clear old stopped jobs.
+
+**During a demo on the shared Neon database, never:** approve or reject review items, press Replay's "Run again from empty", run the conflict scan, or run `build_graph.py` / `ingest_all.py` / `alembic upgrade` from a laptop against Neon.
 
 **Never:** sleep the laptop with tests running (DNS fails, runs hang); look at holdout failures beyond Q021/Q062.
 
@@ -897,12 +890,25 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 | Run | Accuracy (judge) | Citations | Outdated (conflict) | p50 / p95 | Cost | Report |
 |---|---|---|---|---|---|---|
 | 1 (before main's route-v6 / answer-v9 merge) | 88.6% (140/158) | 98.7% | 0/21 | 32.5 s / 80.4 s | not tracked | `eval_20261114_all_openai_gpt5.md` |
-| 2 (after merge + faster GPT path) | 88.0% (139/158) | 100% | 0/21 | 15.5 s / 21.1 s | $1.50 | `eval_20261114_all_openai_gpt5_v2.md` |
+| 2 (after the merge + faster GPT path) | 88.0% (139/158) | 100% | 0/21 | 15.5 s / 21.1 s | $1.50 | `eval_20261114_all_openai_gpt5_v2.md` |
 
-- **Run 2 hand review:** every answer the judge marked wrong or partial was read against the gold answer and the cited passages. Several were correct and misgraded by the strict gpt-5 judge; one judged correct (Q044) was actually wrong. **Hand-reviewed accuracy: 95.6%.**
+- **Run 2 hand review:** every answer the judge marked wrong or partial was read against the gold answer and the cited passages. Several were correct and misgraded by the strict gpt-5 judge; one judged correct (Q044) was actually wrong. **Hand-reviewed accuracy: 95.6% (151/158).**
 - **Real misses:** Q039 (e-invoice input read "above ₹5 crore" as exactly ₹5 crore), Q009/Q010 (GPT assumed a non-PO invoice, so the approvals calculator added the budget owner), Q044 ("lacks both" vs "either missing"), Q057 (self-contradicting answer), Q061 (unverified). Q092 is the known answer-key defect. Unrelated expert tips were attached to some cards (`TIP_MIN_SIM` 0.62 may be low).
-- **Why GPT trailed DeepSeek's 98.8%:** run 1 predated main's prompt and router fixes; gpt-5 as judge is stricter and uncalibrated; full reasoning on the answer path was slow (some answers outlived Neon's idle-in-transaction timeout). The faster path (`reasoning_effort` minimal/low on answers) halved p50.
-- **Decision (15 Nov):** live answers from GPT were weaker in hands-on testing; the team stays on DeepSeek v4.1 (Isoquant), with Anthropic as the fallback provider. The OpenAI provider stays in the code.
+- **Why GPT trailed DeepSeek:** run 1 predated main's prompt and router fixes; gpt-5 as judge is stricter and uncalibrated; full reasoning on the answer path was slow (some answers outlived the database's idle-in-transaction timeout). Low reasoning effort on the answer path halved p50.
+- **Decision (15 Nov):** GPT's live answers were weaker in hands-on testing; the team stays on DeepSeek v4.1 (Isoquant), with Anthropic as the fallback provider. The OpenAI provider stays in the code.
+
+## 2026-11-15 — Railway deployment (API + worker in one container)
+
+**Built** (`d83024d`; step by step in `deploy/RAILWAY.md`):
+- `Dockerfile`: Python 3.11 slim with libmagic; dependencies, then the embedding and reranker models downloaded at build time (about 1.2 GB, so a start never fetches them), then the code.
+- `scripts/start_service.sh`: copies `deploy/seed_blobs/` into the volume, runs `alembic upgrade head`, starts the worker and the API on `$PORT` (with proxy headers); if either stops, the container stops and Railway restarts it.
+- `railway.json`: Dockerfile build, health check `/health`, restart on failure.
+- `deploy/seed_blobs/`: the originals of the documents already in Neon (default, corpus2 and replay tenants), so "Open original" works on the server.
+- `app/ingest/intake.blob_file`: originals are found by their content-hash name under this machine's `BLOB_DIR` when the stored path was written on another machine (a Windows path in a database now read by a Linux server).
+- `scripts/railway_env.py` (variables from `.env` into a git-ignored file to paste into Railway), `scripts/point_vercel.py` (point the website at an API and rebuild it), `scripts/warm_demo.py` and `deploy/demo_questions.txt` (8 demo questions, cached before a demo).
+- **Live:** https://enterprise-knowledge-engine-production.up.railway.app (the address in the 15 Nov load test), set up per `deploy/RAILWAY.md` (Hobby plan, Singapore, volume at `/data`). Vercel and Neon unchanged. The laptop tunnel (`run_public.ps1` / `serve_public.py`) stays as the backup.
+
+**Connecting the website (15 Nov, open at the time of writing):** after the Railway deploy the website did not yet reach the API. The fix is on the Vercel side: Vercel needs Railway's address (`NEXT_PUBLIC_API_BASE_URL`, fixed in at build time, so the site must be rebuilt; `scripts/point_vercel.py` does both from a laptop with `VERCEL_TOKEN` in its `.env`). Railway never needs Vercel's token (remove it there if it was added), and CORS already allows any `*.vercel.app` origin.
 
 ## 2026-11-15 — Concurrency limits, Anthropic limits, provider-limit probe (PRs #3, #4, #5; Akshat)
 
@@ -915,14 +921,43 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
 - `.env.example` and `deploy/RAILWAY.md`: the new settings, Neon's `-pooler` URL, and the server-wide model throttle.
 
 **PR #4, Anthropic limits:**
-- With `LLM_PROVIDER=anthropic` nothing capped parallel calls and the SDK retried a 429 only twice. Now `ANTHROPIC_MAX_CONCURRENT` (default 8, process-wide semaphore), `ANTHROPIC_MAX_RETRIES` (6; Retry-After honoured) and `ANTHROPIC_TIMEOUT_S` (120 s).
-- `scripts/railway_env.py` copies exactly one API key, chosen by `LLM_PROVIDER` (and `NIM_BASE_URL` for Isoquant vs NVIDIA). The judge's Anthropic key no longer leaves the laptop when DeepSeek answers, and an Anthropic-only `.env` no longer fails the key check. Also copies the pool, `ASK_CONCURRENCY` and Anthropic settings.
+- With `LLM_PROVIDER=anthropic` nothing capped parallel calls and the SDK retried a 429 only twice. Now `ANTHROPIC_MAX_CONCURRENT` (default 8, process-wide), `ANTHROPIC_MAX_RETRIES` (6; Retry-After honoured) and `ANTHROPIC_TIMEOUT_S` (120 s).
+- `scripts/railway_env.py` copies exactly one API key, chosen by `LLM_PROVIDER` (and `NIM_BASE_URL` for Isoquant vs NVIDIA). The judge's Anthropic key no longer leaves the laptop when DeepSeek answers, and an Anthropic-only `.env` no longer fails the key check. It also copies the pool, `ASK_CONCURRENCY` and Anthropic settings.
 
 **PR #5, `scripts/probe_llm_limits.py`:** Isoquant publishes no rate limits. The probe sends bursts of tiny calls (4, 8, 16, 24, 32 at once) straight to the endpoint without the engine's throttle, stops at the first 429, prints any rate-limit headers and suggests `NIM_MAX_CONCURRENT` / `NIM_MAX_RPM` at 75% of the highest clean level. Under 100 tiny calls.
 
-**Tests:** PR #3 on the Mac: 368 passed. #3–#5 merged together: 369 passed, ruff clean; the two `test_capture_teams_db` tests that fail in a sandbox without network (embedding model download) pass on a machine with it. New: `tests/unit/test_db_pool.py`, `tests/unit/test_llm_anthropic_limits.py` (cap holds under 12 parallel calls); probe and `railway_env.py` checked against a fake endpoint and sample `.env` files.
+**Tests:** PR #3 on a Mac: 368 passed. #3-#5 merged together: 369 passed, ruff clean (the two `test_capture_teams_db` tests that need the embedding model download fail only in a sandbox without network). New: `tests/unit/test_db_pool.py`, `tests/unit/test_llm_anthropic_limits.py` (the cap holds under 12 parallel calls); the probe and `railway_env.py` checked against a fake endpoint and sample `.env` files.
 
-**Open:**
-- **Set the real model limits:** run the probe with the Isoquant key, put the result in `.env` (`NIM_MAX_CONCURRENT` ≤ 24), rerun `railway_env.py`, update Railway. Then the load test at 5/10/20 users on the Railway URL, watching `/health`.
-- **Connection held during model calls** (the cause behind the pool pressure; Arnav's area, after 18 Nov): pin each answer to its kb_version's publish time (`known_at`) and run each DB step in a short transaction, after checking that every read path honours `known_at` (ontology, entities, scopes, calculator rules), with a publish-mid-answer test and a full eval re-run.
-- **Gate B:** `railway_env.py` sets `WATCH_ENABLED=false` on Railway, but gate B asks for the watched folder on the deployed build. Show ingestion by upload or turn it on: team decision.
+**Not done (after 18 Nov):** the connection held during model calls. Plan: pin each answer to its kb_version's publish time (`known_at`) and run each DB step in a short transaction, after checking that every read path honours `known_at` (ontology, entities, scopes, calculator rules), with a publish-mid-answer test and a full eval re-run.
+
+## 2026-11-15 — First load test on Railway; model threads; polling survives proxy hiccups
+
+**Load test on Railway** (`reports/load_20261115_railway.md`; 63 real Teams questions; each user asks once):
+
+| Users | Answered | Median | p95 | Answering itself (median) | Waiting for a thread (median) |
+|---|---|---|---|---|---|
+| 3 | 3/3 | 34.8 s | 43.2 s | 33.3 s | 1.4 s |
+| 5 | 4/5 (1 connection timeout) | 31.9 s | 47.2 s | 30.8 s | 1.0 s |
+
+- Waiting is about 1 s, so threads and the pool are not the limit; answering itself is about 31-33 s, roughly twice the laptop's. The likely cause is the local models' CPU threads: ONNX sizes its thread pool from the host's CPU count, not the container's share.
+- One request timed out at the client during the 5-user level.
+
+**Changes** (`a4f743a`):
+- `MODEL_THREADS` (default 0 = the runtime's default): CPU threads for the local embedding and reranker models. In a container, set it to the service's vCPUs.
+- `/health` also returns `cpu`: CPUs the process sees, the container's quota (cgroup v2 `cpu.max`) and the `MODEL_THREADS` in use.
+- The web app and `warm_demo.py` tolerate up to 5 consecutive failed polls (a dropped connection or a 502/503/504 from a busy proxy) instead of failing the answer; a 404 (job gone after a restart) still stops.
+
+**Next:** set `MODEL_THREADS` on Railway and rerun at 5 / 10 / 20 users (Resume block, actions 1-2).
+
+## 2026-11-15 — Verifier: an old value the answer explicitly rejects no longer fails it
+
+`e2542e5`: the verifier's not-in-force check and the evaluation's outdated-answer metric now share one list of patterns (`verify.REJECTED_PATTERNS`, `strip_rejected`). A superseded value is set aside only where the answer treats it as old or wrong: "not 2%", "the 2% tolerance does not apply", "2% was replaced", "the old 2% rule", "some old PO templates still carry the 2% setting". "Use 2%, not 1%" and "For old POs the tolerance is still 2%" still state 2% and still fail. Before this, a correct answer that named the old value in order to reject it could come back unverified. Tests in `tests/unit/test_answer.py`.
+
+## 2026-11-15 — Demo preparation: study guide, demo script and three risks (Akshat)
+
+- **Study guide and demo script** (Claude doc "PS-07 Knowledge Engine — What we built and why", shared by Akshat). Study guide: architecture, how each part works, the build history, problems met and fixed, key decisions, results and how they are measured, deployment, gaps and likely questions. Demo script: about 12 minutes in six acts (cited answers and client scope; time and the as-of picker; calculation and expert habits; limits and escalation; change propagation; close) with exact questions, the expected answer cards from the 15 Nov run, spoken lines, timings, checklists and fallbacks, plus a 3-minute version.
+- **Three risks to check on Neon before the 16th:**
+  - **The canteen question may now be answered.** Acceptance test T11 (11 Nov) approved an expert's *test* reply about the canteen subsidy on the public site, so the deployed knowledge base may hold that fact. If so, use "How many days of annual leave does an AP processor get?" (abstention set, refused and routed to HR / Admin team).
+  - **The Infra tolerance may change on 16 Nov.** The replay data holds the Infra owner's email announcing 7% from 16 Nov. If that email is in the live knowledge base, question 1 returns the provisional 7% from the 16th.
+  - **Not cached:** the price-tolerance question (Q001, today and as of 1 Mar 2026) is not in `deploy/demo_questions.txt`; the replay steps in the script come from the 13 Nov notes and must be checked against Neon.
+- **Rule for demo days:** nobody approves review items, presses "Run again from empty" or runs the conflict scan on stage; each changes the shared database or starts a long job.
