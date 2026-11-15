@@ -207,6 +207,52 @@ def _kind(v: dict[str, Any]) -> str | None:
     return None
 
 
+# Ways an answer explicitly treats an old value as old or wrong ("{V}" is the value). Only the
+# value inside such a phrase is set aside: "It is 1%, not 2%" rejects 2%, while "Use 2%, not 1%"
+# and "For old POs the tolerance is still 2%" still state 2%. Shared with the evaluation's
+# outdated-answer check (evaluation/metrics.py).
+REJECTED_PATTERNS = [
+    r"\b(?:not|never|instead of|rather than|no longer)\s+(?:the\s+|a\s+|an\s+)?{V}",
+    r"{V}(?:\s+[\w-]+){{0,3}}?\s+(?:does not|doesn't|do not|don't|no longer|is not|isn't|"
+    r"is no longer|are not|aren't)\s+(?:apply|applies|valid|in force|current|used)\b",
+    r"{V}(?:\s+[\w-]+){{0,3}}?\s+(?:was|were|has been|have been|is|are)\s+"
+    r"(?:replaced|superseded|withdrawn|retired|removed|outdated|obsolete)\b",
+    r"\b(?:old|older|outdated|superseded|previous|former|legacy|withdrawn)\s+(?:[\w-]+\s+){{0,2}}?{V}",
+    r"{V}(?:\s+[\w-]+){{0,2}}\s+(?:on|in|from|of)\s+(?:some\s+|the\s+|an?\s+)?"
+    r"(?:old|older|outdated|legacy|previous|superseded)\b",
+    # "some old PO templates still carry the 2% setting": a stale value a system still shows.
+    r"\b(?:old|older|outdated|legacy|previous|stale)\s+(?:[\w-]+\s+){{0,3}}?(?:still\s+)?"
+    r"(?:carry|carries|show|shows|display|displays|contain|contains)\s+(?:the\s+|a\s+|an\s+)?{V}",
+]
+
+
+def _value_pattern(value: str) -> str:
+    """The value with optional spaces or commas between its characters ('1,000' ~ '1000')."""
+    chars = re.sub(r"[\s,]", "", value)
+    return r"[\s,]*".join(re.escape(c) for c in chars)
+
+
+def strip_rejected(text: str, values: list[str]) -> str:
+    """`text` with each mention of one of `values` that the text explicitly treats as old or
+    wrong replaced by a marker, so only mentions that state the value remain."""
+    for v in sorted({v.strip() for v in values if v and v.strip()}, key=len, reverse=True):
+        if not re.sub(r"[\s,]", "", v):
+            continue
+        val = rf"(?<![\w.]){_value_pattern(v)}(?![\w])" if v[-1].isalnum() else _value_pattern(v)
+        for pat in REJECTED_PATTERNS:
+            text = re.sub(pat.format(V=val), " [rejected value] ", text, flags=re.I)
+    return text
+
+
+def _forms(value: dict[str, Any]) -> list[str]:
+    """How an old value may be written: its text, and a percentage as '<n>%'."""
+    out = [str(value.get("text") or "")]
+    n = value.get("number")
+    if n is not None and _kind(value) == "percentage":
+        out.append(f"{float(n):g}%")
+    return [x for x in out if x]
+
+
 def check_not_in_force(
     rule_text: str,
     not_in_force: list[FactRow],
@@ -219,13 +265,13 @@ def check_not_in_force(
     """Values from facts not in force that the answer states. A value that also appears in
     `given` (the asker's question, the calculator output: computed only from rules in force)
     is the case's own figure or a result, not an old rule, e.g. an excess that happens to
-    equal a retired cap, or a cut-off weekday that was once the run day."""
-    found = mentions(rule_text, units, currencies)
+    equal a retired cap, or a cut-off weekday that was once the run day. A mention the answer
+    itself treats as old or wrong ("old templates still carry the 2% setting", "not 2%") is not
+    a statement of the value (`strip_rejected`)."""
     given_text = norm(_strip_markers(" ".join(g for g in (given or []) if g)))
     given_found = mentions(given_text, units, currencies)
     in_force_keys = {(f.subject_id, f.attribute) for f in in_force}
     not_in_force = [f for f in not_in_force if (f.subject_id, f.attribute) in in_force_keys]
-    t = norm(_strip_markers(rule_text))
     problems = []
     for old in not_in_force:
         attr_now = [
@@ -233,6 +279,8 @@ def check_not_in_force(
         ]
         kind = _kind(old.value)
         n = old.value.get("number")
+        said = strip_rejected(rule_text, _forms(old.value))
+        found = mentions(said, units, currencies)
         if kind and n is not None:
             if any(f.value.get("number") == n for f in attr_now):
                 continue
@@ -247,7 +295,7 @@ def check_not_in_force(
             txt = norm(str(old.value.get("text") or ""))
             if (
                 len(txt) >= 6
-                and txt in t
+                and txt in norm(_strip_markers(said))
                 and txt not in given_text
                 and not any(txt in norm(str(f.value.get("text") or "")) for f in attr_now)
             ):

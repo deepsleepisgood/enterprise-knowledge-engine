@@ -125,11 +125,39 @@ def test_values_from_the_case_or_calculator_are_not_old_rules() -> None:
     # does not let the retired 2% through.
     stale = "The tolerance is 2% [1]."
     assert verify.check_not_in_force(stale, old, now, UNITS, currencies=["₹"], given=[calc])
-    # An old value the asker quoted may be named to correct it; one nobody asked about may not.
+    # An old value the asker quoted may be named; so may one the sentence itself rejects
+    # (15 Nov: before, an old value nobody asked about was blocked even when rejected).
     corrected = "No, the 2% no longer applies; the tolerance is 1% [1]."
     asked = "Is the tolerance still 2%?"
     assert verify.check_not_in_force(corrected, old, now, UNITS, ["₹"], given=[asked]) == []
-    assert verify.check_not_in_force(corrected, old, now, UNITS, currencies=["₹"], given=[""])
+    assert verify.check_not_in_force(corrected, old, now, UNITS, ["₹"], given=[""]) == []
+    # Stated as the rule, it is still caught, however the sentence is dressed up.
+    restated = "The tolerance is 2% [1]; the 1% rule no longer applies [2]."
+    assert verify.check_not_in_force(restated, old, now, UNITS, ["₹"], given=[""])
+
+
+def test_an_old_value_the_answer_treats_as_old_is_not_stated() -> None:
+    now = [fact(1, "tol.pct", {"type": "percentage", "number": 1, "text": "1%"})]
+    old = [fact(2, "tol.pct", {"type": "percentage", "number": 2, "text": "2%"}, "superseded")]
+    rejected = [
+        # The answer the live check wrongly held back on 15 Nov.
+        "Report a wrong tolerance setting to your Team Lead [1]. The tolerance is the lower of 1% "
+        "and the cap [2]. In practice, some old PO templates still carry the 2% setting [1].",
+        "The 2% tolerance does not apply; the tolerance in force is 1% [1].",
+        "It is 1% of the line value, not 2% [1].",
+        "The 2% limit was replaced by 1% in the current version [1].",
+        "If the panel shows the 2% setting on an old PO, report it [1].",
+    ]
+    for text in rejected:
+        assert verify.check_not_in_force(text, old, now, UNITS, given=[""]) == [], text
+    stated = [
+        "The tolerance is 2% [1].",
+        "Use 2%, not 1% [1].",
+        "For old POs the tolerance is still 2% [1].",
+        "Old templates show 2%, and 2% is the tolerance to apply [1].",  # one mention stated
+    ]
+    for text in stated:
+        assert verify.check_not_in_force(text, old, now, UNITS, given=[""]), text
 
 
 def test_assemble_numbers_citations_in_order_and_checks_quotes() -> None:
