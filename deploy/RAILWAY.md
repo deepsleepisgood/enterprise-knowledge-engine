@@ -39,6 +39,17 @@ original" works), `scripts/railway_env.py`, `scripts/point_vercel.py`, `scripts/
 minute). Then open https://ps07-knowledge-engine.vercel.app and ask "What is the price
 tolerance?": the answer should cite AP SOP v4.0.
 
+## Several people at once (read before the load test)
+- **Database connections:** each answer holds a connection for its whole run (model calls
+  included) plus one for the parallel search. The API allows 40 (`DB_POOL_SIZE` 10 +
+  `DB_MAX_OVERFLOW` 30) and works on 16 answers at once (`ASK_CONCURRENCY`); more wait their
+  turn. `/health` shows `db_pool` (`in_use`, `idle`, `max`): if `in_use` sits at `max` under
+  load, the pool is the limit, not Neon. Keep `DATABASE_URL` on Neon's `-pooler` address.
+- **Model calls:** `NIM_MAX_RPM` / `NIM_MAX_CONCURRENT` throttle the whole server. The
+  NVIDIA free-tier values (35 / 4) queue calls with more than a few users; set them to what the
+  Isoquant account allows. With `LLM_PROVIDER=anthropic` these do not apply; check the
+  account's limits in the Anthropic console instead.
+
 ## 4. Warm up, load test, rehearse
 - `python scripts/warm_demo.py --base https://<address>`: asks the 8 demo questions once, so on
   stage they come from the cache. Rerun after any redeploy and on the demo morning.

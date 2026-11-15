@@ -6,6 +6,7 @@ import re
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import lru_cache
+from typing import Any
 
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
@@ -23,8 +24,27 @@ def normalise_url(url: str) -> str:
 
 @lru_cache
 def get_engine() -> Engine:
-    url = normalise_url(get_settings().resolved_database_url())
-    return create_engine(url, pool_pre_ping=True, future=True)
+    s = get_settings()
+    url = normalise_url(s.resolved_database_url())
+    return create_engine(
+        url,
+        pool_pre_ping=True,
+        pool_size=s.db_pool_size,
+        max_overflow=s.db_max_overflow,
+        pool_timeout=s.db_pool_timeout_s,
+        future=True,
+    )
+
+
+def pool_status() -> dict[str, int]:
+    """Connections this process holds: in use, idle, and the most it may open."""
+    pool: Any = get_engine().pool
+    s = get_settings()
+    return {
+        "in_use": int(pool.checkedout()),
+        "idle": int(pool.checkedin()),
+        "max": s.db_pool_size + s.db_max_overflow,
+    }
 
 
 @contextmanager

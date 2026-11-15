@@ -34,7 +34,11 @@ from app.store import kb, search
 MAX_EVIDENCE = 12
 # Calculator inputs are read from the question while routing and search run; for a lookup the
 # result is dropped. Shared and never waited on at shutdown, so a lookup is not slowed down.
-_EARLY = ThreadPoolExecutor(max_workers=4, thread_name_prefix="early-inputs")
+# Each answer submits up to two tasks (calculator inputs, early search) and waits on the search,
+# so the pool scales with the answers worked on at once; a smaller pool queues the search.
+_EARLY = ThreadPoolExecutor(
+    max_workers=max(4, 2 * get_settings().ask_concurrency), thread_name_prefix="early-inputs"
+)
 UNSUPPORTED = "The documents in the knowledge base do not cover this."
 
 
