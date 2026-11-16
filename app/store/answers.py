@@ -335,6 +335,23 @@ def mark_read(session: Session, notification_id: int, user_id: str) -> bool:
     return bool(res.rowcount)
 
 
+def close_notifications(session: Session, user_id: str, kind: str, answer_id: int) -> int:
+    """Mark a user's unread notifications of one kind about one answer as read (superseded by a
+    newer one, e.g. an expert reply once the owner has published it)."""
+    res = session.execute(
+        update(Notification)
+        .where(
+            Notification.tenant_id == tenant(),
+            Notification.user_id == user_id,
+            Notification.kind == kind,
+            Notification.answer_id == answer_id,
+            Notification.read_at.is_(None),
+        )
+        .values(read_at=utcnow())
+    )
+    return int(res.rowcount or 0)
+
+
 def distinct_users(session: Session) -> int:
     from sqlalchemy import func
 

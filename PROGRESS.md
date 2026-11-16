@@ -946,3 +946,25 @@ Weak spots found in `reports/teams_sample_20261114.md`, each traced to a root ca
   Abstention set re-run (reports/abstention_20261115.md): 19/20 not answered, 17/20 routed
   acceptably. The one answered, A14 (US-dollar invoice), scored -0.79, above either gate; it was
   refused on 13–14 Nov, so this is run-to-run model variance, not the gate. Open issue.
+
+## 16 Nov — expert-reply banner stayed "not yet confirmed" after approval
+
+- After the owner approved the night-canteen reply, the escalation was resolved and the question
+  re-answered (notification `reanswered`), but the original `expert_reply` notification stayed
+  unread, so the Ask page kept its banner "not yet part of the knowledge base until the owner
+  confirms it".
+- `reask_if_published` now closes the asker's unread `expert_reply` notices for that answer when
+  it re-asks (`answers.close_notifications`). Test: publishing the reply closes its notice.
+  329 unit + integration tests pass. Existing stale notices go when the user clicks "Got it".
+
+## 16 Nov — Analytics "Not answered from the documents" list
+
+- Was: the last 12 abstained answers, so one question asked 10 times filled the list, questions
+  answered later (e.g. the night-canteen reply once approved) stayed, and escalations closed in
+  the review queue stayed.
+- Now (`insights.open_gaps`): one row per question with "asked N×"; rewordings grouped by
+  embedding cosine ≥ 0.95 (rewordings scored 0.97–0.99; other canteen/revenue questions < 0.8);
+  dropped when the latest ask was answered or an escalation of it was closed/resolved after
+  that ask; `needs_specialist` left out (the documents answered it by routing). On live data:
+  8 questions instead of 12 rows of 7. Grouping costs ~2 s on the first load, cached after.
+- Tests: tests/unit/test_analytics_gaps.py; 334 unit + integration pass.

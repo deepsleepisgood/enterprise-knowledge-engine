@@ -102,6 +102,7 @@ export function AnalyticsView() {
                           {u.question}
                         </Link>
                         <span className="shrink-0 font-mono text-[11px] text-muted">
+                          {(u.times ?? 1) > 1 ? `asked ${u.times}× · ` : ""}
                           {u.status} · {fmtAgo(u.created_at)}
                         </span>
                       </li>

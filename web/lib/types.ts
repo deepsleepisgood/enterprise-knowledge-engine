@@ -499,7 +499,15 @@ export interface Analytics {
   by_status: Record<string, number>;
   by_route: Record<string, number>;
   top_topics: { topic: string; count: number }[];
-  unanswered: { id: number; question: string; client: string | null; status: string; created_at: string }[];
+  unanswered: {
+    id: number;
+    question: string;
+    client: string | null;
+    status: string;
+    created_at: string;
+    /** How often this question went unanswered (repeats are shown once). */
+    times?: number;
+  }[];
   top_sources: { passage_id: string; count: number; label: string; locator: string; section_title: string | null }[];
   latency_ms: { p50: number | null; p90: number | null };
   acknowledgements: { changes: number; acks: number; rate: number | null };

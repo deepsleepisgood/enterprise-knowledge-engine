@@ -127,6 +127,10 @@ def reask_if_published(episode_id: str, **ask_kw: Any) -> list[dict[str, Any]]:
             astore.set_escalation(
                 s, e.id, status="resolved", resulting_fact_ids=[f.id for f in live]
             )
+            # The reply is now in the knowledge base: its "not yet part of the knowledge base"
+            # notice is out of date, and the new answer below replaces it.
+            if e.answer_id is not None:
+                astore.close_notifications(s, e.asked_by, "expert_reply", int(e.answer_id))
             astore.notify(
                 s,
                 e.asked_by,

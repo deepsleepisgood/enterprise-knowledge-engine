@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
+from collections.abc import Callable
 from statistics import median
 from typing import Any
 
@@ -18,7 +20,6 @@ from app.store import facts as fstore
 from app.store import jobs, kb
 
 router = APIRouter(tags=["insights"])
-ABSTAINED = {"unsupported", "unverified", "needs_specialist"}
 
 
 @router.get("/stats")
@@ -45,6 +46,72 @@ def stats(s: Session = Depends(read_session)) -> dict[str, Any]:
     }
 
 
+HANDLED = {"closed", "resolved"}  # escalation taken out of the queue, or answered and published
+# Not answered from the documents. needs_specialist is left out: the documents did answer it, by
+# sending it to a named role.
+GAP_STATUSES = {"unsupported", "unverified"}
+SAME_QUESTION = 0.95  # embedding cosine: rewordings of one question (0.97-0.99) group together;
+# different questions on the same topic ("canteen subsidy" per meal vs night shift) stay below 0.8
+
+
+def _question_key(q: str) -> str:
+    return re.sub(r"\s+", " ", (q or "").strip().lower()).rstrip(" ?.!")
+
+
+def _embedding_groups(keys: list[str]) -> dict[str, str]:
+    """Each question key -> the first key it rewords (cosine >= SAME_QUESTION)."""
+    from app.core.embed import cosine, embed
+
+    reps: list[tuple[str, list[float]]] = []
+    out: dict[str, str] = {}
+    for k in keys:
+        vec = embed([k])[0]  # one at a time: each question is cached in-process
+        rep = next((r for r, v in reps if cosine(vec, v) >= SAME_QUESTION), None)
+        if rep is None:
+            reps.append((k, vec))
+            rep = k
+        out[k] = rep
+    return out
+
+
+def open_gaps(
+    rows: list[dict[str, Any]],
+    escalations: list[Any],
+    group: Callable[[list[str]], dict[str, str]] | None = None,
+) -> list[dict[str, Any]]:
+    """Questions the documents still do not answer: one row per question, rewordings included
+    (its latest ask, with how often it went unanswered). A question drops off when its latest ask
+    was answered, or when an escalation of it was closed or resolved after that ask."""
+    keys = list(dict.fromkeys(_question_key(r["question"]) for r in rows))
+    keys += [_question_key(e.question) for e in escalations if e.status in HANDLED]
+    same = (group or _embedding_groups)(list(dict.fromkeys(keys)))
+    handled_at: dict[str, Any] = {}
+    for e in escalations:
+        if e.status in HANDLED:
+            g = same[_question_key(e.question)]
+            handled_at[g] = max(handled_at.get(g, e.created_at), e.created_at)
+    latest: dict[str, dict[str, Any]] = {}
+    misses: Counter[str] = Counter()
+    for r in rows:  # newest first
+        g = same[_question_key(r["question"])]
+        latest.setdefault(g, r)
+        if r["status"] in GAP_STATUSES:
+            misses[g] += 1
+    out = []
+    for g, r in latest.items():
+        if r["status"] not in GAP_STATUSES:
+            continue
+        if g in handled_at and r["created_at"] <= handled_at[g]:
+            continue
+        out.append(
+            {
+                **{f: r[f] for f in ("id", "question", "client", "status", "created_at")},
+                "times": misses[g],
+            }
+        )
+    return out
+
+
 @router.get("/analytics")
 def analytics(s: Session = Depends(read_session)) -> dict[str, Any]:
     """Most-asked topics, unanswered questions, most-cited sources, latency and
@@ -69,11 +136,7 @@ def analytics(s: Session = Depends(read_session)) -> dict[str, Any]:
         "by_status": dict(Counter(r["status"] or "unknown" for r in rows)),
         "by_route": dict(Counter(r["route"] for r in rows)),
         "top_topics": [{"topic": t, "count": n} for t, n in topics.most_common(8)],
-        "unanswered": [
-            {k: r[k] for k in ("id", "question", "client", "status", "created_at")}
-            for r in rows
-            if r["status"] in ABSTAINED
-        ][:12],
+        "unanswered": open_gaps(rows, astore.list_escalations(s, status=None))[:12],
         "top_sources": [
             {
                 "passage_id": pid,

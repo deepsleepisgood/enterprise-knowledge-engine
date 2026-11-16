@@ -230,6 +230,26 @@ def test_escalation_reply_is_labelled_and_enters_as_an_episode(kb_built) -> None
     assert escalate.reask_if_published(out["episode_id"]) == []
 
 
+def test_publishing_the_reply_closes_its_unconfirmed_notice(kb_built, monkeypatch) -> None:
+    import types
+
+    from app.answer import pipeline
+    from app.store import facts as fstore
+
+    card = run("Is there a canteen subsidy for night shifts?")
+    sent = escalate.escalate(int(card["answer_id"]), asked_by="processor-2")
+    out = escalate.reply(sent["escalation_id"], "hr-lead", "Night shifts get a 50% subsidy.")
+    # The owner approved: a fact from the reply is in force, and the question is asked again.
+    monkeypatch.setattr(
+        fstore, "live_for_episode", lambda s, ep, statuses: [types.SimpleNamespace(id=1)]
+    )
+    monkeypatch.setattr(pipeline, "ask", lambda q, **kw: {**card, "answer_id": card["answer_id"]})
+    assert len(escalate.reask_if_published(out["episode_id"])) == 1
+    with session_scope() as s:
+        notes = {n["kind"]: n for n in astore.notifications_for(s, "processor-2")}
+    assert notes["expert_reply"]["read"] and not notes["reanswered"]["read"]
+
+
 class PublishWhileAnswering(FakeLLM):
     """While the router runs, the owner approves a change that retires the 24-day rule and the
     worker's recall runs at once: all before the answer is saved."""
